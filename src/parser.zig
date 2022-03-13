@@ -72,4 +72,5 @@ pub fn parseSubCommand(
             return ArgMatches.SubCommand.initWithArgMatches(valid_subcmd.name, subcmd_argmatches);
         }
     }
+    return error.UnknownCommand;
 }
