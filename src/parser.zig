@@ -38,6 +38,7 @@ pub fn parseFlag(
             return consumeFlagArg(&flag, provided_flag, argv_iterator);
         }
     }
+    return error.UnknownFlag;
 }
 
 pub fn consumeFlagArg(flag: *Flag, provided_flag: *ArgvIterator.Value, argv_iterator: *ArgvIterator) !MatchedFlag {
