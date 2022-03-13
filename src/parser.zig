@@ -63,7 +63,7 @@ pub fn parseSubCommand(
 ) !ArgMatches.SubCommand {
     for (valid_subcmds) |valid_subcmd| {
         if (std.mem.eql(u8, valid_subcmd.name, provided_subcmd.name)) {
-            if (!valid_cmd.takes_arg)
+            if (!valid_subcmd.takes_arg)
                 return ArgMatches.SubCommand.initWithoutArg(valid_subcmd.name);
 
             const subcmd_argv = argv_iterator.rest() orelse return error.MissingCommandArgument;
