@@ -3,6 +3,7 @@ const Command = @import("Command.zig");
 const Flag = @import("Flag.zig");
 const ArgMatches = @import("ArgMatches.zig");
 const ArgvIterator = @import("ArgvIterator.zig");
+const MatchedFlag = @import("MatchedFlag.zig");
 
 fn parse(argv: []const [:0]const u8, cmd: *Command) !ArgMatches {
     var argv_iter = ArgvIterator.init(argv);
