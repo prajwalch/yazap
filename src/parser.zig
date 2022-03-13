@@ -6,6 +6,8 @@ const ArgvIterator = @import("ArgvIterator.zig");
 
 fn parse(argv: []const [:0]const u8, cmd: *Command) !ArgMatches {
     var argv_iter = ArgvIterator.init(argv);
+    var arg_matches = ArgMatches.initEmpty();
+    errdefer arg_matches.deinit();
 
     while (argv_iter.next()) |arg| {
         if (arg.startsWithDoubleHyphen()) {
