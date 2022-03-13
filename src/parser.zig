@@ -63,7 +63,7 @@ pub fn parseSubCommand(
             if (!valid_cmd.takes_arg)
                 return ArgMatches.SubCommand.initWithoutArg(valid_subcmd.name);
 
-            const subcmd_argv = argv_iterator.rest() orelse return error.MissingCommandArggument;
+            const subcmd_argv = argv_iterator.rest() orelse return error.MissingCommandArgument;
             const subcmd_argmatches = try parse(subcmd_argv, &valid_subcmd);
 
             return ArgMatches.SubCommand.initWithArgMatches(valid_subcmd.name, subcmd_argmatches);
