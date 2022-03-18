@@ -42,7 +42,7 @@ pub fn subCommand(self: *Command, new_subcommand: Command) !void {
     return self.subcommands.?.append(new_subcommand);
 }
 
-pub fn parse(self: *Command, argv: []const [:0]const u8) parser.ParserError!ArgMatches {
+pub fn parse(self: *Command, argv: []const [:0]const u8) parser.Error!ArgMatches {
     return parser.parse(self.allocator, argv, self);
 }
 
