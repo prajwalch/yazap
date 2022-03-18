@@ -33,7 +33,7 @@ fn parse(argv: []const [:0]const u8, cmd: *Command) !ArgMatches {
 
 pub fn parseFlag(
     valid_flags: []const Flag,
-    provided_flag: *ArgvIterator.Value,
+    provided_flag: *const ArgvIterator.Value,
     argv_iterator: *ArgvIterator,
 ) !MatchedFlag {
     for (valid_flags) |flag| {
@@ -44,7 +44,7 @@ pub fn parseFlag(
     return error.UnknownFlag;
 }
 
-pub fn consumeFlagArg(flag: *Flag, provided_flag: *ArgvIterator.Value, argv_iterator: *ArgvIterator) !MatchedFlag {
+pub fn consumeFlagArg(flag: *const Flag, provided_flag: *const ArgvIterator.Value, argv_iterator: *ArgvIterator) !MatchedFlag {
     switch (flag.required_arg) {
         0 => return MatchedFlag.initWithoutArg(flag.name),
         1 => {
@@ -61,7 +61,7 @@ pub fn consumeFlagArg(flag: *Flag, provided_flag: *ArgvIterator.Value, argv_iter
 
 pub fn parseSubCommand(
     valid_subcmds: []const Command,
-    provided_subcmd: *ArgvIterator.Value,
+    provided_subcmd: *const ArgvIterator.Value,
     argv_iterator: *ArgvIterator,
 ) !arg_matches.SubCommand {
     for (valid_subcmds) |valid_subcmd| {
