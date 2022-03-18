@@ -56,6 +56,7 @@ pub fn consumeFlagArg(flag: *const Flag, provided_flag: *const ArgvIterator.Valu
 
             return MatchedFlag.initWithArg(flag.name, provided_arg);
         },
+        else => @panic("Flag reuqires more arg, yet to handle"),
     }
 }
 
