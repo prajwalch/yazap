@@ -42,8 +42,8 @@ pub fn subCommand(self: *Command, new_subcommand: Command) !void {
     return self.subcommands.?.append(new_subcommand);
 }
 
-pub fn parse(self: *Command, argv: []const [:0]const u8) !ArgMatches {
-    return parser.parse(argv, self);
+pub fn parse(self: *Command, argv: []const [:0]const u8) parser.ParserError!ArgMatches {
+    return parser.parse(self.allocator, argv, self);
 }
 
 pub fn takesArg(self: *const Command) bool {

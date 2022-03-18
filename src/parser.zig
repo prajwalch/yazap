@@ -6,7 +6,15 @@ const ArgvIterator = @import("ArgvIterator.zig");
 const MatchedFlag = @import("MatchedFlag.zig");
 const ArgMatches = arg_matches.ArgMatches;
 
-fn parse(argv: []const [:0]const u8, cmd: *Command) !ArgMatches {
+pub const ParserError = error{
+    UnknownFlag,
+    UnknownCommand,
+    MissingFlagArgument,
+    MissingCommandArgument,
+    ArgIsNotInAllowedSet,
+} || std.mem.Allocator.Error;
+
+pub fn parse(allocator: std.mem.Allocator, argv: []const [:0]const u8, cmd: *const Command) ParserError!ArgMatches {
     var argv_iter = ArgvIterator.init(argv);
     var matches = ArgMatches.init(allocator);
     errdefer matches.deinit();
@@ -17,14 +25,14 @@ fn parse(argv: []const [:0]const u8, cmd: *Command) !ArgMatches {
                 const parsed_flag = try parseFlag(flags.items, &arg, &argv_iter);
                 try matches.putFlag(parsed_flag);
             } else {
-                return error.UnknownFlag;
+                return ParserError.UnknownFlag;
             }
         } else {
             if (cmd.subcommands) |subcmds| {
                 const subcmd = try parseSubCommand(subcmds.items, &arg, &argv_iter);
                 try matches.setSubcommand(subcmd);
             } else {
-                return error.UnknownCommand;
+                return ParserError.UnknownCommand;
             }
         }
     }
@@ -41,17 +49,17 @@ pub fn parseFlag(
             return consumeFlagArg(&flag, provided_flag, argv_iterator);
         }
     }
-    return error.UnknownFlag;
+    return ParserError.UnknownFlag;
 }
 
 pub fn consumeFlagArg(flag: *const Flag, provided_flag: *const ArgvIterator.Value, argv_iterator: *ArgvIterator) !MatchedFlag {
     switch (flag.required_arg) {
         0 => return MatchedFlag.initWithoutArg(flag.name),
         1 => {
-            const provided_arg = provided_flag.arg(argv_iterator) orelse return error.MissingFlagArgument;
+            const provided_arg = provided_flag.arg(argv_iterator) orelse return ParserError.MissingFlagArgument;
 
             if (!flag.verifyArgInAllowedSet(provided_arg)) {
-                return error.ArgIsNotInAllowedSet;
+                return ParserError.ArgIsNotInAllowedSet;
             }
 
             return MatchedFlag.initWithArg(flag.name, provided_arg);
@@ -70,11 +78,11 @@ pub fn parseSubCommand(
             if (!valid_subcmd.takesArg())
                 return arg_matches.SubCommand.initWithoutArg(valid_subcmd.name);
 
-            const subcmd_argv = argv_iterator.rest() orelse return error.MissingCommandArgument;
-            const subcmd_argmatches = try parse(subcmd_argv, &valid_subcmd);
+            const subcmd_argv = argv_iterator.rest() orelse return ParserError.MissingCommandArgument;
+            const subcmd_argmatches = try parse(std.heap.page_allocator, subcmd_argv, &valid_subcmd);
 
             return arg_matches.SubCommand.initWithArg(valid_subcmd.name, subcmd_argmatches);
         }
     }
-    return error.UnknownCommand;
+    return ParserError.UnknownCommand;
 }
