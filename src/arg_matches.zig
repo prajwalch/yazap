@@ -1,26 +1,8 @@
 const std = @import("std");
 const MatchedFlag = @import("MatchedFlag.zig");
+
 const FlagArg = MatchedFlag.Arg;
-
 const FlagHashMap = std.StringHashMap(FlagArg);
-
-pub const SubCommand = struct {
-    name: []const u8,
-    flags: FlagHashMap,
-
-    pub fn initWithoutArg(name: []const u8) SubCommand {
-        return SubCommand{
-            .name = name,
-            .flags = undefined,
-        };
-    }
-
-    pub fn initWithArg(name: []const u8, arg_matches: ArgMatches) SubCommand {
-        var self = initWithoutArg(name);
-        self.flags = arg_matches.flags;
-        return self;
-    }
-};
 
 pub const ArgMatches = struct {
     flags: FlagHashMap,
@@ -81,5 +63,23 @@ pub const ArgMatches = struct {
             }
         }
         return null;
+    }
+};
+
+pub const SubCommand = struct {
+    name: []const u8,
+    flags: FlagHashMap,
+
+    pub fn initWithoutArg(name: []const u8) SubCommand {
+        return SubCommand{
+            .name = name,
+            .flags = undefined,
+        };
+    }
+
+    pub fn initWithArg(name: []const u8, arg_matches: ArgMatches) SubCommand {
+        var self = initWithoutArg(name);
+        self.flags = arg_matches.flags;
+        return self;
     }
 };
