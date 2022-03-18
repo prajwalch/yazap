@@ -3,7 +3,7 @@ const Command = @This();
 const std = @import("std");
 const parser = @import("parser.zig");
 const Flag = @import("Flag.zig");
-const ArgMatches = @import("ArgMatches.zig");
+const ArgMatches = @import("arg_matches.zig").ArgMatches;
 
 const mem = std.mem;
 const Allocator = mem.Allocator;
