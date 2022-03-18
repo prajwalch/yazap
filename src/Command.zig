@@ -46,6 +46,6 @@ pub fn parse(self: *Command, argv: []const [:0]const u8) !ArgMatches {
     return parser.parse(argv, self);
 }
 
-pub fn takesArg(self: *Command) bool {
-    return (self.flags == null and self.subcommands == null);
+pub fn takesArg(self: *const Command) bool {
+    return (self.flags != null and self.subcommands != null);
 }
