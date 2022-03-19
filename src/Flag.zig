@@ -24,7 +24,7 @@ pub fn ArgN(comptime name: []const u8, nums_arg: usize) Flag {
 pub fn Option(comptime name: []const u8, sets: []const []const u8) Flag {
     return Flag{
         .name = name,
-        .required_arg = 0,
+        .required_arg = 1,
         .allowed_set = sets,
     };
 }
