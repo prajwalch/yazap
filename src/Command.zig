@@ -72,6 +72,10 @@ pub fn flagRequired(self: *Command, boolean: bool) void {
     self.setting.flag_required = boolean;
 }
 
+pub fn subcommandRequired(self: *Command, boolean: bool) void {
+    self.setting.subcommand_required = boolean;
+}
+
 pub fn parse(self: *Command, argv: []const [:0]const u8) parser.Error!ArgMatches {
     return parser.parse(self.allocator, argv, self);
 }
