@@ -17,10 +17,13 @@ test "command parser" {
         "release",
     }));
 
+    compile_cmd.flagRequired(true);
+
     try cmd.subCommand(compile_cmd);
 
     const argv: []const [:0]const u8 = &.{
         "compile",
+        "--mode",
     };
 
     var matches = try cmd.parse(argv);
