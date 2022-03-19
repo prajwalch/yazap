@@ -10,7 +10,7 @@ arg: Arg,
 
 fn init(name: []const u8) MatchedFlag {
     return MatchedFlag{
-        .name = name,
+        .name = mem.trimLeft(u8, name, "--"),
         .arg = undefined,
     };
 }

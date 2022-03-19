@@ -62,7 +62,7 @@ test "full parsing" {
     try testing.expectEqual(false, matches.isPresent("--version"));
 
     if (matches.subcommandMatches("compile")) |compile_cmd_matches| {
-        try testing.expectEqual(true, compile_cmd_matches.isPresent("--mode"));
-        try testing.expectEqualStrings("debug", compile_cmd_matches.valueOf("--mode").?);
+        try testing.expectEqual(true, compile_cmd_matches.isPresent("mode"));
+        try testing.expectEqualStrings("debug", compile_cmd_matches.valueOf("mode").?);
     }
 }
