@@ -64,13 +64,13 @@ pub fn deinit(self: *Command) void {
     }
 }
 
-pub fn flag(self: *Command, new_flag: Flag) !void {
+pub fn addFlag(self: *Command, new_flag: Flag) !void {
     if (self.flags == null)
         self.flags = std.ArrayList(Flag).init(self.allocator);
     return self.flags.?.append(new_flag);
 }
 
-pub fn subCommand(self: *Command, new_subcommand: Command) !void {
+pub fn addSubcommand(self: *Command, new_subcommand: Command) !void {
     if (self.subcommands == null)
         self.subcommands = std.ArrayList(Command).init(self.allocator);
     return self.subcommands.?.append(new_subcommand);

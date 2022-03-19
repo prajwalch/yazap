@@ -8,17 +8,17 @@ const allocator = std.heap.page_allocator;
 fn initFakeCliArgs(alloc: std.mem.Allocator) !Command {
     var root_cmd = Command.new(alloc, "zig-arg");
 
-    try root_cmd.flag(Flag.Bool("--version"));
-    try root_cmd.flag(Flag.ArgOne("--compile-only"));
-    try root_cmd.subCommand(Command.new(alloc, "help"));
+    try root_cmd.addFlag(Flag.Bool("--version"));
+    try root_cmd.addFlag(Flag.ArgOne("--compile-only"));
+    try root_cmd.addSubcommand(Command.new(alloc, "help"));
 
     var compile_cmd = Command.new(alloc, "compile");
-    try compile_cmd.flag(Flag.Option("--mode", &[_][]const u8{
+    try compile_cmd.addFlag(Flag.Option("--mode", &[_][]const u8{
         "release",
         "debug",
     }));
 
-    try root_cmd.subCommand(compile_cmd);
+    try root_cmd.addSubcommand(compile_cmd);
     return root_cmd;
 }
 
