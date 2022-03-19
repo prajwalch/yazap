@@ -59,7 +59,7 @@ pub fn parseFlag(
     valid_flags: []const Flag,
     provided_flag: *const ArgvIterator.Value,
     argv_iterator: *ArgvIterator,
-) !MatchedFlag {
+) Error!MatchedFlag {
     for (valid_flags) |flag| {
         if (std.mem.eql(u8, flag.name, provided_flag.name)) {
             return consumeFlagArg(&flag, provided_flag, argv_iterator);
@@ -72,7 +72,7 @@ pub fn consumeFlagArg(
     flag: *const Flag,
     provided_flag: *const ArgvIterator.Value,
     argv_iterator: *ArgvIterator,
-) !MatchedFlag {
+) Error!MatchedFlag {
     switch (flag.required_arg) {
         0 => return MatchedFlag.initWithoutArg(flag.name),
         1 => {
@@ -92,7 +92,7 @@ pub fn parseSubCommand(
     valid_subcmds: []const Command,
     provided_subcmd: *const ArgvIterator.Value,
     argv_iterator: *ArgvIterator,
-) !arg_matches.SubCommand {
+) Error!arg_matches.SubCommand {
     for (valid_subcmds) |valid_subcmd| {
         if (std.mem.eql(u8, valid_subcmd.name, provided_subcmd.name)) {
             if (!valid_subcmd.takesArg())
