@@ -52,6 +52,18 @@ pub fn newWithHelpTxt(allocator: Allocator, name: []const u8, about: []const u8)
     return self;
 }
 
+pub fn deinit(self: *Command) void {
+    if (self.flags) |flags| {
+        flags.deinit();
+    }
+
+    if (self.subcommands) |subcommands| {
+        for (subcommands.items) |*subcommand| {
+            subcommand.deinit();
+        }
+    }
+}
+
 pub fn flag(self: *Command, new_flag: Flag) !void {
     if (self.flags == null)
         self.flags = std.ArrayList(Flag).init(self.allocator);

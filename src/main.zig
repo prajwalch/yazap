@@ -54,8 +54,9 @@ test "full parsing" {
     };
 
     var root_cmd = try initFakeCliArgs(allocator);
-    root_cmd.subcommandRequired(true);
+    defer root_cmd.deinit();
 
+    root_cmd.subcommandRequired(true);
     var matches = try root_cmd.parse(argv);
 
     try testing.expectEqual(false, matches.isPresent("--version"));

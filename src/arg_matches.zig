@@ -17,6 +17,9 @@ pub const ArgMatches = struct {
 
     pub fn deinit(self: *ArgMatches) void {
         self.flags.deinit();
+        if (self.subcommand) |*subcommand| {
+            subcommand.deinit();
+        }
     }
 
     pub fn putFlag(self: *ArgMatches, flag: MatchedFlag) !void {
@@ -81,5 +84,9 @@ pub const SubCommand = struct {
         var self = initWithoutArg(name);
         self.flags = arg_matches.flags;
         return self;
+    }
+
+    pub fn deinit(self: *SubCommand) void {
+        self.flags.deinit();
     }
 };
