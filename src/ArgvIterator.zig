@@ -43,5 +43,8 @@ pub fn next(self: *ArgvIterator) ?Value {
 
 pub fn rest(self: *ArgvIterator) ?[]const [:0]const u8 {
     if (self.next_index >= self.argv.len) return null;
-    return self.argv[self.next_index..];
+
+    const rest_of_argv = self.argv[self.next_index..];
+    self.next_index = self.argv.len;
+    return rest_of_argv;
 }
