@@ -11,6 +11,7 @@ pub const Error = error{
     UnknownCommand,
     MissingFlagArgument,
     MissingCommandArgument,
+    MissingCommandFlags,
     ArgIsNotInAllowedSet,
 } || std.mem.Allocator.Error;
 
@@ -18,6 +19,12 @@ pub fn parse(allocator: std.mem.Allocator, argv: []const [:0]const u8, cmd: *con
     var argv_iter = ArgvIterator.init(argv);
     var matches = ArgMatches.init(allocator);
     errdefer matches.deinit();
+
+    if (cmd.isSettingEnabled(.takes_value)) {
+        const provided_value = argv_iter.next() orelse return Error.MissingCommandArgument;
+        //try matches.putValue(provided_value.name);
+        std.debug.print("{s}", .{provided_value.name});
+    }
 
     while (argv_iter.next()) |arg| {
         if (arg.startsWithDoubleHyphen()) {
@@ -36,6 +43,15 @@ pub fn parse(allocator: std.mem.Allocator, argv: []const [:0]const u8, cmd: *con
             }
         }
     }
+
+    if (cmd.isSettingEnabled(.flag_required) and matches.flags.count() == 0) {
+        return Error.MissingCommandFlags;
+    }
+
+    if (cmd.isSettingEnabled(.subcommand_required) and matches.subcommand == null) {
+        return Error.MissingCommandArgument;
+    }
+
     return matches;
 }
 
@@ -52,7 +68,11 @@ pub fn parseFlag(
     return Error.UnknownFlag;
 }
 
-pub fn consumeFlagArg(flag: *const Flag, provided_flag: *const ArgvIterator.Value, argv_iterator: *ArgvIterator) !MatchedFlag {
+pub fn consumeFlagArg(
+    flag: *const Flag,
+    provided_flag: *const ArgvIterator.Value,
+    argv_iterator: *ArgvIterator,
+) !MatchedFlag {
     switch (flag.required_arg) {
         0 => return MatchedFlag.initWithoutArg(flag.name),
         1 => {
