@@ -36,7 +36,7 @@ pub fn parse(allocator: std.mem.Allocator, argv: []const [:0]const u8, cmd: *con
             }
         } else {
             if (cmd.subcommands) |subcmds| {
-                const subcmd = try parseSubCommand(subcmds.items, &arg, &argv_iter);
+                const subcmd = try parseSubCommand(allocator, subcmds.items, &arg, &argv_iter);
                 try matches.setSubcommand(subcmd);
             } else {
                 return Error.UnknownCommand;
@@ -89,6 +89,7 @@ pub fn consumeFlagArg(
 }
 
 pub fn parseSubCommand(
+    allocator: std.mem.Allocator,
     valid_subcmds: []const Command,
     provided_subcmd: *const ArgvIterator.Value,
     argv_iterator: *ArgvIterator,
@@ -99,7 +100,7 @@ pub fn parseSubCommand(
                 return arg_matches.SubCommand.initWithoutArg(valid_subcmd.name);
 
             const subcmd_argv = argv_iterator.rest() orelse return Error.MissingCommandArgument;
-            const subcmd_argmatches = try parse(std.heap.page_allocator, subcmd_argv, &valid_subcmd);
+            const subcmd_argmatches = try parse(allocator, subcmd_argv, &valid_subcmd);
 
             return arg_matches.SubCommand.initWithArg(valid_subcmd.name, subcmd_argmatches);
         }
