@@ -1,4 +1,5 @@
 const MatchedFlag = @This();
+const mem = @import("std").mem;
 
 pub const Arg = union(enum) {
     none: bool,
