@@ -5,11 +5,13 @@ const FlagArg = MatchedFlag.Arg;
 const FlagHashMap = std.StringHashMap(FlagArg);
 
 pub const ArgMatches = struct {
+    allocator: std.mem.Allocator,
     flags: FlagHashMap,
-    subcommand: ?SubCommand,
+    subcommand: ?*SubCommand,
 
     pub fn init(allocator: std.mem.Allocator) ArgMatches {
         return ArgMatches{
+            .allocator = allocator,
             .flags = FlagHashMap.init(allocator),
             .subcommand = null,
         };
@@ -17,8 +19,9 @@ pub const ArgMatches = struct {
 
     pub fn deinit(self: *ArgMatches) void {
         self.flags.deinit();
-        if (self.subcommand) |*subcommand| {
+        if (self.subcommand) |subcommand| {
             subcommand.deinit();
+            self.allocator.destroy(subcommand);
         }
     }
 
@@ -27,7 +30,9 @@ pub const ArgMatches = struct {
     }
 
     pub fn setSubcommand(self: *ArgMatches, subcommand: SubCommand) !void {
-        self.subcommand = subcommand;
+        var alloc_subcmd = try self.allocator.create(SubCommand);
+        alloc_subcmd.* = subcommand;
+        self.subcommand = alloc_subcmd;
     }
 
     pub fn isPresent(self: *const ArgMatches, name_to_lookup: []const u8) bool {
@@ -59,10 +64,7 @@ pub const ArgMatches = struct {
     pub fn subcommandMatches(self: *const ArgMatches, subcmd_name: []const u8) ?ArgMatches {
         if (self.subcommand) |subcmd| {
             if (std.mem.eql(u8, subcmd.name, subcmd_name)) {
-                return ArgMatches{
-                    .flags = subcmd.flags,
-                    .subcommand = null,
-                };
+                return subcmd.matches;
             }
         }
         return null;
@@ -71,22 +73,22 @@ pub const ArgMatches = struct {
 
 pub const SubCommand = struct {
     name: []const u8,
-    flags: FlagHashMap,
+    matches: ?ArgMatches,
 
     pub fn initWithoutArg(name: []const u8) SubCommand {
         return SubCommand{
             .name = name,
-            .flags = undefined,
+            .matches = null,
         };
     }
 
     pub fn initWithArg(name: []const u8, arg_matches: ArgMatches) SubCommand {
         var self = initWithoutArg(name);
-        self.flags = arg_matches.flags;
+        self.matches = arg_matches;
         return self;
     }
 
     pub fn deinit(self: *SubCommand) void {
-        self.flags.deinit();
+        if (self.matches) |*matches| matches.deinit();
     }
 };
