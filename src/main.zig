@@ -31,6 +31,7 @@ test "flag required error" {
 
     var root_cmd = try initFakeCliArgs(allocator);
     root_cmd.flagRequired(true);
+    defer root_cmd.deinit();
 
     try testing.expectError(error.MissingCommandFlags, root_cmd.parse(argv));
 }
@@ -42,6 +43,7 @@ test "subcommand required error" {
 
     var root_cmd = try initFakeCliArgs(allocator);
     root_cmd.subcommandRequired(true);
+    defer root_cmd.deinit();
 
     try testing.expectError(error.MissingCommandArgument, root_cmd.parse(argv));
 }
