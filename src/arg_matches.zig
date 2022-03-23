@@ -6,12 +6,17 @@ const FlagHashMap = std.StringHashMap(FlagArg);
 
 pub const ArgMatches = struct {
     allocator: std.mem.Allocator,
+
+    // TODO: Add support for multiple values.
+    // Ex: cmd arg1 arg2 where arg1 and arg2 are value
+    value: ?[]const u8,
     flags: FlagHashMap,
     subcommand: ?*SubCommand,
 
     pub fn init(allocator: std.mem.Allocator) ArgMatches {
         return ArgMatches{
             .allocator = allocator,
+            .value = null,
             .flags = FlagHashMap.init(allocator),
             .subcommand = null,
         };
@@ -35,6 +40,10 @@ pub const ArgMatches = struct {
         self.subcommand = alloc_subcmd;
     }
 
+    pub fn setValue(self: *ArgMatches, value: []const u8) void {
+        self.value = value;
+    }
+
     pub fn isPresent(self: *const ArgMatches, name_to_lookup: []const u8) bool {
         if (self.flags.contains(name_to_lookup)) {
             return true;
@@ -56,9 +65,21 @@ pub const ArgMatches = struct {
                 .single => |val| return val,
                 else => return null,
             }
-        } else {
-            return null;
         }
+
+        if (self.subcommand) |subcmd| {
+            if (std.mem.eql(u8, subcmd.name, arg_name)) {
+                if (subcmd.matches) |matches| {
+                    return matches.value;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    pub fn getValue(self: *const ArgMatches) ?[]const u8 {
+        return self.value;
     }
 
     pub fn subcommandMatches(self: *const ArgMatches, subcmd_name: []const u8) ?ArgMatches {

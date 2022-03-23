@@ -22,8 +22,7 @@ pub fn parse(allocator: std.mem.Allocator, argv: []const [:0]const u8, cmd: *con
 
     if (cmd.isSettingEnabled(.takes_value)) {
         const provided_value = argv_iter.next() orelse return Error.MissingCommandArgument;
-        //try matches.putValue(provided_value.name);
-        std.debug.print("{s}", .{provided_value.name});
+        matches.setValue(provided_value.name);
     }
 
     while (argv_iter.next()) |arg| {
