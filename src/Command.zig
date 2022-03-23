@@ -26,6 +26,14 @@ const Setting = struct {
             .subcommand_required = false,
         };
     }
+
+    pub fn isOptionEnabled(self: *const Setting, option: SettingOption) bool {
+        return switch (option) {
+            .takes_value => self.takes_value,
+            .flag_required => self.flag_required,
+            .subcommand_required => self.subcommand_required,
+        };
+    }
 };
 
 allocator: Allocator,
@@ -98,9 +106,5 @@ pub fn takesArg(self: *const Command) bool {
 
 // zig fmt: on
 pub fn isSettingEnabled(self: *const Command, setting_opt: SettingOption) bool {
-    return switch (setting_opt) {
-        .takes_value => self.setting.takes_value,
-        .flag_required => self.setting.flag_required,
-        .subcommand_required => self.setting.subcommand_required,
-    };
+    return self.setting.isOptionEnabled(setting_opt);
 }
