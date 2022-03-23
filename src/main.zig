@@ -19,6 +19,11 @@ fn initFakeCliArgs(alloc: std.mem.Allocator) !Command {
     }));
 
     try root_cmd.addSubcommand(compile_cmd);
+
+    var init_cmd = Command.new(alloc, "init");
+    init_cmd.takesValue(true);
+
+    try root_cmd.addSubcommand(init_cmd);
     return root_cmd;
 }
 
@@ -46,6 +51,19 @@ test "subcommand required error" {
     defer root_cmd.deinit();
 
     try testing.expectError(error.MissingCommandArgument, root_cmd.parse(argv));
+}
+
+test "command that takes value" {
+    const argv: []const [:0]const u8 = &.{
+        "init",
+        "test_project",
+    };
+
+    var root_cmd = try initFakeCliArgs(allocator);
+    defer root_cmd.deinit();
+
+    var matches = try root_cmd.parse(argv);
+    try testing.expectEqualStrings("test_project", matches.valueOf("init").?);
 }
 
 test "full parsing" {
