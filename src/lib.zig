@@ -1,2 +1,2 @@
-pub const Command = @import("Command");
-pub const Flag = @import("Flag");
+pub const Command = @import("Command.zig");
+pub const Flag = @import("Flag.zig");
