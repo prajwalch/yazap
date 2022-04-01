@@ -102,7 +102,7 @@ pub fn parse(self: *Command, argv: []const [:0]const u8) parser.Error!ArgMatches
 
 pub fn takesArg(self: *const Command) bool {
     // zig fmt: off
-    return (self.isSettingEnabled(.takes_value)
+    return (self.getSetting().isOptionEnabled(.takes_value)
             or self.flags != null
             or self.subcommands != null);
 }
