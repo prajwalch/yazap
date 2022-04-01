@@ -28,7 +28,7 @@ pub fn parse(allocator: std.mem.Allocator, argv: []const [:0]const u8, cmd: *con
     while (argv_iter.next()) |arg| {
         if (arg.startsWithDoubleHyphen()) {
             if (cmd.flags) |flags| {
-                const parsed_flag = try parseFlag(flags.items, &arg, &argv_iter);
+                const parsed_flag = try parseFlag(allocator, flags.items, &arg, &argv_iter);
                 try matches.putFlag(parsed_flag);
             } else {
                 return Error.UnknownFlag;
@@ -55,19 +55,21 @@ pub fn parse(allocator: std.mem.Allocator, argv: []const [:0]const u8, cmd: *con
 }
 
 pub fn parseFlag(
+    allocator: std.mem.Allocator,
     valid_flags: []const Flag,
     provided_flag: *const ArgvIterator.Value,
     argv_iterator: *ArgvIterator,
 ) Error!MatchedFlag {
     for (valid_flags) |flag| {
         if (std.mem.eql(u8, flag.name, provided_flag.name)) {
-            return consumeFlagArg(&flag, provided_flag, argv_iterator);
+            return consumeFlagArg(allocator, &flag, provided_flag, argv_iterator);
         }
     }
     return Error.UnknownFlag;
 }
 
 pub fn consumeFlagArg(
+    allocator: std.mem.Allocator,
     flag: *const Flag,
     provided_flag: *const ArgvIterator.Value,
     argv_iterator: *ArgvIterator,
@@ -81,9 +83,24 @@ pub fn consumeFlagArg(
                 return Error.ArgIsNotInAllowedSet;
             }
 
-            return MatchedFlag.initWithArg(flag.name, provided_arg);
+            return MatchedFlag.initWithSingleArg(flag.name, provided_arg);
         },
-        else => @panic("Flag reuqires more arg, yet to handle"),
+        else => |num_required_arg| {
+            var args = std.ArrayList([]const u8).init(allocator);
+            var index: usize = 1;
+
+            while (index <= num_required_arg) : (index += 1) {
+                const arg = provided_flag.arg(argv_iterator) orelse return Error.MissingFlagArgument;
+
+                if (!flag.verifyArgInAllowedSet(arg)) {
+                    return Error.ArgIsNotInAllowedSet;
+                }
+
+                try args.append(arg);
+            }
+
+            return MatchedFlag.initWithManyArg(flag.name, args);
+        },
     }
 }
 

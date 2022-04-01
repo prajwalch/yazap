@@ -23,7 +23,15 @@ pub const ArgMatches = struct {
     }
 
     pub fn deinit(self: *ArgMatches) void {
+        var flags_arg_iter = self.flags.valueIterator();
+        while (flags_arg_iter.next()) |arg| {
+            switch (arg.*) {
+                .many => |v| v.deinit(),
+                else => {},
+            }
+        }
         self.flags.deinit();
+
         if (self.subcommand) |subcommand| {
             subcommand.deinit();
             self.allocator.destroy(subcommand);
@@ -76,6 +84,17 @@ pub const ArgMatches = struct {
         }
 
         return null;
+    }
+
+    pub fn valuesOf(self: *const ArgMatches, name_to_lookup: []const u8) ?[][]const u8 {
+        var flag_arg = self.flags.get(name_to_lookup) orelse return null;
+
+        switch (flag_arg) {
+            .many => |*values| {
+                return values.toOwnedSlice();
+            },
+            else => return null,
+        }
     }
 
     pub fn getValue(self: *const ArgMatches) ?[]const u8 {

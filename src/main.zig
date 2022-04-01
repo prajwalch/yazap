@@ -10,6 +10,7 @@ fn initFakeCliArgs(alloc: std.mem.Allocator) !Command {
 
     try root_cmd.addFlag(Flag.Bool("--version"));
     try root_cmd.addFlag(Flag.ArgOne("--compile-only"));
+    try root_cmd.addFlag(Flag.ArgN("--exclude-dir", 3));
     try root_cmd.addSubcommand(Command.new(alloc, "help"));
 
     var compile_cmd = Command.new(alloc, "compile");
@@ -68,6 +69,10 @@ test "command that takes value" {
 
 test "full parsing" {
     const argv: []const [:0]const u8 = &.{
+        "--exclude-dir",
+        "dir1",
+        "dir2",
+        "dir3",
         "compile",
         "--mode",
         "debug",
@@ -80,6 +85,13 @@ test "full parsing" {
     var matches = try root_cmd.parse(argv);
 
     try testing.expectEqual(false, matches.isPresent("--version"));
+    try testing.expectEqual(true, matches.isPresent("exclude-dir"));
+
+    if (matches.valuesOf("exclude-dir")) |dirs_name| {
+        try testing.expectEqualStrings("dir1", dirs_name[0]);
+        try testing.expectEqualStrings("dir2", dirs_name[1]);
+        try testing.expectEqualStrings("dir3", dirs_name[2]);
+    }
 
     if (matches.subcommandMatches("compile")) |compile_cmd_matches| {
         try testing.expectEqual(true, compile_cmd_matches.isPresent("mode"));
