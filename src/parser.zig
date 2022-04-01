@@ -4,6 +4,8 @@ const Command = @import("Command.zig");
 const Flag = @import("Flag.zig");
 const ArgvIterator = @import("ArgvIterator.zig");
 const MatchedFlag = @import("MatchedFlag.zig");
+
+const Allocator = std.mem.Allocator;
 const ArgMatches = arg_matches.ArgMatches;
 
 pub const Error = error{
@@ -13,9 +15,9 @@ pub const Error = error{
     MissingCommandArgument,
     MissingCommandFlags,
     ArgIsNotInAllowedSet,
-} || std.mem.Allocator.Error;
+} || Allocator.Error;
 
-pub fn parse(allocator: std.mem.Allocator, argv: []const [:0]const u8, cmd: *const Command) Error!ArgMatches {
+pub fn parse(allocator: Allocator, argv: []const [:0]const u8, cmd: *const Command) Error!ArgMatches {
     const cmd_setting = cmd.getSetting();
     var argv_iter = ArgvIterator.init(argv);
     var matches = ArgMatches.init(allocator);
@@ -56,7 +58,7 @@ pub fn parse(allocator: std.mem.Allocator, argv: []const [:0]const u8, cmd: *con
 }
 
 pub fn parseFlag(
-    allocator: std.mem.Allocator,
+    allocator: Allocator,
     valid_flags: []const Flag,
     provided_flag: *const ArgvIterator.Value,
     argv_iterator: *ArgvIterator,
@@ -70,7 +72,7 @@ pub fn parseFlag(
 }
 
 pub fn consumeFlagArg(
-    allocator: std.mem.Allocator,
+    allocator: Allocator,
     flag: *const Flag,
     provided_flag: *const ArgvIterator.Value,
     argv_iterator: *ArgvIterator,
@@ -106,7 +108,7 @@ pub fn consumeFlagArg(
 }
 
 pub fn parseSubCommand(
-    allocator: std.mem.Allocator,
+    allocator: Allocator,
     valid_subcmds: []const Command,
     provided_subcmd: *const ArgvIterator.Value,
     argv_iterator: *ArgvIterator,
