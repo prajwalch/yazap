@@ -16,11 +16,12 @@ pub const Error = error{
 } || std.mem.Allocator.Error;
 
 pub fn parse(allocator: std.mem.Allocator, argv: []const [:0]const u8, cmd: *const Command) Error!ArgMatches {
+    const cmd_setting = cmd.getSetting();
     var argv_iter = ArgvIterator.init(argv);
     var matches = ArgMatches.init(allocator);
     errdefer matches.deinit();
 
-    if (cmd.isSettingEnabled(.takes_value)) {
+    if (cmd_setting.isOptionEnabled(.takes_value)) {
         const provided_value = argv_iter.next() orelse return Error.MissingCommandArgument;
         matches.setValue(provided_value.name);
     }
@@ -43,11 +44,11 @@ pub fn parse(allocator: std.mem.Allocator, argv: []const [:0]const u8, cmd: *con
         }
     }
 
-    if (cmd.isSettingEnabled(.flag_required) and matches.flags.count() == 0) {
+    if (cmd_setting.isOptionEnabled(.flag_required) and matches.flags.count() == 0) {
         return Error.MissingCommandFlags;
     }
 
-    if (cmd.isSettingEnabled(.subcommand_required) and matches.subcommand == null) {
+    if (cmd_setting.isOptionEnabled(.subcommand_required) and matches.subcommand == null) {
         return Error.MissingCommandArgument;
     }
 

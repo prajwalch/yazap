@@ -8,13 +8,13 @@ const ArgMatches = @import("arg_matches.zig").ArgMatches;
 const mem = std.mem;
 const Allocator = mem.Allocator;
 
-pub const SettingOption = enum {
-    takes_value,
-    flag_required,
-    subcommand_required,
-};
-
 const Setting = struct {
+    pub const Option = enum {
+        takes_value,
+        flag_required,
+        subcommand_required,
+    };
+
     takes_value: bool,
     flag_required: bool,
     subcommand_required: bool,
@@ -27,7 +27,7 @@ const Setting = struct {
         };
     }
 
-    pub fn isOptionEnabled(self: *const Setting, option: SettingOption) bool {
+    pub fn isOptionEnabled(self: *const Setting, option: Option) bool {
         return switch (option) {
             .takes_value => self.takes_value,
             .flag_required => self.flag_required,
@@ -108,6 +108,6 @@ pub fn takesArg(self: *const Command) bool {
 }
 
 // zig fmt: on
-pub fn isSettingEnabled(self: *const Command, setting_opt: SettingOption) bool {
-    return self.setting.isOptionEnabled(setting_opt);
+pub fn getSetting(self: *const Command) *const Setting {
+    return &self.setting;
 }
