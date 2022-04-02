@@ -24,21 +24,21 @@ pub fn parse(allocator: Allocator, argv: []const [:0]const u8, cmd: *const Comma
     errdefer matches.deinit();
 
     if (cmd_setting.isOptionEnabled(.takes_value)) {
-        const provided_value = argv_iter.next() orelse return Error.MissingCommandArgument;
-        matches.setValue(provided_value.name);
+        const provided_value = argv_iter.nextValue() orelse return Error.MissingCommandArgument;
+        matches.setValue(provided_value);
     }
 
     while (argv_iter.next()) |arg| {
-        if (arg.startsWithDoubleHyphen()) {
+        if (std.mem.startsWith(u8, arg, "--")) {
             if (cmd.flags) |flags| {
-                const parsed_flag = try parseFlag(allocator, flags.items, &arg, &argv_iter);
+                const parsed_flag = try parseFlag(allocator, flags.items, arg, &argv_iter);
                 try matches.putFlag(parsed_flag);
             } else {
                 return Error.UnknownFlag;
             }
         } else {
             if (cmd.subcommands) |subcmds| {
-                const subcmd = try parseSubCommand(allocator, subcmds.items, &arg, &argv_iter);
+                const subcmd = try parseSubCommand(allocator, subcmds.items, arg, &argv_iter);
                 try matches.setSubcommand(subcmd);
             } else {
                 return Error.UnknownCommand;
@@ -60,12 +60,12 @@ pub fn parse(allocator: Allocator, argv: []const [:0]const u8, cmd: *const Comma
 pub fn parseFlag(
     allocator: Allocator,
     valid_flags: []const Flag,
-    provided_flag: *const ArgvIterator.Value,
+    provided_flag: [:0]const u8,
     argv_iterator: *ArgvIterator,
 ) Error!MatchedFlag {
     for (valid_flags) |flag| {
-        if (std.mem.eql(u8, flag.name, provided_flag.name)) {
-            return consumeFlagArg(allocator, &flag, provided_flag, argv_iterator);
+        if (std.mem.eql(u8, flag.name, provided_flag)) {
+            return consumeFlagArg(allocator, &flag, argv_iterator);
         }
     }
     return Error.UnknownFlag;
@@ -74,13 +74,12 @@ pub fn parseFlag(
 pub fn consumeFlagArg(
     allocator: Allocator,
     flag: *const Flag,
-    provided_flag: *const ArgvIterator.Value,
     argv_iterator: *ArgvIterator,
 ) Error!MatchedFlag {
     switch (flag.required_arg) {
         0 => return MatchedFlag.initWithoutArg(flag.name),
         1 => {
-            const provided_arg = provided_flag.arg(argv_iterator) orelse return Error.MissingFlagArgument;
+            const provided_arg = argv_iterator.nextValue() orelse return Error.MissingFlagArgument;
 
             if (!flag.verifyArgInAllowedSet(provided_arg)) {
                 return Error.ArgIsNotInAllowedSet;
@@ -93,7 +92,7 @@ pub fn consumeFlagArg(
             var index: usize = 1;
 
             while (index <= num_required_arg) : (index += 1) {
-                const arg = provided_flag.arg(argv_iterator) orelse return Error.MissingFlagArgument;
+                const arg = argv_iterator.nextValue() orelse return Error.MissingFlagArgument;
 
                 if (!flag.verifyArgInAllowedSet(arg)) {
                     return Error.ArgIsNotInAllowedSet;
@@ -110,11 +109,11 @@ pub fn consumeFlagArg(
 pub fn parseSubCommand(
     allocator: Allocator,
     valid_subcmds: []const Command,
-    provided_subcmd: *const ArgvIterator.Value,
+    provided_subcmd: [:0]const u8,
     argv_iterator: *ArgvIterator,
 ) Error!arg_matches.SubCommand {
     for (valid_subcmds) |valid_subcmd| {
-        if (std.mem.eql(u8, valid_subcmd.name, provided_subcmd.name)) {
+        if (std.mem.eql(u8, valid_subcmd.name, provided_subcmd)) {
             if (!valid_subcmd.takesArg())
                 return arg_matches.SubCommand.initWithoutArg(valid_subcmd.name);
 
