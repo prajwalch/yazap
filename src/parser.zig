@@ -17,7 +17,11 @@ pub const Error = error{
     ArgIsNotInAllowedSet,
 } || Allocator.Error;
 
-pub fn parse(allocator: Allocator, argv: []const [:0]const u8, cmd: *const Command) Error!ArgMatches {
+pub fn parse(
+    allocator: Allocator,
+    argv: []const [:0]const u8,
+    cmd: *const Command,
+) Error!ArgMatches {
     const cmd_setting = cmd.getSetting();
     var argv_iter = ArgvIterator.init(argv);
     var matches = ArgMatches.init(allocator);
