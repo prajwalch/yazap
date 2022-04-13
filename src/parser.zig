@@ -100,7 +100,6 @@ pub fn consumeArgValues(
 
     if (arg.min_values >= 1 and arg.max_values >= arg.min_values) {
         var index: usize = 1;
-
         var values = std.ArrayList([]const u8).init(allocator);
         errdefer values.deinit();
 
@@ -109,13 +108,11 @@ pub fn consumeArgValues(
 
             if (!arg.verifyValueInAllowedValues(provided_value))
                 return Error.ValueIsNotInAllowedValues;
-
             try values.append(provided_value);
         }
 
-        if (values.items.len < arg.max_values and arg.settings.all_values_required) {
+        if (values.items.len < arg.max_values and arg.settings.all_values_required)
             return Error.IncompleteArgValues;
-        }
 
         return MatchedArg.initWithManyValues(arg.name, values);
     }
