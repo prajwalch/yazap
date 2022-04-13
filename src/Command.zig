@@ -10,12 +10,6 @@ const ArrayList = std.ArrayList;
 const Allocator = mem.Allocator;
 
 const Setting = struct {
-    pub const Option = enum {
-        takes_value,
-        arg_required,
-        subcommand_required,
-    };
-
     takes_value: bool,
     arg_required: bool,
     subcommand_required: bool,
@@ -25,14 +19,6 @@ const Setting = struct {
             .takes_value = false,
             .arg_required = false,
             .subcommand_required = false,
-        };
-    }
-
-    pub fn isOptionEnabled(self: *const Setting, option: Option) bool {
-        return switch (option) {
-            .takes_value => self.takes_value,
-            .arg_required => self.arg_required,
-            .subcommand_required => self.subcommand_required,
         };
     }
 };
@@ -102,8 +88,4 @@ pub fn subcommandRequired(self: *Command, boolean: bool) void {
 
 pub fn parse(self: *Command, argv: []const [:0]const u8) parser.Error!ArgMatches {
     return parser.parse(self.allocator, argv, self);
-}
-
-pub fn getSetting(self: *const Command) *const Setting {
-    return &self.setting;
 }

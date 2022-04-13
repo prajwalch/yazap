@@ -22,12 +22,11 @@ pub fn parse(
     argv: []const [:0]const u8,
     cmd: *const Command,
 ) Error!ArgMatches {
-    const cmd_setting = cmd.getSetting();
     var argv_iter = ArgvIterator.init(argv);
     var matches = ArgMatches.init(allocator);
     errdefer matches.deinit();
 
-    if (cmd_setting.isOptionEnabled(.takes_value)) {
+    if (cmd.setting.takes_value) {
         for (cmd.args.items) |arg| {
             if (!std.mem.startsWith(u8, arg.name, "--")) {
                 var parsed_arg = try consumeArgValues(allocator, &arg, &argv_iter);
@@ -52,11 +51,11 @@ pub fn parse(
         }
     }
 
-    if (cmd_setting.isOptionEnabled(.arg_required) and matches.args.count() == 0) {
+    if (cmd.setting.arg_required and matches.args.count() == 0) {
         return Error.MissingCommandArgument;
     }
 
-    if (cmd_setting.isOptionEnabled(.subcommand_required) and matches.subcommand == null) {
+    if (cmd.setting.subcommand_required and matches.subcommand == null) {
         return Error.MissingCommandSubCommand;
     }
 
