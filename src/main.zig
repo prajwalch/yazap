@@ -8,13 +8,13 @@ const allocator = std.heap.page_allocator;
 fn initFakeCliArgs(alloc: std.mem.Allocator) !Command {
     var root_cmd = Command.new(alloc, "zig-arg");
 
-    try root_cmd.addFlag(Flag.Bool("--version"));
-    try root_cmd.addFlag(Flag.ArgOne("--compile-only"));
-    try root_cmd.addFlag(Flag.ArgN("--exclude-dir", 3));
+    try root_cmd.addArg(Flag.boolean("--version"));
+    try root_cmd.addArg(Flag.argOne("--compile-only"));
+    try root_cmd.addArg(Flag.argN("--exclude-dir", 3));
     try root_cmd.addSubcommand(Command.new(alloc, "help"));
 
     var compile_cmd = Command.new(alloc, "compile");
-    try compile_cmd.addFlag(Flag.Option("--mode", &[_][]const u8{
+    try compile_cmd.addArg(Flag.option("--mode", &[_][]const u8{
         "release",
         "debug",
     }));
@@ -22,13 +22,13 @@ fn initFakeCliArgs(alloc: std.mem.Allocator) !Command {
     try root_cmd.addSubcommand(compile_cmd);
 
     var init_cmd = Command.new(alloc, "init");
-    init_cmd.takesValue(true);
+    try init_cmd.takesSingleValue("PROJECT_NAME");
 
     try root_cmd.addSubcommand(init_cmd);
     return root_cmd;
 }
 
-test "flag required error" {
+test "arg required error" {
     const argv: []const [:0]const u8 = &.{
         "compile",
         "--mode",
@@ -36,10 +36,10 @@ test "flag required error" {
     };
 
     var root_cmd = try initFakeCliArgs(allocator);
-    root_cmd.flagRequired(true);
+    root_cmd.argRequired(true);
     defer root_cmd.deinit();
 
-    try testing.expectError(error.MissingCommandFlags, root_cmd.parse(argv));
+    try testing.expectError(error.MissingCommandArgument, root_cmd.parse(argv));
 }
 
 test "subcommand required error" {
@@ -51,7 +51,7 @@ test "subcommand required error" {
     root_cmd.subcommandRequired(true);
     defer root_cmd.deinit();
 
-    try testing.expectError(error.MissingCommandArgument, root_cmd.parse(argv));
+    try testing.expectError(error.MissingCommandSubCommand, root_cmd.parse(argv));
 }
 
 test "command that takes value" {
@@ -64,7 +64,7 @@ test "command that takes value" {
     defer root_cmd.deinit();
 
     var matches = try root_cmd.parse(argv);
-    try testing.expectEqualStrings("test_project", matches.valueOf("init").?);
+    try testing.expectEqualStrings("test_project", matches.valueOf("PROJECT_NAME").?);
 }
 
 test "full parsing" {

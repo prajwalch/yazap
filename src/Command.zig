@@ -2,27 +2,28 @@ const Command = @This();
 
 const std = @import("std");
 const parser = @import("parser.zig");
-const Flag = @import("Flag.zig");
+const Arg = @import("Arg.zig");
 const ArgMatches = @import("arg_matches.zig").ArgMatches;
 
 const mem = std.mem;
+const ArrayList = std.ArrayList;
 const Allocator = mem.Allocator;
 
 const Setting = struct {
     pub const Option = enum {
         takes_value,
-        flag_required,
+        arg_required,
         subcommand_required,
     };
 
     takes_value: bool,
-    flag_required: bool,
+    arg_required: bool,
     subcommand_required: bool,
 
     pub fn initDefault() Setting {
         return Setting{
             .takes_value = false,
-            .flag_required = false,
+            .arg_required = false,
             .subcommand_required = false,
         };
     }
@@ -30,7 +31,7 @@ const Setting = struct {
     pub fn isOptionEnabled(self: *const Setting, option: Option) bool {
         return switch (option) {
             .takes_value => self.takes_value,
-            .flag_required => self.flag_required,
+            .arg_required => self.arg_required,
             .subcommand_required => self.subcommand_required,
         };
     }
@@ -39,8 +40,8 @@ const Setting = struct {
 allocator: Allocator,
 name: []const u8,
 about: ?[]const u8,
-flags: ?std.ArrayList(Flag),
-subcommands: ?std.ArrayList(Command),
+args: ArrayList(Arg),
+subcommands: ArrayList(Command),
 setting: Setting,
 
 pub fn new(allocator: Allocator, name: []const u8) Command {
@@ -48,8 +49,8 @@ pub fn new(allocator: Allocator, name: []const u8) Command {
         .allocator = allocator,
         .name = name,
         .about = null,
-        .flags = null,
-        .subcommands = null,
+        .args = ArrayList(Arg).init(allocator),
+        .subcommands = ArrayList(Command).init(allocator),
         .setting = Setting.initDefault(),
     };
 }
@@ -61,35 +62,38 @@ pub fn newWithHelpTxt(allocator: Allocator, name: []const u8, about: []const u8)
 }
 
 pub fn deinit(self: *Command) void {
-    if (self.flags) |flags| {
-        flags.deinit();
-    }
+    self.args.deinit();
 
-    if (self.subcommands) |subcommands| {
-        for (subcommands.items) |*subcommand| {
-            subcommand.deinit();
-        }
+    for (self.subcommands.items) |*subcommand| {
+        subcommand.deinit();
     }
+    self.subcommands.deinit();
 }
 
-pub fn addFlag(self: *Command, new_flag: Flag) !void {
-    if (self.flags == null)
-        self.flags = std.ArrayList(Flag).init(self.allocator);
-    return self.flags.?.append(new_flag);
+pub fn addArg(self: *Command, new_arg: Arg) !void {
+    return self.args.append(new_arg);
 }
 
 pub fn addSubcommand(self: *Command, new_subcommand: Command) !void {
-    if (self.subcommands == null)
-        self.subcommands = std.ArrayList(Command).init(self.allocator);
-    return self.subcommands.?.append(new_subcommand);
+    return self.subcommands.append(new_subcommand);
 }
 
-pub fn takesValue(self: *Command, boolean: bool) void {
-    self.setting.takes_value = boolean;
+pub fn takesSingleValue(self: *Command, arg_name: []const u8) !void {
+    try self.takesNValues(arg_name, 1);
 }
 
-pub fn flagRequired(self: *Command, boolean: bool) void {
-    self.setting.flag_required = boolean;
+pub fn takesNValues(self: *Command, arg_name: []const u8, n: usize) !void {
+    var arg = Arg.new(arg_name);
+    arg.minValues(1);
+    arg.maxValues(n);
+    arg.settings.all_values_required = true;
+
+    try self.addArg(arg);
+    self.setting.takes_value = true;
+}
+
+pub fn argRequired(self: *Command, boolean: bool) void {
+    self.setting.arg_required = boolean;
 }
 
 pub fn subcommandRequired(self: *Command, boolean: bool) void {
@@ -100,14 +104,6 @@ pub fn parse(self: *Command, argv: []const [:0]const u8) parser.Error!ArgMatches
     return parser.parse(self.allocator, argv, self);
 }
 
-pub fn takesArg(self: *const Command) bool {
-    // zig fmt: off
-    return (self.getSetting().isOptionEnabled(.takes_value)
-            or self.flags != null
-            or self.subcommands != null);
-}
-
-// zig fmt: on
 pub fn getSetting(self: *const Command) *const Setting {
     return &self.setting;
 }

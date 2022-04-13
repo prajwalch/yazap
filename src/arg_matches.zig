@@ -1,36 +1,31 @@
 const std = @import("std");
-const MatchedFlag = @import("MatchedFlag.zig");
+const MatchedArg = @import("MatchedArg.zig");
 
-const FlagArg = MatchedFlag.Arg;
-const FlagHashMap = std.StringHashMap(FlagArg);
+const ArgValue = MatchedArg.Value;
+const ArgHashMap = std.StringHashMap(ArgValue);
 
 pub const ArgMatches = struct {
     allocator: std.mem.Allocator,
-
-    // TODO: Add support for multiple values.
-    // Ex: cmd arg1 arg2 where arg1 and arg2 are value
-    value: ?[]const u8,
-    flags: FlagHashMap,
+    args: ArgHashMap,
     subcommand: ?*SubCommand,
 
     pub fn init(allocator: std.mem.Allocator) ArgMatches {
         return ArgMatches{
             .allocator = allocator,
-            .value = null,
-            .flags = FlagHashMap.init(allocator),
+            .args = ArgHashMap.init(allocator),
             .subcommand = null,
         };
     }
 
     pub fn deinit(self: *ArgMatches) void {
-        var flags_arg_iter = self.flags.valueIterator();
-        while (flags_arg_iter.next()) |arg| {
-            switch (arg.*) {
+        var args_value_iter = self.args.valueIterator();
+        while (args_value_iter.next()) |value| {
+            switch (value.*) {
                 .many => |v| v.deinit(),
                 else => {},
             }
         }
-        self.flags.deinit();
+        self.args.deinit();
 
         if (self.subcommand) |subcommand| {
             subcommand.deinit();
@@ -38,8 +33,8 @@ pub const ArgMatches = struct {
         }
     }
 
-    pub fn putFlag(self: *ArgMatches, flag: MatchedFlag) !void {
-        return self.flags.put(flag.name, flag.arg);
+    pub fn putMatchedArg(self: *ArgMatches, arg: MatchedArg) !void {
+        return self.args.put(arg.name, arg.value);
     }
 
     pub fn setSubcommand(self: *ArgMatches, subcommand: SubCommand) !void {
@@ -48,12 +43,8 @@ pub const ArgMatches = struct {
         self.subcommand = alloc_subcmd;
     }
 
-    pub fn setValue(self: *ArgMatches, value: []const u8) void {
-        self.value = value;
-    }
-
     pub fn isPresent(self: *const ArgMatches, name_to_lookup: []const u8) bool {
-        if (self.flags.contains(name_to_lookup)) {
+        if (self.args.contains(name_to_lookup)) {
             return true;
         }
 
@@ -66,39 +57,35 @@ pub const ArgMatches = struct {
     }
 
     pub fn valueOf(self: *const ArgMatches, arg_name: []const u8) ?[]const u8 {
-        const flag_arg = self.flags.get(arg_name);
+        const arg_value = self.args.get(arg_name);
 
-        if (flag_arg) |arg| {
-            switch (arg) {
-                .single => |val| return val,
+        if (arg_value) |value| {
+            switch (value) {
+                .single => |val| {
+                    return val;
+                },
                 else => return null,
             }
         }
 
         if (self.subcommand) |subcmd| {
-            if (std.mem.eql(u8, subcmd.name, arg_name)) {
-                if (subcmd.matches) |matches| {
-                    return matches.value;
-                }
+            if (subcmd.matches) |matches| {
+                return matches.valueOf(arg_name);
             }
         }
 
         return null;
     }
 
-    pub fn valuesOf(self: *const ArgMatches, name_to_lookup: []const u8) ?[][]const u8 {
-        var flag_arg = self.flags.get(name_to_lookup) orelse return null;
+    pub fn valuesOf(self: *ArgMatches, name_to_lookup: []const u8) ?[][]const u8 {
+        var arg_value = self.args.get(name_to_lookup) orelse return null;
 
-        switch (flag_arg) {
+        switch (arg_value) {
             .many => |*values| {
                 return values.toOwnedSlice();
             },
             else => return null,
         }
-    }
-
-    pub fn getValue(self: *const ArgMatches) ?[]const u8 {
-        return self.value;
     }
 
     pub fn subcommandMatches(self: *const ArgMatches, subcmd_name: []const u8) ?ArgMatches {

@@ -1,41 +1,24 @@
-const Flag = @This();
 const std = @import("std");
+const Arg = @import("Arg.zig");
 
-name: []const u8,
-required_arg: usize,
-allowed_set: ?[]const []const u8,
-
-pub fn Bool(comptime name: []const u8) Flag {
-    return ArgN(name, 0);
+pub fn boolean(comptime name: []const u8) Arg {
+    return Arg.new(name);
 }
 
-pub fn ArgOne(comptime name: []const u8) Flag {
-    return ArgN(name, 1);
+pub fn argOne(comptime name: []const u8) Arg {
+    return argN(name, 1);
 }
 
-pub fn ArgN(comptime name: []const u8, nums_arg: usize) Flag {
-    return Flag{
-        .name = name,
-        .required_arg = nums_arg,
-        .allowed_set = null,
-    };
+pub fn argN(comptime name: []const u8, max_values: usize) Arg {
+    var arg = Arg.new(name);
+    arg.minValues(1);
+    arg.maxValues(max_values);
+    arg.allValuesRequired(true);
+    return arg;
 }
 
-pub fn Option(comptime name: []const u8, sets: []const []const u8) Flag {
-    return Flag{
-        .name = name,
-        .required_arg = 1,
-        .allowed_set = sets,
-    };
-}
-
-pub fn verifyArgInAllowedSet(self: *const Flag, arg: []const u8) bool {
-    if (self.allowed_set) |set| {
-        for (set) |s| {
-            if (std.mem.eql(u8, s, arg)) return true;
-        }
-        return false;
-    } else {
-        return true;
-    }
+pub fn option(comptime name: []const u8, options: []const []const u8) Arg {
+    var arg = argN(name, 1);
+    arg.allowedValues(options);
+    return arg;
 }
