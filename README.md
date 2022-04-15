@@ -91,7 +91,7 @@ pub fn main() anyerror!void {
         // logic here
     }
 
-   if (args.subcommandMatches("subcmd-4")) |subcmd4\_args| {
+   if (args.subcommandMatches("subcmd-4")) |subcmd4_args| {
        if (subcmd4_args.isPresent("bool-flag")) {
            // logic here
        }
