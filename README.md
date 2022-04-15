@@ -15,10 +15,10 @@
     - app cmd <ARG1> [flags]
 * [x] Nested subcommand (with all the above features)
     - app cmd1 cmd1
-* [] Short flags
-* [] Support passing short flag value by `= (-f=value)`, space `(-f value)` and without space `(-fvalue)`
-* [] Support chaining multiple flags `-xyz, -xzyvalue, -xyz value and -xyz=value`
-* [] Support flag that can specified multiple times `-x 1 -x 2 -x 3`
+* [ ] Short flags
+* [ ] Support passing short flag value by `= (-f=value)`, space `(-f value)` and without space `(-fvalue)`
+* [ ] Support chaining multiple flags `-xyz, -xzyvalue, -xyz value and -xyz=value`
+* [ ] Support flag that can specified multiple times `-x 1 -x 2 -x 3`
 
 ## Installation Guide
 Note: Before you follow below steps be sure to initilize your project as repo by running `git init`
