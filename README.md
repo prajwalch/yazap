@@ -67,6 +67,12 @@ pub fn main() anyerror!void {
     try cmd4.takesSingleValue("ARG2");
     try cmd4.addArg(Flag.boolean("--bool-flag"));
     try cmd4.addArg(Flag.argOne("--arg-flag"));
+    // cmd submd4 --opt-flag [opt1, opt2, opt3]
+    // parse method will return error.ValueIsNotInAllowedValues if provided value does not match with options
+    try cmd4.addArg(Flag.option("--opt-flag"), &[_]{
+        "opt1",
+        "opt2",
+    });
 
     try root_cmd.addSubcommand(cmd1);
     try root_cmd.addSubcommand(cmd2);
@@ -80,6 +86,11 @@ pub fn main() anyerror!void {
     defer args.deinit();
 
     if (args.isPresent("bool-cmd")) {
+        // logic here
+    }
+
+    // you can also use isPresent to check other args
+    if (args.isPresent("ARGS")) {
         // logic here
     }
 
@@ -104,3 +115,124 @@ pub fn main() anyerror!void {
    }
 }
 ```
+
+If you don't want flag as a argument but rather want raw value use `Arg` instead.
+Basically `Flag` and `cmd.takesSingleValue() and cmd.takesNValues()` is just a wrapper of `Arg` which handles necessary settings and members to parse as a flag and raw value respectively.
+Lets take above example but we will use `Arg` to manually to define how arg should parse.
+
+```zig
+const std = @import("std");
+const zig_arg = @import("zig-arg");
+
+const allocator = std.heap.page_allocator;
+const Command = zig_arg.Command;
+const Arg = zig_arg.Arg;
+
+pub fn main() anyerror!void {
+    var root_cmd = Command.new(allocator, "root-cmd");
+    try root_cmd.addSubcommand(Command.new(allocator, "bool-cmd"));
+
+    // cmd subcmd1 <ARGS...>
+    var cmd1_arg = Arg.new("ARGS");
+    cmd1_arg.minValues(1);
+    cmd1_arg.maxValues(3);
+    // When set true it will return error.IncompleteArgValues
+    // when provided values are less then  maxValues
+    cmd1_arg.allValuesRequired(true);
+    
+    var cmd1 = Command.new(allocator, "subcmd-1");
+    try cmd1.addArg(cmd1_arg);
+
+    // cmd subcmd2 <ARG>
+    var cmd2_arg = Arg.new("ARG");
+    cmd2_arg.minValues(1);
+    cmd2_arg.maxValues(1);
+    cmd2_arg.allValuesRequired(true);
+
+    var cmd2 = Command.new(allocator, "subcmd-2");
+    try cmd2.addArg(cmd2_arg);
+
+    // cmd subcmd3 <ARG0> <ARG1>
+    var cmd3_arg0 = Arg.new("ARG0");
+    cmd3_arg0.minValues(1);
+    cmd3_arg0.maxValues(1);
+    cmd3_arg0.allValuesRequired(true);
+
+    var cmd3_arg1 = Arg.new("ARG1");
+    cmd3_arg1.minValues(1);
+    cmd3_arg1.maxValues(1);
+    cmd3_arg1.allValuesRequired(true);
+
+    var cmd3 = Command.new(allocator, "subcmd-3");
+    try cmd3.addArg(cmd3_arg1);
+    try cmd3.takesSingleValue("ARG1");
+
+    // cmd subcmd4 <ARG2> [flags]
+    var cmd4_arg = Arg.new("ARG2");
+    cmd4_arg.minValues(1);
+    cmd4_arg.maxValues(1);
+    cmd4_arg.allValuesRequired(true);
+
+    var cmd4_arg_flag = Arg.new("--arg-flag");
+    cmd4_arg_flag.minValues(1);
+    cmd4_arg_flag.maxValues(1);
+    cmd4_arg_flag.allValuesRequired(true);
+
+    var cmd4_opt_flag = Arg.new(--opt-flag);
+    cmd4_opt_flag.minValues(1);
+    cmd4_opt_flag.maxValues(1);
+    // cmd submd4 --opt-flag [opt1, opt2, opt3]
+    // parse method will return error.ValueIsNotInAllowedValues if provided value does not match with options
+    cmd4_opt_flag.allowedValues(&[_]{
+        "opt1",
+        "opt2",
+    });
+
+    var cmd4 = Command.new(allocator, "subcmd-4");
+    try cmd4.addArg(cmd4_arg);
+    try cmd4.addArg(Arg.new("--bool-flag"));
+    try cmd4.addArg(cmd4_arg_flag);
+    try cmd4.addArg(cmd4_opt_flag);
+
+    try root_cmd.addSubcommand(cmd1);
+    try root_cmd.addSubcommand(cmd2);
+    try root_cmd.addSubcommand(cmd3);
+    try root_cmd.addSubcommand(cmd4);
+
+    const argv = try std.process.argsAlloc(allocator);
+    defer std.process.argsFree(allocator, argv);
+
+    var args = try root_cmd.parse(argv);
+    defer args.deinit();
+
+    if (args.isPresent("bool-cmd")) {
+        // logic here
+    }
+
+    // you can also use isPresent to check other args
+    if (args.isPresent("ARGS")) {
+        // logic here
+    }
+
+    // cmd1 args
+    if (args.valuesOf("ARGS")) |values| {
+        // logic here
+    }
+
+    // cmd2 arg
+    if (args.valueOf("ARG")) |value| {
+        // logic here
+    }
+
+   if (args.subcommandMatches("subcmd-4")) |subcmd4_args| {
+       if (subcmd4_args.isPresent("bool-flag")) {
+           // logic here
+       }
+
+       if (subcmd4_args.valueOf("arg-flag")) |arg_flag_value|{
+           // logic here
+       }
+   }
+}
+```
+
