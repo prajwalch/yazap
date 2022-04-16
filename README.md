@@ -2,7 +2,6 @@
 [clap-rs](https://github.com/clap-rs/clap) inspired arg parser library for zig that supports both subcommand, nested subcommand and flag.
 
 This library is in active development so many of the features are yet to implement and bugs are expected to happen.
-But more important is that i  need support specially to improve README.
 
 ## Features Roadmap
 * [x] Long Flag
