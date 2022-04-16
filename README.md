@@ -69,10 +69,10 @@ pub fn main() anyerror!void {
     try cmd4.addArg(Flag.argOne("--arg-flag"));
     // cmd submd4 --opt-flag [opt1, opt2, opt3]
     // parse method will return error.ValueIsNotInAllowedValues if provided value does not match with options
-    try cmd4.addArg(Flag.option("--opt-flag"), &[_]{
+    try cmd4.addArg(Flag.option("--opt-flag", &[_]{
         "opt1",
         "opt2",
-    });
+    }));
 
     try root_cmd.addSubcommand(cmd1);
     try root_cmd.addSubcommand(cmd2);
