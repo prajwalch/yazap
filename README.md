@@ -116,8 +116,8 @@ pub fn main() anyerror!void {
 }
 ```
 
-If you don't want flag as a argument but rather want raw value use `Arg` instead.
-Basically `Flag` and `cmd.takesSingleValue() and cmd.takesNValues()` is just a wrapper of `Arg` which handles necessary settings and members to parse as a flag and raw value respectively.
+If you don't like default behavior of `Flag` and `cmd.takesSingleValue() and cmd.takesNValues() use `Arg` instead.
+Basically `Flag` and `cmd.takesSingleValue() and cmd.takesNValues()` are just a wrapper of `Arg` which handles necessary settings and members to parse as a flag and raw value respectively.
 Lets take above example but we will use `Arg` to manually to define how arg should parse.
 
 ```zig
