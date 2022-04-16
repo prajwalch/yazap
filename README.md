@@ -164,6 +164,7 @@ pub fn main() anyerror!void {
     cmd3_arg1.allValuesRequired(true);
 
     var cmd3 = Command.new(allocator, "subcmd-3");
+    try cmd3.addArg(cmd3_arg0);
     try cmd3.addArg(cmd3_arg1);
     try cmd3.takesSingleValue("ARG1");
 
