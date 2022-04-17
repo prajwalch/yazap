@@ -171,11 +171,18 @@ pub fn main() anyerror!void {
     var app_single_arg = Arg.new("ARG");
     app_single_arg.minValues(1);
     app_single_arg.maxValues(1);
-    // When set true it will return error.IncompleteArgValues
-    // when provided values are less then  maxValues
+    app_single_arg.allValuesRequired(true);
+
+    var app_many_args = Arg.new("ARGS");
+    app_many_args.minValue(1);
+    app_many_args.maxValues(5);
+    // parse method will return error.IncompleteArgValues is provided values
+    // is less then maxValues
     app_single_arg.allValuesRequired(true);
 
     var app_opt_flag = Arg.new("--option-flag");
+    // parse method will return error.ValueIsNotInAllowedValues
+    // if provided value does not match with any allowed values
     app_opt_flag.allowedValues(&[_]{
         "opt1",
         "opt2",
@@ -183,6 +190,7 @@ pub fn main() anyerror!void {
 
     try app.addArg(Arg.new("--bool-flag"));
     try app.addArg(app_single_arg);
+    try app.addArg(app_many_args);
     try app.addArg(app_opt_flag);
 
     const argv = try std.process.argsAlloc(allocator);
