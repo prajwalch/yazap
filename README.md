@@ -4,22 +4,24 @@ zig-arg is a [clap-rs](https://github.com/clap-rs/clap) inspired Command Line Ar
 This library is in active development so many of the features are yet to implement and bugs are expected to happen.
 
 ## Features Roadmap
-* [x] Long Flag
-    - `app --bool-flag`
-    - `app --arg-flag value`
-    - `app --flag-that-takes-multiple-values a1 a2`
-* [x] Boolean subcommand (which does not take any argument)
-* [x] Subcommand that takes single/multiple arg on a single/multiple placeholder
-    - `app cmd <ARGS...>`
-    - `app cmd <ARG1> <ARG2>`
-    - `app cmd <ARGS1...> <ARGS2...>`
-* [x] Subcommand that takes both arg and long flag (same as first point)
-    - `app cmd <ARG1> [flags]`
-* [x] Nested subcommand (with all the above features)
-    - `app cmd1 cmd1`
+* [x] Long flag
+    - `--bool`
+    - `--arg 1, --arg 1 2 `
+    - `--option [a, b, c]`
+
+* [x] Subcommand
+    - `app bool-cmd`
+    - `app single-arg-cmd <ARG>
+    - `app multi-arg-cmd <ARG1> <ARG2> <ARGS3...>`
+    - `app flag-cmd [flags]
+    - `app arg-and-flag-cmd <ARG> [FLAGS]`
+
+* [x] Nested subcommand
+    - `app cmd1 cmd1.1`
+
 * [ ] Short flags
 * [ ] Support passing short flag value by `= (-f=value)`, space `(-f value)` and without space `(-fvalue)`
-* [ ] Support chaining multiple flags `-xyz, -xzyvalue, -xyz value and -xyz=value`
+* [ ] Support chaining multiple short flags `-xyz, -xzyvalue, -xyz value and -xyz=value`
 * [ ] Support flag that can specified multiple times `-x 1 -x 2 -x 3`
 
 ## Installation Guide
