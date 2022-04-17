@@ -5,18 +5,18 @@ This library is in active development so many of the features are yet to impleme
 
 ## Features Roadmap
 * [x] Long Flag
-    - app --bool-flag
-    - app --arg-flag value
-    - app --flag-that-takes-multiple-values a1 a2
+    - `app --bool-flag`
+    - `app --arg-flag value`
+    - `app --flag-that-takes-multiple-values a1 a2`
 * [x] Boolean subcommand (which does not take any argument)
 * [x] Subcommand that takes single/multiple arg on a single/multiple placeholder
-    - app cmd <ARGS...>
-    - app cmd <ARG1> <ARG2>
-    - app cmd <ARGS1...> <ARGS2...>
+    - `app cmd <ARGS...>`
+    - `app cmd <ARG1> <ARG2>`
+    - `app cmd <ARGS1...> <ARGS2...>`
 * [x] Subcommand that takes both arg and long flag (same as first point)
-    - app cmd <ARG1> [flags]
+    - `app cmd <ARG1> [flags]`
 * [x] Nested subcommand (with all the above features)
-    - app cmd1 cmd1
+    - `app cmd1 cmd1`
 * [ ] Short flags
 * [ ] Support passing short flag value by `= (-f=value)`, space `(-f value)` and without space `(-fvalue)`
 * [ ] Support chaining multiple flags `-xyz, -xzyvalue, -xyz value and -xyz=value`
