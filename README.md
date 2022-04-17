@@ -176,9 +176,9 @@ pub fn main() anyerror!void {
     var app_many_args = Arg.new("ARGS");
     app_many_args.minValue(1);
     app_many_args.maxValues(5);
-    // parse method will return error.IncompleteArgValues is provided values
+    // parse method will return error.IncompleteArgValues if provided values
     // is less then maxValues
-    app_single_arg.allValuesRequired(true);
+    app_many_args.allValuesRequired(true);
 
     var app_opt_flag = Arg.new("--option-flag");
     // parse method will return error.ValueIsNotInAllowedValues
