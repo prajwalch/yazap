@@ -11,9 +11,9 @@ This library is in active development so many of the features are yet to impleme
 
 * [x] Subcommand
     - `app bool-cmd`
-    - `app single-arg-cmd <ARG>
+    - `app single-arg-cmd <ARG>`
     - `app multi-arg-cmd <ARG1> <ARG2> <ARGS3...>`
-    - `app flag-cmd [flags]
+    - `app flag-cmd [flags]`
     - `app arg-and-flag-cmd <ARG> [FLAGS]`
 
 * [x] Nested subcommand
