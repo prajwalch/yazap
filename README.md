@@ -42,7 +42,7 @@ Before you follow below steps be sure to initialize your project as repo by runn
 ### `Flag, Command.takesSingleValue and Command.takesNValues`
 These 3 are thin wrapper of `Arg` which handles necessary options and settings to define how flag, single argument
 and multiple arguments should parse respectively. This is the simplest and recommended way to use this library.
-See [below](###Arg) to learn more about `Arg`.
+See [below](#Arg) to learn more about `Arg`.
 
 ```zig
 const std = @import("std");
