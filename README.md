@@ -176,7 +176,7 @@ pub fn main() anyerror!void {
     var app_many_args = Arg.new("ARGS");
     app_many_args.minValue(1);
     app_many_args.maxValues(5);
-    // parse method will return error.IncompleteArgValues if provided values
+    // When set true parse method will return error.IncompleteArgValues if provided values
     // is less then maxValues
     app_many_args.allValuesRequired(true);
 
