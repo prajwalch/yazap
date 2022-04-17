@@ -238,7 +238,7 @@ pub fn main() anyerror!void {
 ```
 
 ## Alternate Parsers
-- [zig-clap](https://github.com/Hejsil/zig-clap) - Simple command line argument parsing library
-- [zig-parse-args](https://github.com/winksaville/zig-parse-args) - Parse command line arguments
-- [zig-args](https://github.com/MasterQ32/zig-args) - Simple-to-use argument parser with struct-based config
+- [Hejsil/zig-clap](https://github.com/Hejsil/zig-clap) - Simple command line argument parsing library
+- [winksaville/zig-parse-args](https://github.com/winksaville/zig-parse-args) - Parse command line arguments
+- [MasterQ32/zig-args](https://github.com/MasterQ32/zig-args) - Simple-to-use argument parser with struct-based config
 
