@@ -40,7 +40,7 @@ Before you follow below steps be sure to initialize your project as repo by runn
 
 ## Examples
 ### `Flag, Command.takesSingleValue and Command.takesNValues`
-These 3 are thin wrapper of `Arg` which handles necessary options and settings to define how flag, single argument
+These 3 are the thin wrapper of `Arg` which handles necessary options and settings to define how flag, single argument
 and multiple arguments should parse respectively. This is the simplest and recommended way to use this library.
 See [below](#Arg) to learn more about `Arg`.
 
@@ -124,10 +124,10 @@ pub fn main() anyerror!void {
         // logic here
     }
 
-    // valueOf recursively search for an argument but if app and subcommand has same argument name 
-    // like in this example app and subcmd2 has same ARG argument in that case it will return the value
-    // of app because it will tries to find in self.args then it will begin to search in self.subcommand
-    // if not found. Therefore to get the value subcmd2 ARG call subcommandMatches(cmd_name) to get args
+    // valueOf recursively search for an argument but if app and subcommand have same argument name 
+    // like in this example app and subcmd2 have same ARG argument in that case it will return the value
+    // of app ARG because it will tries to find in self.args then it will begin to search in self.subcommand
+    // if not found. Therefore to get the value of subcmd2 ARG call subcommandMatches(cmd_name) to get args
     // of cmd_name then you can call valueOf
 
     if (app_args.subcommandMatches("subcmd-2")) |subcmd2_args| {
@@ -152,7 +152,7 @@ pub fn main() anyerror!void {
 ```
 
 ### `Arg`
-`Arg` is a abstract representation of argument which has all the options and settings
+`Arg` is an abstract representation of argument which has all the options and settings
 to define valid argument and to tell parser how it should parse. Let's take a simple example
 to learn how you can use `Arg` to define argument for command and subcommand.
 
