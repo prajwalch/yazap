@@ -81,9 +81,6 @@ pub fn consumeArgValues(
     arg: *const Arg,
     argv_iterator: *ArgvIterator,
 ) Error!MatchedArg {
-    if (arg.min_values == 0)
-        return MatchedArg.initWithoutValue(arg.name);
-
     if (arg.min_values == 1 and arg.max_values == 1) {
         var provided_value = argv_iterator.nextValue() orelse {
             if (arg.settings.all_values_required)
