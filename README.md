@@ -61,7 +61,7 @@ pub fn main() anyerror!void {
 
     // app [FLAGS]
     try app.addArg(Flag.boolean("--bool-flag"));
-    try app.addrg(Flag.argOne("--arg-flag"));
+    try app.addArg(Flag.argOne("--arg-flag"));
 
     // app bool-subcmd
     try app.addSubcommand(Command.new(allocator, "bool-subcmd"));
