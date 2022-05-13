@@ -3,7 +3,7 @@ zig-arg is a [clap-rs](https://github.com/clap-rs/clap) inspired Command Line Ar
 
 This library is in active development so many of the features are yet to implement and bugs are expected to happen.
 
-## Features Roadmap
+## Features
 * [x] Long flag
     - `--bool`
     - `--arg 1, --arg 1 2 `
