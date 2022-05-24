@@ -16,6 +16,7 @@ fn initAppArgs(alloc: std.mem.Allocator) !Command {
 
     // app [-b, --bool-flag]
     try app.addArg(flag.boolean("bool-flag", 'b'));
+    try app.addArg(flag.boolean("bool-flag2", 'c'));
     // var bool_flag = Arg.new("bool-flag");
     // bool_flag.shortName('b');
     // bool_flag.setLongNameSameAsName();
@@ -106,7 +107,7 @@ test "command that takes value" {
 
 test "flags" {
     const argv: []const [:0]const u8 = &.{
-        "-b",
+        "-bc",
         "-1one",
         "--argn-flag=val1,val2,val3",
         "--option-flag",
@@ -120,6 +121,7 @@ test "flags" {
     defer matches.deinit();
 
     try testing.expect(matches.isPresent("bool-flag") == true);
+    try testing.expect(matches.isPresent("bool-flag2") == true);
     try testing.expectEqualStrings("one", matches.valueOf("arg-one-flag").?);
 
     const argn_values = matches.valuesOf("argn-flag").?;
