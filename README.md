@@ -3,7 +3,7 @@ zig-arg is a [clap-rs](https://github.com/clap-rs/clap) inspired Command Line Ar
 
 This library is in active development so many of the features are yet to implement and bugs are expected to happen.
 
-## Features Roadmap
+## Features
 * [x] Long flag
     - `--bool`
     - `--arg 1, --arg 1 2 `
@@ -61,7 +61,7 @@ pub fn main() anyerror!void {
 
     // app [FLAGS]
     try app.addArg(Flag.boolean("--bool-flag"));
-    try app.addrg(Flag.argOne("--arg-flag"));
+    try app.addArg(Flag.argOne("--arg-flag"));
 
     // app bool-subcmd
     try app.addSubcommand(Command.new(allocator, "bool-subcmd"));
