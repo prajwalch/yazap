@@ -4,10 +4,24 @@ zig-arg is a [clap-rs](https://github.com/clap-rs/clap) inspired Command Line Ar
 This library is in active development so many of the features are yet to implement and bugs are expected to happen.
 
 ## Features
+* [x] Short flags
+    - `-b`, `-1 value`, `-o <a | b | c>`
+
 * [x] Long flag
     - `--bool`
     - `--arg 1, --arg 1 2 `
-    - `--option [a, b, c]`
+    - `--option <a | b | c>`
+
+* [x] Support passing flag value using space `-f value`
+    no space `-fvalue` and using `=` (`-f=value`)
+
+* [x] Support chaining multiple short flags
+    - `-xy` where both `x` and `y` does not take value
+    - [ ] `-xzyvalue` 
+    - [ ] `-xyz value`
+    - [ ] `-xyz=value`
+
+* [ ] Support flag that can specified multiple times `-x 1 -x 2 -x 3`
 
 * [x] Subcommand
     - `app bool-cmd`
@@ -19,10 +33,6 @@ This library is in active development so many of the features are yet to impleme
 * [x] Nested subcommand
     - `app cmd1 cmd1.1`
 
-* [ ] Short flags
-* [ ] Support passing short flag value by `= (-f=value)`, space `(-f value)` and without space `(-fvalue)`
-* [ ] Support chaining multiple short flags `-xyz, -xzyvalue, -xyz value and -xyz=value`
-* [ ] Support flag that can specified multiple times `-x 1 -x 2 -x 3`
 
 ## Installation Guide
 Before you follow below steps be sure to initialize your project as repo by running `git init`
