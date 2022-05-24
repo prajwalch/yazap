@@ -1,100 +1,130 @@
 const std = @import("std");
 const Command = @import("Command.zig");
-const Flag = @import("Flag.zig");
+const flag = @import("flag.zig");
+// const Arg = @import("Arg.zig");
 const testing = std.testing;
 
 const allocator = std.heap.page_allocator;
 
-fn initFakeCliArgs(alloc: std.mem.Allocator) !Command {
-    var root_cmd = Command.new(alloc, "zig-arg");
+fn initAppArgs(alloc: std.mem.Allocator) !Command {
+    var app = Command.new(alloc, "app");
 
-    try root_cmd.addArg(Flag.boolean("--version"));
-    try root_cmd.addArg(Flag.argOne("--compile-only"));
-    try root_cmd.addArg(Flag.argN("--exclude-dir", 3));
-    try root_cmd.addSubcommand(Command.new(alloc, "help"));
+    // app <ARG-ONE>
+    try app.takesSingleValue("ARG-ONE");
+    // app <ARG-MANY...>
+    try app.takesNValues("ARG-MANY", 3);
 
-    var compile_cmd = Command.new(alloc, "compile");
-    try compile_cmd.addArg(Flag.option("--mode", &[_][]const u8{
-        "release",
-        "debug",
+    // app [-b, --bool-flag]
+    try app.addArg(flag.boolean("bool-flag", 'b'));
+    // var bool_flag = Arg.new("bool-flag");
+    // bool_flag.shortName('b');
+    // bool_flag.setLongNameSameAsName();
+    // try app.addArg(bool_flag);
+
+    // app [-1, --arg_one_flag <VALUE>]
+    try app.addArg(flag.argOne("arg-one-flag", '1'));
+    // var arg_one_flag = Arg.new("arg-one-flag");
+    // arg_one_flag.shortName('1');
+    // arg_one_flag.setLongNameSameAsName();
+    // arg_one_flag.takesValue(true);
+    // try app.addArg(arg_one_flag);
+
+    // app [-3, --argn-flag <VALUE...>
+    try app.addArg(flag.argN("argn-flag", '3', 3));
+    // var argn_flag = Arg.new("argn-flag");
+    // argn_flag.shortName('3');
+    // argn_flag.setLongNameSameAsName();
+    // argn_flag.maxValues(3);
+    // argn_flag.valuesDelimiter(",");
+    // try app.addArg(argn_flag);
+
+    // app [-o, --option-flag <opt1 | opt2 | opt3>]
+    try app.addArg(flag.option("option-flag", 'o', &[_][]const u8{
+        "opt1",
+        "opt2",
+        "opt3",
     }));
+    // var opt_flag = Arg.new("option-flag");
+    // opt_flag.shortName('o');
+    // opt_flag.setLongNameSameAsName();
+    // opt_flag.allowedValues(&[_][]const u8{
+    // "opt1",
+    // "opt2",
+    // "opt3",
+    // });
+    // try app.addArg(opt_flag);
 
-    try root_cmd.addSubcommand(compile_cmd);
-
-    var init_cmd = Command.new(alloc, "init");
-    try init_cmd.takesSingleValue("PROJECT_NAME");
-
-    try root_cmd.addSubcommand(init_cmd);
-    return root_cmd;
+    // app subcmd1
+    try app.addSubcommand(Command.new(alloc, "subcmd1"));
+    return app;
 }
 
 test "arg required error" {
     const argv: []const [:0]const u8 = &.{
-        "compile",
         "--mode",
         "debug",
     };
 
-    var root_cmd = try initFakeCliArgs(allocator);
-    root_cmd.argRequired(true);
-    defer root_cmd.deinit();
+    var app = try initAppArgs(allocator);
+    app.argRequired(true);
+    defer app.deinit();
 
-    try testing.expectError(error.MissingCommandArgument, root_cmd.parse(argv));
+    try testing.expectError(error.CommandArgumentNotProvided, app.parse(argv));
 }
 
 test "subcommand required error" {
     const argv: []const [:0]const u8 = &.{
-        "--version",
+        "",
     };
 
-    var root_cmd = try initFakeCliArgs(allocator);
-    root_cmd.subcommandRequired(true);
-    defer root_cmd.deinit();
+    var app = try initAppArgs(allocator);
+    app.subcommandRequired(true);
+    defer app.deinit();
 
-    try testing.expectError(error.MissingCommandSubCommand, root_cmd.parse(argv));
+    try testing.expectError(error.MissingCommandSubCommand, app.parse(argv));
 }
 
 test "command that takes value" {
     const argv: []const [:0]const u8 = &.{
-        "init",
-        "test_project",
+        "argone",
+        "argmany1",
+        "argmany2",
+        "argmany3",
     };
 
-    var root_cmd = try initFakeCliArgs(allocator);
-    defer root_cmd.deinit();
+    var app = try initAppArgs(allocator);
+    defer app.deinit();
 
-    var matches = try root_cmd.parse(argv);
-    try testing.expectEqualStrings("test_project", matches.valueOf("PROJECT_NAME").?);
+    var matches = try app.parse(argv);
+    try testing.expectEqualStrings("argone", matches.valueOf("ARG-ONE").?);
+
+    const many_values = matches.valuesOf("ARG-MANY").?;
+    try testing.expectEqualStrings("argmany1", many_values[0]);
+    try testing.expectEqualStrings("argmany2", many_values[1]);
+    try testing.expectEqualStrings("argmany3", many_values[2]);
 }
 
-test "full parsing" {
+test "flags" {
     const argv: []const [:0]const u8 = &.{
-        "--exclude-dir",
-        "dir1",
-        "dir2",
-        "dir3",
-        "compile",
-        "--mode",
-        "debug",
+        "-b",
+        "-1one",
+        "--argn-flag=val1,val2,val3",
+        "--option-flag",
+        "opt2",
     };
 
-    var root_cmd = try initFakeCliArgs(allocator);
-    defer root_cmd.deinit();
+    var app = try initAppArgs(allocator);
+    defer app.deinit();
 
-    root_cmd.subcommandRequired(true);
-    var matches = try root_cmd.parse(argv);
+    var matches = try app.parse(argv);
+    defer matches.deinit();
 
-    try testing.expectEqual(false, matches.isPresent("--version"));
-    try testing.expectEqual(true, matches.isPresent("exclude-dir"));
+    try testing.expect(matches.isPresent("bool-flag") == true);
+    try testing.expectEqualStrings("one", matches.valueOf("arg-one-flag").?);
 
-    if (matches.valuesOf("exclude-dir")) |dirs_name| {
-        try testing.expectEqualStrings("dir1", dirs_name[0]);
-        try testing.expectEqualStrings("dir2", dirs_name[1]);
-        try testing.expectEqualStrings("dir3", dirs_name[2]);
-    }
-
-    if (matches.subcommandMatches("compile")) |compile_cmd_matches| {
-        try testing.expectEqual(true, compile_cmd_matches.isPresent("mode"));
-        try testing.expectEqualStrings("debug", compile_cmd_matches.valueOf("mode").?);
-    }
+    const argn_values = matches.valuesOf("argn-flag").?;
+    try testing.expectEqualStrings("val1", argn_values[0]);
+    try testing.expectEqualStrings("val2", argn_values[1]);
+    try testing.expectEqualStrings("val3", argn_values[2]);
+    try testing.expectEqualStrings("opt2", matches.valueOf("option-flag").?);
 }
