@@ -17,7 +17,7 @@ This library is in active development so many of the features are yet to impleme
 
 * [x] Support chaining multiple short flags
     - `-xy` where both `x` and `y` does not take value
-    - [ ] `-xzyvalue` 
+    - [ ] `-xzyvalue`
     - [ ] `-xyz value`
     - [ ] `-xyz=value`
 
@@ -49,162 +49,161 @@ Before you follow below steps be sure to initialize your project as repo by runn
     ```
 
 ## Examples
-### `flag` 
+## flag
 The `flag` modules contains 4 methods `boolean`, `argOne`, `argN` and `option` which helps to define 4 kind of flag for you
 by taking care of all the necessary settings and values.
 Read below for more details on them.
 
-* `boolean`
-    ```zig
-    fn boolean(name: []const u8, short_name: ?u8) Arg { .. }
-    ```
-    Defines a bool flag with short name if given.
+### boolean
+```zig
+fn boolean(name: []const u8, short_name: ?u8) Arg
+```
+Defines a bool flag with short name if given.
 
-    <details>
-        <summary>Example</summary>
+<details>
+    <summary>Example</summary>
 
-    ```zig
-    const std = @import("std");
-    const zig_arg = @import("zig-arg");
+```zig
+const std = @import("std");
+const zig_arg = @import("zig-arg");
 
-    pub fn main() anyerror!void {
-        const argv = try std.process.argsAlloc(allocator);
-        defer std.process.argsFree(allocator, argv);
+pub fn main() anyerror!void {
+    const argv = try std.process.argsAlloc(allocator);
+    defer std.process.argsFree(allocator, argv);
 
-        var app = zig_arg.Command.new(allocator, "my app");
-        defer app.deinit();
+    var app = zig_arg.Command.new(allocator, "my app");
+    defer app.deinit();
 
-        try app.addArg(zig_arg.flag.boolean("version", 'v'));
-        try app.addArg(zig_arg.flag.boolean("help", 'h'));
+    try app.addArg(zig_arg.flag.boolean("version", 'v'));
+    try app.addArg(zig_arg.flag.boolean("help", 'h'));
 
-        var app_args = try app.parse(argv[1..] // skip exe path);
-        defer app_args.deinit();
+    var app_args = try app.parse(argv[1..] // skip exe path);
+    defer app_args.deinit();
 
-        if (app_args.isPresent("version")) {
-            std.log.info("v0.1.0", .{});
-        } else if (app_args.isPresent("help")) {
-            std.log.info("show help", .{});
-        }
-
+    if (app_args.isPresent("version")) {
+        std.log.info("v0.1.0", .{});
+    } else if (app_args.isPresent("help")) {
+        std.log.info("show help", .{});
     }
-    ```
-    </details>
 
-* `argOne`
-    ```zig
-    fn argOne(name: []const u8, short_name: ?u8) Arg { .. }
-    ```
-    Defines a flag that takes one value.
+}
+```
+</details>
 
-    <details>
-        <summary>Example</summary>
+### argOne
+```zig
+fn argOne(name: []const u8, short_name: ?u8) Arg
+```
+Defines a flag that takes one value.
 
-    ```zig
-    const std = @import("std");
-    const zig_arg = @import("zig-arg");
+<details>
+    <summary>Example</summary>
 
-    pub fn main() anyerror!void {
-        const argv = try std.process.argsAlloc(allocator);
-        defer std.process.argsFree(allocator, argv);
+```zig
+const std = @import("std");
+const zig_arg = @import("zig-arg");
 
-        var app = zig_arg.Command.new(allocator, "my app");
-        defer app.deinit();
+pub fn main() anyerror!void {
+    const argv = try std.process.argsAlloc(allocator);
+    defer std.process.argsFree(allocator, argv);
 
-        try app.addArg(zig_arg.flag.argOne("name", 'n'));
-        try app.addArg(zig_arg.flag.argOne("cast", 'c'));
+    var app = zig_arg.Command.new(allocator, "my app");
+    defer app.deinit();
 
-        var app_args = try app.parse(argv[1..] // skip exe path);
-        defer app_args.deinit();
+    try app.addArg(zig_arg.flag.argOne("name", 'n'));
+    try app.addArg(zig_arg.flag.argOne("cast", 'c'));
 
-        if (app_args.valueOf("name")) |n| {
-            std.log.info("name = {s}\n", .{n});
-        }
+    var app_args = try app.parse(argv[1..] // skip exe path);
+    defer app_args.deinit();
 
-        if (app_args.isPresent("cast")) {
-            std.log.info("cast = {s}\n", .{app_args.valueOf("cast").?});
-        }
-
+    if (app_args.valueOf("name")) |n| {
+        std.log.info("name = {s}\n", .{n});
     }
-    ```
-    </details>
 
-* `argN`
-    ```zig
-    fn argN(name: []const u8, short_name: ?u8, max_values: usize) Arg { .. }
-    ```
-    Defines a flag with max values to max_values and implicitly setting min values to 1
-    and values delimiter to `,` if max_values is greater then 1 which means user must have to
-    use `,` to seperate multiple values.
+    if (app_args.isPresent("cast")) {
+        std.log.info("cast = {s}\n", .{app_args.valueOf("cast").?});
+    }
+}
+```
+</details>
 
-    For ex:- `-f=v1,v2,v3`
+### argN
+```zig
+fn argN(name: []const u8, short_name: ?u8, max_values: usize) Arg
+```
+Defines a flag with max values to max_values and implicitly setting min values to 1
+and values delimiter to `,` if max_values is greater then 1 which means user must have to
+use `,` to seperate multiple values.
 
-    If you want to use custom delimiter you have to use `Arg` to manually define
-    flag with custom settings. [See here to learn how](#Arg) 
+For ex:- `-f=v1,v2,v3`
 
-    <details>
-        <summary>Example</summary>
+If you want to use custom delimiter you have to use `Arg` to manually define
+flag with custom settings. [See here to learn how](#Arg)
 
-    ```zig
-    const std = @import("std");
-    const zig_arg = @import("zig-arg");
+<details>
+    <summary>Example</summary>
 
-    pub fn main() anyerror!void {
-        const argv = try std.process.argsAlloc(allocator);
-        defer std.process.argsFree(allocator, argv);
+```zig
+const std = @import("std");
+const zig_arg = @import("zig-arg");
 
-        var app = zig_arg.Command.new(allocator, "my app");
-        defer app.deinit();
+pub fn main() anyerror!void {
+    const argv = try std.process.argsAlloc(allocator);
+    defer std.process.argsFree(allocator, argv);
 
-        try app.addArg(zig_arg.flag.argN("values", 'n', 3));
+    var app = zig_arg.Command.new(allocator, "my app");
+    defer app.deinit();
 
-        var app_args = try app.parse(argv[1..] // skip exe path);
-        defer app_args.deinit();
+    try app.addArg(zig_arg.flag.argN("values", 'n', 3));
 
-        if (app_args.valuesOf("values")) |vals| {
-            for (vals) |v| {
-                std.log.info("value={s}\n", .{v});
-            }
+    var app_args = try app.parse(argv[1..] // skip exe path);
+    defer app_args.deinit();
+
+    if (app_args.valuesOf("values")) |vals| {
+        for (vals) |v| {
+            std.log.info("value={s}\n", .{v});
         }
     }
-    ```
-    </details>
+}
+```
+</details>
 
-* `option`
-    ```zig
-    fn option(name: []const u8, short_name: ?u8, options: [][]const u8) Arg { .. }
-    ```
-    Defines a flag that takes single value with all possible values.
+### option
+```zig
+fn option(name: []const u8, short_name: ?u8, options: [][]const u8) Arg
+```
+Defines a flag that takes single value with all possible values.
 
-    <details>
-        <summary>Example</summary>
+<details>
+    <summary>Example</summary>
 
-     ```zig
-     const std = @import("std");
-     const zig_arg = @import("zig-arg");
+ ```zig
+ const std = @import("std");
+ const zig_arg = @import("zig-arg");
 
-     pub fn main() anyerror!void {
-         const argv = try std.process.argsAlloc(allocator);
-         defer std.process.argsFree(allocator, argv);
+ pub fn main() anyerror!void {
+     const argv = try std.process.argsAlloc(allocator);
+     defer std.process.argsFree(allocator, argv);
 
-         var app = zig_arg.Command.new(allocator, "my app");
-         defer app.deinit();
+     var app = zig_arg.Command.new(allocator, "my app");
+     defer app.deinit();
 
-         try app.addArg(zig_arg.flag.option("color", 'c', &[_][]const u8{
-             "on",
-             "off",
-         }));
+     try app.addArg(zig_arg.flag.option("color", 'c', &[_][]const u8{
+         "on",
+         "off",
+     }));
 
-         var app_args = try app.parse(argv[1..] // skip exe path);
-         defer app_args.deinit();
+     var app_args = try app.parse(argv[1..] // skip exe path);
+     defer app_args.deinit();
 
-         if (app_args.valueOf("color")) |state| {
-             std.log.info("color={s}", .{state});
-         }
+     if (app_args.valueOf("color")) |state| {
+         std.log.info("color={s}", .{state});
      }
-     ```
-    </details>
+ }
+ ```
+</details>
 
-### Making simple `ls` program
+### Making simple ls program
 ```zig
 const std = @import("std");
 const zig_arg = @import("zig-arg");
@@ -358,7 +357,7 @@ pub fn main() anyerror!void {
         // logic here
     }
 
-    // valueOf recursively search for an argument but if app and subcommand have same argument name 
+    // valueOf recursively search for an argument but if app and subcommand have same argument name
     // like in this example app and subcmd2 have same ARG argument in that case it will return the value
     // of app ARG because it will tries to find in self.args then it will begin to search in self.subcommand
     // if not found. Therefore to get the value of subcmd2 ARG call subcommandMatches(cmd_name) to get args
