@@ -63,31 +63,31 @@ Read below for more details on them.
     <details>
         <summary>Example</summary>
 
-        ```zig
-        const std = @import("std");
-        const zig_arg = @import("zig-arg");
+    ```zig
+    const std = @import("std");
+    const zig_arg = @import("zig-arg");
 
-        pub fn main() anyerror!void {
-            const argv = try std.process.argsAlloc(allocator);
-            defer std.process.argsFree(allocator, argv);
+    pub fn main() anyerror!void {
+        const argv = try std.process.argsAlloc(allocator);
+        defer std.process.argsFree(allocator, argv);
 
-            var app = zig_arg.Command.new(allocator, "my app");
-            defer app.deinit();
+        var app = zig_arg.Command.new(allocator, "my app");
+        defer app.deinit();
 
-            try app.addArg(zig_arg.flag.boolean("version", 'v'));
-            try app.addArg(zig_arg.flag.boolean("help", 'h'));
+        try app.addArg(zig_arg.flag.boolean("version", 'v'));
+        try app.addArg(zig_arg.flag.boolean("help", 'h'));
 
-            var app_args = try app.parse(argv[1..] // skip exe path);
-            defer app_args.deinit();
+        var app_args = try app.parse(argv[1..] // skip exe path);
+        defer app_args.deinit();
 
-            if (app_args.isPresent("version")) {
-                std.log.info("v0.1.0", .{});
-            } else if (app_args.isPresent("help")) {
-                std.log.info("show help", .{});
-            }
-
+        if (app_args.isPresent("version")) {
+            std.log.info("v0.1.0", .{});
+        } else if (app_args.isPresent("help")) {
+            std.log.info("show help", .{});
         }
-        ```
+
+    }
+    ```
     </details>
 
 * `argOne`
@@ -99,33 +99,33 @@ Read below for more details on them.
     <details>
         <summary>Example</summary>
 
-        ```zig
-        const std = @import("std");
-        const zig_arg = @import("zig-arg");
+    ```zig
+    const std = @import("std");
+    const zig_arg = @import("zig-arg");
 
-        pub fn main() anyerror!void {
-            const argv = try std.process.argsAlloc(allocator);
-            defer std.process.argsFree(allocator, argv);
+    pub fn main() anyerror!void {
+        const argv = try std.process.argsAlloc(allocator);
+        defer std.process.argsFree(allocator, argv);
 
-            var app = zig_arg.Command.new(allocator, "my app");
-            defer app.deinit();
+        var app = zig_arg.Command.new(allocator, "my app");
+        defer app.deinit();
 
-            try app.addArg(zig_arg.flag.argOne("name", 'n'));
-            try app.addArg(zig_arg.flag.argOne("cast", 'c'));
+        try app.addArg(zig_arg.flag.argOne("name", 'n'));
+        try app.addArg(zig_arg.flag.argOne("cast", 'c'));
 
-            var app_args = try app.parse(argv[1..] // skip exe path);
-            defer app_args.deinit();
+        var app_args = try app.parse(argv[1..] // skip exe path);
+        defer app_args.deinit();
 
-            if (app_args.valueOf("name")) |n| {
-                std.log.info("name = {s}\n", .{n});
-            }
-
-            if (app_args.isPresent("cast")) {
-                std.log.info("cast = {s}\n", .{app_args.valueOf("cast").?});
-            }
-
+        if (app_args.valueOf("name")) |n| {
+            std.log.info("name = {s}\n", .{n});
         }
-        ```
+
+        if (app_args.isPresent("cast")) {
+            std.log.info("cast = {s}\n", .{app_args.valueOf("cast").?});
+        }
+
+    }
+    ```
     </details>
 
 * `argN`
@@ -144,29 +144,29 @@ Read below for more details on them.
     <details>
         <summary>Example</summary>
 
-        ```zig
-        const std = @import("std");
-        const zig_arg = @import("zig-arg");
+    ```zig
+    const std = @import("std");
+    const zig_arg = @import("zig-arg");
 
-        pub fn main() anyerror!void {
-            const argv = try std.process.argsAlloc(allocator);
-            defer std.process.argsFree(allocator, argv);
+    pub fn main() anyerror!void {
+        const argv = try std.process.argsAlloc(allocator);
+        defer std.process.argsFree(allocator, argv);
 
-            var app = zig_arg.Command.new(allocator, "my app");
-            defer app.deinit();
+        var app = zig_arg.Command.new(allocator, "my app");
+        defer app.deinit();
 
-            try app.addArg(zig_arg.flag.argN("values", 'n', 3));
+        try app.addArg(zig_arg.flag.argN("values", 'n', 3));
 
-            var app_args = try app.parse(argv[1..] // skip exe path);
-            defer app_args.deinit();
+        var app_args = try app.parse(argv[1..] // skip exe path);
+        defer app_args.deinit();
 
-            if (app_args.valuesOf("values")) |vals| {
-                for (vals) |v| {
-                    std.log.info("value={s}\n", .{v});
-                }
+        if (app_args.valuesOf("values")) |vals| {
+            for (vals) |v| {
+                std.log.info("value={s}\n", .{v});
             }
         }
-        ```
+    }
+    ```
     </details>
 
 * `option`
@@ -178,105 +178,105 @@ Read below for more details on them.
     <details>
         <summary>Example</summary>
 
-        ```zig
-        const std = @import("std");
-        const zig_arg = @import("zig-arg");
+     ```zig
+     const std = @import("std");
+     const zig_arg = @import("zig-arg");
 
-        pub fn main() anyerror!void {
-            const argv = try std.process.argsAlloc(allocator);
-            defer std.process.argsFree(allocator, argv);
+     pub fn main() anyerror!void {
+         const argv = try std.process.argsAlloc(allocator);
+         defer std.process.argsFree(allocator, argv);
 
-            var app = zig_arg.Command.new(allocator, "my app");
-            defer app.deinit();
+         var app = zig_arg.Command.new(allocator, "my app");
+         defer app.deinit();
 
-            try app.addArg(zig_arg.flag.option("color", 'c', &[_][]const u8{
-                "on",
-                "off",
-            }));
+         try app.addArg(zig_arg.flag.option("color", 'c', &[_][]const u8{
+             "on",
+             "off",
+         }));
 
-            var app_args = try app.parse(argv[1..] // skip exe path);
-            defer app_args.deinit();
+         var app_args = try app.parse(argv[1..] // skip exe path);
+         defer app_args.deinit();
 
-            if (app_args.valueOf("color")) |state| {
-                std.log.info("color={s}", .{state});
-            }
-        }
-        ```
+         if (app_args.valueOf("color")) |state| {
+             std.log.info("color={s}", .{state});
+         }
+     }
+     ```
     </details>
 
 ### Making simple `ls` program
-    ```zig
-    const std = @import("std");
-    const zig_arg = @import("zig-arg");
+```zig
+const std = @import("std");
+const zig_arg = @import("zig-arg");
 
-    const log = std.log;
-    const Command = zig_arg.Command;
-    const flag = zig_arg.flag;
+const log = std.log;
+const Command = zig_arg.Command;
+const flag = zig_arg.flag;
 
-    pub fn main() anyerror!void {
-        const argv = try std.process.argsAlloc(allocator);
-        defer std.process.argsFree(allocator, argv);
+pub fn main() anyerror!void {
+    const argv = try std.process.argsAlloc(allocator);
+    defer std.process.argsFree(allocator, argv);
 
-        var ls = Command.new(allocator, "ls");
-        defer ls.deinit();
+    var ls = Command.new(allocator, "ls");
+    defer ls.deinit();
 
-        try ls.addArg(flag.boolean("all", 'a'));
-        try ls.addArg(flag.boolean("recursive", 'R'));
-        // For now short name can be null but not long name
-        // that's why one-line long name is used for -1 short name
-        try ls.addArg(flag.boolean("one-line", '1'));
-        try ls.addArg(flag.boolean("size", 's'));
-        try ls.addArg(flag.boolean("version", null));
-        try ls.addArg(flag.boolean("help", null));
+    try ls.addArg(flag.boolean("all", 'a'));
+    try ls.addArg(flag.boolean("recursive", 'R'));
+    // For now short name can be null but not long name
+    // that's why one-line long name is used for -1 short name
+    try ls.addArg(flag.boolean("one-line", '1'));
+    try ls.addArg(flag.boolean("size", 's'));
+    try ls.addArg(flag.boolean("version", null));
+    try ls.addArg(flag.boolean("help", null));
 
-        try ls.addArg(flag.argOne("ignore", 'I'));
-        try ls.addArg(flag.argOne("hide", null));
+    try ls.addArg(flag.argOne("ignore", 'I'));
+    try ls.addArg(flag.argOne("hide", null));
 
-        try ls.addArg(flag.option("color", 'C', &[_][]const u8{
-            "always",
-            "auto",
-            "never",
-        }));
+    try ls.addArg(flag.option("color", 'C', &[_][]const u8{
+        "always",
+        "auto",
+        "never",
+    }));
 
-        var ls_args = try ls.parse(argv[1..]);
-        defer ls_args.deinit();
+    var ls_args = try ls.parse(argv[1..]);
+    defer ls_args.deinit();
 
-        // It's upto you how you check for each args
-        // for now i am showing you in a straightforward way
+    // It's upto you how you check for each args
+    // for now i am showing you in a straightforward way
 
-        if (ls_args.isPresent("help")) {
-           log.info("show help", .{});
-           return;
-        }
-
-        if (ls_args.isPresent("version")) {
-            log.info("v0.1.0", .{});
-            return;
-        }
-
-        if (ls_args.isPresent("all")) {
-            log.info("show all");
-            return;
-        }
-
-        if (ls_args.isPresent("recursive")) {
-            log.info("show recursive", .{});
-            return;
-        }
-
-        if (ls_args.valueOf("ignore")) |pattern| {
-            log.info("ignore pattern = {s}", .{pattern});
-            return;
-        }
-
-        if (ls_args.isPresent("color")) {
-            const when = ls_args.valueOf("color").?;
-
-            log.info("color={s}", .{when});
-            return;
-        }
+    if (ls_args.isPresent("help")) {
+       log.info("show help", .{});
+       return;
     }
-    ```
+
+    if (ls_args.isPresent("version")) {
+        log.info("v0.1.0", .{});
+        return;
+    }
+
+    if (ls_args.isPresent("all")) {
+        log.info("show all");
+        return;
+    }
+
+    if (ls_args.isPresent("recursive")) {
+        log.info("show recursive", .{});
+        return;
+    }
+
+    if (ls_args.valueOf("ignore")) |pattern| {
+        log.info("ignore pattern = {s}", .{pattern});
+        return;
+    }
+
+    if (ls_args.isPresent("color")) {
+        const when = ls_args.valueOf("color").?;
+
+        log.info("color={s}", .{when});
+        return;
+    }
+}
+```
 
 ```zig
 const std = @import("std");
