@@ -77,7 +77,7 @@ pub fn main() anyerror!void {
     try app.addArg(zig_arg.flag.boolean("version", 'v'));
     try app.addArg(zig_arg.flag.boolean("help", 'h'));
 
-    var app_args = try app.parse(argv[1..] // skip exe path);
+    var app_args = try app.parse(argv[1..]);
     defer app_args.deinit();
 
     if (app_args.isPresent("version")) {
@@ -113,7 +113,7 @@ pub fn main() anyerror!void {
     try app.addArg(zig_arg.flag.argOne("name", 'n'));
     try app.addArg(zig_arg.flag.argOne("cast", 'c'));
 
-    var app_args = try app.parse(argv[1..] // skip exe path);
+    var app_args = try app.parse(argv[1..]);
     defer app_args.deinit();
 
     if (app_args.valueOf("name")) |n| {
@@ -156,7 +156,7 @@ pub fn main() anyerror!void {
 
     try app.addArg(zig_arg.flag.argN("values", 'n', 3));
 
-    var app_args = try app.parse(argv[1..] // skip exe path);
+    var app_args = try app.parse(argv[1..]);
     defer app_args.deinit();
 
     if (app_args.valuesOf("values")) |vals| {
@@ -193,7 +193,7 @@ Defines a flag that takes single value with all possible values.
          "off",
      }));
 
-     var app_args = try app.parse(argv[1..] // skip exe path);
+     var app_args = try app.parse(argv[1..]);
      defer app_args.deinit();
 
      if (app_args.valueOf("color")) |state| {
