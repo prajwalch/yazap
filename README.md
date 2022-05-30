@@ -68,16 +68,13 @@ const std = @import("std");
 const zig_arg = @import("zig-arg");
 
 pub fn main() anyerror!void {
-    const argv = try std.process.argsAlloc(allocator);
-    defer std.process.argsFree(allocator, argv);
-
     var app = zig_arg.Command.new(allocator, "my app");
     defer app.deinit();
 
     try app.addArg(zig_arg.flag.boolean("version", 'v'));
     try app.addArg(zig_arg.flag.boolean("help", 'h'));
 
-    var app_args = try app.parse(argv[1..]);
+    var app_args = try app.parseProcess();
     defer app_args.deinit();
 
     if (app_args.isPresent("version")) {
@@ -104,16 +101,13 @@ const std = @import("std");
 const zig_arg = @import("zig-arg");
 
 pub fn main() anyerror!void {
-    const argv = try std.process.argsAlloc(allocator);
-    defer std.process.argsFree(allocator, argv);
-
     var app = zig_arg.Command.new(allocator, "my app");
     defer app.deinit();
 
     try app.addArg(zig_arg.flag.argOne("name", 'n'));
     try app.addArg(zig_arg.flag.argOne("cast", 'c'));
 
-    var app_args = try app.parse(argv[1..]);
+    var app_args = try app.parseProcess();
     defer app_args.deinit();
 
     if (app_args.valueOf("name")) |n| {
@@ -148,15 +142,12 @@ const std = @import("std");
 const zig_arg = @import("zig-arg");
 
 pub fn main() anyerror!void {
-    const argv = try std.process.argsAlloc(allocator);
-    defer std.process.argsFree(allocator, argv);
-
     var app = zig_arg.Command.new(allocator, "my app");
     defer app.deinit();
 
     try app.addArg(zig_arg.flag.argN("values", 'n', 3));
 
-    var app_args = try app.parse(argv[1..]);
+    var app_args = try app.parseProcess();
     defer app_args.deinit();
 
     if (app_args.valuesOf("values")) |vals| {
@@ -182,9 +173,6 @@ Defines a flag that takes single value with all possible values.
  const zig_arg = @import("zig-arg");
 
  pub fn main() anyerror!void {
-     const argv = try std.process.argsAlloc(allocator);
-     defer std.process.argsFree(allocator, argv);
-
      var app = zig_arg.Command.new(allocator, "my app");
      defer app.deinit();
 
@@ -193,7 +181,7 @@ Defines a flag that takes single value with all possible values.
          "off",
      }));
 
-     var app_args = try app.parse(argv[1..]);
+     var app_args = try app.parseProcess();
      defer app_args.deinit();
 
      if (app_args.valueOf("color")) |state| {
@@ -213,9 +201,6 @@ const Command = zig_arg.Command;
 const flag = zig_arg.flag;
 
 pub fn main() anyerror!void {
-    const argv = try std.process.argsAlloc(allocator);
-    defer std.process.argsFree(allocator, argv);
-
     var ls = Command.new(allocator, "ls");
     defer ls.deinit();
 
@@ -237,7 +222,7 @@ pub fn main() anyerror!void {
         "never",
     }));
 
-    var ls_args = try ls.parse(argv[1..]);
+    var ls_args = try ls.parseProcess();
     defer ls_args.deinit();
 
     // It's upto you how you check for each args
