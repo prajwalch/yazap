@@ -70,7 +70,7 @@ test "arg required error" {
     app.argRequired(true);
     defer app.deinit();
 
-    try testing.expectError(error.CommandArgumentNotProvided, app.parse(argv));
+    try testing.expectError(error.CommandArgumentNotProvided, app.parseFrom(argv));
 }
 
 test "subcommand required error" {
@@ -82,7 +82,7 @@ test "subcommand required error" {
     app.subcommandRequired(true);
     defer app.deinit();
 
-    try testing.expectError(error.MissingCommandSubCommand, app.parse(argv));
+    try testing.expectError(error.MissingCommandSubCommand, app.parseFrom(argv));
 }
 
 test "command that takes value" {
@@ -96,7 +96,7 @@ test "command that takes value" {
     var app = try initAppArgs(allocator);
     defer app.deinit();
 
-    var matches = try app.parse(argv);
+    var matches = try app.parseFrom(argv);
     try testing.expectEqualStrings("argone", matches.valueOf("ARG-ONE").?);
 
     const many_values = matches.valuesOf("ARG-MANY").?;
@@ -117,7 +117,7 @@ test "flags" {
     var app = try initAppArgs(allocator);
     defer app.deinit();
 
-    var matches = try app.parse(argv);
+    var matches = try app.parseFrom(argv);
     defer matches.deinit();
 
     try testing.expect(matches.isPresent("bool-flag") == true);

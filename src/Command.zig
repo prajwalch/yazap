@@ -86,6 +86,18 @@ pub fn subcommandRequired(self: *Command, boolean: bool) void {
     self.setting.subcommand_required = boolean;
 }
 
-pub fn parse(self: *Command, argv: []const [:0]const u8) parser.Error!ArgMatches {
+pub fn parseProcess(self: *Command) parser.Error!ArgMatches {
+    const process_args = try std.process.argsAlloc(self.allocator);
+    defer std.process.argFree(self.allocator, process_args);
+    errdefer std.process.argFree(self.allocator, process_args);
+
+    if (process_args.len > 1) {
+        return self.parseFrom(process_args[1..]);
+    } else {
+        return self.parseFrom(&[_][:0]const u8{});
+    }
+}
+
+pub fn parseFrom(self: *Command, argv: []const [:0]const u8) parser.Error!ArgMatches {
     return parser.parse(self.allocator, argv, self);
 }
