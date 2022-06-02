@@ -49,6 +49,186 @@ Before you follow below steps be sure to initialize your project as repo by runn
     ```
 
 ## Examples
+## Command
+The `Command` module represents your app therefore to define what args your app will take
+initilize it with `Command.new(allocator, "your app name")` then use the provided  methods
+to define arg, subcommand and flags.
+
+### takesSingleValue
+```zig
+fn takesSingleValue(self: *Command, arg_name: []const u8) !void
+```
+Creates a new [Arg](#Arg) with given name and specifies that the command will takes a single value.
+
+You can also use [addArg](#addArg) to manually add [Arg](#Arg) with custom options.
+
+<details>
+    <summary>Example</summary>
+
+```zig
+var app = Command.new(allocator, "app");
+defer app.deinit();
+
+try app.takesValue("ARG");
+```
+</details>
+
+### takesNValues
+```zig
+fn takesNValues(self: *Command, arg_name: []const u8, max_values: usize) !void
+```
+Creates a new [Arg](#Arg) with given name and specifies that the command will takes `max_values`.
+
+You can also use [addArg](#addArg) to manually add [Arg](#Arg) with custom options.
+
+<details>
+    <summary>Example</summary>
+
+```zig
+var app = Command.new(allocator, "app");
+defer app.deinit();
+
+try app.takesNValues("ARGS", 2);
+```
+</details>
+
+### addArg
+```zig
+fn addArg(self: *Command, new_arg: Arg) !void
+```
+Appends a `new_arg` in the list of valid arguments.
+
+<details>
+    <summary>Example</summary>
+
+```zig
+var app = Command.new(allocator, "app");
+defer app.deinit();
+
+// below code is equivalent to try app.takesSingleValue("ARG");
+var arg = Arg.new("ARG");
+arg.takesValue(true);
+try app.addArg(arg);
+
+// below code is equivalent to try app.takesNValues("ARGS", 2);
+var args = Arg.new("ARGS");
+arg.maxValues(2);
+arg.valuesDelimiter(",");
+try app.addArg(args);
+```
+</details>
+
+### addSubcommand
+```zig
+fn addSubcommand(self: *Command, new_subcommand: Command) !void
+```
+Appends a `new_subcommand` to the list of valid subcommands.
+
+Subcommand can also have its own arg, flags and subcommand too.
+
+<details>
+    <summary>Example</summary>
+
+```zig
+var app = Command.new(allocator, "app");
+defer app.deinit();
+
+var subcmd = Command.new(allocator, "subcmd");
+// Add its arguments
+// subcmd.deinit() call is not needed here because app.deinit()
+// will handle it
+
+try app.addSubcommand(subcmd);
+```
+</details>
+
+### argRequired
+```zig
+fn argRequired(self: *Command, b: boolean) void
+```
+Specifics that the command's argument is necessary.
+
+<details>
+    <summary>Example</summary>
+
+```zig
+var app = Command.new(allocator, "app");
+defer app.deinit();
+
+try app.takesSingleValue("ARG");
+app.argRequired(true);
+```
+</details>
+
+### subcommandRequired
+```zig
+fn subcommandRequired(self: *Command, b: boolean) void
+```
+Specifics that the command's subcommand is necessary to provide.
+
+<details>
+    <summary>Example</summary>
+
+```zig
+var app = Command.new(allocator, "app");
+defer app.deinit();
+
+var subcmd = Command.new("subcmd");
+// Add its arguments
+
+try app.addSubcommand(subcmd);
+app.subcommandRequired(true);
+```
+</details>
+
+### parseProcess
+```zig
+fn parseProcess(self: *Command) parser.Error!ArgMatches
+```
+Parse process args. Internally it calls to `std.process.argsAlloc` to obtain args.
+
+<details>
+    <summary>Example</summary>
+
+```zig
+var app = Command.new(allocator, "app");
+defer app.deinit();
+
+try app.takesSingleValue("ARG");
+try app.takesNValues("ARGS", 3);
+// Add more args
+
+// Once you are done adding args
+var app_args = try app.parseProcess();
+defer app_args.deinit();
+
+// logics starts here
+```
+</details>
+
+### parseFrom
+```zig
+fn parseFrom(self: *Command, argv: []const [:0]const u8) parser.Error!ArgMatches
+```
+Parse args from given `argv`. Useful to use it on test.
+
+<details>
+    <summary>Example</summary>
+
+```zig
+var cmd = Command.new(allocator, "app");
+defer cmd.deinit();
+
+// add args
+
+var app_args = try cmd.parseFrom(&[_][:0]const u8 {
+    "--flag",
+    // and more
+});
+defer app_args.deinit();
+```
+</details>
+
 ## flag
 The `flag` modules contains 4 methods `boolean`, `argOne`, `argN` and `option` which helps to define 4 kind of flag for you
 by taking care of all the necessary settings and values.
