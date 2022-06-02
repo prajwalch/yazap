@@ -19,6 +19,7 @@ pub const ArgMatches = struct {
 
     pub fn deinit(self: *ArgMatches) void {
         var args_value_iter = self.args.valueIterator();
+
         while (args_value_iter.next()) |value| {
             switch (value.*) {
                 .many => |v| v.deinit(),
@@ -46,9 +47,7 @@ pub const ArgMatches = struct {
     pub fn isPresent(self: *const ArgMatches, name_to_lookup: []const u8) bool {
         if (self.args.contains(name_to_lookup)) {
             return true;
-        }
-
-        if (self.subcommand) |subcmd| {
+        } else if (self.subcommand) |subcmd| {
             if (std.mem.eql(u8, subcmd.name, name_to_lookup))
                 return true;
         }
@@ -57,18 +56,12 @@ pub const ArgMatches = struct {
     }
 
     pub fn valueOf(self: *const ArgMatches, arg_name: []const u8) ?[]const u8 {
-        const arg_value = self.args.get(arg_name);
-
-        if (arg_value) |value| {
+        if (self.args.get(arg_name)) |value| {
             switch (value) {
-                .single => |val| {
-                    return val;
-                },
+                .single => |val| return val,
                 else => return null,
             }
-        }
-
-        if (self.subcommand) |subcmd| {
+        } else if (self.subcommand) |subcmd| {
             if (subcmd.matches) |matches| {
                 return matches.valueOf(arg_name);
             }
@@ -78,13 +71,13 @@ pub const ArgMatches = struct {
     }
 
     pub fn valuesOf(self: *ArgMatches, name_to_lookup: []const u8) ?[][]const u8 {
-        var arg_value = self.args.get(name_to_lookup) orelse return null;
-
-        switch (arg_value) {
-            .many => |*values| {
-                return values.toOwnedSlice();
-            },
-            else => return null,
+        if (self.args.get(name_to_lookup)) |value| {
+            switch (value) {
+                .many => |*v| return v.items[0..],
+                else => return null,
+            }
+        } else {
+            return null;
         }
     }
 
