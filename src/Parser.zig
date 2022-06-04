@@ -1,3 +1,5 @@
+const Parser = @This();
+
 const std = @import("std");
 const arg_matches = @import("arg_matches.zig");
 const Command = @import("Command.zig");
@@ -27,19 +29,30 @@ const InternalError = error{
     AttachedValueNotConsumed,
 } || Error;
 
-pub fn parse(
+allocator: Allocator,
+argv_iter: ArgvIterator,
+cmd: *const Command,
+
+pub fn init(
     allocator: Allocator,
     argv: []const [:0]const u8,
-    cmd: *const Command,
-) Error!ArgMatches {
-    var argv_iter = ArgvIterator.init(argv);
-    var matches = ArgMatches.init(allocator);
+    command: *const Command,
+) Parser {
+    return Parser{
+        .allocator = allocator,
+        .argv_iter = ArgvIterator.init(argv),
+        .cmd = command,
+    };
+}
+
+pub fn parse(self: *Parser) Error!ArgMatches {
+    var matches = ArgMatches.init(self.allocator);
     errdefer matches.deinit();
 
-    if (cmd.setting.takes_value) {
-        for (cmd.args.items) |arg| {
+    if (self.cmd.setting.takes_value) {
+        for (self.cmd.args.items) |arg| {
             if ((arg.short_name == null) and (arg.long_name == null)) {
-                var parsed_arg = consumeArgValue(allocator, &arg, null, &argv_iter) catch |err| switch (err) {
+                var parsed_arg = self.consumeArgValue(&arg, null) catch |err| switch (err) {
                     InternalError.AttachedValueNotConsumed => unreachable,
                     InternalError.ArgValueNotProvided => break,
                     else => |e| return e,
@@ -48,43 +61,37 @@ pub fn parse(
             }
         }
 
-        if (cmd.setting.arg_required and (matches.args.count() == 0)) {
+        if (self.cmd.setting.arg_required and (matches.args.count() == 0)) {
             return Error.CommandArgumentNotProvided;
         }
     }
 
-    while (argv_iter.next()) |*raw_arg| {
+    while (self.argv_iter.next()) |*raw_arg| {
         if (raw_arg.isShort() or raw_arg.isLong()) {
-            if (cmd.args.items.len == 0)
+            if (self.cmd.args.items.len == 0)
                 return Error.UnknownArg;
 
-            try parseArg(allocator, cmd.args.items, raw_arg, &argv_iter, &matches);
+            try self.parseArg(raw_arg, &matches);
         } else {
-            if (cmd.subcommands.items.len == 0)
+            if (self.cmd.subcommands.items.len == 0)
                 return Error.UnknownCommand;
 
-            const subcmd = try parseSubCommand(allocator, cmd.subcommands.items, raw_arg.name, &argv_iter);
+            const subcmd = try self.parseSubCommand(raw_arg.name);
             try matches.setSubcommand(subcmd);
         }
     }
 
-    if (cmd.setting.subcommand_required and matches.subcommand == null) {
+    if (self.cmd.setting.subcommand_required and matches.subcommand == null) {
         return Error.MissingCommandSubCommand;
     }
 
     return matches;
 }
 
-pub fn parseArg(
-    allocator: Allocator,
-    valid_args: []const Arg,
-    raw_arg: *ArgvIterator.RawArg,
-    argv_iter: *ArgvIterator,
-    matches: *ArgMatches,
-) Error!void {
+pub fn parseArg(self: *Parser, raw_arg: *ArgvIterator.RawArg, matches: *ArgMatches) Error!void {
     if (raw_arg.isShort()) {
         if (raw_arg.toShort()) |*short_arg| {
-            const parsed_args = try parseShortArg(allocator, valid_args, short_arg, argv_iter);
+            const parsed_args = try self.parseShortArg(short_arg);
 
             for (parsed_args) |parsed_arg| {
                 try matches.putMatchedArg(parsed_arg);
@@ -92,23 +99,18 @@ pub fn parseArg(
         }
     } else if (raw_arg.isLong()) {
         if (raw_arg.toLong()) |*long_arg| {
-            const parsed_arg = try parseLongArg(allocator, valid_args, long_arg, argv_iter);
+            const parsed_arg = try self.parseLongArg(long_arg);
             try matches.putMatchedArg(parsed_arg);
         }
     }
 }
 
-fn parseShortArg(
-    allocator: Allocator,
-    valid_args: []const Arg,
-    short_args: *ArgvIterator.ShortFlags,
-    argv_iter: *ArgvIterator,
-) Error![]const MatchedArg {
-    var parsed_args = std.ArrayList(MatchedArg).init(allocator);
+fn parseShortArg(self: *Parser, short_args: *ArgvIterator.ShortFlags) Error![]const MatchedArg {
+    var parsed_args = std.ArrayList(MatchedArg).init(self.allocator);
     errdefer parsed_args.deinit();
 
     while (short_args.nextFlag()) |short_flag| {
-        if (findArgByShortName(valid_args, short_flag)) |arg| {
+        if (findArgByShortName(self.cmd.args.items, short_flag)) |arg| {
             if (!arg.settings.takes_value) {
                 if (short_args.fixed_value) |val| {
                     if (val.len >= 1) {
@@ -122,7 +124,7 @@ fn parseShortArg(
             }
 
             const value = short_args.nextValue();
-            const parsed_arg = consumeArgValue(allocator, arg, value, argv_iter) catch |err| switch (err) {
+            const parsed_arg = self.consumeArgValue(arg, value) catch |err| switch (err) {
                 InternalError.AttachedValueNotConsumed => {
                     // If attached value is not consumed, we may have more flags to parse
                     short_args.rollbackValue();
@@ -148,13 +150,8 @@ fn findArgByShortName(valid_args: []const Arg, short_name: u8) ?*const Arg {
     return null;
 }
 
-fn parseLongArg(
-    allocator: Allocator,
-    valid_args: []const Arg,
-    long_arg: *ArgvIterator.LongFlag,
-    argv_iter: *ArgvIterator,
-) Error!MatchedArg {
-    if (findArgByLongName(valid_args, long_arg.name)) |arg| {
+fn parseLongArg(self: *Parser, long_arg: *ArgvIterator.LongFlag) Error!MatchedArg {
+    if (findArgByLongName(self.cmd.args.items, long_arg.name)) |arg| {
         if (!arg.settings.takes_value) {
             if (long_arg.value != null) {
                 return Error.UnneededAttachedValue;
@@ -163,7 +160,7 @@ fn parseLongArg(
             }
         }
 
-        const parsed_arg = consumeArgValue(allocator, arg, long_arg.value, argv_iter) catch |err| switch (err) {
+        const parsed_arg = self.consumeArgValue(arg, long_arg.value) catch |err| switch (err) {
             InternalError.AttachedValueNotConsumed => {
                 return MatchedArg.initWithoutValue(arg.name);
             },
@@ -186,10 +183,9 @@ fn findArgByLongName(valid_args: []const Arg, long_name: []const u8) ?*const Arg
 }
 
 pub fn consumeArgValue(
-    allocator: Allocator,
+    self: *Parser,
     arg: *const Arg,
     attached_value: ?[]const u8,
-    argv_iter: *ArgvIterator,
 ) InternalError!MatchedArg {
     if (arg.min_values) |min_values| {
         if (min_values == 0) {
@@ -202,23 +198,22 @@ pub fn consumeArgValue(
     }
 
     if (attached_value) |val| {
-        return processValue(allocator, arg, val, true, null);
+        return self.processValue(arg, val, true);
     } else {
-        const value = argv_iter.nextValue() orelse return Error.ArgValueNotProvided;
-        return processValue(allocator, arg, value, false, argv_iter);
+        const value = self.argv_iter.nextValue() orelse return Error.ArgValueNotProvided;
+        return self.processValue(arg, value, false);
     }
 }
 
 pub fn processValue(
-    allocator: Allocator,
+    self: *Parser,
     arg: *const Arg,
     value: []const u8,
     is_attached_value: bool,
-    argv_iter: ?*ArgvIterator,
 ) Error!MatchedArg {
     if (arg.values_delimiter) |delimiter| {
         var values_iter = mem.split(u8, value, delimiter);
-        var values = std.ArrayList([]const u8).init(allocator);
+        var values = std.ArrayList([]const u8).init(self.allocator);
         errdefer values.deinit();
 
         while (values_iter.next()) |val| {
@@ -259,14 +254,14 @@ pub fn processValue(
             return MatchedArg.initWithSingleValue(arg.name, value);
         } else {
             var index: usize = 1;
-            var values = std.ArrayList([]const u8).init(allocator);
+            var values = std.ArrayList([]const u8).init(self.allocator);
             errdefer values.deinit();
 
             try values.append(value);
 
             // consume each value using ArgvIterator
             while (index <= num_remaining_values) : (index += 1) {
-                const _value = argv_iter.?.nextValue() orelse break;
+                const _value = self.argv_iter.nextValue() orelse break;
 
                 if ((_value.len == 0) and !(arg.settings.allow_empty_value))
                     return Error.EmptyArgValueNotAllowed;
@@ -282,20 +277,19 @@ pub fn processValue(
 }
 
 pub fn parseSubCommand(
-    allocator: Allocator,
-    valid_subcmds: []const Command,
+    self: *Parser,
     provided_subcmd: []const u8,
-    argv_iterator: *ArgvIterator,
 ) Error!arg_matches.SubCommand {
-    for (valid_subcmds) |valid_subcmd| {
+    for (self.cmd.subcommands.items) |valid_subcmd| {
         if (mem.eql(u8, valid_subcmd.name, provided_subcmd)) {
             // zig fmt: off
             if (valid_subcmd.setting.takes_value
                 or valid_subcmd.args.items.len >= 1
                 or valid_subcmd.subcommands.items.len >= 1) {
                 // zig fmt: on
-                const subcmd_argv = argv_iterator.rest() orelse return Error.CommandArgumentNotProvided;
-                const subcmd_argmatches = try parse(allocator, subcmd_argv, &valid_subcmd);
+                const subcmd_argv = self.argv_iter.rest() orelse return Error.CommandArgumentNotProvided;
+                var parser = Parser.init(self.allocator, subcmd_argv, &valid_subcmd);
+                const subcmd_argmatches = try parser.parse();
 
                 return arg_matches.SubCommand.initWithArg(valid_subcmd.name, subcmd_argmatches);
             }
