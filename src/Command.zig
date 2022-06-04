@@ -1,7 +1,7 @@
 const Command = @This();
 
 const std = @import("std");
-const parser = @import("parser.zig");
+const Parser = @import("Parser.zig");
 const Arg = @import("Arg.zig");
 const ArgMatches = @import("arg_matches.zig").ArgMatches;
 
@@ -86,7 +86,7 @@ pub fn subcommandRequired(self: *Command, boolean: bool) void {
     self.setting.subcommand_required = boolean;
 }
 
-pub fn parseProcess(self: *Command) parser.Error!ArgMatches {
+pub fn parseProcess(self: *Command) Parser.Error!ArgMatches {
     const process_args = try std.process.argsAlloc(self.allocator);
     defer std.process.argsFree(self.allocator, process_args);
     errdefer std.process.argsFree(self.allocator, process_args);
@@ -98,6 +98,7 @@ pub fn parseProcess(self: *Command) parser.Error!ArgMatches {
     }
 }
 
-pub fn parseFrom(self: *Command, argv: []const [:0]const u8) parser.Error!ArgMatches {
-    return parser.parse(self.allocator, argv, self);
+pub fn parseFrom(self: *Command, argv: []const [:0]const u8) Parser.Error!ArgMatches {
+    var parser = Parser.init(self.allocator, argv, self);
+    return parser.parse();
 }
