@@ -23,11 +23,17 @@ const Setting = struct {
     }
 };
 
+pub const Error = error{
+    InvalidCmdLine,
+    Overflow,
+} || Parser.Error;
+
 allocator: Allocator,
 name: []const u8,
 about: ?[]const u8,
 args: ArrayList(Arg),
 subcommands: ArrayList(Command),
+process_args: ?[]const [:0]u8,
 setting: Setting,
 
 pub fn new(allocator: Allocator, name: []const u8) Command {
@@ -37,6 +43,7 @@ pub fn new(allocator: Allocator, name: []const u8) Command {
         .about = null,
         .args = ArrayList(Arg).init(allocator),
         .subcommands = ArrayList(Command).init(allocator),
+        .process_args = null,
         .setting = Setting.initDefault(),
     };
 }
@@ -54,6 +61,10 @@ pub fn deinit(self: *Command) void {
         subcommand.deinit();
     }
     self.subcommands.deinit();
+
+    if (self.process_args) |args| {
+        std.process.argsFree(self.allocator, args);
+    }
 }
 
 pub fn addArg(self: *Command, new_arg: Arg) !void {
@@ -86,16 +97,9 @@ pub fn subcommandRequired(self: *Command, boolean: bool) void {
     self.setting.subcommand_required = boolean;
 }
 
-pub fn parseProcess(self: *Command) Parser.Error!ArgMatches {
-    const process_args = try std.process.argsAlloc(self.allocator);
-    defer std.process.argsFree(self.allocator, process_args);
-    errdefer std.process.argsFree(self.allocator, process_args);
-
-    if (process_args.len > 1) {
-        return self.parseFrom(process_args[1..]);
-    } else {
-        return self.parseFrom(&[_][:0]const u8{});
-    }
+pub fn parseProcess(self: *Command) Error!ArgMatches {
+    self.process_args = try std.process.argsAlloc(self.allocator);
+    return self.parseFrom(self.process_args.?[1..]);
 }
 
 pub fn parseFrom(self: *Command, argv: []const [:0]const u8) Parser.Error!ArgMatches {
