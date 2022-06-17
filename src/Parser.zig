@@ -104,7 +104,7 @@ fn parseShortArg(self: *Parser, token: *Token) Error![]const MatchedArg {
     errdefer parsed_args.deinit();
 
     while (short_flag.next()) |flag| {
-        const arg = findArgByShortName(self.cmd.args.items, flag) orelse {
+        const arg = self.cmd.findArgByShortName(flag) orelse {
             return Error.UnknownFlag;
         };
 
@@ -136,18 +136,9 @@ fn parseShortArg(self: *Parser, token: *Token) Error![]const MatchedArg {
     return parsed_args.toOwnedSlice();
 }
 
-fn findArgByShortName(valid_args: []const Arg, short_name: u8) ?*const Arg {
-    for (valid_args) |*valid_arg| {
-        if (valid_arg.short_name) |valid_short_name| {
-            if (valid_short_name == short_name) return valid_arg;
-        }
-    }
-    return null;
-}
-
 fn parseLongArg(self: *Parser, token: *Token) Error!MatchedArg {
     const flag_tuple = flagTokenToFlagTuple(token);
-    const arg = findArgByLongName(self.cmd.args.items, flag_tuple.@"0") orelse {
+    const arg = self.cmd.findArgByLongName(flag_tuple.@"0") orelse {
         return Error.UnknownFlag;
     };
 
@@ -189,16 +180,6 @@ fn flagTokenToFlagTuple(token: *Token) FlagTuple {
 
         else => unreachable,
     };
-}
-
-fn findArgByLongName(valid_args: []const Arg, long_name: []const u8) ?*const Arg {
-    for (valid_args) |*valid_arg| {
-        if (valid_arg.long_name) |valid_long_name| {
-            if (mem.eql(u8, valid_long_name, long_name))
-                return valid_arg;
-        }
-    }
-    return null;
 }
 
 pub fn consumeArgValue(

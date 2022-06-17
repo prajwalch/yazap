@@ -97,6 +97,24 @@ pub fn subcommandRequired(self: *Command, boolean: bool) void {
     self.setting.subcommand_required = boolean;
 }
 
+pub fn findArgByShortName(self: *const Command, short_name: u8) ?*const Arg {
+    for (self.args.items) |*arg| {
+        if (arg.short_name) |s| {
+            if (s == short_name) return arg;
+        }
+    }
+    return null;
+}
+
+pub fn findArgByLongName(self: *const Command, long_name: []const u8) ?*const Arg {
+    for (self.args.items) |*arg| {
+        if (arg.long_name) |l| {
+            if (mem.eql(u8, l, long_name)) return arg;
+        }
+    }
+    return null;
+}
+
 pub fn parseProcess(self: *Command) Error!ArgMatches {
     self.process_args = try std.process.argsAlloc(self.allocator);
     return self.parseFrom(self.process_args.?[1..]);
