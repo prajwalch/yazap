@@ -17,9 +17,12 @@ This library is in active development so many of the features are yet to impleme
 
 * [x] Support chaining multiple short flags
     - `-xy` where both `x` and `y` does not take value
-    - [ ] `-xzyvalue`
-    - [ ] `-xyz value`
-    - [ ] `-xyz=value`
+    - `-xyz=value`
+
+    Note: Currently if you provided a value for chained flags using space (`-xyz arg`)
+    where all of them takes value it will be not parse as you expect. Which means it will
+    not take `arg` as a value for `xyz` flags instead it will take `yz` as value for `x`
+    even if you pass them as a flags and the `arg` will be parsed a argument or subcommand.
 
 * [ ] Support flag that can specified multiple times `-x 1 -x 2 -x 3`
 
