@@ -27,10 +27,6 @@ pub const Error = error{
     EmptyArgValueNotAllowed,
 } || Allocator.Error;
 
-const InternalError = error{
-    AttachedValueNotConsumed,
-} || Error;
-
 allocator: Allocator,
 tokenizer: Tokenizer,
 cmd: *const Command,
