@@ -55,8 +55,7 @@ pub fn parse(self: *Parser) Error!ArgMatches {
         for (self.cmd.args.items) |arg| {
             if ((arg.short_name == null) and (arg.long_name == null)) {
                 var parsed_arg = self.consumeArgValue(&arg, null) catch |err| switch (err) {
-                    InternalError.AttachedValueNotConsumed => unreachable,
-                    InternalError.ArgValueNotProvided => break,
+                    Error.ArgValueNotProvided => break,
                     else => |e| return e,
                 };
                 try matches.putMatchedArg(parsed_arg);
@@ -210,17 +209,7 @@ pub fn consumeArgValue(
     self: *Parser,
     arg: *const Arg,
     attached_value: ?[]const u8,
-) InternalError!MatchedArg {
-    if (arg.min_values) |min_values| {
-        if (min_values == 0) {
-            if (attached_value != null) {
-                return InternalError.AttachedValueNotConsumed;
-            } else if (arg.settings.allow_empty_value) {
-                return MatchedArg.initWithSingleValue(arg.name, " ");
-            }
-        }
-    }
-
+) Error!MatchedArg {
     if (attached_value) |val| {
         return self.processValue(arg, val, true);
     } else {

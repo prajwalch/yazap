@@ -50,8 +50,10 @@ pub fn setLongNameSameAsName(self: *Arg) void {
 }
 
 pub fn minValues(self: *Arg, num: usize) void {
-    self.min_values = num;
-    self.takesValue(true);
+    if (num >= 1) {
+        self.min_values = num;
+        self.takesValue(true);
+    }
 }
 
 pub fn maxValues(self: *Arg, num: usize) void {
