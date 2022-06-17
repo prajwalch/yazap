@@ -2,14 +2,16 @@ const Parser = @This();
 
 const std = @import("std");
 const arg_matches = @import("arg_matches.zig");
+const tokenizer = @import("tokenizer.zig");
 const Command = @import("Command.zig");
 const Arg = @import("Arg.zig");
-const ArgvIterator = @import("ArgvIterator.zig");
 const MatchedArg = @import("MatchedArg.zig");
 
 const mem = std.mem;
 const Allocator = std.mem.Allocator;
 const ArgMatches = arg_matches.ArgMatches;
+const Token = tokenizer.Token;
+const Tokenizer = tokenizer.Tokenizer;
 
 // TODO: Clean up errors
 pub const Error = error{
@@ -30,7 +32,7 @@ const InternalError = error{
 } || Error;
 
 allocator: Allocator,
-argv_iter: ArgvIterator,
+tokenizer: Tokenizer,
 cmd: *const Command,
 
 pub fn init(
@@ -40,7 +42,7 @@ pub fn init(
 ) Parser {
     return Parser{
         .allocator = allocator,
-        .argv_iter = ArgvIterator.init(argv),
+        .tokenizer = Tokenizer.init(argv),
         .cmd = command,
     };
 }
@@ -66,17 +68,17 @@ pub fn parse(self: *Parser) Error!ArgMatches {
         }
     }
 
-    while (self.argv_iter.next()) |*raw_arg| {
-        if (raw_arg.isShort() or raw_arg.isLong()) {
+    while (self.tokenizer.nextToken()) |*token| {
+        if (token.isShortFlag() or token.isLongFlag()) {
             if (self.cmd.args.items.len == 0)
                 return Error.UnknownArg;
 
-            try self.parseArg(raw_arg, &matches);
+            try self.parseArg(token, &matches);
         } else {
             if (self.cmd.subcommands.items.len == 0)
                 return Error.UnknownCommand;
 
-            const subcmd = try self.parseSubCommand(raw_arg.name);
+            const subcmd = try self.parseSubCommand(token.value);
             try matches.setSubcommand(subcmd);
         }
     }
@@ -88,55 +90,53 @@ pub fn parse(self: *Parser) Error!ArgMatches {
     return matches;
 }
 
-pub fn parseArg(self: *Parser, raw_arg: *ArgvIterator.RawArg, matches: *ArgMatches) Error!void {
-    if (raw_arg.isShort()) {
-        if (raw_arg.toShort()) |*short_arg| {
-            const parsed_args = try self.parseShortArg(short_arg);
+pub fn parseArg(self: *Parser, token: *Token, matches: *ArgMatches) Error!void {
+    if (token.isShortFlag()) {
+        const parsed_args = try self.parseShortArg(token);
 
-            for (parsed_args) |parsed_arg| {
-                try matches.putMatchedArg(parsed_arg);
-            }
-        }
-    } else if (raw_arg.isLong()) {
-        if (raw_arg.toLong()) |*long_arg| {
-            const parsed_arg = try self.parseLongArg(long_arg);
+        for (parsed_args) |parsed_arg| {
             try matches.putMatchedArg(parsed_arg);
         }
+    } else if (token.isLongFlag()) {
+        const parsed_arg = try self.parseLongArg(token);
+        try matches.putMatchedArg(parsed_arg);
     }
 }
 
-fn parseShortArg(self: *Parser, short_args: *ArgvIterator.ShortFlags) Error![]const MatchedArg {
+fn parseShortArg(self: *Parser, token: *Token) Error![]const MatchedArg {
+    var short_flag = ShortFlag.initFromToken(token);
     var parsed_args = std.ArrayList(MatchedArg).init(self.allocator);
     errdefer parsed_args.deinit();
 
-    while (short_args.nextFlag()) |short_flag| {
-        if (findArgByShortName(self.cmd.args.items, short_flag)) |arg| {
-            if (!arg.settings.takes_value) {
-                if (short_args.fixed_value) |val| {
-                    if (val.len >= 1) {
-                        return Error.UnneededAttachedValue;
-                    } else {
-                        return Error.UnneededEmptyAttachedValue;
-                    }
-                }
+    while (short_flag.next()) |flag| {
+        const arg = findArgByShortName(self.cmd.args.items, flag) orelse {
+            return Error.UnknownFlag;
+        };
+
+        if (!(arg.settings.takes_value)) {
+            if (short_flag.hasValue()) {
+                return Error.UnneededAttachedValue;
+            } else if (short_flag.hasEmptyValue()) {
+                return Error.UnneededEmptyAttachedValue;
+            } else {
                 try parsed_args.append(MatchedArg.initWithoutValue(arg.name));
                 continue;
             }
-
-            const value = short_args.nextValue();
-            const parsed_arg = self.consumeArgValue(arg, value) catch |err| switch (err) {
-                InternalError.AttachedValueNotConsumed => {
-                    // If attached value is not consumed, we may have more flags to parse
-                    short_args.rollbackValue();
-                    try parsed_args.append(MatchedArg.initWithoutValue(arg.name));
-                    continue;
-                },
-                else => |e| return e,
-            };
-            try parsed_args.append(parsed_arg);
-        } else {
-            return Error.UnknownFlag;
         }
+
+        const value = short_flag.getValue() orelse blk: {
+            if (short_flag.hasTail()) {
+                // Take remain flag/tail as value
+                //
+                // For ex: if -xyz is passed and -x takes value
+                // take yz as value even if they are passed as flags
+                break :blk short_flag.getRemainTail();
+            } else {
+                break :blk null;
+            }
+        };
+        const parsed_arg = try self.consumeArgValue(arg, value);
+        try parsed_args.append(parsed_arg);
     }
     return parsed_args.toOwnedSlice();
 }
@@ -150,26 +150,50 @@ fn findArgByShortName(valid_args: []const Arg, short_name: u8) ?*const Arg {
     return null;
 }
 
-fn parseLongArg(self: *Parser, long_arg: *ArgvIterator.LongFlag) Error!MatchedArg {
-    if (findArgByLongName(self.cmd.args.items, long_arg.name)) |arg| {
-        if (!arg.settings.takes_value) {
-            if (long_arg.value != null) {
-                return Error.UnneededAttachedValue;
-            } else {
-                return MatchedArg.initWithoutValue(arg.name);
-            }
-        }
-
-        const parsed_arg = self.consumeArgValue(arg, long_arg.value) catch |err| switch (err) {
-            InternalError.AttachedValueNotConsumed => {
-                return MatchedArg.initWithoutValue(arg.name);
-            },
-            else => |e| return e,
-        };
-        return parsed_arg;
-    } else {
+fn parseLongArg(self: *Parser, token: *Token) Error!MatchedArg {
+    const flag_tuple = flagTokenToFlagTuple(token);
+    const arg = findArgByLongName(self.cmd.args.items, flag_tuple.@"0") orelse {
         return Error.UnknownFlag;
+    };
+
+    if (!arg.settings.takes_value) {
+        if (flag_tuple.@"1" != null) {
+            return Error.UnneededAttachedValue;
+        } else {
+            return MatchedArg.initWithoutValue(arg.name);
+        }
     }
+
+    const parsed_arg = try self.consumeArgValue(arg, flag_tuple.@"1");
+    return parsed_arg;
+}
+
+const FlagTuple = std.meta.Tuple(&[_]type{ []const u8, ?[]const u8 });
+
+// Converts a flag token to a tuple holding a flag name and an optional value
+//
+// --flag, -f, -fgh                     => (flag, null), (f, null), (fgh, null)
+// --flag=value, -f=value, -fgh=value   => (flag, value), (f, value), (fgh, value)
+// --flag=, -f=, -fgh=                  => (flag, ""), (f, ""), (fgh, "")
+fn flagTokenToFlagTuple(token: *Token) FlagTuple {
+    var kv_iter = mem.tokenize(u8, token.value, "=");
+
+    return switch (token.tag) {
+        .short_flag,
+        .short_flag_with_tail,
+        .long_flag,
+        => .{ token.value, null },
+
+        .short_flag_with_value,
+        .short_flag_with_empty_value,
+        .short_flags_with_value,
+        .short_flags_with_empty_value,
+        .long_flag_with_value,
+        .long_flag_with_empty_value,
+        => .{ kv_iter.next().?, kv_iter.rest() },
+
+        else => unreachable,
+    };
 }
 
 fn findArgByLongName(valid_args: []const Arg, long_name: []const u8) ?*const Arg {
@@ -200,7 +224,7 @@ pub fn consumeArgValue(
     if (attached_value) |val| {
         return self.processValue(arg, val, true);
     } else {
-        const value = self.argv_iter.nextValue() orelse return Error.ArgValueNotProvided;
+        const value = self.tokenizer.nextNonFlagArg() orelse return Error.ArgValueNotProvided;
         return self.processValue(arg, value, false);
     }
 }
@@ -259,9 +283,9 @@ pub fn processValue(
 
             try values.append(value);
 
-            // consume each value using ArgvIterator
+            // consume each value using tokenizer
             while (index <= num_remaining_values) : (index += 1) {
-                const _value = self.argv_iter.nextValue() orelse break;
+                const _value = self.tokenizer.nextNonFlagArg() orelse break;
 
                 if ((_value.len == 0) and !(arg.settings.allow_empty_value))
                     return Error.EmptyArgValueNotAllowed;
@@ -287,7 +311,7 @@ pub fn parseSubCommand(
                 or valid_subcmd.args.items.len >= 1
                 or valid_subcmd.subcommands.items.len >= 1) {
                 // zig fmt: on
-                const subcmd_argv = self.argv_iter.rest() orelse return Error.CommandArgumentNotProvided;
+                const subcmd_argv = self.tokenizer.restArg() orelse return Error.CommandArgumentNotProvided;
                 var parser = Parser.init(self.allocator, subcmd_argv, &valid_subcmd);
                 const subcmd_argmatches = try parser.parse();
 
@@ -298,3 +322,59 @@ pub fn parseSubCommand(
     }
     return Error.UnknownCommand;
 }
+
+const ShortFlag = struct {
+    name: []const u8,
+    value: ?[]const u8,
+    cursor: usize,
+
+    pub fn initFromToken(token: *Token) ShortFlag {
+        const flag_tuple = flagTokenToFlagTuple(token);
+
+        var self = .{
+            .name = flag_tuple.@"0",
+            .value = flag_tuple.@"1",
+            .cursor = 0,
+        };
+
+        return self;
+    }
+
+    pub fn next(self: *ShortFlag) ?u8 {
+        if (self.cursor >= self.name.len) return null;
+        defer self.cursor += 1;
+
+        return self.name[self.cursor];
+    }
+
+    pub fn getValue(self: *ShortFlag) ?[]const u8 {
+        return (self.value);
+    }
+
+    pub fn getRemainTail(self: *ShortFlag) ?[]const u8 {
+        if (self.cursor >= self.name.len) return null;
+        defer self.cursor = self.name.len;
+
+        return self.name[self.cursor..];
+    }
+
+    pub fn hasValue(self: *ShortFlag) bool {
+        if (self.value) |v| {
+            return (v.len >= 1);
+        } else {
+            return false;
+        }
+    }
+
+    pub fn hasEmptyValue(self: *ShortFlag) bool {
+        if (self.value) |v| {
+            return (v.len == 0);
+        } else {
+            return false;
+        }
+    }
+
+    pub fn hasTail(self: *ShortFlag) bool {
+        return (self.value == null and self.name.len > 1);
+    }
+};
