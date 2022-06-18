@@ -81,7 +81,6 @@ pub fn parse(self: *Parser) Error!ArgMatches {
     if (self.cmd.setting.subcommand_required and matches.subcommand == null) {
         return Error.MissingCommandSubCommand;
     }
-
     return matches;
 }
 
@@ -142,14 +141,13 @@ fn parseLongArg(self: *Parser, token: *Token) Error!MatchedArg {
         return Error.UnknownFlag;
     };
 
-    if (!arg.settings.takes_value) {
+    if (!(arg.settings.takes_value)) {
         if (flag_tuple.@"1" != null) {
             return Error.UnneededAttachedValue;
         } else {
             return MatchedArg.initWithoutValue(arg.name);
         }
     }
-
     const parsed_arg = try self.consumeArgValue(arg, flag_tuple.@"1");
     return parsed_arg;
 }
@@ -211,7 +209,6 @@ pub fn processValue(
 
             if ((_val.len == 0) and !(arg.settings.allow_empty_value))
                 return Error.EmptyArgValueNotAllowed;
-
             if (!arg.verifyValueInAllowedValues(_val))
                 return Error.ValueIsNotInAllowedValues;
 
@@ -255,7 +252,6 @@ pub fn processValue(
 
                 if ((_value.len == 0) and !(arg.settings.allow_empty_value))
                     return Error.EmptyArgValueNotAllowed;
-
                 if (!arg.verifyValueInAllowedValues(_value))
                     return Error.ValueIsNotInAllowedValues;
 
