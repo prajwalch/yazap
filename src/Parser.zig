@@ -303,7 +303,7 @@ const ShortFlag = struct {
     }
 
     pub fn next(self: *ShortFlag) ?u8 {
-        if (self.cursor >= self.name.len) return null;
+        if (self.isAtEnd()) return null;
         defer self.cursor += 1;
 
         return self.name[self.cursor];
@@ -314,7 +314,7 @@ const ShortFlag = struct {
     }
 
     pub fn getRemainTail(self: *ShortFlag) ?[]const u8 {
-        if (self.cursor >= self.name.len) return null;
+        if (self.isAtEnd()) return null;
         defer self.cursor = self.name.len;
 
         return self.name[self.cursor..];
@@ -338,5 +338,9 @@ const ShortFlag = struct {
 
     pub fn hasTail(self: *ShortFlag) bool {
         return (self.value == null and self.name.len > 1);
+    }
+
+    fn isAtEnd(self: *ShortFlag) bool {
+        return (self.cursor >= self.name.len);
     }
 };
