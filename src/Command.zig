@@ -1,9 +1,9 @@
 const Command = @This();
 
 const std = @import("std");
-const Parser = @import("Parser.zig");
+const Parser = @import("parser/Parser.zig");
 const Arg = @import("Arg.zig");
-const ArgMatches = @import("arg_matches.zig").ArgMatches;
+const ArgMatches = @import("parser/arg_matches.zig").ArgMatches;
 
 const mem = std.mem;
 const ArrayList = std.ArrayList;
