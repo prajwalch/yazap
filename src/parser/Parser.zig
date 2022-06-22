@@ -3,12 +3,14 @@ const Parser = @This();
 const std = @import("std");
 const arg_matches = @import("arg_matches.zig");
 const tokenizer = @import("tokenizer.zig");
-const Command = @import("Command.zig");
-const Arg = @import("Arg.zig");
+const Command = @import("../Command.zig");
+const Arg = @import("../Arg.zig");
 const MatchedArg = @import("MatchedArg.zig");
+const ShortFlag = @import("ShortFlag.zig");
 
 const mem = std.mem;
 const Allocator = std.mem.Allocator;
+const FlagTuple = std.meta.Tuple(&[_]type{ []const u8, ?[]const u8 });
 const ArgMatches = arg_matches.ArgMatches;
 const Token = tokenizer.Token;
 const Tokenizer = tokenizer.Tokenizer;
@@ -84,7 +86,7 @@ pub fn parse(self: *Parser) Error!ArgMatches {
     return matches;
 }
 
-pub fn parseArg(self: *Parser, token: *Token, matches: *ArgMatches) Error!void {
+fn parseArg(self: *Parser, token: *Token, matches: *ArgMatches) Error!void {
     if (token.isShortFlag()) {
         const parsed_args = try self.parseShortArg(token);
 
@@ -98,7 +100,8 @@ pub fn parseArg(self: *Parser, token: *Token, matches: *ArgMatches) Error!void {
 }
 
 fn parseShortArg(self: *Parser, token: *Token) Error![]const MatchedArg {
-    var short_flag = ShortFlag.initFromToken(token);
+    const flag_tuple = flagTokenToFlagTuple(token);
+    var short_flag = ShortFlag.initFromToken(flag_tuple.@"0", flag_tuple.@"1");
     var parsed_args = std.ArrayList(MatchedArg).init(self.allocator);
     errdefer parsed_args.deinit();
 
@@ -152,8 +155,6 @@ fn parseLongArg(self: *Parser, token: *Token) Error!MatchedArg {
     return parsed_arg;
 }
 
-const FlagTuple = std.meta.Tuple(&[_]type{ []const u8, ?[]const u8 });
-
 // Converts a flag token to a tuple holding a flag name and an optional value
 //
 // --flag, -f, -fgh                     => (flag, null), (f, null), (fgh, null)
@@ -180,7 +181,7 @@ fn flagTokenToFlagTuple(token: *Token) FlagTuple {
     };
 }
 
-pub fn consumeArgValue(
+fn consumeArgValue(
     self: *Parser,
     arg: *const Arg,
     attached_value: ?[]const u8,
@@ -193,7 +194,7 @@ pub fn consumeArgValue(
     }
 }
 
-pub fn processValue(
+fn processValue(
     self: *Parser,
     arg: *const Arg,
     value: []const u8,
@@ -262,7 +263,7 @@ pub fn processValue(
     }
 }
 
-pub fn parseSubCommand(
+fn parseSubCommand(
     self: *Parser,
     provided_subcmd: []const u8,
 ) Error!arg_matches.SubCommand {
@@ -284,63 +285,3 @@ pub fn parseSubCommand(
     }
     return Error.UnknownCommand;
 }
-
-const ShortFlag = struct {
-    name: []const u8,
-    value: ?[]const u8,
-    cursor: usize,
-
-    pub fn initFromToken(token: *Token) ShortFlag {
-        const flag_tuple = flagTokenToFlagTuple(token);
-
-        var self = .{
-            .name = flag_tuple.@"0",
-            .value = flag_tuple.@"1",
-            .cursor = 0,
-        };
-
-        return self;
-    }
-
-    pub fn next(self: *ShortFlag) ?u8 {
-        if (self.isAtEnd()) return null;
-        defer self.cursor += 1;
-
-        return self.name[self.cursor];
-    }
-
-    pub fn getValue(self: *ShortFlag) ?[]const u8 {
-        return (self.value);
-    }
-
-    pub fn getRemainTail(self: *ShortFlag) ?[]const u8 {
-        if (self.isAtEnd()) return null;
-        defer self.cursor = self.name.len;
-
-        return self.name[self.cursor..];
-    }
-
-    pub fn hasValue(self: *ShortFlag) bool {
-        if (self.value) |v| {
-            return (v.len >= 1);
-        } else {
-            return false;
-        }
-    }
-
-    pub fn hasEmptyValue(self: *ShortFlag) bool {
-        if (self.value) |v| {
-            return (v.len == 0);
-        } else {
-            return false;
-        }
-    }
-
-    pub fn hasTail(self: *ShortFlag) bool {
-        return (self.value == null and self.name.len > 1);
-    }
-
-    fn isAtEnd(self: *ShortFlag) bool {
-        return (self.cursor >= self.name.len);
-    }
-};
