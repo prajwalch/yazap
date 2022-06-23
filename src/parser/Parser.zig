@@ -6,7 +6,6 @@ const tokenizer = @import("tokenizer.zig");
 const Command = @import("../Command.zig");
 const Arg = @import("../Arg.zig");
 const MatchedArg = @import("MatchedArg.zig");
-const ShortFlag = @import("ShortFlag.zig");
 
 const mem = std.mem;
 const Allocator = std.mem.Allocator;
@@ -28,6 +27,62 @@ pub const Error = error{
     ArgValueNotProvided,
     EmptyArgValueNotAllowed,
 } || Allocator.Error;
+
+const ShortFlag = struct {
+    name: []const u8,
+    value: ?[]const u8,
+    cursor: usize,
+
+    pub fn init(name: []const u8, value: ?[]const u8) ShortFlag {
+        return ShortFlag{
+            .name = name,
+            .value = value,
+            .cursor = 0,
+        };
+    }
+
+    pub fn next(self: *ShortFlag) ?u8 {
+        if (self.isAtEnd()) return null;
+        defer self.cursor += 1;
+
+        return self.name[self.cursor];
+    }
+
+    pub fn getValue(self: *ShortFlag) ?[]const u8 {
+        return (self.value);
+    }
+
+    pub fn getRemainTail(self: *ShortFlag) ?[]const u8 {
+        if (self.isAtEnd()) return null;
+        defer self.cursor = self.name.len;
+
+        return self.name[self.cursor..];
+    }
+
+    pub fn hasValue(self: *ShortFlag) bool {
+        if (self.value) |v| {
+            return (v.len >= 1);
+        } else {
+            return false;
+        }
+    }
+
+    pub fn hasEmptyValue(self: *ShortFlag) bool {
+        if (self.value) |v| {
+            return (v.len == 0);
+        } else {
+            return false;
+        }
+    }
+
+    pub fn hasTail(self: *ShortFlag) bool {
+        return (self.value == null and self.name.len > 1);
+    }
+
+    fn isAtEnd(self: *ShortFlag) bool {
+        return (self.cursor >= self.name.len);
+    }
+};
 
 allocator: Allocator,
 tokenizer: Tokenizer,
@@ -101,7 +156,7 @@ fn parseArg(self: *Parser, token: *Token, matches: *ArgMatches) Error!void {
 
 fn parseShortArg(self: *Parser, token: *Token) Error![]const MatchedArg {
     const flag_tuple = flagTokenToFlagTuple(token);
-    var short_flag = ShortFlag.initFromToken(flag_tuple.@"0", flag_tuple.@"1");
+    var short_flag = ShortFlag.init(flag_tuple.@"0", flag_tuple.@"1");
     var parsed_args = std.ArrayList(MatchedArg).init(self.allocator);
     errdefer parsed_args.deinit();
 
