@@ -3,7 +3,7 @@ const Command = @This();
 const std = @import("std");
 const Parser = @import("parser/Parser.zig");
 const Arg = @import("Arg.zig");
-const ArgMatches = @import("parser/arg_matches.zig").ArgMatches;
+const ArgsContext = @import("parser/ArgsContext.zig");
 
 const mem = std.mem;
 const ArrayList = std.ArrayList;
@@ -115,12 +115,12 @@ pub fn findArgByLongName(self: *const Command, long_name: []const u8) ?*const Ar
     return null;
 }
 
-pub fn parseProcess(self: *Command) Error!ArgMatches {
+pub fn parseProcess(self: *Command) Error!ArgsContext {
     self.process_args = try std.process.argsAlloc(self.allocator);
     return self.parseFrom(self.process_args.?[1..]);
 }
 
-pub fn parseFrom(self: *Command, argv: []const [:0]const u8) Parser.Error!ArgMatches {
+pub fn parseFrom(self: *Command, argv: []const [:0]const u8) Parser.Error!ArgsContext {
     var parser = Parser.init(self.allocator, argv, self);
     return parser.parse();
 }

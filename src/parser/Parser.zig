@@ -1,16 +1,16 @@
 const Parser = @This();
 
 const std = @import("std");
-const arg_matches = @import("arg_matches.zig");
 const tokenizer = @import("tokenizer.zig");
+const ArgsContext = @import("ArgsContext.zig");
 const Command = @import("../Command.zig");
 const Arg = @import("../Arg.zig");
-const MatchedArg = @import("MatchedArg.zig");
 
 const mem = std.mem;
 const Allocator = std.mem.Allocator;
 const FlagTuple = std.meta.Tuple(&[_]type{ []const u8, ?[]const u8 });
-const ArgMatches = arg_matches.ArgMatches;
+const MatchedArg = ArgsContext.MatchedArg;
+const MatchedSubCommand = ArgsContext.MatchedSubCommand;
 const Token = tokenizer.Token;
 const Tokenizer = tokenizer.Tokenizer;
 
@@ -100,9 +100,9 @@ pub fn init(
     };
 }
 
-pub fn parse(self: *Parser) Error!ArgMatches {
-    var matches = ArgMatches.init(self.allocator);
-    errdefer matches.deinit();
+pub fn parse(self: *Parser) Error!ArgsContext {
+    var args_ctx = ArgsContext.init(self.allocator);
+    errdefer args_ctx.deinit();
 
     if (self.cmd.setting.takes_value) {
         for (self.cmd.args.items) |arg| {
@@ -111,11 +111,11 @@ pub fn parse(self: *Parser) Error!ArgMatches {
                     Error.ArgValueNotProvided => break,
                     else => |e| return e,
                 };
-                try matches.putMatchedArg(parsed_arg);
+                try args_ctx.putMatchedArg(parsed_arg);
             }
         }
 
-        if (self.cmd.setting.arg_required and (matches.args.count() == 0)) {
+        if (self.cmd.setting.arg_required and (args_ctx.args.count() == 0)) {
             return Error.CommandArgumentNotProvided;
         }
     }
@@ -125,32 +125,32 @@ pub fn parse(self: *Parser) Error!ArgMatches {
             if (self.cmd.args.items.len == 0)
                 return Error.UnknownArg;
 
-            try self.parseArg(token, &matches);
+            try self.parseArg(token, &args_ctx);
         } else {
             if (self.cmd.subcommands.items.len == 0)
                 return Error.UnknownCommand;
 
             const subcmd = try self.parseSubCommand(token.value);
-            try matches.setSubcommand(subcmd);
+            try args_ctx.setSubcommand(subcmd);
         }
     }
 
-    if (self.cmd.setting.subcommand_required and matches.subcommand == null) {
+    if (self.cmd.setting.subcommand_required and args_ctx.subcommand == null) {
         return Error.MissingCommandSubCommand;
     }
-    return matches;
+    return args_ctx;
 }
 
-fn parseArg(self: *Parser, token: *Token, matches: *ArgMatches) Error!void {
+fn parseArg(self: *Parser, token: *Token, args_ctx: *ArgsContext) Error!void {
     if (token.isShortFlag()) {
         const parsed_args = try self.parseShortArg(token);
 
         for (parsed_args) |parsed_arg| {
-            try matches.putMatchedArg(parsed_arg);
+            try args_ctx.putMatchedArg(parsed_arg);
         }
     } else if (token.isLongFlag()) {
         const parsed_arg = try self.parseLongArg(token);
-        try matches.putMatchedArg(parsed_arg);
+        try args_ctx.putMatchedArg(parsed_arg);
     }
 }
 
@@ -321,7 +321,7 @@ fn processValue(
 fn parseSubCommand(
     self: *Parser,
     provided_subcmd: []const u8,
-) Error!arg_matches.SubCommand {
+) Error!MatchedSubCommand {
     for (self.cmd.subcommands.items) |valid_subcmd| {
         if (mem.eql(u8, valid_subcmd.name, provided_subcmd)) {
             // zig fmt: off
@@ -331,11 +331,11 @@ fn parseSubCommand(
                 // zig fmt: on
                 const subcmd_argv = self.tokenizer.restArg() orelse return Error.CommandArgumentNotProvided;
                 var parser = Parser.init(self.allocator, subcmd_argv, &valid_subcmd);
-                const subcmd_argmatches = try parser.parse();
+                const subcmd_ctx = try parser.parse();
 
-                return arg_matches.SubCommand.initWithArg(valid_subcmd.name, subcmd_argmatches);
+                return MatchedSubCommand.initWithArg(valid_subcmd.name, subcmd_ctx);
             }
-            return arg_matches.SubCommand.initWithoutArg(valid_subcmd.name);
+            return MatchedSubCommand.initWithoutArg(valid_subcmd.name);
         }
     }
     return Error.UnknownCommand;
