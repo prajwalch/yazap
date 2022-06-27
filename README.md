@@ -186,7 +186,7 @@ app.subcommandRequired(true);
 
 ### parseProcess
 ```zig
-fn parseProcess(self: *Command) parser.Error!ArgMatches
+fn parseProcess(self: *Command) parser.Error!ArgsContext
 ```
 Parse process args. Internally it calls to `std.process.argsAlloc` to obtain args.
 
@@ -211,7 +211,7 @@ defer app_args.deinit();
 
 ### parseFrom
 ```zig
-fn parseFrom(self: *Command, argv: []const [:0]const u8) parser.Error!ArgMatches
+fn parseFrom(self: *Command, argv: []const [:0]const u8) parser.Error!ArgsContext
 ```
 Parse args from given `argv`. Useful to use it on test.
 
