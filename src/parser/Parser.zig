@@ -104,21 +104,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
     var args_ctx = ArgsContext.init(self.allocator);
     errdefer args_ctx.deinit();
 
-    if (self.cmd.setting.takes_value) {
-        for (self.cmd.args.items) |arg| {
-            if ((arg.short_name == null) and (arg.long_name == null)) {
-                var parsed_arg = self.consumeArgValue(&arg, null) catch |err| switch (err) {
-                    Error.ArgValueNotProvided => break,
-                    else => |e| return e,
-                };
-                try args_ctx.putMatchedArg(parsed_arg);
-            }
-        }
-
-        if (self.cmd.setting.arg_required and (args_ctx.args.count() == 0)) {
-            return Error.CommandArgumentNotProvided;
-        }
-    }
+    try self.parseCommandArgument(&args_ctx);
 
     while (self.tokenizer.nextToken()) |*token| {
         if (token.isShortFlag() or token.isLongFlag()) {
@@ -139,6 +125,24 @@ pub fn parse(self: *Parser) Error!ArgsContext {
         return Error.MissingCommandSubCommand;
     }
     return args_ctx;
+}
+
+fn parseCommandArgument(self: *Parser, args_ctx: *ArgsContext) Error!void {
+    if (self.cmd.setting.takes_value) {
+        for (self.cmd.args.items) |arg| {
+            if ((arg.short_name == null) and (arg.long_name == null)) {
+                var parsed_arg = self.consumeArgValue(&arg, null) catch |err| switch (err) {
+                    Error.ArgValueNotProvided => break,
+                    else => |e| return e,
+                };
+                try args_ctx.putMatchedArg(parsed_arg);
+            }
+        }
+
+        if (self.cmd.setting.arg_required and (args_ctx.args.count() == 0)) {
+            return Error.CommandArgumentNotProvided;
+        }
+    }
 }
 
 fn parseArg(self: *Parser, token: *Token, args_ctx: *ArgsContext) Error!void {
