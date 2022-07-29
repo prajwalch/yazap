@@ -88,10 +88,7 @@ pub fn deinit(self: *ArgsContext) void {
     var args_value_iter = self.args.valueIterator();
 
     while (args_value_iter.next()) |value| {
-        switch (value.*) {
-            .many => |v| v.deinit(),
-            else => {},
-        }
+        if (value.isMany()) value.many.deinit();
     }
     self.args.deinit();
 
@@ -165,10 +162,7 @@ pub fn isPresent(self: *const ArgsContext, name_to_lookup: []const u8) bool {
 
 pub fn valueOf(self: *const ArgsContext, arg_name: []const u8) ?[]const u8 {
     if (self.args.get(arg_name)) |value| {
-        switch (value) {
-            .single => |val| return val,
-            else => return null,
-        }
+        if (value.isSingle()) return value.single;
     } else if (self.subcommand) |subcmd| {
         if (subcmd.ctx) |ctx| {
             return ctx.valueOf(arg_name);
@@ -180,13 +174,9 @@ pub fn valueOf(self: *const ArgsContext, arg_name: []const u8) ?[]const u8 {
 
 pub fn valuesOf(self: *ArgsContext, name_to_lookup: []const u8) ?[][]const u8 {
     if (self.args.get(name_to_lookup)) |value| {
-        switch (value) {
-            .many => |*v| return v.items[0..],
-            else => return null,
-        }
-    } else {
-        return null;
+        if (value.isMany()) return value.many.items[0..];
     }
+    return null;
 }
 
 pub fn subcommandContext(self: *const ArgsContext, subcmd_name: []const u8) ?ArgsContext {
