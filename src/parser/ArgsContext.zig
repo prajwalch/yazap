@@ -7,6 +7,18 @@ pub const MatchedArg = struct {
         none,
         single: []const u8,
         many: std.ArrayList([]const u8),
+
+        pub fn isNone(self: Value) bool {
+            return (!self.isSingle() and !self.isMany());
+        }
+
+        pub fn isSingle(self: Value) bool {
+            return (self == .single);
+        }
+
+        pub fn isMany(self: Value) bool {
+            return (self == .many);
+        }
     };
 
     name: []const u8,
@@ -90,7 +102,48 @@ pub fn deinit(self: *ArgsContext) void {
 }
 
 pub fn putMatchedArg(self: *ArgsContext, arg: MatchedArg) !void {
-    return self.args.put(arg.name, arg.value);
+    var maybe_old_value = self.args.getPtr(arg.name);
+
+    if (maybe_old_value) |old_value| {
+        // To fix the const error
+        var new_value = arg.value;
+
+        switch (old_value.*) {
+            .none => if (!(new_value.isNone())) {
+                return self.args.put(arg.name, new_value);
+            },
+            .single => |old_single_value| {
+                if (new_value.isSingle()) {
+                    // If both old and new value are single then
+                    // store them in a single ArrayList and create a new key
+                    var many = std.ArrayList([]const u8).init(self.allocator);
+                    try many.append(old_single_value);
+                    try many.append(new_value.single);
+
+                    const new_key = MatchedArg.Value{ .many = many };
+                    return self.args.put(arg.name, new_key);
+                } else if (new_value.isMany()) {
+                    // If old value is single but the new value is many then
+                    // append the old one into new many value
+                    try new_value.many.append(old_single_value);
+                    return self.args.put(arg.name, new_value);
+                }
+            },
+            .many => |*old_many_values| {
+                if (new_value.isSingle()) {
+                    // If old value is many and the new value is single then
+                    // append the new single value into old many value
+                    try old_many_values.append(new_value.single);
+                } else if (new_value.isMany()) {
+                    // If both old and new value is many, append all new values into old value
+                    try old_many_values.appendSlice(new_value.many.toOwnedSlice());
+                }
+            },
+        }
+    } else {
+        // We don't have old value, put the new value
+        return self.args.put(arg.name, arg.value);
+    }
 }
 
 pub fn setSubcommand(self: *ArgsContext, subcommand: MatchedSubCommand) !void {
