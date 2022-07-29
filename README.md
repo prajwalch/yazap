@@ -24,7 +24,7 @@ This library is in active development so many of the features are yet to impleme
     not take `arg` as a value for `xyz` flags instead it will take `yz` as value for `x`
     even if you pass them as a flags and the `arg` will be parsed a argument or subcommand.
 
-* [ ] Support flag that can specified multiple times `-x 1 -x 2 -x 3`
+* [x] Support flag that can specified multiple times `-x 1 -x 2 -x 3`
 
 * [x] Subcommand
     - `app bool-cmd`
