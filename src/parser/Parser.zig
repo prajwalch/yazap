@@ -14,19 +14,22 @@ const MatchedSubCommand = ArgsContext.MatchedSubCommand;
 const Token = tokenizer.Token;
 const Tokenizer = tokenizer.Tokenizer;
 
-// TODO: Clean up errors
 pub const Error = error{
-    UnknownArg,
-    UnknownCommand,
     UnknownFlag,
+    UnknownCommand,
     CommandArgumentNotProvided,
-    MissingCommandSubCommand,
-    ValueIsNotInAllowedValues,
+    CommandSubcommandNotProvided,
+    FlagValueNotProvided,
     UnneededAttachedValue,
     UnneededEmptyAttachedValue,
+    EmptyFlagValueNotAllowed,
+    ProvidedValueIsNotValidOption,
+} || Allocator.Error;
+
+const InternalError = error{
     ArgValueNotProvided,
     EmptyArgValueNotAllowed,
-} || Allocator.Error;
+} || Error;
 
 const ShortFlag = struct {
     name: []const u8,
@@ -109,9 +112,13 @@ pub fn parse(self: *Parser) Error!ArgsContext {
     while (self.tokenizer.nextToken()) |*token| {
         if (token.isShortFlag() or token.isLongFlag()) {
             if (self.cmd.args.items.len == 0)
-                return Error.UnknownArg;
+                return Error.UnknownFlag;
 
-            try self.parseArg(token, &args_ctx);
+            self.parseArg(token, &args_ctx) catch |err| switch (err) {
+                InternalError.ArgValueNotProvided => return Error.FlagValueNotProvided,
+                InternalError.EmptyArgValueNotAllowed => return Error.EmptyFlagValueNotAllowed,
+                else => |e| return e,
+            };
         } else {
             if (self.cmd.subcommands.items.len == 0)
                 return Error.UnknownCommand;
@@ -122,7 +129,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
     }
 
     if (self.cmd.setting.subcommand_required and args_ctx.subcommand == null) {
-        return Error.MissingCommandSubCommand;
+        return Error.CommandSubcommandNotProvided;
     }
     return args_ctx;
 }
@@ -132,7 +139,9 @@ fn parseCommandArgument(self: *Parser, args_ctx: *ArgsContext) Error!void {
         for (self.cmd.args.items) |arg| {
             if ((arg.short_name == null) and (arg.long_name == null)) {
                 var parsed_arg = self.consumeArgValue(&arg, null) catch |err| switch (err) {
-                    Error.ArgValueNotProvided => break,
+                    InternalError.ArgValueNotProvided,
+                    InternalError.EmptyArgValueNotAllowed,
+                    => break,
                     else => |e| return e,
                 };
                 try args_ctx.putMatchedArg(parsed_arg);
@@ -145,7 +154,7 @@ fn parseCommandArgument(self: *Parser, args_ctx: *ArgsContext) Error!void {
     }
 }
 
-fn parseArg(self: *Parser, token: *Token, args_ctx: *ArgsContext) Error!void {
+fn parseArg(self: *Parser, token: *Token, args_ctx: *ArgsContext) InternalError!void {
     if (token.isShortFlag()) {
         const parsed_args = try self.parseShortArg(token);
 
@@ -158,7 +167,7 @@ fn parseArg(self: *Parser, token: *Token, args_ctx: *ArgsContext) Error!void {
     }
 }
 
-fn parseShortArg(self: *Parser, token: *Token) Error![]const MatchedArg {
+fn parseShortArg(self: *Parser, token: *Token) InternalError![]const MatchedArg {
     const flag_tuple = flagTokenToFlagTuple(token);
     var short_flag = ShortFlag.init(flag_tuple.@"0", flag_tuple.@"1");
     var parsed_args = std.ArrayList(MatchedArg).init(self.allocator);
@@ -197,7 +206,7 @@ fn parseShortArg(self: *Parser, token: *Token) Error![]const MatchedArg {
     return parsed_args.toOwnedSlice();
 }
 
-fn parseLongArg(self: *Parser, token: *Token) Error!MatchedArg {
+fn parseLongArg(self: *Parser, token: *Token) InternalError!MatchedArg {
     const flag_tuple = flagTokenToFlagTuple(token);
     const arg = self.cmd.findArgByLongName(flag_tuple.@"0") orelse {
         return Error.UnknownFlag;
@@ -244,11 +253,11 @@ fn consumeArgValue(
     self: *Parser,
     arg: *const Arg,
     attached_value: ?[]const u8,
-) Error!MatchedArg {
+) InternalError!MatchedArg {
     if (attached_value) |val| {
         return self.processValue(arg, val, true);
     } else {
-        const value = self.tokenizer.nextNonFlagArg() orelse return Error.ArgValueNotProvided;
+        const value = self.tokenizer.nextNonFlagArg() orelse return InternalError.ArgValueNotProvided;
         return self.processValue(arg, value, false);
     }
 }
@@ -258,7 +267,7 @@ fn processValue(
     arg: *const Arg,
     value: []const u8,
     is_attached_value: bool,
-) Error!MatchedArg {
+) InternalError!MatchedArg {
     if (arg.values_delimiter) |delimiter| {
         var values_iter = mem.split(u8, value, delimiter);
         var values = std.ArrayList([]const u8).init(self.allocator);
@@ -268,9 +277,9 @@ fn processValue(
             const _val = @as([]const u8, val);
 
             if ((_val.len == 0) and !(arg.settings.allow_empty_value))
-                return Error.EmptyArgValueNotAllowed;
+                return InternalError.EmptyArgValueNotAllowed;
             if (!arg.verifyValueInAllowedValues(_val))
-                return Error.ValueIsNotInAllowedValues;
+                return InternalError.ProvidedValueIsNotValidOption;
 
             try values.append(_val);
         }
@@ -311,9 +320,9 @@ fn processValue(
                 const _value = self.tokenizer.nextNonFlagArg() orelse break;
 
                 if ((_value.len == 0) and !(arg.settings.allow_empty_value))
-                    return Error.EmptyArgValueNotAllowed;
+                    return InternalError.EmptyArgValueNotAllowed;
                 if (!arg.verifyValueInAllowedValues(_value))
-                    return Error.ValueIsNotInAllowedValues;
+                    return InternalError.ProvidedValueIsNotValidOption;
 
                 try values.append(_value);
             }

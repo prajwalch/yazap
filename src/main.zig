@@ -82,7 +82,7 @@ test "subcommand required error" {
     app.subcommandRequired(true);
     defer app.deinit();
 
-    try testing.expectError(error.MissingCommandSubCommand, app.parseFrom(argv));
+    try testing.expectError(error.CommandSubcommandNotProvided, app.parseFrom(argv));
 }
 
 test "command that takes value" {
