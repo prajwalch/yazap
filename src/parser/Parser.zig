@@ -1,18 +1,17 @@
 const Parser = @This();
 
 const std = @import("std");
-const tokenizer = @import("tokenizer.zig");
 const ArgsContext = @import("ArgsContext.zig");
 const Command = @import("../Command.zig");
 const Arg = @import("../Arg.zig");
+const Token = @import("tokenizer.zig").Token;
+const Tokenizer = @import("tokenizer.zig").Tokenizer;
 
 const mem = std.mem;
 const Allocator = std.mem.Allocator;
 const FlagTuple = std.meta.Tuple(&[_]type{ []const u8, ?[]const u8 });
 const MatchedArg = ArgsContext.MatchedArg;
 const MatchedSubCommand = ArgsContext.MatchedSubCommand;
-const Token = tokenizer.Token;
-const Tokenizer = tokenizer.Tokenizer;
 
 pub const Error = error{
     UnknownFlag,
@@ -93,12 +92,12 @@ cmd: *const Command,
 
 pub fn init(
     allocator: Allocator,
-    argv: []const [:0]const u8,
+    tokenizer: Tokenizer,
     command: *const Command,
 ) Parser {
     return Parser{
         .allocator = allocator,
-        .tokenizer = Tokenizer.init(argv),
+        .tokenizer = tokenizer,
         .cmd = command,
     };
 }
@@ -343,7 +342,7 @@ fn parseSubCommand(
                 or valid_subcmd.subcommands.items.len >= 1) {
                 // zig fmt: on
                 const subcmd_argv = self.tokenizer.restArg() orelse return Error.CommandArgumentNotProvided;
-                var parser = Parser.init(self.allocator, subcmd_argv, &valid_subcmd);
+                var parser = Parser.init(self.allocator, Tokenizer.init(subcmd_argv), &valid_subcmd);
                 const subcmd_ctx = try parser.parse();
 
                 return MatchedSubCommand.initWithArg(valid_subcmd.name, subcmd_ctx);
