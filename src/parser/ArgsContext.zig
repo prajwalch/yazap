@@ -1,52 +1,46 @@
 const ArgsContext = @This();
+
 const std = @import("std");
-const ArgHashMap = std.StringHashMap(MatchedArg.Value);
+const Arg = @import("../Arg.zig");
+const ArgHashMap = std.StringHashMap(MatchedArgValue);
 
-pub const MatchedArg = struct {
-    pub const Value = union(enum) {
-        none,
-        single: []const u8,
-        many: std.ArrayList([]const u8),
+pub const MatchedArgValue = union(enum) {
+    none,
+    single: []const u8,
+    many: std.ArrayList([]const u8),
 
-        pub fn isNone(self: Value) bool {
-            return (!self.isSingle() and !self.isMany());
-        }
-
-        pub fn isSingle(self: Value) bool {
-            return (self == .single);
-        }
-
-        pub fn isMany(self: Value) bool {
-            return (self == .many);
-        }
-    };
-
-    name: []const u8,
-    value: Value,
-
-    fn init(name: []const u8) MatchedArg {
-        return MatchedArg{
-            .name = name,
-            .value = undefined,
-        };
+    pub fn initNone() MatchedArgValue {
+        return .none;
     }
 
-    pub fn initWithoutValue(name: []const u8) MatchedArg {
-        var self = MatchedArg.init(name);
-        self.value = .{ .none = undefined };
-        return self;
+    pub fn initSingle(val: []const u8) MatchedArgValue {
+        return MatchedArgValue{ .single = val };
     }
 
-    pub fn initWithSingleValue(name: []const u8, value: []const u8) MatchedArg {
-        var self = MatchedArg.init(name);
-        self.value = .{ .single = value };
-        return self;
+    pub fn initMany(vals: std.ArrayList([]const u8)) MatchedArgValue {
+        return MatchedArgValue{ .many = vals };
     }
 
-    pub fn initWithManyValues(name: []const u8, values: std.ArrayList([]const u8)) MatchedArg {
-        var self = MatchedArg.init(name);
-        self.value = .{ .many = values };
-        return self;
+    pub fn count(val: MatchedArgValue) usize {
+        if (val.isSingle()) {
+            return 1;
+        } else if (val.isMany()) {
+            return val.many.items.len;
+        } else {
+            return 0;
+        }
+    }
+
+    pub fn isNone(self: MatchedArgValue) bool {
+        return (!self.isSingle() and !self.isMany());
+    }
+
+    pub fn isSingle(self: MatchedArgValue) bool {
+        return (self == .single);
+    }
+
+    pub fn isMany(self: MatchedArgValue) bool {
+        return (self == .many);
     }
 };
 
@@ -98,12 +92,15 @@ pub fn deinit(self: *ArgsContext) void {
     }
 }
 
-pub fn putMatchedArg(self: *ArgsContext, arg: MatchedArg) !void {
+pub fn putMatchedArg(self: *ArgsContext, arg: *const Arg, value: MatchedArgValue) !void {
+    if (value.count() > arg.remainingValuesToConsume(self)) {
+        return error.TooManyArgValue;
+    }
     var maybe_old_value = self.args.getPtr(arg.name);
 
     if (maybe_old_value) |old_value| {
         // To fix the const error
-        var new_value = arg.value;
+        var new_value = value;
 
         switch (old_value.*) {
             .none => if (!(new_value.isNone())) {
@@ -117,7 +114,7 @@ pub fn putMatchedArg(self: *ArgsContext, arg: MatchedArg) !void {
                     try many.append(old_single_value);
                     try many.append(new_value.single);
 
-                    return self.args.put(arg.name, MatchedArg.Value{ .many = many });
+                    return self.args.put(arg.name, MatchedArgValue.initMany(many));
                 } else if (new_value.isMany()) {
                     // If old value is single but the new value is many then
                     // append the old one into new many value
@@ -138,7 +135,7 @@ pub fn putMatchedArg(self: *ArgsContext, arg: MatchedArg) !void {
         }
     } else {
         // We don't have old value, put the new value
-        return self.args.put(arg.name, arg.value);
+        return self.args.put(arg.name, value);
     }
 }
 

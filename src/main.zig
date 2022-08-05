@@ -109,7 +109,6 @@ test "flags" {
     const argv: []const [:0]const u8 = &.{
         "-bc",
         "-1one",
-        "-1two",
         "--argn-flag=val1,val2,val3",
         "--option-flag",
         "opt2",
@@ -123,8 +122,8 @@ test "flags" {
 
     try testing.expect(matches.isPresent("bool-flag") == true);
     try testing.expect(matches.isPresent("bool-flag2") == true);
-    //try testing.expectEqualStrings("one", matches.valueOf("arg-one-flag").?);
-    try testing.expect(2 == matches.valuesOf("arg-one-flag").?.len);
+    try testing.expectEqualStrings("one", matches.valueOf("arg-one-flag").?);
+    //try testing.expect(2 == matches.valuesOf("arg-one-flag").?.len);
 
     const argn_values = matches.valuesOf("argn-flag").?;
     try testing.expectEqualStrings("val1", argn_values[0]);
