@@ -10,7 +10,7 @@ const Tokenizer = @import("tokenizer.zig").Tokenizer;
 const mem = std.mem;
 const Allocator = std.mem.Allocator;
 const FlagTuple = std.meta.Tuple(&[_]type{ []const u8, ?[]const u8 });
-const MatchedArg = ArgsContext.MatchedArg;
+const MatchedArgValue = ArgsContext.MatchedArgValue;
 const MatchedSubCommand = ArgsContext.MatchedSubCommand;
 
 pub const Error = error{
@@ -23,6 +23,7 @@ pub const Error = error{
     UnneededEmptyAttachedValue,
     EmptyFlagValueNotAllowed,
     ProvidedValueIsNotValidOption,
+    TooManyArgValue,
 } || Allocator.Error;
 
 const InternalError = error{
@@ -88,6 +89,7 @@ const ShortFlag = struct {
 
 allocator: Allocator,
 tokenizer: Tokenizer,
+args_ctx: ArgsContext,
 cmd: *const Command,
 
 pub fn init(
@@ -98,22 +100,21 @@ pub fn init(
     return Parser{
         .allocator = allocator,
         .tokenizer = tokenizer,
+        .args_ctx = ArgsContext.init(allocator),
         .cmd = command,
     };
 }
 
 pub fn parse(self: *Parser) Error!ArgsContext {
-    var args_ctx = ArgsContext.init(self.allocator);
-    errdefer args_ctx.deinit();
-
-    try self.parseCommandArgument(&args_ctx);
+    errdefer self.args_ctx.deinit();
+    try self.parseCommandArgument();
 
     while (self.tokenizer.nextToken()) |*token| {
         if (token.isShortFlag() or token.isLongFlag()) {
             if (self.cmd.args.items.len == 0)
                 return Error.UnknownFlag;
 
-            self.parseArg(token, &args_ctx) catch |err| switch (err) {
+            self.parseArg(token) catch |err| switch (err) {
                 InternalError.ArgValueNotProvided => return Error.FlagValueNotProvided,
                 InternalError.EmptyArgValueNotAllowed => return Error.EmptyFlagValueNotAllowed,
                 else => |e| return e,
@@ -123,54 +124,46 @@ pub fn parse(self: *Parser) Error!ArgsContext {
                 return Error.UnknownCommand;
 
             const subcmd = try self.parseSubCommand(token.value);
-            try args_ctx.setSubcommand(subcmd);
+            try self.args_ctx.setSubcommand(subcmd);
         }
     }
 
-    if (self.cmd.setting.subcommand_required and args_ctx.subcommand == null) {
+    if (self.cmd.setting.subcommand_required and self.args_ctx.subcommand == null) {
         return Error.CommandSubcommandNotProvided;
     }
-    return args_ctx;
+    return self.args_ctx;
 }
 
-fn parseCommandArgument(self: *Parser, args_ctx: *ArgsContext) Error!void {
-    if (self.cmd.setting.takes_value) {
-        for (self.cmd.args.items) |arg| {
-            if ((arg.short_name == null) and (arg.long_name == null)) {
-                var parsed_arg = self.consumeArgValue(&arg, null) catch |err| switch (err) {
-                    InternalError.ArgValueNotProvided,
-                    InternalError.EmptyArgValueNotAllowed,
-                    => break,
-                    else => |e| return e,
-                };
-                try args_ctx.putMatchedArg(parsed_arg);
-            }
-        }
+fn parseCommandArgument(self: *Parser) Error!void {
+    if (!self.cmd.setting.takes_value) return;
 
-        if (self.cmd.setting.arg_required and (args_ctx.args.count() == 0)) {
-            return Error.CommandArgumentNotProvided;
+    for (self.cmd.args.items) |arg| {
+        if ((arg.short_name == null) and (arg.long_name == null)) {
+            self.consumeArgValue(&arg, null) catch |err| switch (err) {
+                InternalError.ArgValueNotProvided,
+                InternalError.EmptyArgValueNotAllowed,
+                => break,
+                else => |e| return e,
+            };
         }
+    }
+
+    if (self.cmd.setting.arg_required and (self.args_ctx.args.count() == 0)) {
+        return Error.CommandArgumentNotProvided;
     }
 }
 
-fn parseArg(self: *Parser, token: *Token, args_ctx: *ArgsContext) InternalError!void {
+fn parseArg(self: *Parser, token: *Token) InternalError!void {
     if (token.isShortFlag()) {
-        const parsed_args = try self.parseShortArg(token);
-
-        for (parsed_args) |parsed_arg| {
-            try args_ctx.putMatchedArg(parsed_arg);
-        }
+        try self.parseShortArg(token);
     } else if (token.isLongFlag()) {
-        const parsed_arg = try self.parseLongArg(token);
-        try args_ctx.putMatchedArg(parsed_arg);
+        try self.parseLongArg(token);
     }
 }
 
-fn parseShortArg(self: *Parser, token: *Token) InternalError![]const MatchedArg {
+fn parseShortArg(self: *Parser, token: *Token) InternalError!void {
     const flag_tuple = flagTokenToFlagTuple(token);
     var short_flag = ShortFlag.init(flag_tuple.@"0", flag_tuple.@"1");
-    var parsed_args = std.ArrayList(MatchedArg).init(self.allocator);
-    errdefer parsed_args.deinit();
 
     while (short_flag.next()) |flag| {
         const arg = self.cmd.findArgByShortName(flag) orelse {
@@ -183,7 +176,7 @@ fn parseShortArg(self: *Parser, token: *Token) InternalError![]const MatchedArg 
             } else if (short_flag.hasEmptyValue()) {
                 return Error.UnneededEmptyAttachedValue;
             } else {
-                try parsed_args.append(MatchedArg.initWithoutValue(arg.name));
+                try self.args_ctx.putMatchedArg(arg, MatchedArgValue.initNone());
                 continue;
             }
         }
@@ -199,13 +192,11 @@ fn parseShortArg(self: *Parser, token: *Token) InternalError![]const MatchedArg 
                 break :blk null;
             }
         };
-        const parsed_arg = try self.consumeArgValue(arg, value);
-        try parsed_args.append(parsed_arg);
+        try self.consumeArgValue(arg, value);
     }
-    return parsed_args.toOwnedSlice();
 }
 
-fn parseLongArg(self: *Parser, token: *Token) InternalError!MatchedArg {
+fn parseLongArg(self: *Parser, token: *Token) InternalError!void {
     const flag_tuple = flagTokenToFlagTuple(token);
     const arg = self.cmd.findArgByLongName(flag_tuple.@"0") orelse {
         return Error.UnknownFlag;
@@ -215,11 +206,10 @@ fn parseLongArg(self: *Parser, token: *Token) InternalError!MatchedArg {
         if (flag_tuple.@"1" != null) {
             return Error.UnneededAttachedValue;
         } else {
-            return MatchedArg.initWithoutValue(arg.name);
+            return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initNone());
         }
     }
-    const parsed_arg = try self.consumeArgValue(arg, flag_tuple.@"1");
-    return parsed_arg;
+    return try self.consumeArgValue(arg, flag_tuple.@"1");
 }
 
 // Converts a flag token to a tuple holding a flag name and an optional value
@@ -252,7 +242,7 @@ fn consumeArgValue(
     self: *Parser,
     arg: *const Arg,
     attached_value: ?[]const u8,
-) InternalError!MatchedArg {
+) InternalError!void {
     if (attached_value) |val| {
         return self.processValue(arg, val, true);
     } else {
@@ -266,7 +256,7 @@ fn processValue(
     arg: *const Arg,
     value: []const u8,
     is_attached_value: bool,
-) InternalError!MatchedArg {
+) InternalError!void {
     if (arg.values_delimiter) |delimiter| {
         var values_iter = mem.split(u8, value, delimiter);
         var values = std.ArrayList([]const u8).init(self.allocator);
@@ -283,11 +273,8 @@ fn processValue(
             try values.append(_val);
         }
 
-        // zig fmt: off
-        if (mem.containsAtLeast(u8, value, 1, delimiter)
-            or arg.remainingValuesToConsume(values.items.len) == 0) {
-            // zig fmt: on
-            return MatchedArg.initWithManyValues(arg.name, values);
+        if (mem.containsAtLeast(u8, value, 1, delimiter)) {
+            return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initMany(values));
         } else {
             values.deinit();
         }
@@ -300,19 +287,19 @@ fn processValue(
         // For ex: -f=v1,v2
         // flag = f
         // value = v1,v2
-        return MatchedArg.initWithSingleValue(arg.name, value);
+        return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initSingle(value));
     } else {
-        // we have given only one value hence we pass 1 here
-        const num_remaining_values = arg.remainingValuesToConsume(1);
+        const num_remaining_values = arg.remainingValuesToConsume(&self.args_ctx);
 
-        if (num_remaining_values == 0) {
-            return MatchedArg.initWithSingleValue(arg.name, value);
+        if (num_remaining_values <= 1) {
+            return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initSingle(value));
         } else {
             var index: usize = 1;
             var values = std.ArrayList([]const u8).init(self.allocator);
             errdefer values.deinit();
 
             try values.append(value);
+            index += 1;
 
             // consume each value using tokenizer
             while (index <= num_remaining_values) : (index += 1) {
@@ -325,7 +312,7 @@ fn processValue(
 
                 try values.append(_value);
             }
-            return MatchedArg.initWithManyValues(arg.name, values);
+            return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initMany(values));
         }
     }
 }

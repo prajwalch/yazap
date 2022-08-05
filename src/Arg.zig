@@ -1,5 +1,6 @@
 const Arg = @This();
 const std = @import("std");
+const ArgsContext = @import("parser/ArgsContext.zig");
 
 const Settings = struct {
     takes_value: bool,
@@ -90,8 +91,17 @@ pub fn verifyValueInAllowedValues(self: *const Arg, value_to_check: []const u8) 
     }
 }
 
-// min 1 -> 5
-pub fn remainingValuesToConsume(self: *const Arg, num_consumed_values: usize) usize {
+pub fn remainingValuesToConsume(self: *const Arg, args_ctx: *ArgsContext) usize {
+    const num_consumed_values = blk: {
+        const maybe_value = args_ctx.args.get(self.name);
+
+        if (maybe_value) |value| {
+            break :blk value.count();
+        } else {
+            break :blk 0;
+        }
+    };
+
     const num_required_values = blk: {
         if (self.max_values) |n| {
             break :blk n;
@@ -102,7 +112,7 @@ pub fn remainingValuesToConsume(self: *const Arg, num_consumed_values: usize) us
         }
     };
 
-    if (num_consumed_values > num_required_values) {
+    if (num_consumed_values >= num_required_values) {
         return 0;
     } else {
         return num_required_values - num_consumed_values;
