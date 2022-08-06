@@ -209,7 +209,7 @@ fn parseLongArg(self: *Parser, token: *Token) InternalError!void {
             return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initNone());
         }
     }
-    return try self.consumeArgValue(arg, flag_tuple.@"1");
+    return self.consumeArgValue(arg, flag_tuple.@"1");
 }
 
 // Converts a flag token to a tuple holding a flag name and an optional value
