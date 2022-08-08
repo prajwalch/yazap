@@ -98,6 +98,14 @@ pub fn subcommandRequired(self: *Command, boolean: bool) void {
     self.setting.subcommand_required = boolean;
 }
 
+pub fn countArgs(self: *const Command) usize {
+    return (self.args.items.len);
+}
+
+pub fn countSubcommands(self: *const Command) usize {
+    return (self.subcommands.items.len);
+}
+
 pub fn findArgByShortName(self: *const Command, short_name: u8) ?*const Arg {
     for (self.args.items) |*arg| {
         if (arg.short_name) |s| {

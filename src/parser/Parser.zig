@@ -111,7 +111,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
 
     while (self.tokenizer.nextToken()) |*token| {
         if (token.isShortFlag() or token.isLongFlag()) {
-            if (self.cmd.args.items.len == 0)
+            if (self.cmd.countArgs() == 0)
                 return Error.UnknownFlag;
 
             self.parseArg(token) catch |err| switch (err) {
@@ -120,7 +120,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
                 else => |e| return e,
             };
         } else {
-            if (self.cmd.subcommands.items.len == 0)
+            if (self.cmd.countSubcommands() == 0)
                 return Error.UnknownCommand;
 
             const subcmd = try self.parseSubCommand(token.value);
