@@ -321,21 +321,20 @@ fn parseSubCommand(
     self: *Parser,
     provided_subcmd: []const u8,
 ) Error!MatchedSubCommand {
-    for (self.cmd.subcommands.items) |valid_subcmd| {
-        if (mem.eql(u8, valid_subcmd.name, provided_subcmd)) {
-            // zig fmt: off
-            if (valid_subcmd.setting.takes_value
-                or valid_subcmd.args.items.len >= 1
-                or valid_subcmd.subcommands.items.len >= 1) {
-                // zig fmt: on
-                const subcmd_argv = self.tokenizer.restArg() orelse return Error.CommandArgumentNotProvided;
-                var parser = Parser.init(self.allocator, Tokenizer.init(subcmd_argv), &valid_subcmd);
-                const subcmd_ctx = try parser.parse();
+    const valid_subcmd = self.cmd.findSubcommand(provided_subcmd) orelse {
+        return Error.UnknownCommand;
+    };
 
-                return MatchedSubCommand.initWithArg(valid_subcmd.name, subcmd_ctx);
-            }
-            return MatchedSubCommand.initWithoutArg(valid_subcmd.name);
-        }
+    // zig fmt: off
+    if (valid_subcmd.setting.takes_value
+        or valid_subcmd.args.items.len >= 1
+        or valid_subcmd.subcommands.items.len >= 1) {
+        // zig fmt: on
+        const subcmd_argv = self.tokenizer.restArg() orelse return Error.CommandArgumentNotProvided;
+        var parser = Parser.init(self.allocator, Tokenizer.init(subcmd_argv), valid_subcmd);
+        const subcmd_ctx = try parser.parse();
+
+        return MatchedSubCommand.initWithArg(valid_subcmd.name, subcmd_ctx);
     }
-    return Error.UnknownCommand;
+    return MatchedSubCommand.initWithoutArg(valid_subcmd.name);
 }

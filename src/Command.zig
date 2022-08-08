@@ -124,6 +124,16 @@ pub fn findArgByLongName(self: *const Command, long_name: []const u8) ?*const Ar
     return null;
 }
 
+pub fn findSubcommand(self: *const Command, provided_subcmd: []const u8) ?*const Command {
+    for (self.subcommands.items) |*subcmd| {
+        if (std.mem.eql(u8, subcmd.name, provided_subcmd)) {
+            return subcmd;
+        }
+    }
+
+    return null;
+}
+
 pub fn parseProcess(self: *Command) Error!ArgsContext {
     self.process_args = try std.process.argsAlloc(self.allocator);
     return self.parseFrom(self.process_args.?[1..]);
