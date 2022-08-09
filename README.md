@@ -1,7 +1,10 @@
 # zig-arg
-zig-arg is a [clap-rs](https://github.com/clap-rs/clap) inspired Command Line Argument parser for zig which support flags, subcommand and nested subcommands out of the box.
+zig-arg is a [clap-rs](https://github.com/clap-rs/clap) inspired command line argument parser library for [zig](https://ziglang.org).
 
-This library is in active development so many of the features are yet to implement and bugs are expected to happen.
+It supports flag, subcommand, nested subcommands and has a flexible and easy to use API for defining custom [Argument](#arg).
+
+### Note
+zig-arg is still in early development compared to [other parsers](#alternate-parsers).
 
 ## Features
 * [x] Short flags
