@@ -287,12 +287,20 @@ fn processValue(
         // For ex: -f=v1,v2
         // flag = f
         // value = v1,v2
-        return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initSingle(value));
+        if (arg.verifyValueInAllowedValues(value)) {
+            return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initSingle(value));
+        } else {
+            return InternalError.ProvidedValueIsNotValidOption;
+        }
     } else {
         const num_remaining_values = arg.remainingValuesToConsume(&self.args_ctx);
 
         if (num_remaining_values <= 1) {
-            return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initSingle(value));
+            if (arg.verifyValueInAllowedValues(value)) {
+                return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initSingle(value));
+            } else {
+                return InternalError.ProvidedValueIsNotValidOption;
+            }
         } else {
             var index: usize = 1;
             var values = std.ArrayList([]const u8).init(self.allocator);
