@@ -2,6 +2,7 @@ const Parser = @This();
 
 const std = @import("std");
 const ArgsContext = @import("ArgsContext.zig");
+const ErrorContext = @import("error.zig").ErrorContext;
 const Command = @import("../Command.zig");
 const Arg = @import("../Arg.zig");
 const Token = @import("tokenizer.zig").Token;
@@ -90,6 +91,7 @@ const ShortFlag = struct {
 allocator: Allocator,
 tokenizer: Tokenizer,
 args_ctx: ArgsContext,
+err_ctx: ErrorContext,
 cmd: *const Command,
 
 pub fn init(
@@ -101,27 +103,45 @@ pub fn init(
         .allocator = allocator,
         .tokenizer = tokenizer,
         .args_ctx = ArgsContext.init(allocator),
+        .err_ctx = ErrorContext.init(),
         .cmd = command,
     };
 }
 
 pub fn parse(self: *Parser) Error!ArgsContext {
     errdefer self.args_ctx.deinit();
+
+    self.err_ctx.setCmd(self.cmd);
     try self.parseCommandArgument();
 
     while (self.tokenizer.nextToken()) |*token| {
+        self.err_ctx.setProvidedArg(token.value);
+
         if (token.isShortFlag() or token.isLongFlag()) {
-            if (self.cmd.countArgs() == 0)
-                return Error.UnknownFlag;
+            if (self.cmd.countArgs() == 0) {
+                self.err_ctx.setErr(Error.UnknownFlag);
+                return self.err_ctx.err;
+            }
 
             self.parseArg(token) catch |err| switch (err) {
-                InternalError.ArgValueNotProvided => return Error.FlagValueNotProvided,
-                InternalError.EmptyArgValueNotAllowed => return Error.EmptyFlagValueNotAllowed,
-                else => |e| return e,
+                InternalError.ArgValueNotProvided => {
+                    self.err_ctx.setErr(Error.FlagValueNotProvided);
+                    return self.err_ctx.err;
+                },
+                InternalError.EmptyArgValueNotAllowed => {
+                    self.err_ctx.setErr(Error.EmptyFlagValueNotAllowed);
+                    return self.err_ctx.err;
+                },
+                else => |e| {
+                    self.err_ctx.setErr(e);
+                    return e;
+                },
             };
         } else {
-            if (self.cmd.countSubcommands() == 0)
+            if (self.cmd.countSubcommands() == 0) {
+                self.err_ctx.setErr(Error.UnknownCommand);
                 return Error.UnknownCommand;
+            }
 
             const subcmd = try self.parseSubCommand(token.value);
             try self.args_ctx.setSubcommand(subcmd);
@@ -129,7 +149,8 @@ pub fn parse(self: *Parser) Error!ArgsContext {
     }
 
     if (self.cmd.setting.subcommand_required and self.args_ctx.subcommand == null) {
-        return Error.CommandSubcommandNotProvided;
+        self.err_ctx.setErr(Error.CommandSubcommandNotProvided);
+        return self.err_ctx.err;
     }
     return self.args_ctx;
 }
@@ -149,7 +170,8 @@ fn parseCommandArgument(self: *Parser) Error!void {
     }
 
     if (self.cmd.setting.arg_required and (self.args_ctx.args.count() == 0)) {
-        return Error.CommandArgumentNotProvided;
+        self.err_ctx.setErr(Error.CommandArgumentNotProvided);
+        return self.err_ctx.err;
     }
 }
 
@@ -166,6 +188,8 @@ fn parseShortArg(self: *Parser, token: *Token) InternalError!void {
     var short_flag = ShortFlag.init(flag_tuple.@"0", flag_tuple.@"1");
 
     while (short_flag.next()) |flag| {
+        self.err_ctx.setProvidedArg(&[_]u8{flag});
+
         const arg = self.cmd.findArgByShortName(flag) orelse {
             return Error.UnknownFlag;
         };
@@ -198,6 +222,8 @@ fn parseShortArg(self: *Parser, token: *Token) InternalError!void {
 
 fn parseLongArg(self: *Parser, token: *Token) InternalError!void {
     const flag_tuple = flagTokenToFlagTuple(token);
+    self.err_ctx.setProvidedArg(flag_tuple.@"0");
+
     const arg = self.cmd.findArgByLongName(flag_tuple.@"0") orelse {
         return Error.UnknownFlag;
     };
@@ -243,6 +269,8 @@ fn consumeArgValue(
     arg: *const Arg,
     attached_value: ?[]const u8,
 ) InternalError!void {
+    self.err_ctx.setArg(arg);
+
     if (attached_value) |val| {
         return self.processValue(arg, val, true);
     } else {
@@ -257,6 +285,8 @@ fn processValue(
     value: []const u8,
     is_attached_value: bool,
 ) InternalError!void {
+    self.err_ctx.setProvidedArg(value);
+
     if (arg.values_delimiter) |delimiter| {
         var values_iter = mem.split(u8, value, delimiter);
         var values = std.ArrayList([]const u8).init(self.allocator);
@@ -264,6 +294,7 @@ fn processValue(
 
         while (values_iter.next()) |val| {
             const _val = @as([]const u8, val);
+            self.err_ctx.setProvidedArg(_val);
 
             if ((_val.len == 0) and !(arg.settings.allow_empty_value))
                 return InternalError.EmptyArgValueNotAllowed;
@@ -312,6 +343,7 @@ fn processValue(
             // consume each value using tokenizer
             while (index <= num_remaining_values) : (index += 1) {
                 const _value = self.tokenizer.nextNonFlagArg() orelse break;
+                self.err_ctx.setProvidedArg(_value);
 
                 if ((_value.len == 0) and !(arg.settings.allow_empty_value))
                     return InternalError.EmptyArgValueNotAllowed;
@@ -330,7 +362,8 @@ fn parseSubCommand(
     provided_subcmd: []const u8,
 ) Error!MatchedSubCommand {
     const valid_subcmd = self.cmd.findSubcommand(provided_subcmd) orelse {
-        return Error.UnknownCommand;
+        self.err_ctx.setErr(Error.UnknownCommand);
+        return self.err_ctx.err;
     };
 
     // zig fmt: off
@@ -338,7 +371,10 @@ fn parseSubCommand(
         or valid_subcmd.args.items.len >= 1
         or valid_subcmd.subcommands.items.len >= 1) {
         // zig fmt: on
-        const subcmd_argv = self.tokenizer.restArg() orelse return Error.CommandArgumentNotProvided;
+        const subcmd_argv = self.tokenizer.restArg() orelse {
+            self.err_ctx.setErr(Error.CommandArgumentNotProvided);
+            return self.err_ctx.err;
+        };
         var parser = Parser.init(self.allocator, Tokenizer.init(subcmd_argv), valid_subcmd);
         const subcmd_ctx = try parser.parse();
 

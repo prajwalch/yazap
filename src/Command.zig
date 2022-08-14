@@ -1,6 +1,7 @@
 const Command = @This();
 
 const std = @import("std");
+const err = @import("parser/error.zig");
 const Parser = @import("parser/Parser.zig");
 const Arg = @import("Arg.zig");
 const ArgsContext = @import("parser/ArgsContext.zig");
@@ -27,7 +28,7 @@ const Setting = struct {
 pub const Error = error{
     InvalidCmdLine,
     Overflow,
-} || Parser.Error;
+} || Parser.Error || err.PrintError;
 
 allocator: Allocator,
 name: []const u8,
@@ -139,7 +140,11 @@ pub fn parseProcess(self: *Command) Error!ArgsContext {
     return self.parseFrom(self.process_args.?[1..]);
 }
 
-pub fn parseFrom(self: *Command, argv: []const [:0]const u8) Parser.Error!ArgsContext {
+pub fn parseFrom(self: *Command, argv: []const [:0]const u8) Error!ArgsContext {
     var parser = Parser.init(self.allocator, Tokenizer.init(argv), self);
-    return parser.parse();
+    const args_ctx = parser.parse() catch |e| {
+        try err.print(parser.err_ctx);
+        return e;
+    };
+    return args_ctx;
 }
