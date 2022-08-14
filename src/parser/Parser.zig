@@ -193,6 +193,7 @@ fn parseShortArg(self: *Parser, token: *Token) InternalError!void {
         const arg = self.cmd.findArgByShortName(flag) orelse {
             return Error.UnknownFlag;
         };
+        self.err_ctx.setArg(arg);
 
         if (!(arg.settings.takes_value)) {
             if (short_flag.hasValue()) {
@@ -227,6 +228,7 @@ fn parseLongArg(self: *Parser, token: *Token) InternalError!void {
     const arg = self.cmd.findArgByLongName(flag_tuple.@"0") orelse {
         return Error.UnknownFlag;
     };
+    self.err_ctx.setArg(arg);
 
     if (!(arg.settings.takes_value)) {
         if (flag_tuple.@"1" != null) {
@@ -269,7 +271,8 @@ fn consumeArgValue(
     arg: *const Arg,
     attached_value: ?[]const u8,
 ) InternalError!void {
-    self.err_ctx.setArg(arg);
+    // Only set arg when caller doesn't already set it
+    if (self.err_ctx.arg == null) self.err_ctx.setArg(arg);
 
     if (attached_value) |val| {
         return self.processValue(arg, val, true);
