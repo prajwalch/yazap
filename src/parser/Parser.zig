@@ -45,11 +45,11 @@ const ShortFlag = struct {
         };
     }
 
-    pub fn next(self: *ShortFlag) ?u8 {
+    pub fn next(self: *ShortFlag) ?*const u8 {
         if (self.isAtEnd()) return null;
         defer self.cursor += 1;
 
-        return self.name[self.cursor];
+        return &self.name[self.cursor];
     }
 
     pub fn getValue(self: *ShortFlag) ?[]const u8 {
@@ -188,9 +188,9 @@ fn parseShortArg(self: *Parser, token: *Token) InternalError!void {
     var short_flag = ShortFlag.init(flag_tuple.@"0", flag_tuple.@"1");
 
     while (short_flag.next()) |flag| {
-        self.err_ctx.setProvidedArg(&[_]u8{flag});
+        self.err_ctx.setProvidedArg(@as(*const [1]u8, flag));
 
-        const arg = self.cmd.findArgByShortName(flag) orelse {
+        const arg = self.cmd.findArgByShortName(flag.*) orelse {
             return Error.UnknownFlag;
         };
         self.err_ctx.setArg(arg);
