@@ -291,26 +291,23 @@ fn processValue(
     self.err_ctx.setProvidedArg(value);
 
     if (arg.values_delimiter) |delimiter| {
-        var values_iter = mem.split(u8, value, delimiter);
-        var values = std.ArrayList([]const u8).init(self.allocator);
-        errdefer values.deinit();
-
-        while (values_iter.next()) |val| {
-            const _val = @as([]const u8, val);
-            self.err_ctx.setProvidedArg(_val);
-
-            if ((_val.len == 0) and !(arg.settings.allow_empty_value))
-                return InternalError.EmptyArgValueNotAllowed;
-            if (!arg.verifyValueInAllowedValues(_val))
-                return InternalError.ProvidedValueIsNotValidOption;
-
-            try values.append(_val);
-        }
-
         if (mem.containsAtLeast(u8, value, 1, delimiter)) {
+            var values_iter = mem.split(u8, value, delimiter);
+            var values = std.ArrayList([]const u8).init(self.allocator);
+            errdefer values.deinit();
+
+            while (values_iter.next()) |val| {
+                const _val = @as([]const u8, val);
+                self.err_ctx.setProvidedArg(_val);
+
+                if ((_val.len == 0) and !(arg.settings.allow_empty_value))
+                    return InternalError.EmptyArgValueNotAllowed;
+                if (!arg.verifyValueInAllowedValues(_val))
+                    return InternalError.ProvidedValueIsNotValidOption;
+
+                try values.append(_val);
+            }
             return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initMany(values));
-        } else {
-            values.deinit();
         }
     }
 
