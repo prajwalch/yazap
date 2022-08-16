@@ -271,7 +271,7 @@ fn consumeArgValue(
     arg: *const Arg,
     attached_value: ?[]const u8,
 ) InternalError!void {
-    // Only set arg when caller doesn't already set it
+    // Only set arg if caller didn't set it already
     if (self.err_ctx.arg == null) self.err_ctx.setArg(arg);
 
     if (attached_value) |val| {
