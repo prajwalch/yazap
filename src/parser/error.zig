@@ -6,10 +6,16 @@ const ParserError = @import("Parser.zig").Error;
 const log = std.log.scoped(.zigarg);
 pub const PrintError = std.fs.File.WriteError;
 
+/// A structure for `Parser` to collect enough data
+/// for generating error message
 pub const ErrorContext = struct {
+    /// Actual error that happened
     err: ParserError,
+    /// The actual command argument which parser found just before error happened
     arg: ?*const Arg = null,
+    /// The command whose argument parser was trying to parse
     cmd: ?*const Command = null,
+    /// User provided raw argument
     provided_arg: []const u8,
 
     pub fn init() ErrorContext {
