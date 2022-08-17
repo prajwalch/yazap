@@ -2,7 +2,7 @@ const Parser = @This();
 
 const std = @import("std");
 const ArgsContext = @import("ArgsContext.zig");
-const ErrorContext = @import("error.zig").ErrorContext;
+const ErrorContext = @import("ErrorContext.zig");
 const Command = @import("../Command.zig");
 const Arg = @import("../Arg.zig");
 const Token = @import("tokenizer.zig").Token;

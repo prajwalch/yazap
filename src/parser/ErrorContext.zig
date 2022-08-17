@@ -1,3 +1,8 @@
+//! A structure for `Parser` to collect enough data
+//! for generating error message
+
+const ErrorContext = @This();
+
 const std = @import("std");
 const Arg = @import("../Arg.zig");
 const Command = @import("../Command.zig");
@@ -6,40 +11,36 @@ const ParserError = @import("Parser.zig").Error;
 const log = std.log.scoped(.zigarg);
 pub const PrintError = std.fs.File.WriteError;
 
-/// A structure for `Parser` to collect enough data
-/// for generating error message
-pub const ErrorContext = struct {
-    /// Actual error that happened
-    err: ParserError,
-    /// The actual command argument which parser found just before error happened
-    arg: ?*const Arg = null,
-    /// The command whose argument parser was trying to parse
-    cmd: ?*const Command = null,
-    /// User provided raw argument
-    provided_arg: []const u8,
+/// Actual error that happened
+err: ParserError,
+/// The actual command argument which parser found just before error happened
+arg: ?*const Arg = null,
+/// The command whose argument parser was trying to parse
+cmd: ?*const Command = null,
+/// User provided raw argument
+provided_arg: []const u8,
 
-    pub fn init() ErrorContext {
-        return ErrorContext{ .err = undefined, .provided_arg = undefined };
-    }
+pub fn init() ErrorContext {
+    return ErrorContext{ .err = undefined, .provided_arg = undefined };
+}
 
-    pub inline fn setErr(self: *ErrorContext, err: ParserError) void {
-        self.err = err;
-    }
+pub inline fn setErr(self: *ErrorContext, err: ParserError) void {
+    self.err = err;
+}
 
-    pub inline fn setArg(self: *ErrorContext, arg: *const Arg) void {
-        self.arg = arg;
-    }
+pub inline fn setArg(self: *ErrorContext, arg: *const Arg) void {
+    self.arg = arg;
+}
 
-    pub inline fn setCmd(self: *ErrorContext, cmd: *const Command) void {
-        self.cmd = cmd;
-    }
+pub inline fn setCmd(self: *ErrorContext, cmd: *const Command) void {
+    self.cmd = cmd;
+}
 
-    pub inline fn setProvidedArg(self: *ErrorContext, provided_arg: []const u8) void {
-        self.provided_arg = provided_arg;
-    }
-};
+pub inline fn setProvidedArg(self: *ErrorContext, provided_arg: []const u8) void {
+    self.provided_arg = provided_arg;
+}
 
-pub fn print(err_ctx: ErrorContext) PrintError!void {
+pub fn logError(err_ctx: *ErrorContext) PrintError!void {
     switch (err_ctx.err) {
         ParserError.UnknownFlag => log.err("Unknown flag '{s}'\n", .{err_ctx.provided_arg}),
         ParserError.UnknownCommand => log.err("Unknown Command '{s}'\n", .{err_ctx.provided_arg}),
