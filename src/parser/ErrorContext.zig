@@ -1,5 +1,4 @@
-//! A structure for `Parser` to collect enough data
-//! for generating error message
+//! This structure is used to hold all the information needed to generate error message
 
 const ErrorContext = @This();
 
