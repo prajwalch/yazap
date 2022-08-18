@@ -312,8 +312,8 @@ fn processValue(
     }
 
     if (is_attached_value) {
-        // Ignore multiples values seperated with delimiter
-        // if have
+        // When values delimiter is not set and multiple values are passed
+        // by attaching it then take the entire values as single value
         //
         // For ex: -f=v1,v2
         // flag = f
