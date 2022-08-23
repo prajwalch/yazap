@@ -3,7 +3,7 @@ Making instance of it by calling `Command.new(allocator, "You app name")` is the
 
 Then add the custom [Argument](#arg), [flag](#flag) and sub-command by using the provided methods.
 Once you're done adding all, call `Command.parseProcess` to start parsing the
-raw argument which internally calls `[std.process.argsAlloc](https://ziglang.org/documentation/master/std/#root;process.argsAlloc)` to
+raw argument which internally calls [std.process.argsAlloc](https://ziglang.org/documentation/master/std/#root;process.argsAlloc) to
 obtain the arguments. Alternately you can call `Command.parseFrom` by passing your own argument.
 
 ## Methods
