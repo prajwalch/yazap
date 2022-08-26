@@ -32,7 +32,7 @@ pub const Token = struct {
         return Token{ .value = value, .tag = tag };
     }
 
-    pub fn isShortFlag(self: *Token) bool {
+    pub fn isShortFlag(self: *const Token) bool {
         // zig fmt: off
         return (
             self.tag == .short_flag
@@ -45,7 +45,7 @@ pub const Token = struct {
         // zig fmt: on
     }
 
-    pub fn isLongFlag(self: *Token) bool {
+    pub fn isLongFlag(self: *const Token) bool {
         // zig fmt: off
         return (
             self.tag == .long_flag

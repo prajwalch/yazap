@@ -175,7 +175,7 @@ fn parseCommandArgument(self: *Parser) Error!void {
     }
 }
 
-fn parseArg(self: *Parser, token: *Token) InternalError!void {
+fn parseArg(self: *Parser, token: *const Token) InternalError!void {
     if (token.isShortFlag()) {
         try self.parseShortArg(token);
     } else if (token.isLongFlag()) {
@@ -183,7 +183,7 @@ fn parseArg(self: *Parser, token: *Token) InternalError!void {
     }
 }
 
-fn parseShortArg(self: *Parser, token: *Token) InternalError!void {
+fn parseShortArg(self: *Parser, token: *const Token) InternalError!void {
     const flag_tuple = flagTokenToFlagTuple(token);
     var short_flag = ShortFlag.init(flag_tuple.@"0", flag_tuple.@"1");
 
@@ -221,7 +221,7 @@ fn parseShortArg(self: *Parser, token: *Token) InternalError!void {
     }
 }
 
-fn parseLongArg(self: *Parser, token: *Token) InternalError!void {
+fn parseLongArg(self: *Parser, token: *const Token) InternalError!void {
     const flag_tuple = flagTokenToFlagTuple(token);
     self.err_ctx.setProvidedArg(flag_tuple.@"0");
 
@@ -245,7 +245,7 @@ fn parseLongArg(self: *Parser, token: *Token) InternalError!void {
 // --flag, -f, -fgh                     => (flag, null), (f, null), (fgh, null)
 // --flag=value, -f=value, -fgh=value   => (flag, value), (f, value), (fgh, value)
 // --flag=, -f=, -fgh=                  => (flag, ""), (f, ""), (fgh, "")
-fn flagTokenToFlagTuple(token: *Token) FlagTuple {
+fn flagTokenToFlagTuple(token: *const Token) FlagTuple {
     var kv_iter = mem.tokenize(u8, token.value, "=");
 
     return switch (token.tag) {
