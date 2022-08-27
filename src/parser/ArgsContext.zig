@@ -1,3 +1,6 @@
+//! A structure for querying the parser result
+//! which includes the getting command's raw value, flag's value, subcommand's args result and so on.
+
 const ArgsContext = @This();
 
 const std = @import("std");
@@ -145,6 +148,7 @@ pub fn setSubcommand(self: *ArgsContext, subcommand: MatchedSubCommand) !void {
     self.subcommand = alloc_subcmd;
 }
 
+/// Checks if argument or subcommand is present
 pub fn isPresent(self: *const ArgsContext, name_to_lookup: []const u8) bool {
     if (self.args.contains(name_to_lookup)) {
         return true;
@@ -156,6 +160,7 @@ pub fn isPresent(self: *const ArgsContext, name_to_lookup: []const u8) bool {
     return false;
 }
 
+/// Returns the single value of an argument if found otherwise null
 pub fn valueOf(self: *const ArgsContext, arg_name: []const u8) ?[]const u8 {
     if (self.args.get(arg_name)) |value| {
         if (value.isSingle()) return value.single;
@@ -168,6 +173,7 @@ pub fn valueOf(self: *const ArgsContext, arg_name: []const u8) ?[]const u8 {
     return null;
 }
 
+/// Returns the array of values of an argument if found otherwise null
 pub fn valuesOf(self: *ArgsContext, name_to_lookup: []const u8) ?[][]const u8 {
     if (self.args.get(name_to_lookup)) |value| {
         if (value.isMany()) return value.many.items[0..];
@@ -175,6 +181,7 @@ pub fn valuesOf(self: *ArgsContext, name_to_lookup: []const u8) ?[][]const u8 {
     return null;
 }
 
+/// Returns the subcommand `ArgsContext` if subcommand is present otherwise null
 pub fn subcommandContext(self: *const ArgsContext, subcmd_name: []const u8) ?ArgsContext {
     if (self.subcommand) |subcmd| {
         if (std.mem.eql(u8, subcmd.name, subcmd_name)) {
@@ -182,4 +189,8 @@ pub fn subcommandContext(self: *const ArgsContext, subcmd_name: []const u8) ?Arg
         }
     }
     return null;
+}
+
+test "emit methods docs" {
+    std.testing.refAllDecls(@This());
 }
