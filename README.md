@@ -51,12 +51,13 @@ Before you follow below steps be sure to initialize your project as repo by runn
 ## Docs
 Please visit [here](https://prajwalch.github.io/yazap/) for documentation reference
 
-## Examples
-### Simple ls program
+## Example
+### Flag
 ```zig
 const std = @import("std");
 const yazap = @import("yazap");
 
+const allocator = std.heap.page_allocator;
 const log = std.log;
 const Command = yazap.Command;
 const flag = yazap.flag;
