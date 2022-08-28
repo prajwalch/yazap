@@ -3,9 +3,6 @@ zig-arg is a [clap-rs](https://github.com/clap-rs/clap) inspired command line ar
 
 It supports for defining custom Argument, flag, subcommand and nested subcommand with easy to use API.
 
-### Note
-zig-arg is still in early development compared to [other parsers](#alternate-parsers).
-
 ## Features
 - Flags
     * boolean/no argument flag (`-f, --flag`)
