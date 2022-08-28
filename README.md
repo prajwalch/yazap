@@ -52,7 +52,6 @@ Before you follow below steps be sure to initialize your project as repo by runn
 Please visit [here](https://prajwalch.github.io/yazap/) for documentation reference
 
 ## Example
-### Flag
 ```zig
 const std = @import("std");
 const yazap = @import("yazap");
