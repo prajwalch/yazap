@@ -1,5 +1,5 @@
-# zig-arg
-zig-arg is a [clap-rs](https://github.com/clap-rs/clap) inspired command line argument parser library for [zig](https://ziglang.org).
+# yazap
+yazap is a [clap-rs](https://github.com/clap-rs/clap) inspired command line argument parser library for [zig](https://ziglang.org).
 
 It supports for defining custom Argument, flag, subcommand and nested subcommand with easy to use API.
 
@@ -30,35 +30,35 @@ It supports for defining custom Argument, flag, subcommand and nested subcommand
     * `app arg-and-flag-cmd <ARG> [FLAGS]`
     * Nested subcommand
 
-- Defining custom [Argument](https://prajwalch.github.io/zig-arg/#root;Arg)
+- Defining custom [Argument](https://prajwalch.github.io/yazap/#root;Arg)
 
 
 ## Installation Guide
 Before you follow below steps be sure to initialize your project as repo by running `git init`
 
 1. On your root project make a directory named `libs`
-2. Run `git submodule add https://github.com/PrajwalCH/zig-arg libs/zig-arg`
+2. Run `git submodule add https://github.com/PrajwalCH/yazap libs/yazap`
 3. After above step is complete add the following code snippet on your `build.zig` file
     ```zig
-    exe.addPackagePath("zig-arg", "libs/zig-arg/src/lib.zig");
+    exe.addPackagePath("yazap", "libs/yazap/src/lib.zig");
     ```
 4. Now you can import this library on your src file as
     ```zig
-    const zigarg = @import("zig-arg");
+    const yazap = @import("yazap");
     ```
 
 ## Docs
-Please visit [here](https://prajwalch.github.io/zig-arg/) for documentation reference
+Please visit [here](https://prajwalch.github.io/yazap/) for documentation reference
 
 ## Examples
 ### Simple ls program
 ```zig
 const std = @import("std");
-const zigarg = @import("zig-arg");
+const yazap = @import("yazap");
 
 const log = std.log;
-const Command = zigarg.Command;
-const flag = zigarg.flag;
+const Command = yazap.Command;
+const flag = yazap.flag;
 
 pub fn main() anyerror!void {
     var ls = Command.new(allocator, "ls");
