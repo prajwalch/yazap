@@ -1,43 +1,37 @@
 # zig-arg
 zig-arg is a [clap-rs](https://github.com/clap-rs/clap) inspired command line argument parser library for [zig](https://ziglang.org).
 
-It supports flag, subcommand, nested subcommands and has a flexible and easy to use API for defining custom [Argument](#arg).
+It supports for defining custom Argument, flag, subcommand and nested subcommand with easy to use API.
 
 ### Note
 zig-arg is still in early development compared to [other parsers](#alternate-parsers).
 
 ## Features
-* [x] Short flags
-    - `-b`, `-1 value`, `-o <a | b | c>`
+- Flags
+    * boolean/no argument flag (`-f, --flag`)
+    * single argument flag (`-f, --flag <VALUE>`)
+    * multi argument flag (`-f, --flag <VALUES>`)
+        Note: You have to explicitly set the number of arguments for it
+    * single argument flag with options (`-f, --flag <A | B | C>`)
 
-* [x] Long flag
-    - `--bool`
-    - `--arg 1, --arg 1 2 `
-    - `--option <a | b | c>`
-
-* [x] Support passing flag value using space `-f value`
+    * Support passing value using space `-f value`
     no space `-fvalue` and using `=` (`-f=value`)
 
-* [x] Support chaining multiple short flags
-    - `-xy` where both `x` and `y` does not take value
-    - `-xyz=value`
+    * Support chaining multiple short flags
+        + `-xy` where both `x` and `y` does not take value
+        + `-xyz=value`
 
-    Note: Currently if you provided a value for chained flags using space (`-xyz arg`)
-    where all of them takes value it will be not parse as you expect. Which means it will
-    not take `arg` as a value for `xyz` flags instead it will take `yz` as value for `x`
-    even if you pass them as a flags and the `arg` will be parsed a argument or subcommand.
+    * Support for specifying flag multiple times (`-x a -x b -x c`)
 
-* [x] Support flag that can specified multiple times `-x 1 -x 2 -x 3`
+- Subcommand
+    * `app bool-cmd`
+    * `app single-arg-cmd <ARG>`
+    * `app multi-arg-cmd <ARG1> <ARG2> <ARGS3...>`
+    * `app flag-cmd [flags]`
+    * `app arg-and-flag-cmd <ARG> [FLAGS]`
+    * Nested subcommand
 
-* [x] Subcommand
-    - `app bool-cmd`
-    - `app single-arg-cmd <ARG>`
-    - `app multi-arg-cmd <ARG1> <ARG2> <ARGS3...>`
-    - `app flag-cmd [flags]`
-    - `app arg-and-flag-cmd <ARG> [FLAGS]`
-
-* [x] Nested subcommand
-    - `app cmd1 cmd1.1`
+- Defining custom [Argument](https://prajwalch.github.io/zig-arg/#root;Arg)
 
 
 ## Installation Guide
@@ -51,7 +45,7 @@ Before you follow below steps be sure to initialize your project as repo by runn
     ```
 4. Now you can import this library on your src file as
     ```zig
-    const zig_arg = @import("zig-arg");
+    const zigarg = @import("zig-arg");
     ```
 
 ## Docs
