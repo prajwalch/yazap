@@ -1,7 +1,8 @@
 # yazap
-yazap is a [clap-rs](https://github.com/clap-rs/clap) inspired command line argument parser library for [zig](https://ziglang.org).
+**yazap** is a command line argument parser for [zig](http://ziglang.org) which provides simple and easy to use API for you to define
+custom Argument, flag, subcommand and nested subcommand.
 
-It supports for defining custom Argument, flag, subcommand and nested subcommand with easy to use API.
+Inspired from [clap-rs](https://github.com/clap-rs/clap) and [andrewrk/ziglang: src-self-hosted/arg.zig](https://git.sr.ht/~andrewrk/ziglang/tree/725b6ee634f01355da4a6badc5675751b85f0bf0/src-self-hosted/arg.zig)
 
 ## Features
 - Flags
