@@ -25,7 +25,7 @@ pub fn main() anyerror!void {
     var cmd_push = Command.new(allocator, "push");
     try cmd_push.takesSingleValue("REMOTE");
     try cmd_push.takesSingleValue("BRANCH_NAME");
-    try cmd_push.argRequired(true);
+    cmd_push.argRequired(true);
 
     try git.addSubcommand(Command.new(allocator, "init"));
     try git.addSubcommand(cmd_commit);
