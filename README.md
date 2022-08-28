@@ -11,7 +11,9 @@ zig-arg is still in early development compared to [other parsers](#alternate-par
     * boolean/no argument flag (`-f, --flag`)
     * single argument flag (`-f, --flag <VALUE>`)
     * multi argument flag (`-f, --flag <VALUES>`)
+        
         Note: You have to explicitly set the number of arguments for it
+    
     * single argument flag with options (`-f, --flag <A | B | C>`)
 
     * Support passing value using space `-f value`
@@ -55,11 +57,11 @@ Please visit [here](https://prajwalch.github.io/zig-arg/) for documentation refe
 ### Simple ls program
 ```zig
 const std = @import("std");
-const zig_arg = @import("zig-arg");
+const zigarg = @import("zig-arg");
 
 const log = std.log;
-const Command = zig_arg.Command;
-const flag = zig_arg.flag;
+const Command = zigarg.Command;
+const flag = zigarg.flag;
 
 pub fn main() anyerror!void {
     var ls = Command.new(allocator, "ls");
