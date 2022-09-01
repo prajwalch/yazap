@@ -300,15 +300,7 @@ fn processValue(
             errdefer values.deinit();
 
             while (values_iter.next()) |val| {
-                const _val = @as([]const u8, val);
-                self.err_ctx.setProvidedArg(_val);
-
-                if ((_val.len == 0) and !(arg.settings.allow_empty_value))
-                    return InternalError.EmptyArgValueNotAllowed;
-                if (!arg.verifyValueInAllowedValues(_val))
-                    return InternalError.ProvidedValueIsNotValidOption;
-
-                try values.append(_val);
+                try self.verifyAndAppendValue(arg, &values, val);
             }
             return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initMany(values));
         }
@@ -343,21 +335,20 @@ fn processValue(
             try values.append(value);
             index += 1;
 
-            // consume each value using tokenizer
-            while (index <= num_remaining_values) : (index += 1) {
-                const _value = self.tokenizer.nextNonFlagArg() orelse break;
-                self.err_ctx.setProvidedArg(_value);
+fn verifyAndAppendValue(
+    self: *Parser,
+    arg: *const Arg,
+    list: *std.ArrayList([]const u8),
+    value: []const u8,
+) InternalError!void {
+    self.err_ctx.setProvidedArg(value);
 
-                if ((_value.len == 0) and !(arg.settings.allow_empty_value))
-                    return InternalError.EmptyArgValueNotAllowed;
-                if (!arg.verifyValueInAllowedValues(_value))
-                    return InternalError.ProvidedValueIsNotValidOption;
+    if ((value.len == 0) and !(arg.settings.allow_empty_value))
+        return InternalError.EmptyArgValueNotAllowed;
+    if (!(arg.verifyValueInAllowedValues(value)))
+        return InternalError.ProvidedValueIsNotValidOption;
 
-                try values.append(_value);
-            }
-            return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initMany(values));
-        }
-    }
+    try list.append(value);
 }
 
 fn parseSubCommand(
