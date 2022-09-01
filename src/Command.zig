@@ -97,7 +97,7 @@ pub fn takesNValues(self: *Command, arg_name: []const u8, n: usize) !void {
     self.takesValue(true);
 }
 
-/// Specifies that the command takes value. Default to 'false
+/// Specifies that the command takes value. Default to 'false`
 pub fn takesValue(self: *Command, b: bool) void {
     self.setting.takes_value = b;
 }
