@@ -164,7 +164,10 @@ fn parseCommandArgument(self: *Parser) Error!void {
                 InternalError.ArgValueNotProvided,
                 InternalError.EmptyArgValueNotAllowed,
                 => break,
-                else => |e| return e,
+                else => |e| {
+                    self.err_ctx.setErr(e);
+                    return e;
+                },
             };
         }
     }
