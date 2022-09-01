@@ -158,9 +158,9 @@ pub fn parse(self: *Parser) Error!ArgsContext {
 fn parseCommandArgument(self: *Parser) Error!void {
     if (!self.cmd.setting.takes_value) return;
 
-    for (self.cmd.args.items) |arg| {
+    for (self.cmd.args.items) |*arg| {
         if ((arg.short_name == null) and (arg.long_name == null)) {
-            self.consumeArgValue(&arg, null) catch |err| switch (err) {
+            self.consumeArgValue(arg, null) catch |err| switch (err) {
                 InternalError.ArgValueNotProvided,
                 InternalError.EmptyArgValueNotAllowed,
                 => break,
