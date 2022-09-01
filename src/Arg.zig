@@ -6,11 +6,13 @@ const ArgsContext = @import("parser/ArgsContext.zig");
 
 const Settings = struct {
     takes_value: bool,
+    takes_multiple_values: bool,
     allow_empty_value: bool,
 
     pub fn initDefault() Settings {
         return Settings{
             .takes_value = false,
+            .takes_multiple_values = false,
             .allow_empty_value = false,
         };
     }
@@ -92,6 +94,18 @@ pub fn takesValue(self: *Arg, b: bool) void {
     self.settings.takes_value = b;
 }
 
+/// Specifies that the argument will takes an unknown number of values.
+/// You can use `Arg.maxValues(n)` to limit the number of values.
+///
+/// Note:
+/// Values will continue to be consume until one of the following condition wiil satisfies:
+/// 1. If another flag is found
+/// 2. If parser reaches the end of raw argument
+/// 3. If parser reaches the maximum number of values. Requires to explicitly set `Arg.maxValues(n)`
+pub fn takesMultipleValues(self: *Arg, b: bool) void {
+    self.settings.takes_multiple_values = b;
+}
+
 /// Specifies wether an argument can take a empty value or not
 pub fn allowedEmptyValue(self: *Arg, b: bool) void {
     self.settings.allow_empty_value = b;
@@ -105,34 +119,6 @@ pub fn verifyValueInAllowedValues(self: *const Arg, value_to_check: []const u8) 
         return false;
     } else {
         return true;
-    }
-}
-
-pub fn remainingValuesToConsume(self: *const Arg, args_ctx: *ArgsContext) usize {
-    const num_consumed_values = blk: {
-        const maybe_value = args_ctx.args.get(self.name);
-
-        if (maybe_value) |value| {
-            break :blk value.count();
-        } else {
-            break :blk 0;
-        }
-    };
-
-    const num_required_values = blk: {
-        if (self.max_values) |n| {
-            break :blk n;
-        } else if (self.min_values) |n| {
-            break :blk n;
-        } else {
-            break :blk 0;
-        }
-    };
-
-    if (num_consumed_values >= num_required_values) {
-        return 0;
-    } else {
-        return num_required_values - num_consumed_values;
     }
 }
 

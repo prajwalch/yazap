@@ -1,7 +1,7 @@
 const std = @import("std");
 const Command = @import("Command.zig");
 const flag = @import("flag.zig");
-// const Arg = @import("Arg.zig");
+const Arg = @import("Arg.zig");
 const testing = std.testing;
 
 const allocator = std.heap.page_allocator;
@@ -130,4 +130,29 @@ test "flags" {
     try testing.expectEqualStrings("val2", argn_values[1]);
     try testing.expectEqualStrings("val3", argn_values[2]);
     try testing.expectEqualStrings("opt2", matches.valueOf("option-flag").?);
+}
+
+test "arg.takes_multiple_values" {
+    const argv: []const [:0]const u8 = &.{
+        "file1.zig",
+        "file1.zig",
+        "file1.zig",
+        "file1.zig",
+    };
+
+    var cmd = Command.new(allocator, "appi");
+    defer cmd.deinit();
+    cmd.takesValue(true);
+
+    var files = Arg.new("files");
+    //files.takesValue(true);
+    files.takesMultipleValues(true);
+
+    try cmd.addArg(files);
+    var args = try cmd.parseFrom(argv);
+    defer args.deinit();
+
+    if (args.valuesOf("files")) |f| {
+        try testing.expect(f.len == 4);
+    }
 }

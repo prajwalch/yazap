@@ -96,8 +96,8 @@ pub fn deinit(self: *ArgsContext) void {
 }
 
 pub fn putMatchedArg(self: *ArgsContext, arg: *const Arg, value: MatchedArgValue) !void {
-    if (value.count() > arg.remainingValuesToConsume(self)) {
-        return error.TooManyArgValue;
+    if (arg.max_values) |max| {
+        if ((value.count()) > max) return error.TooManyArgValue;
     }
     var maybe_old_value = self.args.getPtr(arg.name);
 

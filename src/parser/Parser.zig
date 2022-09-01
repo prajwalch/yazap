@@ -24,6 +24,7 @@ pub const Error = error{
     UnneededEmptyAttachedValue,
     EmptyFlagValueNotAllowed,
     ProvidedValueIsNotValidOption,
+    TooFewArgValue,
     TooManyArgValue,
 } || Allocator.Error;
 
@@ -319,21 +320,65 @@ fn processValue(
             return InternalError.ProvidedValueIsNotValidOption;
         }
     } else {
-        const num_remaining_values = arg.remainingValuesToConsume(&self.args_ctx);
+        var values = std.ArrayList([]const u8).init(self.allocator);
+        errdefer values.deinit();
 
-        if (num_remaining_values <= 1) {
-            if (arg.verifyValueInAllowedValues(value)) {
+        try values.append(value);
+        // Consume minimum number of required values first
+        if (arg.min_values) |min| {
+            try self.consumeNValues(arg, &values, min);
+            // Not enough values
+            if (values.items.len < min) return error.TooFewArgValue;
+        }
+        const has_max_num = if (arg.max_values == null) false else true;
+        const max_eqls_one = (has_max_num and (arg.max_values.? == 1));
+
+        // If maximum number and takes_multiple_values is not set we are not looking for more values
+        if ((!has_max_num or max_eqls_one) and !(arg.settings.takes_multiple_values)) {
+            // If values contains only one value, we can be sure that the minimum number of values is set to 1
+            // therefore return it as a single value instead
+            if (values.items.len == 1) {
+                values.deinit();
                 return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initSingle(value));
             } else {
-                return InternalError.ProvidedValueIsNotValidOption;
+                return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initMany(values));
             }
-        } else {
-            var index: usize = 1;
-            var values = std.ArrayList([]const u8).init(self.allocator);
-            errdefer values.deinit();
+        }
+        if (arg.settings.takes_multiple_values) {
+            if (!has_max_num) {
+                try self.consumeValuesTillNextFlag(arg, &values);
+                return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initMany(values));
+            }
+        }
+        if (has_max_num) {
+            try self.consumeNValues(arg, &values, arg.max_values.?);
+        }
+        return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initMany(values));
+    }
+}
 
-            try values.append(value);
-            index += 1;
+fn consumeNValues(
+    self: *Parser,
+    arg: *const Arg,
+    list: *std.ArrayList([]const u8),
+    num: usize,
+) InternalError!void {
+    var i: usize = 1;
+    while (i < num) : (i += 1) {
+        const value = self.tokenizer.nextNonFlagArg() orelse return;
+        try self.verifyAndAppendValue(arg, list, value);
+    }
+}
+
+fn consumeValuesTillNextFlag(
+    self: *Parser,
+    arg: *const Arg,
+    list: *std.ArrayList([]const u8),
+) InternalError!void {
+    while (self.tokenizer.nextNonFlagArg()) |value| {
+        try self.verifyAndAppendValue(arg, list, value);
+    }
+}
 
 fn verifyAndAppendValue(
     self: *Parser,
