@@ -7,7 +7,7 @@ const Arg = @import("../Arg.zig");
 const Command = @import("../Command.zig");
 const ParserError = @import("Parser.zig").Error;
 
-const log = std.log.scoped(.zigarg);
+const log = std.log;
 pub const PrintError = std.fs.File.WriteError;
 
 /// Actual error that happened
