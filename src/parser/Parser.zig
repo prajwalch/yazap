@@ -411,6 +411,9 @@ fn parseSubCommand(
         or valid_subcmd.subcommands.items.len >= 1) {
         // zig fmt: on
         const subcmd_argv = self.tokenizer.restArg() orelse {
+            if (!(valid_subcmd.setting.arg_required)) {
+                return MatchedSubCommand.initWithoutArg(valid_subcmd.name);
+            }
             self.err_ctx.setCmd(valid_subcmd);
             self.err_ctx.setErr(Error.CommandArgumentNotProvided);
             return self.err_ctx.err;
