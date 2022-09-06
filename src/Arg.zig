@@ -5,17 +5,9 @@ const std = @import("std");
 const ArgsContext = @import("parser/ArgsContext.zig");
 
 const Settings = struct {
-    takes_value: bool,
-    takes_multiple_values: bool,
-    allow_empty_value: bool,
-
-    pub fn initDefault() Settings {
-        return Settings{
-            .takes_value = false,
-            .takes_multiple_values = false,
-            .allow_empty_value = false,
-        };
-    }
+    takes_value: bool = false,
+    takes_multiple_values: bool = false,
+    allow_empty_value: bool = false,
 };
 
 name: []const u8,
@@ -35,7 +27,7 @@ pub fn new(name: []const u8) Arg {
         .long_name = null,
         .allowed_values = null,
         .values_delimiter = null,
-        .settings = Settings.initDefault(),
+        .settings = Settings{},
     };
 }
 

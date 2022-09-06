@@ -12,17 +12,9 @@ const ArrayList = std.ArrayList;
 const Allocator = mem.Allocator;
 
 const Setting = struct {
-    takes_value: bool,
-    arg_required: bool,
-    subcommand_required: bool,
-
-    pub fn initDefault() Setting {
-        return Setting{
-            .takes_value = false,
-            .arg_required = false,
-            .subcommand_required = false,
-        };
-    }
+    takes_value: bool = false,
+    arg_required: bool = false,
+    subcommand_required: bool = false,
 };
 
 pub const Error = error{
@@ -47,7 +39,7 @@ pub fn new(allocator: Allocator, name: []const u8) Command {
         .args = ArrayList(Arg).init(allocator),
         .subcommands = ArrayList(Command).init(allocator),
         .process_args = null,
-        .setting = Setting.initDefault(),
+        .setting = Setting{},
     };
 }
 
