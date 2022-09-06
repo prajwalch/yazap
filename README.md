@@ -101,7 +101,7 @@ pub fn main() anyerror!void {
     }
 
     if (ls_args.isPresent("all")) {
-        log.info("show all");
+        log.info("show all", .{});
         return;
     }
 
