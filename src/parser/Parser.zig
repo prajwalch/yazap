@@ -2,7 +2,7 @@ const Parser = @This();
 
 const std = @import("std");
 const ArgsContext = @import("ArgsContext.zig");
-const ErrorContext = @import("ErrorContext.zig");
+const ErrorBuilder = @import("ErrorBuilder.zig");
 const Command = @import("../Command.zig");
 const Arg = @import("../Arg.zig");
 const Token = @import("tokenizer.zig").Token;
@@ -92,7 +92,7 @@ const ShortFlag = struct {
 allocator: Allocator,
 tokenizer: Tokenizer,
 args_ctx: ArgsContext,
-err_ctx: ErrorContext,
+err_builder: ErrorBuilder,
 cmd: *const Command,
 
 pub fn init(
@@ -104,7 +104,7 @@ pub fn init(
         .allocator = allocator,
         .tokenizer = tokenizer,
         .args_ctx = ArgsContext.init(allocator),
-        .err_ctx = ErrorContext.init(),
+        .err_builder = ErrorBuilder.init(),
         .cmd = command,
     };
 }
@@ -112,35 +112,35 @@ pub fn init(
 pub fn parse(self: *Parser) Error!ArgsContext {
     errdefer self.args_ctx.deinit();
 
-    self.err_ctx.setCmd(self.cmd);
+    self.err_builder.setCmd(self.cmd);
     try self.parseCommandArgument();
 
     while (self.tokenizer.nextToken()) |*token| {
-        self.err_ctx.setProvidedArg(token.value);
+        self.err_builder.setProvidedArg(token.value);
 
         if (token.isShortFlag() or token.isLongFlag()) {
             if (self.cmd.countArgs() == 0) {
-                self.err_ctx.setErr(Error.UnknownFlag);
-                return self.err_ctx.err;
+                self.err_builder.setErr(Error.UnknownFlag);
+                return self.err_builder.err;
             }
 
             self.parseArg(token) catch |err| switch (err) {
                 InternalError.ArgValueNotProvided => {
-                    self.err_ctx.setErr(Error.FlagValueNotProvided);
-                    return self.err_ctx.err;
+                    self.err_builder.setErr(Error.FlagValueNotProvided);
+                    return self.err_builder.err;
                 },
                 InternalError.EmptyArgValueNotAllowed => {
-                    self.err_ctx.setErr(Error.EmptyFlagValueNotAllowed);
-                    return self.err_ctx.err;
+                    self.err_builder.setErr(Error.EmptyFlagValueNotAllowed);
+                    return self.err_builder.err;
                 },
                 else => |e| {
-                    self.err_ctx.setErr(e);
+                    self.err_builder.setErr(e);
                     return e;
                 },
             };
         } else {
             if (self.cmd.countSubcommands() == 0) {
-                self.err_ctx.setErr(Error.UnknownCommand);
+                self.err_builder.setErr(Error.UnknownCommand);
                 return Error.UnknownCommand;
             }
 
@@ -150,8 +150,8 @@ pub fn parse(self: *Parser) Error!ArgsContext {
     }
 
     if (self.cmd.setting.subcommand_required and self.args_ctx.subcommand == null) {
-        self.err_ctx.setErr(Error.CommandSubcommandNotProvided);
-        return self.err_ctx.err;
+        self.err_builder.setErr(Error.CommandSubcommandNotProvided);
+        return self.err_builder.err;
     }
     return self.args_ctx;
 }
@@ -166,7 +166,7 @@ fn parseCommandArgument(self: *Parser) Error!void {
                 InternalError.EmptyArgValueNotAllowed,
                 => break,
                 else => |e| {
-                    self.err_ctx.setErr(e);
+                    self.err_builder.setErr(e);
                     return e;
                 },
             };
@@ -174,8 +174,8 @@ fn parseCommandArgument(self: *Parser) Error!void {
     }
 
     if (self.cmd.setting.arg_required and (self.args_ctx.args.count() == 0)) {
-        self.err_ctx.setErr(Error.CommandArgumentNotProvided);
-        return self.err_ctx.err;
+        self.err_builder.setErr(Error.CommandArgumentNotProvided);
+        return self.err_builder.err;
     }
 }
 
@@ -192,12 +192,12 @@ fn parseShortArg(self: *Parser, token: *const Token) InternalError!void {
     var short_flag = ShortFlag.init(flag_tuple.@"0", flag_tuple.@"1");
 
     while (short_flag.next()) |flag| {
-        self.err_ctx.setProvidedArg(@as(*const [1]u8, flag));
+        self.err_builder.setProvidedArg(@as(*const [1]u8, flag));
 
         const arg = self.cmd.findArgByShortName(flag.*) orelse {
             return Error.UnknownFlag;
         };
-        self.err_ctx.setArg(arg);
+        self.err_builder.setArg(arg);
 
         if (!(arg.settings.takes_value)) {
             if (short_flag.hasValue()) {
@@ -227,12 +227,12 @@ fn parseShortArg(self: *Parser, token: *const Token) InternalError!void {
 
 fn parseLongArg(self: *Parser, token: *const Token) InternalError!void {
     const flag_tuple = flagTokenToFlagTuple(token);
-    self.err_ctx.setProvidedArg(flag_tuple.@"0");
+    self.err_builder.setProvidedArg(flag_tuple.@"0");
 
     const arg = self.cmd.findArgByLongName(flag_tuple.@"0") orelse {
         return Error.UnknownFlag;
     };
-    self.err_ctx.setArg(arg);
+    self.err_builder.setArg(arg);
 
     if (!(arg.settings.takes_value)) {
         if (flag_tuple.@"1" != null) {
@@ -276,7 +276,7 @@ fn consumeArgValue(
     attached_value: ?[]const u8,
 ) InternalError!void {
     // Only set arg if caller didn't set it already
-    if (self.err_ctx.arg == null) self.err_ctx.setArg(arg);
+    if (self.err_builder.arg == null) self.err_builder.setArg(arg);
 
     if (attached_value) |val| {
         return self.processValue(arg, val, true);
@@ -292,7 +292,7 @@ fn processValue(
     value: []const u8,
     is_attached_value: bool,
 ) InternalError!void {
-    self.err_ctx.setProvidedArg(value);
+    self.err_builder.setProvidedArg(value);
 
     if (arg.values_delimiter) |delimiter| {
         if (mem.containsAtLeast(u8, value, 1, delimiter)) {
@@ -386,7 +386,7 @@ fn verifyAndAppendValue(
     list: *std.ArrayList([]const u8),
     value: []const u8,
 ) InternalError!void {
-    self.err_ctx.setProvidedArg(value);
+    self.err_builder.setProvidedArg(value);
 
     if ((value.len == 0) and !(arg.settings.allow_empty_value))
         return InternalError.EmptyArgValueNotAllowed;
@@ -401,8 +401,8 @@ fn parseSubCommand(
     provided_subcmd: []const u8,
 ) Error!MatchedSubCommand {
     const valid_subcmd = self.cmd.findSubcommand(provided_subcmd) orelse {
-        self.err_ctx.setErr(Error.UnknownCommand);
-        return self.err_ctx.err;
+        self.err_builder.setErr(Error.UnknownCommand);
+        return self.err_builder.err;
     };
 
     // zig fmt: off
@@ -414,9 +414,9 @@ fn parseSubCommand(
             if (!(valid_subcmd.setting.arg_required)) {
                 return MatchedSubCommand.initWithoutArg(valid_subcmd.name);
             }
-            self.err_ctx.setCmd(valid_subcmd);
-            self.err_ctx.setErr(Error.CommandArgumentNotProvided);
-            return self.err_ctx.err;
+            self.err_builder.setCmd(valid_subcmd);
+            self.err_builder.setErr(Error.CommandArgumentNotProvided);
+            return self.err_builder.err;
         };
         var parser = Parser.init(self.allocator, Tokenizer.init(subcmd_argv), valid_subcmd);
         const subcmd_ctx = try parser.parse();

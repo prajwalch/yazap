@@ -5,7 +5,7 @@ const Parser = @import("parser/Parser.zig");
 const Arg = @import("Arg.zig");
 const ArgsContext = @import("parser/ArgsContext.zig");
 const Tokenizer = @import("parser/tokenizer.zig").Tokenizer;
-const PrintError = @import("parser/ErrorContext.zig").PrintError;
+const PrintError = @import("parser/ErrorBuilder.zig").PrintError;
 
 const mem = std.mem;
 const ArrayList = std.ArrayList;
@@ -156,7 +156,7 @@ pub fn parseProcess(self: *Command) Error!ArgsContext {
 pub fn parseFrom(self: *Command, argv: []const [:0]const u8) Error!ArgsContext {
     var parser = Parser.init(self.allocator, Tokenizer.init(argv), self);
     const args_ctx = parser.parse() catch |e| {
-        try parser.err_ctx.logError();
+        try parser.err_builder.logError();
         return e;
     };
     return args_ctx;
