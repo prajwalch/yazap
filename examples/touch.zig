@@ -4,10 +4,13 @@ const yazap = @import("yazap");
 const allocator = std.heap.page_allocator;
 const flag = yazap.flag;
 const Command = yazap.Command;
+const Yazap = yazap.Yazap;
 
 pub fn main() anyerror!void {
-    var touch = Command.new(allocator, "mytouch");
-    defer touch.deinit();
+    var app = Yazap.init(allocator, "mytouch");
+    defer app.deinit();
+
+    var touch = app.rootCommand();
 
     try touch.takesSingleValue("FILE_NAME");
     touch.argRequired(true);
@@ -16,8 +19,7 @@ pub fn main() anyerror!void {
     try touch.addArg(flag.boolean("version", 'v'));
     try touch.addArg(flag.boolean("help", 'h'));
 
-    var args = try touch.parseProcess();
-    defer args.deinit();
+    var args = try app.parseProcess();
 
     if (args.isPresent("help")) {
         std.debug.print("Show help", .{});

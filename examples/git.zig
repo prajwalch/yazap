@@ -5,6 +5,7 @@ const allocator = std.heap.page_allocator;
 const flag = yazap.flag;
 const Command = yazap.Command;
 const Arg = yazap.Arg;
+const Yazap = yazap.Yazap;
 
 // git init
 // git commit -m "message"
@@ -12,28 +13,29 @@ const Arg = yazap.Arg;
 // git push <remote> <branch_name>
 
 pub fn main() anyerror!void {
-    var git = Command.new(allocator, "mygit");
-    defer git.deinit();
+    var app = Yazap.init(allocator, "mygit");
+    defer app.deinit();
 
-    var cmd_commit = Command.new(allocator, "commit");
+    var git = app.rootCommand();
+
+    var cmd_commit = app.createCommand("commit");
     try cmd_commit.addArg(flag.argOne("message", 'm'));
 
-    var cmd_pull = Command.new(allocator, "pull");
+    var cmd_pull = app.createCommand("pull");
     try cmd_pull.takesSingleValue("REMOTE");
     cmd_pull.argRequired(true);
 
-    var cmd_push = Command.new(allocator, "push");
+    var cmd_push = app.createCommand("push");
     try cmd_push.takesSingleValue("REMOTE");
     try cmd_push.takesSingleValue("BRANCH_NAME");
     cmd_push.argRequired(true);
 
-    try git.addSubcommand(Command.new(allocator, "init"));
+    try git.addSubcommand(app.createCommand("init"));
     try git.addSubcommand(cmd_commit);
     try git.addSubcommand(cmd_pull);
     try git.addSubcommand(cmd_push);
 
-    var args = try git.parseProcess();
-    defer args.deinit();
+    var args = try app.parseProcess();
 
     if (args.isPresent("init")) {
         std.debug.print("Initilize empty repo", .{});
