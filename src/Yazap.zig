@@ -59,3 +59,7 @@ pub fn parseFrom(self: *Yazap, argv: []const [:0]const u8) Error!(*const ArgsCon
     self.args_ctx = args_ctx;
     return &self.args_ctx.?;
 }
+
+test "emit docs" {
+    std.testing.refAllDecls(@This());
+}
