@@ -1,11 +1,7 @@
 const Command = @This();
 
 const std = @import("std");
-const Parser = @import("parser/Parser.zig");
 const Arg = @import("Arg.zig");
-const ArgsContext = @import("parser/ArgsContext.zig");
-const Tokenizer = @import("parser/tokenizer.zig").Tokenizer;
-const PrintError = @import("parser/ErrorBuilder.zig").PrintError;
 
 const mem = std.mem;
 const ArrayList = std.ArrayList;
@@ -16,11 +12,6 @@ const Setting = struct {
     arg_required: bool = false,
     subcommand_required: bool = false,
 };
-
-pub const Error = error{
-    InvalidCmdLine,
-    Overflow,
-} || Parser.Error || PrintError;
 
 allocator: Allocator,
 name: []const u8,
@@ -144,22 +135,6 @@ pub fn findSubcommand(self: *const Command, provided_subcmd: []const u8) ?*const
     }
 
     return null;
-}
-
-/// Starts parsing the process arguments
-pub fn parseProcess(self: *Command) Error!ArgsContext {
-    self.process_args = try std.process.argsAlloc(self.allocator);
-    return self.parseFrom(self.process_args.?[1..]);
-}
-
-/// Starts parsing the given arguments
-pub fn parseFrom(self: *Command, argv: []const [:0]const u8) Error!ArgsContext {
-    var parser = Parser.init(self.allocator, Tokenizer.init(argv), self);
-    const args_ctx = parser.parse() catch |e| {
-        try parser.err_builder.logError();
-        return e;
-    };
-    return args_ctx;
 }
 
 test "emit methods docs" {

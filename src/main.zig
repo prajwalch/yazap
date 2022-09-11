@@ -2,12 +2,16 @@ const std = @import("std");
 const Command = @import("Command.zig");
 const flag = @import("flag.zig");
 const Arg = @import("Arg.zig");
+const Yazap = @import("Yazap.zig");
 const testing = std.testing;
 
-const allocator = std.heap.page_allocator;
+const allocator = testing.allocator;
 
-fn initAppArgs(alloc: std.mem.Allocator) !Command {
-    var app = Command.new(alloc, "app");
+fn initAppArgs(alloc: std.mem.Allocator) !Yazap {
+    var yazap = Yazap.init(alloc, "app");
+    errdefer yazap.deinit();
+
+    var app = yazap.rootCommand();
 
     // app <ARG-ONE>
     try app.takesSingleValue("ARG-ONE");
@@ -56,8 +60,8 @@ fn initAppArgs(alloc: std.mem.Allocator) !Command {
     // try app.addArg(opt_flag);
 
     // app subcmd1
-    try app.addSubcommand(Command.new(alloc, "subcmd1"));
-    return app;
+    try app.addSubcommand(yazap.createCommand("subcmd1"));
+    return yazap;
 }
 
 test "arg required error" {
@@ -67,7 +71,7 @@ test "arg required error" {
     };
 
     var app = try initAppArgs(allocator);
-    app.argRequired(true);
+    app.rootCommand().argRequired(true);
     defer app.deinit();
 
     try testing.expectError(error.CommandArgumentNotProvided, app.parseFrom(argv));
@@ -79,7 +83,7 @@ test "subcommand required error" {
     };
 
     var app = try initAppArgs(allocator);
-    app.subcommandRequired(true);
+    app.rootCommand().subcommandRequired(true);
     defer app.deinit();
 
     try testing.expectError(error.CommandSubcommandNotProvided, app.parseFrom(argv));
@@ -118,8 +122,6 @@ test "flags" {
     defer app.deinit();
 
     var matches = try app.parseFrom(argv);
-    defer matches.deinit();
-
     try testing.expect(matches.isPresent("bool-flag") == true);
     try testing.expect(matches.isPresent("bool-flag2") == true);
     try testing.expectEqualStrings("one", matches.valueOf("arg-one-flag").?);
@@ -140,17 +142,16 @@ test "arg.takes_multiple_values" {
         "file1.zig",
     };
 
-    var cmd = Command.new(allocator, "appi");
-    defer cmd.deinit();
-    cmd.takesValue(true);
+    var app = try initAppArgs(allocator);
+    defer app.deinit();
+    app.rootCommand().takesValue(true);
 
     var files = Arg.new("files");
     //files.takesValue(true);
     files.takesMultipleValues(true);
 
-    try cmd.addArg(files);
-    var args = try cmd.parseFrom(argv);
-    defer args.deinit();
+    try app.rootCommand().addArg(files);
+    var args = try app.parseFrom(argv);
 
     if (args.valuesOf("files")) |f| {
         try testing.expect(f.len == 4);
