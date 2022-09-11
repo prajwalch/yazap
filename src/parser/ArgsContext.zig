@@ -174,7 +174,7 @@ pub fn valueOf(self: *const ArgsContext, arg_name: []const u8) ?[]const u8 {
 }
 
 /// Returns the array of values of an argument if found otherwise null
-pub fn valuesOf(self: *ArgsContext, name_to_lookup: []const u8) ?[][]const u8 {
+pub fn valuesOf(self: *const ArgsContext, name_to_lookup: []const u8) ?[][]const u8 {
     if (self.args.get(name_to_lookup)) |value| {
         if (value.isMany()) return value.many.items[0..];
     }

@@ -1,14 +1,10 @@
 const Command = @This();
 
 const std = @import("std");
-const Parser = @import("parser/Parser.zig");
 const Arg = @import("Arg.zig");
-const ArgsContext = @import("parser/ArgsContext.zig");
-const Tokenizer = @import("parser/tokenizer.zig").Tokenizer;
-const PrintError = @import("parser/ErrorBuilder.zig").PrintError;
 
 const mem = std.mem;
-const ArrayList = std.ArrayList;
+const ArrayList = std.ArrayListUnmanaged;
 const Allocator = mem.Allocator;
 
 const Setting = struct {
@@ -17,30 +13,16 @@ const Setting = struct {
     subcommand_required: bool = false,
 };
 
-pub const Error = error{
-    InvalidCmdLine,
-    Overflow,
-} || Parser.Error || PrintError;
-
 allocator: Allocator,
 name: []const u8,
-about: ?[]const u8,
-args: ArrayList(Arg),
-subcommands: ArrayList(Command),
-process_args: ?[]const [:0]u8,
-setting: Setting,
+about: ?[]const u8 = null,
+args: ArrayList(Arg) = ArrayList(Arg){},
+subcommands: ArrayList(Command) = ArrayList(Command){},
+setting: Setting = Setting{},
 
 /// Creates a new instance of it
 pub fn new(allocator: Allocator, name: []const u8) Command {
-    return Command{
-        .allocator = allocator,
-        .name = name,
-        .about = null,
-        .args = ArrayList(Arg).init(allocator),
-        .subcommands = ArrayList(Command).init(allocator),
-        .process_args = null,
-        .setting = Setting{},
-    };
+    return Command{ .allocator = allocator, .name = name };
 }
 
 pub fn newWithHelpTxt(allocator: Allocator, name: []const u8, about: []const u8) Command {
@@ -51,26 +33,22 @@ pub fn newWithHelpTxt(allocator: Allocator, name: []const u8, about: []const u8)
 
 /// Release all allocated memory
 pub fn deinit(self: *Command) void {
-    self.args.deinit();
+    self.args.deinit(self.allocator);
 
     for (self.subcommands.items) |*subcommand| {
         subcommand.deinit();
     }
-    self.subcommands.deinit();
-
-    if (self.process_args) |args| {
-        std.process.argsFree(self.allocator, args);
-    }
+    self.subcommands.deinit(self.allocator);
 }
 
 /// Appends the new arg into the args list
 pub fn addArg(self: *Command, new_arg: Arg) !void {
-    return self.args.append(new_arg);
+    return self.args.append(self.allocator, new_arg);
 }
 
 /// Appends the new subcommand into the subcommands list
 pub fn addSubcommand(self: *Command, new_subcommand: Command) !void {
-    return self.subcommands.append(new_subcommand);
+    return self.subcommands.append(self.allocator, new_subcommand);
 }
 
 /// Create a new [Argument](/#root;Arg) with the given name and specifies that Command will take single value
@@ -144,22 +122,6 @@ pub fn findSubcommand(self: *const Command, provided_subcmd: []const u8) ?*const
     }
 
     return null;
-}
-
-/// Starts parsing the process arguments
-pub fn parseProcess(self: *Command) Error!ArgsContext {
-    self.process_args = try std.process.argsAlloc(self.allocator);
-    return self.parseFrom(self.process_args.?[1..]);
-}
-
-/// Starts parsing the given arguments
-pub fn parseFrom(self: *Command, argv: []const [:0]const u8) Error!ArgsContext {
-    var parser = Parser.init(self.allocator, Tokenizer.init(argv), self);
-    const args_ctx = parser.parse() catch |e| {
-        try parser.err_builder.logError();
-        return e;
-    };
-    return args_ctx;
 }
 
 test "emit methods docs" {
