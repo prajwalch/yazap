@@ -56,22 +56,22 @@ Checkout [examples/](/examples) for more.
 
 ### Initializing the yazap
 The first step in using the `yazap` is making an instance of [Yazap](https://prajwalch.github.io/yazap/#root;Yazap)
-which is done by making a call to `Yazap.init(allocator, "Your app name")` which internally creates a root command for your app.
+by calling `Yazap.init(allocator, "Your app name")` which internally creates a root command for your app.
 ```zig
 var app = Yazap.init(allocator, "myls");
 defer app.deinit();
 ```
 
-### Getting root command
-[Yazap](https://prajwalch.github.io/yazap/#root;Yazap) itself don't have an any API to add arguments for your command.
-Its main purpose is to initialize, parse arguments and deinitilize the library therefore to add arguments get the root [Command](https://prajwalch.github.io/yazap/#root;Command)
-by calling `Yazap.rootCommand` which returns a pointer of a root command.
+### Getting a root command
+[Yazap](https://prajwalch.github.io/yazap/#root;Yazap) itself don't provides an any methods to add arguments for your command.
+Its only purpose is to initialize the library, invkoing parser and deinitilize all the structures therefore you must have to use
+root command to add arguments. You can simply get it by calling `Yazap.rootCommand` which returns a pointer of it.
 ```zig
 var myls = app.rootCommand();
 ```
 
 ### Adding arguments
-After you get the root command it's time to add argument by using an appropriate API provided by `Command`.
+After you get the root command it's time to add argument by using an appropriate methods provided by `Command`.
 See [Command](https://prajwalch.github.io/yazap/#root;Command) to see all the available API.
 ```zig
 try myls.addArg(flag.boolean("all", 'a'));
@@ -99,9 +99,9 @@ Here we also use the [flag](https://prajwalch.github.io/yazap/#root;flag) module
 different kind of flags quickly and easily.
 
 ### Parsing arguments
-Once you're done adding arguments make a call to `app.parseProcess` to starts parsing. It internally calls [std.process.argsAlloc](https://ziglang.org/documentation/master/std/#root;process.argsAlloc)
-to obtain the arguments then invokes the parser and later returns the constant pointer to a [ArgsContext](https://prajwalch.github.io/yazap/#root;ArgsContext). Alternately you can make a call
-to `app.parseFrom`by passing your own arguments which can be useful on test.
+Once you're done adding arguments call `app.parseProcess` to starts parsing the arguments. It internally calls [std.process.argsAlloc](https://ziglang.org/documentation/master/std/#root;process.argsAlloc)
+to obtain the arguments then invokes the parser and later returns the constant pointer to a [ArgsContext](https://prajwalch.github.io/yazap/#root;ArgsContext). Alternately you can make a call to `app.parseFrom`
+by passing your own arguments which can be useful on test.
 ```zig
 var ls_args = try app.parseProcess();
 
