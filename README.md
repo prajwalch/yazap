@@ -59,12 +59,14 @@ const yazap = @import("yazap");
 
 const allocator = std.heap.page_allocator;
 const log = std.log;
-const Command = yazap.Command;
 const flag = yazap.flag;
+const Yazap = yazap.Yazap;
 
 pub fn main() anyerror!void {
-    var ls = Command.new(allocator, "ls");
-    defer ls.deinit();
+    var app = Yazap.init(allocator, "ls");
+    defer app.deinit();
+
+    var ls = app.rootCommand();
 
     try ls.addArg(flag.boolean("all", 'a'));
     try ls.addArg(flag.boolean("recursive", 'R'));
@@ -84,8 +86,7 @@ pub fn main() anyerror!void {
         "never",
     }));
 
-    var ls_args = try ls.parseProcess();
-    defer ls_args.deinit();
+    var ls_args = try app.parseProcess();
 
     // It's upto you how you check for each args
     // for now i am showing you in a straightforward way
