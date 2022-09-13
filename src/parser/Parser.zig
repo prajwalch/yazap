@@ -323,7 +323,7 @@ fn processValue(
         var values = std.ArrayList([]const u8).init(self.allocator);
         errdefer values.deinit();
 
-        try values.append(value);
+        try self.verifyAndAppendValue(arg, &values, value);
         // Consume minimum number of required values first
         if (arg.min_values) |min| {
             try self.consumeNValues(arg, &values, min);
