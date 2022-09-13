@@ -419,7 +419,11 @@ fn parseSubCommand(
             return self.err_builder.err;
         };
         var parser = Parser.init(self.allocator, Tokenizer.init(subcmd_argv), valid_subcmd);
-        const subcmd_ctx = try parser.parse();
+        const subcmd_ctx = parser.parse() catch |err| {
+            // Bubble up the error trace to the parent command that happened while parsing subcommand
+            self.err_builder = parser.err_builder;
+            return err;
+        };
 
         return MatchedSubCommand.initWithArg(valid_subcmd.name, subcmd_ctx);
     }
