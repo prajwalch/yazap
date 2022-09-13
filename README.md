@@ -65,7 +65,7 @@ defer app.deinit();
 ### Getting a root command
 [Yazap](https://prajwalch.github.io/yazap/#root;Yazap) itself don't provides an any methods to add arguments for your command.
 Its only purpose is to initialize the library, invkoing parser and deinitilize all the structures therefore you must have to use
-root command to add arguments. You can simply get it by calling `Yazap.rootCommand` which returns a pointer of it.
+root command to add arguments and subcommands. You can simply get it by calling `Yazap.rootCommand` which returns a pointer of it.
 ```zig
 var myls = app.rootCommand();
 ```
@@ -98,10 +98,21 @@ Here we also use the [flag](https://prajwalch.github.io/yazap/#root;flag) module
 [Arg](https://prajwalch.github.io/yazap/#root;Arg). It  provides a few different functions for defining
 different kind of flags quickly and easily.
 
+### Adding subcommands
+You can use `Yazap.createCommand("name")` to create a subcommand with previously given allocator instead of manually using `Command.new(allocator, "name")` by passing the same allocator twice.
+Once you create a subcommand you can add its own arguments and subcommands just like root command.
+```zig
+var update_cmd = app.createCommand("update");
+try update_cmd.addArg(flag.boolean("check-only", null));
+try update_cmd.addArg(flag.option("branch", 'b', &[_][]const u8{ "stable", "nightly", "beta" }));
+
+try myls.addSubcommand(update_cmd);
+```
+
 ### Parsing arguments
-Once you're done adding arguments call `app.parseProcess` to starts parsing the arguments. It internally calls [std.process.argsAlloc](https://ziglang.org/documentation/master/std/#root;process.argsAlloc)
-to obtain the arguments then invokes the parser and later returns the constant pointer to a [ArgsContext](https://prajwalch.github.io/yazap/#root;ArgsContext). Alternately you can make a call to `app.parseFrom`
-by passing your own arguments which can be useful on test.
+Once you're done adding arguments and subcommands call `app.parseProcess` to starts parsing. It internally calls [std.process.argsAlloc](https://ziglang.org/documentation/master/std/#root;process.argsAlloc)
+to obtain the raw arguments then invokes the parser and later returns the constant pointer to a [ArgsContext](https://prajwalch.github.io/yazap/#root;ArgsContext). Alternately you can make a call to `app.parseFrom`
+by passing your own raw arguments which can be useful on test.
 ```zig
 var ls_args = try app.parseProcess();
 
@@ -112,6 +123,19 @@ if (ls_args.isPresent("help")) {
 
 if (ls_args.isPresent("version")) {
     log.info("v0.1.0", .{});
+    return;
+}
+
+if (ls_args.subcommandContext("update")) |update_cmd_args| {
+    if (update_cmd_args.isPresent("check-only")) {
+        std.log.info("Check and report new update", .{});
+        return;
+    }
+
+    if (update_cmd_args.valueOf("branch")) |branch| {
+        std.log.info("Branch to update: {s}", .{branch});
+        return;
+    }
     return;
 }
 
@@ -154,6 +178,12 @@ pub fn main() anyerror!void {
 
     var myls = app.rootCommand();
 
+    var update_cmd = app.createCommand("update");
+    try update_cmd.addArg(flag.boolean("check-only", null));
+    try update_cmd.addArg(flag.option("branch", 'b', &[_][]const u8{ "stable", "nightly", "beta" }));
+
+    try myls.addSubcommand(update_cmd);
+
     try myls.addArg(flag.boolean("all", 'a'));
     try myls.addArg(flag.boolean("recursive", 'R'));
 
@@ -182,6 +212,18 @@ pub fn main() anyerror!void {
 
     if (ls_args.isPresent("version")) {
         log.info("v0.1.0", .{});
+        return;
+    }
+
+    if (ls_args.subcommandContext("update")) |update_cmd_args| {
+        if (update_cmd_args.isPresent("check-only")) {
+            std.log.info("Check and report new update", .{});
+            return;
+        }
+        if (update_cmd_args.valueOf("branch")) |branch| {
+            std.log.info("Branch to update: {s}", .{branch});
+            return;
+        }
         return;
     }
 
