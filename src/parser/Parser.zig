@@ -407,8 +407,8 @@ fn parseSubCommand(
 
     // zig fmt: off
     if (valid_subcmd.setting.takes_value
-        or valid_subcmd.args.items.len >= 1
-        or valid_subcmd.subcommands.items.len >= 1) {
+        or valid_subcmd.countArgs() >= 1
+        or valid_subcmd.countSubcommands() >= 1) {
         // zig fmt: on
         const subcmd_argv = self.tokenizer.restArg() orelse {
             if (!(valid_subcmd.setting.arg_required)) {
