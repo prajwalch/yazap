@@ -179,9 +179,9 @@ pub fn main() anyerror!void {
 
     var myls = app.rootCommand();
 
-    var update_cmd = app.createCommand("update");
-    try update_cmd.addArg(flag.boolean("check-only", null));
-    try update_cmd.addArg(flag.option("branch", 'b', &[_][]const u8{ "stable", "nightly", "beta" }));
+    var update_cmd = app.createCommand("update", "Update the app or check for new updates");
+    try update_cmd.addArg(flag.boolean("check-only", null, "Only check for new update"));
+    try update_cmd.addArg(flag.option("branch", 'b', &[_][]const u8{ "stable", "nightly", "beta" }, "Branch to update"));
 
     try myls.addSubcommand(update_cmd);
 
