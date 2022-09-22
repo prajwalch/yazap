@@ -32,6 +32,7 @@ Inspired from [clap-rs](https://github.com/clap-rs/clap) and [andrewrk/ziglang: 
     * Nested subcommand
 
 - Defining custom [Argument](https://prajwalch.github.io/yazap/#root;Arg)
+- Auto help text generation
 
 
 ## Installation Guide
@@ -56,9 +57,10 @@ Checkout [examples/](/examples) for more.
 
 ### Initializing the yazap
 The first step in using the `yazap` is making an instance of [Yazap](https://prajwalch.github.io/yazap/#root;Yazap)
-by calling `Yazap.init(allocator, "Your app name")` which internally creates a root command for your app.
+by calling `Yazap.init(allocator, "Your app name", "Your app description")` or `Yazap.init(allocator, "Your app name", null)` if you don't care about description
+which internally creates a root command for your app.
 ```zig
-var app = Yazap.init(allocator, "myls");
+var app = Yazap.init(allocator, "myls", "My custom ls");
 defer app.deinit();
 ```
 
@@ -74,24 +76,24 @@ var myls = app.rootCommand();
 After you get the root command it's time to add argument by using an appropriate methods provided by `Command`.
 See [Command](https://prajwalch.github.io/yazap/#root;Command) to see all the available API.
 ```zig
-try myls.addArg(flag.boolean("all", 'a'));
-try myls.addArg(flag.boolean("recursive", 'R'));
+try myls.addArg(flag.boolean("all", 'a', "Don't ignore the hidden directories"));
+try myls.addArg(flag.boolean("recursive", 'R', "List subdirectories recursively"));
 
 // For now short name can be null but not long name
 // that's why one-line long name is used for -1 short name
-try myls.addArg(flag.boolean("one-line", '1'));
-try myls.addArg(flag.boolean("size", 's'));
-try myls.addArg(flag.boolean("version", null));
-try myls.addArg(flag.boolean("help", null));
+try myls.addArg(flag.boolean("one-line", '1', null));
+try myls.addArg(flag.boolean("size", 's', null, null));
+try myls.addArg(flag.boolean("version", null, null));
+try myls.addArg(flag.boolean("help", null, null));
 
-try myls.addArg(flag.argOne("ignore", 'I'));
-try myls.addArg(flag.argOne("hide", null));
+try myls.addArg(flag.argOne("ignore", 'I', null));
+try myls.addArg(flag.argOne("hide", null, null));
 
 try myls.addArg(flag.option("color", 'C', &[_][]const u8{
     "always",
     "auto",
     "never",
-}));
+}, null));
 ```
 
 Here we also use the [flag](https://prajwalch.github.io/yazap/#root;flag) module which is a wrapper around
@@ -99,12 +101,12 @@ Here we also use the [flag](https://prajwalch.github.io/yazap/#root;flag) module
 different kind of flags quickly and easily.
 
 ### Adding subcommands
-You can use `Yazap.createCommand("name")` to create a subcommand with previously given allocator instead of manually using `Command.new(allocator, "name")` by passing the same allocator twice.
+You can use `Yazap.createCommand("name", "Subcommand description")` or `Yazap.createCommand("name", null)` to create a subcommand with previously given allocator instead of manually using `Command.new(allocator, "name")` by passing the same allocator twice.
 Once you create a subcommand you can add its own arguments and subcommands just like root command.
 ```zig
-var update_cmd = app.createCommand("update");
-try update_cmd.addArg(flag.boolean("check-only", null));
-try update_cmd.addArg(flag.option("branch", 'b', &[_][]const u8{ "stable", "nightly", "beta" }));
+var update_cmd = app.createCommand("update", "Update the app or check for new updates");
+try update_cmd.addArg(flag.boolean("check-only", null, "Only check for new update"));
+try update_cmd.addArg(flag.option("branch", 'b', &[_][]const u8{ "stable", "nightly", "beta" }, "Branch to update"));
 
 try myls.addSubcommand(update_cmd);
 ```
@@ -173,7 +175,7 @@ const flag = yazap.flag;
 const Yazap = yazap.Yazap;
 
 pub fn main() anyerror!void {
-    var app = Yazap.init(allocator, "myls");
+    var app = Yazap.init(allocator, "myls", "My custom ls");
     defer app.deinit();
 
     var myls = app.rootCommand();
@@ -184,24 +186,24 @@ pub fn main() anyerror!void {
 
     try myls.addSubcommand(update_cmd);
 
-    try myls.addArg(flag.boolean("all", 'a'));
-    try myls.addArg(flag.boolean("recursive", 'R'));
+    try myls.addArg(flag.boolean("all", 'a', "Don't ignore the hidden directories"));
+    try myls.addArg(flag.boolean("recursive", 'R', "List subdirectories recursively"));
 
     // For now short name can be null but not long name
     // that's why one-line long name is used for -1 short name
-    try myls.addArg(flag.boolean("one-line", '1'));
-    try myls.addArg(flag.boolean("size", 's'));
-    try myls.addArg(flag.boolean("version", null));
-    try myls.addArg(flag.boolean("help", null));
+    try myls.addArg(flag.boolean("one-line", '1', null));
+    try myls.addArg(flag.boolean("size", 's', null, null));
+    try myls.addArg(flag.boolean("version", null, null));
+    try myls.addArg(flag.boolean("help", null, null));
 
-    try myls.addArg(flag.argOne("ignore", 'I'));
-    try myls.addArg(flag.argOne("hide", null));
+    try myls.addArg(flag.argOne("ignore", 'I', null));
+    try myls.addArg(flag.argOne("hide", null, null));
 
     try myls.addArg(flag.option("color", 'C', &[_][]const u8{
         "always",
         "auto",
         "never",
-    }));
+    }, null));
 
     var ls_args = try app.parseProcess();
 
