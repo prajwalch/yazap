@@ -21,6 +21,8 @@ pub const Token = struct {
         long_flag_with_value,
         // --flag=
         long_flag_with_empty_value,
+        // -h, --help
+        help_flag,
         // arg
         some_argument,
     };
@@ -53,6 +55,10 @@ pub const Token = struct {
             or self.tag == .long_flag_with_empty_value
         );
         // zig fmt: on
+    }
+
+    pub fn isHelpFlag(self: *const Token) bool {
+        return (self.tag == .help_flag);
     }
 };
 
@@ -99,7 +105,7 @@ pub const Tokenizer = struct {
     pub fn nextNonFlagArg(self: *Tokenizer) ?[]const u8 {
         var next_token = self.nextToken() orelse return null;
 
-        if (next_token.isShortFlag() or next_token.isLongFlag()) {
+        if (next_token.isShortFlag() or next_token.isLongFlag() or next_token.isHelpFlag()) {
             self.cursor -= 1;
             return null;
         }
@@ -116,53 +122,57 @@ pub const Tokenizer = struct {
 
     fn processLongFlag(arg: []const u8) Token {
         const flag = mem.trimLeft(u8, arg, "--");
-        var tag: Token.Tag = .long_flag;
+        const tag: Token.Tag = blk: {
+            // Check for 'help' flag
+            if (std.mem.eql(u8, flag, "help"))
+                break :blk .help_flag;
 
-        if (mem.indexOfScalar(u8, flag, '=')) |eql_pos| {
-            const has_value = (eql_pos + 1) < flag.len;
+            if (mem.indexOfScalar(u8, flag, '=')) |eql_pos| {
+                const has_value = (eql_pos + 1) < flag.len;
 
-            tag = blk: {
                 if (has_value) {
                     break :blk .long_flag_with_value;
                 } else {
                     break :blk .long_flag_with_empty_value;
                 }
-            };
-        }
+            }
+            break :blk .long_flag;
+        };
 
         return Token.init(flag, tag);
     }
 
     fn processShortFlag(arg: []const u8) Token {
         const flag = mem.trimLeft(u8, arg, "-");
-        var tag: Token.Tag = .short_flag;
+        const tag: Token.Tag = blk: {
+            // Check for 'h' flag
+            if (std.mem.eql(u8, flag, "h"))
+                break :blk .help_flag;
 
-        if (mem.indexOfScalar(u8, flag, '=')) |eql_pos| {
-            const is_flags = (flag[0..eql_pos]).len > 1;
-            const has_value = (eql_pos + 1) < flag.len;
+            if (mem.indexOfScalar(u8, flag, '=')) |eql_pos| {
+                const is_flags = (flag[0..eql_pos]).len > 1;
+                const has_value = (eql_pos + 1) < flag.len;
 
-            if (is_flags) {
-                tag = blk: {
+                if (is_flags) {
                     if (has_value) {
                         break :blk .short_flags_with_value;
                     } else {
                         break :blk .short_flags_with_empty_value;
                     }
-                };
-            } else {
-                tag = blk: {
+                } else {
                     if (has_value) {
                         break :blk .short_flag_with_value;
                     } else {
                         break :blk .short_flag_with_empty_value;
                     }
-                };
+                }
+            } else {
+                // has tail?
+                // for ex: -fgh or -fvalue
+                if (flag.len > 1) break :blk .short_flag_with_tail;
             }
-        } else {
-            // has tail?
-            // for ex: -fgh or -fvalue
-            if (flag.len > 1) tag = .short_flag_with_tail;
-        }
+            break :blk .short_flag;
+        };
 
         return Token.init(flag, tag);
     }
@@ -179,6 +189,7 @@ fn expectToken(actual_token: Token, expected_tag: Token.Tag) !void {
 
 test "tokenizer" {
     const args = &.{
+        "-h",
         "-f",
         "-f=val",
         "-f=",
@@ -196,6 +207,7 @@ test "tokenizer" {
 
     var tokenizer = Tokenizer.init(args);
 
+    try expectToken(tokenizer.nextToken().?, .help_flag);
     try expectToken(tokenizer.nextToken().?, .short_flag);
     try expectToken(tokenizer.nextToken().?, .short_flag_with_value);
     try expectToken(tokenizer.nextToken().?, .short_flag_with_empty_value);

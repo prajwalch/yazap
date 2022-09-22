@@ -2,6 +2,7 @@ const Command = @This();
 
 const std = @import("std");
 const Arg = @import("Arg.zig");
+const Help = @import("Help.zig");
 
 const mem = std.mem;
 const ArrayList = std.ArrayListUnmanaged;
@@ -15,19 +16,20 @@ const Setting = struct {
 
 allocator: Allocator,
 name: []const u8,
-about: ?[]const u8 = null,
+description: ?[]const u8 = null,
 args: ArrayList(Arg) = ArrayList(Arg){},
 subcommands: ArrayList(Command) = ArrayList(Command){},
 setting: Setting = Setting{},
+help_options: Help.Options = Help.Options{},
 
 /// Creates a new instance of it
 pub fn new(allocator: Allocator, name: []const u8) Command {
     return Command{ .allocator = allocator, .name = name };
 }
 
-pub fn newWithHelpTxt(allocator: Allocator, name: []const u8, about: []const u8) Command {
+pub fn newWithDescription(allocator: Allocator, name: []const u8, description: []const u8) Command {
     var self = Command.new(allocator, name);
-    self.about = about;
+    self.description = description;
     return self;
 }
 
@@ -43,7 +45,15 @@ pub fn deinit(self: *Command) void {
 
 /// Appends the new arg into the args list
 pub fn addArg(self: *Command, new_arg: Arg) !void {
-    return self.args.append(self.allocator, new_arg);
+    try self.args.append(self.allocator, new_arg);
+
+    if (!(self.help_options.include_args) or !(self.help_options.include_flags)) {
+        if ((new_arg.short_name == null) or (new_arg.long_name == null)) {
+            self.help_options.include_args = true;
+        } else {
+            self.help_options.include_flags = true;
+        }
+    }
 }
 
 /// Appends the new subcommand into the subcommands list
@@ -122,6 +132,10 @@ pub fn findSubcommand(self: *const Command, provided_subcmd: []const u8) ?*const
     }
 
     return null;
+}
+
+pub fn help(self: *const Command) Help {
+    return Help.init(self, self.help_options);
 }
 
 test "emit methods docs" {

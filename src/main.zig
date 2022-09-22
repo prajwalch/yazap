@@ -8,7 +8,7 @@ const testing = std.testing;
 const allocator = testing.allocator;
 
 fn initAppArgs(alloc: std.mem.Allocator) !Yazap {
-    var yazap = Yazap.init(alloc, "app");
+    var yazap = Yazap.init(alloc, "app", "Test app description");
     errdefer yazap.deinit();
 
     var app = yazap.rootCommand();
@@ -19,15 +19,15 @@ fn initAppArgs(alloc: std.mem.Allocator) !Yazap {
     try app.takesNValues("ARG-MANY", 3);
 
     // app [-b, --bool-flag]
-    try app.addArg(flag.boolean("bool-flag", 'b'));
-    try app.addArg(flag.boolean("bool-flag2", 'c'));
+    try app.addArg(flag.boolean("bool-flag", 'b', null));
+    try app.addArg(flag.boolean("bool-flag2", 'c', null));
     // var bool_flag = Arg.new("bool-flag");
     // bool_flag.shortName('b');
     // bool_flag.setLongNameSameAsName();
     // try app.addArg(bool_flag);
 
     // app [-1, --arg_one_flag <VALUE>]
-    try app.addArg(flag.argOne("arg-one-flag", '1'));
+    try app.addArg(flag.argOne("arg-one-flag", '1', null));
     // var arg_one_flag = Arg.new("arg-one-flag");
     // arg_one_flag.shortName('1');
     // arg_one_flag.setLongNameSameAsName();
@@ -35,7 +35,7 @@ fn initAppArgs(alloc: std.mem.Allocator) !Yazap {
     // try app.addArg(arg_one_flag);
 
     // app [-3, --argn-flag <VALUE...>
-    try app.addArg(flag.argN("argn-flag", '3', 3));
+    try app.addArg(flag.argN("argn-flag", '3', 3, null));
     // var argn_flag = Arg.new("argn-flag");
     // argn_flag.shortName('3');
     // argn_flag.setLongNameSameAsName();
@@ -48,7 +48,7 @@ fn initAppArgs(alloc: std.mem.Allocator) !Yazap {
         "opt1",
         "opt2",
         "opt3",
-    }));
+    }, null));
     // var opt_flag = Arg.new("option-flag");
     // opt_flag.shortName('o');
     // opt_flag.setLongNameSameAsName();
@@ -60,7 +60,7 @@ fn initAppArgs(alloc: std.mem.Allocator) !Yazap {
     // try app.addArg(opt_flag);
 
     // app subcmd1
-    try app.addSubcommand(yazap.createCommand("subcmd1"));
+    try app.addSubcommand(yazap.createCommand("subcmd1", "First sub command"));
     return yazap;
 }
 
@@ -156,4 +156,13 @@ test "arg.takes_multiple_values" {
     if (args.valuesOf("files")) |f| {
         try testing.expect(f.len == 4);
     }
+}
+
+test "auto help generation" {
+    const argv: []const [:0]const u8 = &.{"-h"};
+
+    var app = try initAppArgs(allocator);
+    defer app.deinit();
+
+    _ = try app.parseFrom(argv);
 }
