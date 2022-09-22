@@ -45,12 +45,14 @@ pub fn writeAll(self: *Help) !void {
     try self.writeCommands(writer);
     try self.writeOptions(writer);
 
-    try writer.writeAll(
-        \\ 
-        \\Note:
-        \\ Use cmd -h or --help to get help for specific command
-        \\
-    );
+    if (self.options.include_subcmds) {
+        try writer.writeAll(
+            \\ 
+            \\Note:
+            \\ Use cmd -h or --help to get help for specific command
+            \\
+        );
+    }
     try buffer.flush();
 }
 
