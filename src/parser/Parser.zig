@@ -118,6 +118,11 @@ pub fn parse(self: *Parser) Error!ArgsContext {
     while (self.tokenizer.nextToken()) |*token| {
         self.err_builder.setProvidedArg(token.value);
 
+        if (token.isHelpFlag()) {
+            self.args_ctx.help = self.cmd.help();
+            continue;
+        }
+
         if (token.isShortFlag() or token.isLongFlag()) {
             if (self.cmd.countArgs() == 0) {
                 self.err_builder.setErr(Error.UnknownFlag);
@@ -145,6 +150,9 @@ pub fn parse(self: *Parser) Error!ArgsContext {
             }
 
             const subcmd = try self.parseSubCommand(token.value);
+            if (subcmd.ctx) |subcmd_ctx| {
+                self.args_ctx.help = subcmd_ctx.help;
+            }
             try self.args_ctx.setSubcommand(subcmd);
         }
     }

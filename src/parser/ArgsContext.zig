@@ -5,6 +5,7 @@ const ArgsContext = @This();
 
 const std = @import("std");
 const Arg = @import("../Arg.zig");
+const Help = @import("../Help.zig");
 const ArgHashMap = std.StringHashMap(MatchedArgValue);
 
 pub const MatchedArgValue = union(enum) {
@@ -72,6 +73,7 @@ pub const MatchedSubCommand = struct {
 allocator: std.mem.Allocator,
 args: ArgHashMap,
 subcommand: ?*MatchedSubCommand,
+help: ?Help = null,
 
 pub fn init(allocator: std.mem.Allocator) ArgsContext {
     return ArgsContext{
