@@ -57,8 +57,7 @@ Checkout [examples/](/examples) for more.
 
 ### Initializing the yazap
 The first step in using the `yazap` is making an instance of [Yazap](https://prajwalch.github.io/yazap/#root;Yazap)
-by calling `Yazap.init(allocator, "Your app name", "Your app description")` or `Yazap.init(allocator, "Your app name", null)` if you don't care about description
-which internally creates a root command for your app.
+by calling `Yazap.init(allocator, "Your app name", "Your app description")` or `Yazap.init(allocator, "Your app name", null)` which internally creates a root command for your app.
 ```zig
 var app = Yazap.init(allocator, "myls", "My custom ls");
 defer app.deinit();
