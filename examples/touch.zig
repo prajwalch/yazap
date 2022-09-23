@@ -29,7 +29,7 @@ pub fn main() anyerror!void {
         if (args.isPresent("no-create")) {
             std.debug.print("I'am not creating it", .{});
         } else {
-            var file = try std.fs.cwd().createFile(file_name);
+            var file = try std.fs.cwd().createFile(file_name, .{});
             defer file.close();
         }
     }
