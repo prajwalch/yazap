@@ -81,9 +81,8 @@ try myls.addArg(flag.boolean("recursive", 'R', "List subdirectories recursively"
 // For now short name can be null but not long name
 // that's why one-line long name is used for -1 short name
 try myls.addArg(flag.boolean("one-line", '1', null));
-try myls.addArg(flag.boolean("size", 's', null, null));
+try myls.addArg(flag.boolean("size", 's', null));
 try myls.addArg(flag.boolean("version", null, null));
-try myls.addArg(flag.boolean("help", null, null));
 
 try myls.addArg(flag.argOne("ignore", 'I', null));
 try myls.addArg(flag.argOne("hide", null, null));
@@ -116,11 +115,6 @@ to obtain the raw arguments then invokes the parser and later returns the consta
 by passing your own raw arguments which can be useful on test.
 ```zig
 var ls_args = try app.parseProcess();
-
-if (ls_args.isPresent("help")) {
-    log.info("show help", .{});
-    return;
-}
 
 if (ls_args.isPresent("version")) {
     log.info("v0.1.0", .{});
@@ -191,9 +185,8 @@ pub fn main() anyerror!void {
     // For now short name can be null but not long name
     // that's why one-line long name is used for -1 short name
     try myls.addArg(flag.boolean("one-line", '1', null));
-    try myls.addArg(flag.boolean("size", 's', null, null));
+    try myls.addArg(flag.boolean("size", 's', null));
     try myls.addArg(flag.boolean("version", null, null));
-    try myls.addArg(flag.boolean("help", null, null));
 
     try myls.addArg(flag.argOne("ignore", 'I', null));
     try myls.addArg(flag.argOne("hide", null, null));
