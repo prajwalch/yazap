@@ -7,7 +7,7 @@ const Command = yazap.Command;
 const Yazap = yazap.Yazap;
 
 pub fn main() anyerror!void {
-    var app = Yazap.init(allocator, "mytouch");
+    var app = Yazap.init(allocator, "mytouch", null);
     defer app.deinit();
 
     var touch = app.rootCommand();
@@ -15,16 +15,10 @@ pub fn main() anyerror!void {
     try touch.takesSingleValue("FILE_NAME");
     touch.argRequired(true);
 
-    try touch.addArg(flag.boolean("no-create", 'c'));
-    try touch.addArg(flag.boolean("version", 'v'));
-    try touch.addArg(flag.boolean("help", 'h'));
+    try touch.addArg(flag.boolean("no-create", 'c', "Do not create any files"));
+    try touch.addArg(flag.boolean("version", 'v', "Display app version"));
 
     var args = try app.parseProcess();
-
-    if (args.isPresent("help")) {
-        std.debug.print("Show help", .{});
-        return;
-    }
 
     if (args.isPresent("version")) {
         std.debug.print("v0.1.0", .{});
