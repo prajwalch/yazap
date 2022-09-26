@@ -17,10 +17,10 @@ const Setting = struct {
 allocator: Allocator,
 name: []const u8,
 description: ?[]const u8 = null,
-args: ArrayList(Arg) = ArrayList(Arg){},
-subcommands: ArrayList(Command) = ArrayList(Command){},
-setting: Setting = Setting{},
-help_options: Help.Options = Help.Options{},
+args: ArrayList(Arg) = .{},
+subcommands: ArrayList(Command) = .{},
+setting: Setting = .{},
+help_options: Help.Options = .{},
 
 /// Creates a new instance of it
 pub fn new(allocator: Allocator, name: []const u8) Command {
