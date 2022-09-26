@@ -404,10 +404,7 @@ fn verifyAndAppendValue(
     try list.append(value);
 }
 
-fn parseSubCommand(
-    self: *Parser,
-    provided_subcmd: []const u8,
-) Error!MatchedSubCommand {
+fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubCommand {
     const valid_subcmd = self.cmd.findSubcommand(provided_subcmd) orelse {
         self.err_builder.setErr(Error.UnknownCommand);
         return self.err_builder.err;
