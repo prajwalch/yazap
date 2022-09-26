@@ -338,7 +338,7 @@ fn processValue(
             // Not enough values
             if (values.items.len < min) return error.TooFewArgValue;
         }
-        const has_max_num = if (arg.max_values == null) false else true;
+        const has_max_num = (arg.max_values != null);
         const max_eqls_one = (has_max_num and (arg.max_values.? == 1));
 
         // If maximum number and takes_multiple_values is not set we are not looking for more values
