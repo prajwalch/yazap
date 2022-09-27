@@ -66,7 +66,7 @@ pub fn logError(err_builder: *ErrorBuilder) PrintError!void {
         },
         ParserError.TooFewArgValue => log.err("Too few values for Arg '{s}'\n Expected at least '{d}'\n", .{
             err_builder.arg.?.name,
-            err_builder.arg.?.min_values,
+            err_builder.arg.?.min_values.?,
         }),
         ParserError.TooManyArgValue => {
             const expected_num_values = if (err_builder.arg.?.max_values) |max|
