@@ -66,7 +66,7 @@ defer app.deinit();
 ### Getting a root command
 [Yazap](https://prajwalch.github.io/yazap/#root;Yazap) itself don't provides an any methods to add arguments for your command.
 Its only purpose is to initialize the library, invkoing parser and deinitilize all the structures therefore you must have to use
-root command to add arguments and subcommands. You can simply get it by calling `Yazap.rootCommand` which returns a pointer of it.
+root command to add arguments and subcommands. You can simply get it by calling `Yazap.rootCommand` which returns a pointer to it.
 ```zig
 var myls = app.rootCommand();
 ```
@@ -111,7 +111,7 @@ try myls.addSubcommand(update_cmd);
 
 ### Parsing arguments
 Once you're done adding arguments and subcommands call `app.parseProcess` to starts parsing. It internally calls [std.process.argsAlloc](https://ziglang.org/documentation/master/std/#root;process.argsAlloc)
-to obtain the raw arguments then invokes the parser and later returns the constant pointer to a [ArgsContext](https://prajwalch.github.io/yazap/#root;ArgsContext). Alternately you can make a call to `app.parseFrom`
+to obtain the raw arguments then it invokes the parser and later returns the constant pointer to a [ArgsContext](https://prajwalch.github.io/yazap/#root;ArgsContext). Alternately you can make a call to `app.parseFrom`
 by passing your own raw arguments which can be useful on test.
 ```zig
 var ls_args = try app.parseProcess();
