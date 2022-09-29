@@ -113,14 +113,16 @@ pub fn parse(self: *Parser) Error!ArgsContext {
     errdefer self.args_ctx.deinit();
 
     self.err_builder.setCmd(self.cmd);
-    try self.parseCommandArgument();
+    var found_help_flag: bool = false;
 
     while (self.tokenizer.nextToken()) |*token| {
         self.err_builder.setProvidedArg(token.value);
 
         if (token.isHelpFlag()) {
             self.args_ctx.help = self.cmd.help();
-            continue;
+            found_help_flag = true;
+            break;
+        }
         }
 
         if (token.isShortFlag() or token.isLongFlag()) {
