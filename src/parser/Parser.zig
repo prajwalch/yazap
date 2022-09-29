@@ -94,6 +94,8 @@ tokenizer: Tokenizer,
 args_ctx: ArgsContext,
 err_builder: ErrorBuilder,
 cmd: *const Command,
+pos_args_idx: usize,
+consume_pos_args: bool,
 
 pub fn init(
     allocator: Allocator,
@@ -106,6 +108,8 @@ pub fn init(
         .args_ctx = ArgsContext.init(allocator),
         .err_builder = ErrorBuilder.init(),
         .cmd = command,
+        .pos_args_idx = 0,
+        .consume_pos_args = command.setting.takes_value,
     };
 }
 
@@ -123,6 +127,11 @@ pub fn parse(self: *Parser) Error!ArgsContext {
             found_help_flag = true;
             break;
         }
+
+        if (self.consume_pos_args) {
+            try self.consumePositionalArgument(token);
+            // Skip current token if it has been consumed otherwise further process it
+            if (self.consume_pos_args) continue;
         }
 
         if (token.isShortFlag() or token.isLongFlag()) {
@@ -159,19 +168,38 @@ pub fn parse(self: *Parser) Error!ArgsContext {
         }
     }
 
-    if (self.cmd.setting.subcommand_required and self.args_ctx.subcommand == null) {
-        self.err_builder.setErr(Error.CommandSubcommandNotProvided);
-        return self.err_builder.err;
+    if (!found_help_flag) {
+        if (self.cmd.setting.subcommand_required and self.args_ctx.subcommand == null) {
+            self.err_builder.setErr(Error.CommandSubcommandNotProvided);
+            return self.err_builder.err;
+        }
     }
     return self.args_ctx;
 }
 
-fn parseCommandArgument(self: *Parser) Error!void {
-    if (!self.cmd.setting.takes_value) return;
+fn consumePositionalArgument(self: *Parser, token: *const Token) Error!void {
+    // All positional arguments has been consumed
+    if (self.pos_args_idx >= self.cmd.countArgs()) {
+        self.consume_pos_args = false;
+        return;
+    }
 
-    for (self.cmd.args.items) |*arg| {
+    // Looks like we found a flag
+    if (token.tag != .some_argument) {
+        if (self.cmd.setting.arg_required and (self.args_ctx.args.count() == 0)) {
+            self.err_builder.setErr(Error.CommandArgumentNotProvided);
+            return self.err_builder.err;
+        } else {
+            self.consume_pos_args = false;
+            return;
+        }
+    }
+
+    for (self.cmd.args.items[self.pos_args_idx..]) |*arg, idx| {
         if ((arg.short_name == null) and (arg.long_name == null)) {
-            self.consumeArgValue(arg, null) catch |err| switch (err) {
+            self.pos_args_idx = idx + 1;
+
+            self.processValue(arg, token.value, false) catch |err| switch (err) {
                 InternalError.ArgValueNotProvided,
                 InternalError.EmptyArgValueNotAllowed,
                 => break,
@@ -180,12 +208,8 @@ fn parseCommandArgument(self: *Parser) Error!void {
                     return e;
                 },
             };
+            break;
         }
-    }
-
-    if (self.cmd.setting.arg_required and (self.args_ctx.args.count() == 0)) {
-        self.err_builder.setErr(Error.CommandArgumentNotProvided);
-        return self.err_builder.err;
     }
 }
 
