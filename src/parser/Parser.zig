@@ -197,7 +197,7 @@ fn consumePositionalArgument(self: *Parser, token: *const Token) Error!void {
 
     for (self.cmd.args.items[self.pos_args_idx..]) |*arg, idx| {
         if ((arg.short_name == null) and (arg.long_name == null)) {
-            self.pos_args_idx = idx + 1;
+            self.pos_args_idx += idx + 1;
 
             self.processValue(arg, token.value, false) catch |err| switch (err) {
                 InternalError.ArgValueNotProvided,
