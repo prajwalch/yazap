@@ -48,7 +48,7 @@ pub fn addArg(self: *Command, new_arg: Arg) !void {
     try self.args.append(self.allocator, new_arg);
 
     if (!(self.help_options.include_args) or !(self.help_options.include_flags)) {
-        if ((new_arg.short_name == null) or (new_arg.long_name == null)) {
+        if ((new_arg.short_name == null) and (new_arg.long_name == null)) {
             self.help_options.include_args = true;
         } else {
             self.help_options.include_flags = true;
