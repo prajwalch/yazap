@@ -11,7 +11,6 @@ const Tokenizer = @import("tokenizer.zig").Tokenizer;
 const mem = std.mem;
 const Allocator = std.mem.Allocator;
 const FlagTuple = std.meta.Tuple(&[_]type{ []const u8, ?[]const u8 });
-const MatchedArgValue = ArgsContext.MatchedArgValue;
 const MatchedSubCommand = ArgsContext.MatchedSubCommand;
 
 pub const Error = error{
@@ -121,7 +120,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
         self.err_builder.setProvidedArg(token.value);
 
         if (token.isHelpFlag()) {
-            try self.args_ctx.putMatchedArg(&Arg.new("help"), MatchedArgValue.initNone());
+            try self.args_ctx.putMatchedArg(&Arg.new("help"), .none);
             break;
         }
 
@@ -233,7 +232,7 @@ fn parseShortArg(self: *Parser, token: *const Token) InternalError!void {
             } else if (short_flag.hasEmptyValue()) {
                 return Error.UnneededEmptyAttachedValue;
             } else {
-                try self.args_ctx.putMatchedArg(arg, MatchedArgValue.initNone());
+                try self.args_ctx.putMatchedArg(arg, .none);
                 continue;
             }
         }
@@ -266,7 +265,7 @@ fn parseLongArg(self: *Parser, token: *const Token) InternalError!void {
         if (flag_tuple.@"1" != null) {
             return Error.UnneededAttachedValue;
         } else {
-            return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initNone());
+            return self.args_ctx.putMatchedArg(arg, .none);
         }
     }
     return self.consumeArgValue(arg, flag_tuple.@"1");
@@ -331,7 +330,7 @@ fn processValue(
             while (values_iter.next()) |val| {
                 try self.verifyAndAppendValue(arg, &values, val);
             }
-            return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initMany(values));
+            return self.args_ctx.putMatchedArg(arg, .{ .many = values });
         }
     }
 
@@ -343,7 +342,7 @@ fn processValue(
         // flag = f
         // value = v1,v2
         if (arg.verifyValueInAllowedValues(value)) {
-            return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initSingle(value));
+            return self.args_ctx.putMatchedArg(arg, .{ .single = value });
         } else {
             return InternalError.ProvidedValueIsNotValidOption;
         }
@@ -367,21 +366,21 @@ fn processValue(
             // therefore return it as a single value instead
             if (values.items.len == 1) {
                 values.deinit();
-                return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initSingle(value));
+                return self.args_ctx.putMatchedArg(arg, .{ .single = value });
             } else {
-                return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initMany(values));
+                return self.args_ctx.putMatchedArg(arg, .{ .many = values });
             }
         }
         if (arg.settings.takes_multiple_values) {
             if (!has_max_num) {
                 try self.consumeValuesTillNextFlag(arg, &values);
-                return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initMany(values));
+                return self.args_ctx.putMatchedArg(arg, .{ .many = values });
             }
         }
         if (has_max_num) {
             try self.consumeNValues(arg, &values, arg.max_values.?);
         }
-        return self.args_ctx.putMatchedArg(arg, MatchedArgValue.initMany(values));
+        return self.args_ctx.putMatchedArg(arg, .{ .many = values });
     }
 }
 
