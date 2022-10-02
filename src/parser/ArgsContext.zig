@@ -13,18 +13,6 @@ pub const MatchedArgValue = union(enum) {
     single: []const u8,
     many: std.ArrayList([]const u8),
 
-    pub fn initNone() MatchedArgValue {
-        return .none;
-    }
-
-    pub fn initSingle(val: []const u8) MatchedArgValue {
-        return MatchedArgValue{ .single = val };
-    }
-
-    pub fn initMany(vals: std.ArrayList([]const u8)) MatchedArgValue {
-        return MatchedArgValue{ .many = vals };
-    }
-
     pub fn count(val: MatchedArgValue) usize {
         if (val.isSingle()) {
             return 1;
