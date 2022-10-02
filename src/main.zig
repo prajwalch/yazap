@@ -158,6 +158,26 @@ test "arg.takes_multiple_values" {
     }
 }
 
+test "using displayHelp and displaySubcommandHelp help api" {
+    const argv: []const [:0]const u8 = &.{"subcmd"};
+
+    var app = try initAppArgs(allocator);
+    defer app.deinit();
+    app.rootCommand().takesValue(false);
+
+    var subcmd = app.createCommand("subcmd", null);
+    try subcmd.addArg(flag.boolean("bool", null, null));
+    try app.rootCommand().addSubcommand(subcmd);
+
+    var args = try app.parseFrom(argv);
+
+    if (args.subcommandContext("subcmd")) |sargs| {
+        if (!sargs.hasArgs()) {
+            try app.displaySubcommandHelp();
+        }
+    }
+}
+
 test "auto help generation" {
     const argv: []const [:0]const u8 = &.{"-h"};
 

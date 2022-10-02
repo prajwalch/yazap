@@ -51,17 +51,20 @@ pub const MatchedArgValue = union(enum) {
 pub const MatchedSubCommand = struct {
     name: []const u8,
     ctx: ?ArgsContext,
+    help: ?Help,
 
     pub fn initWithoutArg(name: []const u8) MatchedSubCommand {
         return MatchedSubCommand{
             .name = name,
             .ctx = null,
+            .help = null,
         };
     }
 
-    pub fn initWithArg(name: []const u8, args_ctx: ArgsContext) MatchedSubCommand {
+    pub fn initWithArg(name: []const u8, args_ctx: ArgsContext, help: Help) MatchedSubCommand {
         var self = initWithoutArg(name);
         self.ctx = args_ctx;
+        self.help = help;
         return self;
     }
 
@@ -73,7 +76,6 @@ pub const MatchedSubCommand = struct {
 allocator: std.mem.Allocator,
 args: ArgHashMap,
 subcommand: ?*MatchedSubCommand,
-help: ?Help = null,
 
 pub fn init(allocator: std.mem.Allocator) ArgsContext {
     return ArgsContext{
@@ -160,6 +162,11 @@ pub fn isPresent(self: *const ArgsContext, name_to_lookup: []const u8) bool {
     }
 
     return false;
+}
+
+/// Checks if arguments were present on command line or not
+pub fn hasArgs(self: *const ArgsContext) bool {
+    return ((self.args.count() >= 1) or (self.subcommand != null));
 }
 
 /// Returns the single value of an argument if found otherwise null

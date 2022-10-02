@@ -2,6 +2,7 @@ const Yazap = @This();
 
 const std = @import("std");
 const Command = @import("Command.zig");
+const Help = @import("Help.zig");
 const Parser = @import("parser/Parser.zig");
 const ArgsContext = @import("parser/ArgsContext.zig");
 const Tokenizer = @import("parser/tokenizer.zig").Tokenizer;
@@ -16,6 +17,8 @@ pub const Error = error{
 
 allocator: Allocator,
 command: Command,
+command_help: ?Help,
+subcommand_help: ?Help = null,
 args_ctx: ?ArgsContext = null,
 process_args: ?[]const [:0]u8 = null,
 
@@ -31,6 +34,7 @@ pub fn init(
             cmd.description = description;
             break :blk cmd;
         },
+        .command_help = null,
     };
 }
 
@@ -61,19 +65,58 @@ pub fn parseProcess(self: *Yazap) Error!(*const ArgsContext) {
 
 /// Starts parsing the given arguments
 pub fn parseFrom(self: *Yazap, argv: []const [:0]const u8) Error!(*const ArgsContext) {
+    self.command_help = self.rootCommand().help();
+
     var parser = Parser.init(self.allocator, Tokenizer.init(argv), self.rootCommand());
-    var args_ctx = parser.parse() catch |e| {
+    self.args_ctx = parser.parse() catch |e| {
         try parser.err_builder.logError();
         return e;
     };
-    if (args_ctx.help) |*help| {
-        try help.writeAll();
-        args_ctx.deinit();
+
+    // Store the given subcommand's help writer
+    if (self.args_ctx.?.subcommand) |subcmd| {
+        self.subcommand_help = subcmd.help;
+    }
+    try self.displayHelpAndExitIfFound();
+    return &self.args_ctx.?;
+}
+
+/// Displays the help message of root command
+pub fn displayHelp(self: *Yazap) !void {
+    if (self.command_help) |*h| return h.writeAll();
+}
+
+/// Displays the help message of subcommand if it is provided on command line
+/// otherwise it will display nothing
+pub fn displaySubcommandHelp(self: *Yazap) !void {
+    if (self.subcommand_help) |*h| return h.writeAll();
+}
+
+fn displayHelpAndExitIfFound(self: *Yazap) !void {
+    var args_ctx = self.args_ctx orelse return;
+    var help_displayed = false;
+
+    if (args_ctx.isPresent("help")) {
+        try self.displayHelp();
+        help_displayed = true;
+    } else if (currentSubcommandCtx(&args_ctx)) |subcmd_ctx| {
+        if (subcmd_ctx.isPresent("help")) {
+            try self.displaySubcommandHelp();
+            help_displayed = true;
+        }
+    }
+
+    if (help_displayed) {
         self.deinit();
         std.process.exit(0);
     }
-    self.args_ctx = args_ctx;
-    return &self.args_ctx.?;
+}
+
+fn currentSubcommandCtx(args_ctx: *ArgsContext) ?*ArgsContext {
+    if (args_ctx.subcommand) |subcmd| {
+        if (subcmd.ctx) |*ctx| return ctx;
+    }
+    return null;
 }
 
 test "emit docs" {
