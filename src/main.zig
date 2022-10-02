@@ -13,53 +13,21 @@ fn initAppArgs(alloc: std.mem.Allocator) !Yazap {
 
     var app = yazap.rootCommand();
 
-    // app <ARG-ONE>
     try app.takesSingleValue("ARG-ONE");
-    // app <ARG-MANY...>
     try app.takesNValues("ARG-MANY", 3);
 
-    // app [-b, --bool-flag]
-    try app.addArg(flag.boolean("bool-flag", 'b', null));
-    try app.addArg(flag.boolean("bool-flag2", 'c', null));
-    // var bool_flag = Arg.new("bool-flag");
-    // bool_flag.shortName('b');
-    // bool_flag.setLongNameSameAsName();
-    // try app.addArg(bool_flag);
+    try app.addArgs(&[_]Arg{
+        flag.boolean("bool-flag", 'b', null),
+        flag.boolean("bool-flag2", 'c', null),
+        flag.argOne("arg-one-flag", '1', null),
+        flag.argN("argn-flag", '3', 3, null),
+        flag.option("option-flag", 'o', &[_][]const u8{
+            "opt1",
+            "opt2",
+            "opt3",
+        }, null),
+    });
 
-    // app [-1, --arg_one_flag <VALUE>]
-    try app.addArg(flag.argOne("arg-one-flag", '1', null));
-    // var arg_one_flag = Arg.new("arg-one-flag");
-    // arg_one_flag.shortName('1');
-    // arg_one_flag.setLongNameSameAsName();
-    // arg_one_flag.takesValue(true);
-    // try app.addArg(arg_one_flag);
-
-    // app [-3, --argn-flag <VALUE...>
-    try app.addArg(flag.argN("argn-flag", '3', 3, null));
-    // var argn_flag = Arg.new("argn-flag");
-    // argn_flag.shortName('3');
-    // argn_flag.setLongNameSameAsName();
-    // argn_flag.maxValues(3);
-    // argn_flag.valuesDelimiter(",");
-    // try app.addArg(argn_flag);
-
-    // app [-o, --option-flag <opt1 | opt2 | opt3>]
-    try app.addArg(flag.option("option-flag", 'o', &[_][]const u8{
-        "opt1",
-        "opt2",
-        "opt3",
-    }, null));
-    // var opt_flag = Arg.new("option-flag");
-    // opt_flag.shortName('o');
-    // opt_flag.setLongNameSameAsName();
-    // opt_flag.allowedValues(&[_][]const u8{
-    // "opt1",
-    // "opt2",
-    // "opt3",
-    // });
-    // try app.addArg(opt_flag);
-
-    // app subcmd1
     try app.addSubcommand(yazap.createCommand("subcmd1", "First sub command"));
     return yazap;
 }

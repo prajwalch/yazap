@@ -56,9 +56,19 @@ pub fn addArg(self: *Command, new_arg: Arg) !void {
     }
 }
 
+/// Appends args into the args list
+pub fn addArgs(self: *Command, args: []Arg) !void {
+    for (args) |arg| try self.addArg(arg);
+}
+
 /// Appends the new subcommand into the subcommands list
 pub fn addSubcommand(self: *Command, new_subcommand: Command) !void {
     return self.subcommands.append(self.allocator, new_subcommand);
+}
+
+/// Appends the `subcommands` into the subcommands list
+pub fn addSubcommands(self: *Command, subcommands: []Command) !void {
+    for (subcommands) |subcmd| try self.addSubcommand(subcmd);
 }
 
 /// Create a new [Argument](/#root;Arg) with the given name and specifies that Command will take single value
