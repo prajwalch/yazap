@@ -109,7 +109,7 @@ pub fn putMatchedArg(self: *ArgsContext, arg: *const Arg, value: MatchedArgValue
                     try many.append(old_single_value);
                     try many.append(new_value.single);
 
-                    return self.args.put(arg.name, MatchedArgValue.initMany(many));
+                    return self.args.put(arg.name, .{ .many = many });
                 } else if (new_value.isMany()) {
                     // If old value is single but the new value is many then
                     // append the old one into new many value
