@@ -115,16 +115,13 @@ pub fn init(
 
 pub fn parse(self: *Parser) Error!ArgsContext {
     errdefer self.args_ctx.deinit();
-
     self.err_builder.setCmd(self.cmd);
-    var found_help_flag: bool = false;
 
     while (self.tokenizer.nextToken()) |*token| {
         self.err_builder.setProvidedArg(token.value);
 
         if (token.isHelpFlag()) {
-            self.args_ctx.help = self.cmd.help();
-            found_help_flag = true;
+            try self.args_ctx.putMatchedArg(&Arg.new("help"), MatchedArgValue.initNone());
             break;
         }
 
@@ -161,14 +158,11 @@ pub fn parse(self: *Parser) Error!ArgsContext {
             }
 
             const subcmd = try self.parseSubCommand(token.value);
-            if (subcmd.ctx) |subcmd_ctx| {
-                self.args_ctx.help = subcmd_ctx.help;
-            }
             try self.args_ctx.setSubcommand(subcmd);
         }
     }
 
-    if (!found_help_flag) {
+    if (!(self.args_ctx.isPresent("help"))) {
         if (self.cmd.setting.subcommand_required and self.args_ctx.subcommand == null) {
             self.err_builder.setErr(Error.CommandSubcommandNotProvided);
             return self.err_builder.err;
@@ -441,9 +435,14 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
         or valid_subcmd.countArgs() >= 1
         or valid_subcmd.countSubcommands() >= 1) {
         // zig fmt: on
+        const help = valid_subcmd.help();
         const subcmd_argv = self.tokenizer.restArg() orelse {
             if (!(valid_subcmd.setting.arg_required)) {
-                return MatchedSubCommand.initWithoutArg(valid_subcmd.name);
+                return MatchedSubCommand.initWithArg(
+                    valid_subcmd.name,
+                    ArgsContext.init(self.allocator),
+                    help,
+                );
             }
             self.err_builder.setCmd(valid_subcmd);
             self.err_builder.setErr(Error.CommandArgumentNotProvided);
@@ -456,7 +455,7 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
             return err;
         };
 
-        return MatchedSubCommand.initWithArg(valid_subcmd.name, subcmd_ctx);
+        return MatchedSubCommand.initWithArg(valid_subcmd.name, subcmd_ctx, help);
     }
     return MatchedSubCommand.initWithoutArg(valid_subcmd.name);
 }
