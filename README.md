@@ -199,11 +199,6 @@ pub fn main() anyerror!void {
 
     var ls_args = try app.parseProcess();
 
-    if (ls_args.isPresent("help")) {
-       log.info("show help", .{});
-       return;
-    }
-
     if (ls_args.isPresent("version")) {
         log.info("v0.1.0", .{});
         return;
