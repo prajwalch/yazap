@@ -55,13 +55,14 @@ pub fn logError(err_builder: *ErrorBuilder) PrintError!void {
                 err_builder.arg.?.name,
             });
 
-            // We don't need extra info like '[scoped] (..):' while printing just a simple value
-            // therfore using directly stdout writer seems right solution here
-            const stdout = std.io.getStdOut().writer();
             if (err_builder.arg.?.allowed_values) |values| {
-                for (values) |v| {
-                    try stdout.print("{s}\n", .{v});
-                }
+                // We don't need extra info like '[scoped] (..):' while printing just a simple value
+                // therfore using directly stdout writer seems right solution here
+                var buffer = std.io.bufferedWriter(std.io.getStdErr().writer());
+                var stderr = buffer.writer();
+
+                for (values) |v| try stderr.print("{s}\n", .{v});
+                try buffer.flush();
             }
         },
         ParserError.TooFewArgValue => log.err("Too few values for Arg '{s}'\n Expected at least '{d}'\n", .{
