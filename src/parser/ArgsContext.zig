@@ -135,6 +135,8 @@ pub fn putMatchedArg(self: *ArgsContext, arg: *const Arg, value: MatchedArgValue
 }
 
 pub fn setSubcommand(self: *ArgsContext, subcommand: MatchedSubCommand) !void {
+    if (self.subcommand != null) return;
+
     var alloc_subcmd = try self.allocator.create(MatchedSubCommand);
     alloc_subcmd.* = subcommand;
     self.subcommand = alloc_subcmd;
