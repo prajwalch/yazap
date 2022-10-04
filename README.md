@@ -157,6 +157,23 @@ if (ls_args.isPresent("color")) {
 }
 ```
 
+### Handling help
+You don't have manually handle `-h` and `--help` but if want to display help
+like when argument is empty then you can use `Yazap.displayHelp` and `Yazap.displaySubcommandHelp`
+```zig
+if (!(ls_args.hasArgs())) {
+    try app.displayHelp();
+    return;
+}
+
+if (ls_args.subcommandContext("update")) |update_cmd_args| {
+    if (!(update_cmd_args.hasArgs()) {
+        try app.displaySubcommandHelp();
+        return;
+    }
+}
+```
+
 ### Putting it all together
 ```zig
 const std = @import("std");
@@ -199,12 +216,22 @@ pub fn main() anyerror!void {
 
     var ls_args = try app.parseProcess();
 
+    if (!(ls_args.hasArgs())) {
+        try app.displayHelp();
+        return;
+    }
+
     if (ls_args.isPresent("version")) {
         log.info("v0.1.0", .{});
         return;
     }
 
     if (ls_args.subcommandContext("update")) |update_cmd_args| {
+        if (!(update_cmd_args.hasArgs())) {
+            try app.displaySubcommandHelp();
+            return;
+        }
+
         if (update_cmd_args.isPresent("check-only")) {
             std.log.info("Check and report new update", .{});
             return;
