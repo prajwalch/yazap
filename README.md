@@ -158,7 +158,7 @@ if (ls_args.isPresent("color")) {
 ```
 
 ### Handling help
-You don't have manually handle `-h` and `--help` but if want to display help
+You don't have to manually handle `-h` and `--help` but if want to display help
 like when argument is empty then you can use `Yazap.displayHelp` and `Yazap.displaySubcommandHelp`
 ```zig
 if (!(ls_args.hasArgs())) {
