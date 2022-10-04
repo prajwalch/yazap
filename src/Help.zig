@@ -64,7 +64,7 @@ fn writeHeader(self: *Help, writer: anytype) !void {
 
         for (self.cmd.args.items) |arg| {
             if ((arg.short_name == null) and (arg.long_name == null)) {
-                try writer.print("{c}{s}{c} ", .{ braces.@"0", arg.name, braces.@"1" });
+                try writer.print("{c}{s}{c} ", .{ braces[0], arg.name, braces[1] });
             }
         }
     }
@@ -75,7 +75,7 @@ fn writeHeader(self: *Help, writer: anytype) !void {
         self.options.include_subcmds = true;
         const braces = getBraces(self.cmd.setting.subcommand_required);
 
-        try writer.print("{c}COMMAND{c}\n", .{ braces.@"0", braces.@"1" });
+        try writer.print("{c}COMMAND{c}\n", .{ braces[0], braces[1] });
     }
 
     if (self.cmd.description) |des| {
