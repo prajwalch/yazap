@@ -216,7 +216,7 @@ fn parseArg(self: *Parser, token: *const Token) InternalError!void {
 
 fn parseShortArg(self: *Parser, token: *const Token) InternalError!void {
     const flag_tuple = flagTokenToFlagTuple(token);
-    var short_flag = ShortFlag.init(flag_tuple.@"0", flag_tuple.@"1");
+    var short_flag = ShortFlag.init(flag_tuple[0], flag_tuple[1]);
 
     while (short_flag.next()) |flag| {
         self.err_builder.setProvidedArg(@as(*const [1]u8, flag));
@@ -254,21 +254,21 @@ fn parseShortArg(self: *Parser, token: *const Token) InternalError!void {
 
 fn parseLongArg(self: *Parser, token: *const Token) InternalError!void {
     const flag_tuple = flagTokenToFlagTuple(token);
-    self.err_builder.setProvidedArg(flag_tuple.@"0");
+    self.err_builder.setProvidedArg(flag_tuple[0]);
 
-    const arg = self.cmd.findArgByLongName(flag_tuple.@"0") orelse {
+    const arg = self.cmd.findArgByLongName(flag_tuple[0]) orelse {
         return Error.UnknownFlag;
     };
     self.err_builder.setArg(arg);
 
     if (!(arg.settings.takes_value)) {
-        if (flag_tuple.@"1" != null) {
+        if (flag_tuple[1] != null) {
             return Error.UnneededAttachedValue;
         } else {
             return self.args_ctx.putMatchedArg(arg, .none);
         }
     }
-    return self.consumeArgValue(arg, flag_tuple.@"1");
+    return self.consumeArgValue(arg, flag_tuple[1]);
 }
 
 // Converts a flag token to a tuple holding a flag name and an optional value
