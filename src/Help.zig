@@ -46,11 +46,9 @@ pub fn writeAll(self: *Help) !void {
     try self.writeOptions(writer);
 
     if (self.options.include_subcmds) {
-        try writer.writeAll(
-            \\ 
-            \\Note:
-            \\ Use cmd -h or --help to get help for specific command
-            \\
+        try writer.print(
+            "\nRun '{s} <command> -h' or '{s} <command> --help' to get help for specific command\n",
+            .{ self.cmd.name, self.cmd.name },
         );
     }
     try buffer.flush();
