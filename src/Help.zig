@@ -136,7 +136,9 @@ fn writeOptions(self: *Help, writer: anytype) !void {
                 } else {
                     // TODO: Find a better way to make UPPERCASE
                     var buff: [100]u8 = undefined;
-                    try writer.print("<{s}>", .{std.ascii.upperString(&buff, arg.name)});
+                    var arg_name = std.ascii.upperString(&buff, arg.name);
+                    std.mem.replaceScalar(u8, arg_name, '-', '_');
+                    try writer.print("<{s}>", .{buff});
                 }
             }
 
