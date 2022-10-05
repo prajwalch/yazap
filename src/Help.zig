@@ -46,17 +46,21 @@ pub fn writeAll(self: *Help) !void {
     try self.writeOptions(writer);
 
     if (self.options.include_subcmds) {
+        try writeNewLine(writer);
         try writer.print(
-            "\nRun '{s} <command> -h' or '{s} <command> --help' to get help for specific command\n",
+            "Run '{s} <command> -h' or '{s} <command> --help' to get help for specific command",
             .{ self.cmd.name, self.cmd.name },
         );
+        try writeNewLine(writer);
     }
     try buffer.flush();
 }
 
 fn writeHeader(self: *Help, writer: anytype) !void {
     if (self.cmd.description) |des| {
-        try writer.print("{s}\n\n", .{des});
+        try writer.print("{s}", .{des});
+        try writeNewLine(writer);
+        try writeNewLine(writer);
     }
     try writer.print("Usage: {s} ", .{self.cmd.name});
 
@@ -76,10 +80,10 @@ fn writeHeader(self: *Help, writer: anytype) !void {
         self.options.include_subcmds = true;
         const braces = getBraces(self.cmd.setting.subcommand_required);
 
-        try writer.print("{c}COMMAND{c}\n", .{ braces[0], braces[1] });
+        try writer.print("{c}COMMAND{c}", .{ braces[0], braces[1] });
+        try writeNewLine(writer);
     }
-
-    try writer.writeAll("\n");
+    try writeNewLine(writer);
 }
 
 fn getBraces(required: bool) Braces {
@@ -89,19 +93,21 @@ fn getBraces(required: bool) Braces {
 fn writeCommands(self: *Help, writer: anytype) !void {
     if (!(self.options.include_subcmds)) return;
 
-    try writer.writeAll("Commands:\n");
+    try writer.writeAll("Commands:");
+    try writeNewLine(writer);
 
     for (self.cmd.subcommands.items) |subcmd| {
         try writer.print(" {s}\t", .{subcmd.name});
         if (subcmd.description) |d| try writer.print("{s}", .{d});
-        try writer.writeAll("\n");
+        try writeNewLine(writer);
     }
-    try writer.writeAll("\n");
+    try writeNewLine(writer);
 }
 
 fn writeOptions(self: *Help, writer: anytype) !void {
     if (self.options.include_flags) {
-        try writer.writeAll("Options:\n");
+        try writer.writeAll("Options:");
+        try writeNewLine(writer);
 
         for (self.cmd.args.items) |arg| {
             if ((arg.short_name == null) and (arg.long_name == null)) continue;
@@ -135,10 +141,16 @@ fn writeOptions(self: *Help, writer: anytype) !void {
             }
 
             if (arg.description) |des_txt| {
-                try writer.print("\n\t{s}\n", .{des_txt});
+                try writeNewLine(writer);
+                try writer.print("\t{s}", .{des_txt});
+                try writeNewLine(writer);
             }
             try writer.writeAll("\n");
         }
     }
     try writer.writeAll(" -h, --help\n\tPrint this help and exit\n");
+}
+
+fn writeNewLine(writer: anytype) !void {
+    return writer.writeByte('\n');
 }
