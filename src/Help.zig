@@ -55,6 +55,9 @@ pub fn writeAll(self: *Help) !void {
 }
 
 fn writeHeader(self: *Help, writer: anytype) !void {
+    if (self.cmd.description) |des| {
+        try writer.print("{s}\n\n", .{des});
+    }
     try writer.print("Usage: {s} ", .{self.cmd.name});
 
     if (self.options.include_args) {
@@ -76,10 +79,6 @@ fn writeHeader(self: *Help, writer: anytype) !void {
         try writer.print("{c}COMMAND{c}\n", .{ braces[0], braces[1] });
     }
 
-    if (self.cmd.description) |des| {
-        try writer.writeAll("\nDescription:\n");
-        try writer.print(" {s}\n", .{des});
-    }
     try writer.writeAll("\n");
 }
 
