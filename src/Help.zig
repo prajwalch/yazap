@@ -117,17 +117,17 @@ fn writeOptions(self: *Help, writer: anytype) !void {
 
                 // Required options: <A | B | C>
                 if (arg.allowed_values) |values| {
-                    try writer.writeByte('<');
+                    try writer.writeByte('{');
 
                     for (values) |value, idx| {
                         try writer.print("{s}", .{value});
 
                         // Only print '|' till second last option
                         if (idx < (values.len - 1)) {
-                            try writer.writeAll(" | ");
+                            try writer.writeAll("|");
                         }
                     }
-                    try writer.writeByte('>');
+                    try writer.writeByte('}');
                 } else {
                     // TODO: Find a better way to make UPPERCASE
                     var buff: [100]u8 = undefined;
