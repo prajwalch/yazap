@@ -15,11 +15,11 @@ pub const Token = struct {
         short_options_with_value,
         // -fgh=
         short_options_with_empty_value,
-        // --flag
+        // --option
         long_option,
-        // --flag=value
+        // --option=value
         long_option_with_value,
-        // --flag=
+        // --option=
         long_option_with_empty_value,
         // -h, --help
         help_option,
@@ -101,7 +101,7 @@ pub const Tokenizer = struct {
         return @as([]const u8, self.args[self.cursor]);
     }
 
-    /// Returns the next non flag argument
+    /// Returns the next non option argument
     pub fn nextNonOptionArg(self: *Tokenizer) ?[]const u8 {
         var next_token = self.nextToken() orelse return null;
 
@@ -121,14 +121,14 @@ pub const Tokenizer = struct {
     }
 
     fn processLongOption(arg: []const u8) Token {
-        const flag = mem.trimLeft(u8, arg, "--");
+        const option = mem.trimLeft(u8, arg, "--");
         const tag: Token.Tag = blk: {
-            // Check for 'help' flag
-            if (std.mem.eql(u8, flag, "help"))
+            // Check for 'help' option
+            if (std.mem.eql(u8, option, "help"))
                 break :blk .help_option;
 
-            if (mem.indexOfScalar(u8, flag, '=')) |eql_pos| {
-                const has_value = (eql_pos + 1) < flag.len;
+            if (mem.indexOfScalar(u8, option, '=')) |eql_pos| {
+                const has_value = (eql_pos + 1) < option.len;
 
                 if (has_value) {
                     break :blk .long_option_with_value;
@@ -139,19 +139,19 @@ pub const Tokenizer = struct {
             break :blk .long_option;
         };
 
-        return Token.init(flag, tag);
+        return Token.init(option, tag);
     }
 
     fn processShortOption(arg: []const u8) Token {
-        const flag = mem.trimLeft(u8, arg, "-");
+        const option = mem.trimLeft(u8, arg, "-");
         const tag: Token.Tag = blk: {
-            // Check for 'h' flag
-            if (std.mem.eql(u8, flag, "h"))
+            // Check for 'h' option
+            if (std.mem.eql(u8, option, "h"))
                 break :blk .help_option;
 
-            if (mem.indexOfScalar(u8, flag, '=')) |eql_pos| {
-                const is_options = (flag[0..eql_pos]).len > 1;
-                const has_value = (eql_pos + 1) < flag.len;
+            if (mem.indexOfScalar(u8, option, '=')) |eql_pos| {
+                const is_options = (option[0..eql_pos]).len > 1;
+                const has_value = (eql_pos + 1) < option.len;
 
                 if (is_options) {
                     if (has_value) {
@@ -169,12 +169,12 @@ pub const Tokenizer = struct {
             } else {
                 // has tail?
                 // for ex: -fgh or -fvalue
-                if (flag.len > 1) break :blk .short_option_with_tail;
+                if (option.len > 1) break :blk .short_option_with_tail;
             }
             break :blk .short_option;
         };
 
-        return Token.init(flag, tag);
+        return Token.init(option, tag);
     }
 };
 
@@ -198,9 +198,9 @@ test "tokenizer" {
         "-fgh=",
         "",
         "",
-        "--flag",
-        "--flagi=value",
-        "--flag=",
+        "--option",
+        "--optioni=value",
+        "--option=",
         "arg",
         "",
     };
