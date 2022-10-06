@@ -130,7 +130,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
             if (self.consume_cmd_args) continue;
         }
 
-        if (token.isShortFlag() or token.isLongFlag()) {
+        if (token.isShortOption() or token.isLongOption()) {
             if (self.cmd.countOptions() == 0) {
                 self.err_builder.setErr(Error.UnknownFlag);
                 return self.err_builder.err;
@@ -202,9 +202,9 @@ fn consumeCommandArg(self: *Parser, token: *const Token) Error!void {
 }
 
 fn parseArg(self: *Parser, token: *const Token) InternalError!void {
-    if (token.isShortFlag()) {
+    if (token.isShortOption()) {
         try self.parseShortArg(token);
-    } else if (token.isLongFlag()) {
+    } else if (token.isLongOption()) {
         try self.parseLongArg(token);
     }
 }

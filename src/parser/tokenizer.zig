@@ -34,7 +34,7 @@ pub const Token = struct {
         return Token{ .value = value, .tag = tag };
     }
 
-    pub fn isShortFlag(self: *const Token) bool {
+    pub fn isShortOption(self: *const Token) bool {
         // zig fmt: off
         return (
             self.tag == .short_option
@@ -47,7 +47,7 @@ pub const Token = struct {
         // zig fmt: on
     }
 
-    pub fn isLongFlag(self: *const Token) bool {
+    pub fn isLongOption(self: *const Token) bool {
         // zig fmt: off
         return (
             self.tag == .long_option
@@ -105,7 +105,7 @@ pub const Tokenizer = struct {
     pub fn nextNonFlagArg(self: *Tokenizer) ?[]const u8 {
         var next_token = self.nextToken() orelse return null;
 
-        if (next_token.isShortFlag() or next_token.isLongFlag() or next_token.isHelpFlag()) {
+        if (next_token.isShortOption() or next_token.isLongOption() or next_token.isHelpFlag()) {
             self.cursor -= 1;
             return null;
         }
