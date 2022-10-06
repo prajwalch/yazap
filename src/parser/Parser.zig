@@ -368,7 +368,7 @@ fn processValue(
         }
         if (arg.settings.takes_multiple_values) {
             if (!has_max_num) {
-                try self.consumeValuesTillNextFlag(arg, &values);
+                try self.consumeValuesTillNextOption(arg, &values);
                 return self.args_ctx.putMatchedArg(arg, .{ .many = values });
             }
         }
@@ -392,7 +392,7 @@ fn consumeNValues(
     }
 }
 
-fn consumeValuesTillNextFlag(
+fn consumeValuesTillNextOption(
     self: *Parser,
     arg: *const Arg,
     list: *std.ArrayList([]const u8),
