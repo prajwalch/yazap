@@ -125,7 +125,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
         }
 
         if (self.consume_cmd_args) {
-            try self.consumePositionalArgument(token);
+            try self.consumeCommandArg(token);
             // Skip current token if it has been consumed otherwise further process it
             if (self.consume_cmd_args) continue;
         }
@@ -170,7 +170,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
     return self.args_ctx;
 }
 
-fn consumePositionalArgument(self: *Parser, token: *const Token) Error!void {
+fn consumeCommandArg(self: *Parser, token: *const Token) Error!void {
     // All positional arguments has been consumed
     if (self.cmd_args_idx >= self.cmd.countArgs()) {
         self.consume_cmd_args = false;
