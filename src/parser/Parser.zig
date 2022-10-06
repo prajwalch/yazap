@@ -136,7 +136,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
                 return self.err_builder.err;
             }
 
-            self.parseArg(token) catch |err| switch (err) {
+            self.parseOption(token) catch |err| switch (err) {
                 InternalError.ArgValueNotProvided => {
                     self.err_builder.setErr(Error.FlagValueNotProvided);
                     return self.err_builder.err;
@@ -201,15 +201,15 @@ fn consumeCommandArg(self: *Parser, token: *const Token) Error!void {
     };
 }
 
-fn parseArg(self: *Parser, token: *const Token) InternalError!void {
+fn parseOption(self: *Parser, token: *const Token) InternalError!void {
     if (token.isShortOption()) {
-        try self.parseShortArg(token);
+        try self.parseShortOption(token);
     } else if (token.isLongOption()) {
-        try self.parseLongArg(token);
+        try self.parseLongOption(token);
     }
 }
 
-fn parseShortArg(self: *Parser, token: *const Token) InternalError!void {
+fn parseShortOption(self: *Parser, token: *const Token) InternalError!void {
     const flag_tuple = flagTokenToFlagTuple(token);
     var short_flag = ShortOption.init(flag_tuple[0], flag_tuple[1]);
 
@@ -247,7 +247,7 @@ fn parseShortArg(self: *Parser, token: *const Token) InternalError!void {
     }
 }
 
-fn parseLongArg(self: *Parser, token: *const Token) InternalError!void {
+fn parseLongOption(self: *Parser, token: *const Token) InternalError!void {
     const flag_tuple = flagTokenToFlagTuple(token);
     self.err_builder.setProvidedArg(flag_tuple[0]);
 
