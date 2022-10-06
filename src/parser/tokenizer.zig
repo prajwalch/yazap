@@ -102,7 +102,7 @@ pub const Tokenizer = struct {
     }
 
     /// Returns the next non flag argument
-    pub fn nextNonFlagArg(self: *Tokenizer) ?[]const u8 {
+    pub fn nextNonOptionArg(self: *Tokenizer) ?[]const u8 {
         var next_token = self.nextToken() orelse return null;
 
         if (next_token.isShortOption() or next_token.isLongOption() or next_token.isHelpOption()) {

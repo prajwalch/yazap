@@ -303,7 +303,7 @@ fn consumeArgValue(
     if (attached_value) |val| {
         return self.processValue(arg, val, true);
     } else {
-        const value = self.tokenizer.nextNonFlagArg() orelse return InternalError.ArgValueNotProvided;
+        const value = self.tokenizer.nextNonOptionArg() orelse return InternalError.ArgValueNotProvided;
         return self.processValue(arg, value, false);
     }
 }
@@ -387,7 +387,7 @@ fn consumeNValues(
 ) InternalError!void {
     var i: usize = 1;
     while (i < num) : (i += 1) {
-        const value = self.tokenizer.nextNonFlagArg() orelse return;
+        const value = self.tokenizer.nextNonOptionArg() orelse return;
         try self.verifyAndAppendValue(arg, list, value);
     }
 }
@@ -397,7 +397,7 @@ fn consumeValuesTillNextFlag(
     arg: *const Arg,
     list: *std.ArrayList([]const u8),
 ) InternalError!void {
-    while (self.tokenizer.nextNonFlagArg()) |value| {
+    while (self.tokenizer.nextNonOptionArg()) |value| {
         try self.verifyAndAppendValue(arg, list, value);
     }
 }
