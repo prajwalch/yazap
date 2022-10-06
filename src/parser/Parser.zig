@@ -210,7 +210,7 @@ fn parseOption(self: *Parser, token: *const Token) InternalError!void {
 }
 
 fn parseShortOption(self: *Parser, token: *const Token) InternalError!void {
-    const flag_tuple = flagTokenToFlagTuple(token);
+    const flag_tuple = optionTokenToOptionTuple(token);
     var short_flag = ShortOption.init(flag_tuple[0], flag_tuple[1]);
 
     while (short_flag.next()) |flag| {
@@ -248,7 +248,7 @@ fn parseShortOption(self: *Parser, token: *const Token) InternalError!void {
 }
 
 fn parseLongOption(self: *Parser, token: *const Token) InternalError!void {
-    const flag_tuple = flagTokenToFlagTuple(token);
+    const flag_tuple = optionTokenToOptionTuple(token);
     self.err_builder.setProvidedArg(flag_tuple[0]);
 
     const arg = self.cmd.findArgByLongName(flag_tuple[0]) orelse {
@@ -271,7 +271,7 @@ fn parseLongOption(self: *Parser, token: *const Token) InternalError!void {
 // --flag, -f, -fgh                     => (flag, null), (f, null), (fgh, null)
 // --flag=value, -f=value, -fgh=value   => (flag, value), (f, value), (fgh, value)
 // --flag=, -f=, -fgh=                  => (flag, ""), (f, ""), (fgh, "")
-fn flagTokenToFlagTuple(token: *const Token) OptionTuple {
+fn optionTokenToOptionTuple(token: *const Token) OptionTuple {
     var kv_iter = mem.tokenize(u8, token.value, "=");
 
     return switch (token.tag) {
