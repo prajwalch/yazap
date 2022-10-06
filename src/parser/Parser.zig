@@ -119,7 +119,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
     while (self.tokenizer.nextToken()) |*token| {
         self.err_builder.setProvidedArg(token.value);
 
-        if (token.isHelpFlag()) {
+        if (token.isHelpOption()) {
             try self.args_ctx.putMatchedArg(&Arg.new("help"), .none);
             break;
         }

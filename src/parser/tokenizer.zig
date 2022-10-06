@@ -57,7 +57,7 @@ pub const Token = struct {
         // zig fmt: on
     }
 
-    pub fn isHelpFlag(self: *const Token) bool {
+    pub fn isHelpOption(self: *const Token) bool {
         return (self.tag == .help_option);
     }
 };
@@ -105,7 +105,7 @@ pub const Tokenizer = struct {
     pub fn nextNonFlagArg(self: *Tokenizer) ?[]const u8 {
         var next_token = self.nextToken() orelse return null;
 
-        if (next_token.isShortOption() or next_token.isLongOption() or next_token.isHelpFlag()) {
+        if (next_token.isShortOption() or next_token.isLongOption() or next_token.isHelpOption()) {
             self.cursor -= 1;
             return null;
         }
