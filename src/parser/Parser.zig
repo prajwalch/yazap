@@ -32,38 +32,38 @@ const InternalError = error{
     EmptyArgValueNotAllowed,
 } || Error;
 
-const ShortFlag = struct {
+const ShortOption = struct {
     name: []const u8,
     value: ?[]const u8,
     cursor: usize,
 
-    pub fn init(name: []const u8, value: ?[]const u8) ShortFlag {
-        return ShortFlag{
+    pub fn init(name: []const u8, value: ?[]const u8) ShortOption {
+        return ShortOption{
             .name = name,
             .value = value,
             .cursor = 0,
         };
     }
 
-    pub fn next(self: *ShortFlag) ?*const u8 {
+    pub fn next(self: *ShortOption) ?*const u8 {
         if (self.isAtEnd()) return null;
         defer self.cursor += 1;
 
         return &self.name[self.cursor];
     }
 
-    pub fn getValue(self: *ShortFlag) ?[]const u8 {
+    pub fn getValue(self: *ShortOption) ?[]const u8 {
         return (self.value);
     }
 
-    pub fn getRemainTail(self: *ShortFlag) ?[]const u8 {
+    pub fn getRemainTail(self: *ShortOption) ?[]const u8 {
         if (self.isAtEnd()) return null;
         defer self.cursor = self.name.len;
 
         return self.name[self.cursor..];
     }
 
-    pub fn hasValue(self: *ShortFlag) bool {
+    pub fn hasValue(self: *ShortOption) bool {
         if (self.value) |v| {
             return (v.len >= 1);
         } else {
@@ -71,7 +71,7 @@ const ShortFlag = struct {
         }
     }
 
-    pub fn hasEmptyValue(self: *ShortFlag) bool {
+    pub fn hasEmptyValue(self: *ShortOption) bool {
         if (self.value) |v| {
             return (v.len == 0);
         } else {
@@ -79,11 +79,11 @@ const ShortFlag = struct {
         }
     }
 
-    pub fn hasTail(self: *ShortFlag) bool {
+    pub fn hasTail(self: *ShortOption) bool {
         return (self.value == null and self.name.len > 1);
     }
 
-    fn isAtEnd(self: *ShortFlag) bool {
+    fn isAtEnd(self: *ShortOption) bool {
         return (self.cursor >= self.name.len);
     }
 };
@@ -211,7 +211,7 @@ fn parseArg(self: *Parser, token: *const Token) InternalError!void {
 
 fn parseShortArg(self: *Parser, token: *const Token) InternalError!void {
     const flag_tuple = flagTokenToFlagTuple(token);
-    var short_flag = ShortFlag.init(flag_tuple[0], flag_tuple[1]);
+    var short_flag = ShortOption.init(flag_tuple[0], flag_tuple[1]);
 
     while (short_flag.next()) |flag| {
         self.err_builder.setProvidedArg(@as(*const [1]u8, flag));
