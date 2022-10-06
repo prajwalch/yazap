@@ -177,7 +177,7 @@ fn consumeCommandArg(self: *Parser, token: *const Token) Error!void {
         return;
     }
 
-    // Looks like we found a flag
+    // Looks like we found a option
     if (token.tag != .some_argument) {
         if (self.cmd.setting.arg_required and (self.args_ctx.args.count() == 0)) {
             self.err_builder.setErr(Error.CommandArgumentNotProvided);
@@ -210,21 +210,21 @@ fn parseOption(self: *Parser, token: *const Token) InternalError!void {
 }
 
 fn parseShortOption(self: *Parser, token: *const Token) InternalError!void {
-    const flag_tuple = optionTokenToOptionTuple(token);
-    var short_flag = ShortOption.init(flag_tuple[0], flag_tuple[1]);
+    const option_tuple = optionTokenToOptionTuple(token);
+    var short_option = ShortOption.init(option_tuple[0], option_tuple[1]);
 
-    while (short_flag.next()) |flag| {
-        self.err_builder.setProvidedArg(@as(*const [1]u8, flag));
+    while (short_option.next()) |option| {
+        self.err_builder.setProvidedArg(@as(*const [1]u8, option));
 
-        const arg = self.cmd.findArgByShortName(flag.*) orelse {
+        const arg = self.cmd.findArgByShortName(option.*) orelse {
             return Error.UnknownFlag;
         };
         self.err_builder.setArg(arg);
 
         if (!(arg.settings.takes_value)) {
-            if (short_flag.hasValue()) {
+            if (short_option.hasValue()) {
                 return Error.UnneededAttachedValue;
-            } else if (short_flag.hasEmptyValue()) {
+            } else if (short_option.hasEmptyValue()) {
                 return Error.UnneededEmptyAttachedValue;
             } else {
                 try self.args_ctx.putMatchedArg(arg, .none);
@@ -232,13 +232,13 @@ fn parseShortOption(self: *Parser, token: *const Token) InternalError!void {
             }
         }
 
-        const value = short_flag.getValue() orelse blk: {
-            if (short_flag.hasTail()) {
-                // Take remain flag/tail as value
+        const value = short_option.getValue() orelse blk: {
+            if (short_option.hasTail()) {
+                // Take remain option/tail as value
                 //
                 // For ex: if -xyz is passed and -x takes value
-                // take yz as value even if they are passed as flags
-                break :blk short_flag.getRemainTail();
+                // take yz as value even if they are passed as options
+                break :blk short_option.getRemainTail();
             } else {
                 break :blk null;
             }
@@ -248,29 +248,29 @@ fn parseShortOption(self: *Parser, token: *const Token) InternalError!void {
 }
 
 fn parseLongOption(self: *Parser, token: *const Token) InternalError!void {
-    const flag_tuple = optionTokenToOptionTuple(token);
-    self.err_builder.setProvidedArg(flag_tuple[0]);
+    const option_tuple = optionTokenToOptionTuple(token);
+    self.err_builder.setProvidedArg(option_tuple[0]);
 
-    const arg = self.cmd.findArgByLongName(flag_tuple[0]) orelse {
+    const arg = self.cmd.findArgByLongName(option_tuple[0]) orelse {
         return Error.UnknownFlag;
     };
     self.err_builder.setArg(arg);
 
     if (!(arg.settings.takes_value)) {
-        if (flag_tuple[1] != null) {
+        if (option_tuple[1] != null) {
             return Error.UnneededAttachedValue;
         } else {
             return self.args_ctx.putMatchedArg(arg, .none);
         }
     }
-    return self.consumeArgValue(arg, flag_tuple[1]);
+    return self.consumeArgValue(arg, option_tuple[1]);
 }
 
-// Converts a flag token to a tuple holding a flag name and an optional value
+// Converts a option token to a tuple holding a option name and an optional value
 //
-// --flag, -f, -fgh                     => (flag, null), (f, null), (fgh, null)
-// --flag=value, -f=value, -fgh=value   => (flag, value), (f, value), (fgh, value)
-// --flag=, -f=, -fgh=                  => (flag, ""), (f, ""), (fgh, "")
+// --option, -f, -fgh                     => (option, null), (f, null), (fgh, null)
+// --option=value, -f=value, -fgh=value   => (option, value), (f, value), (fgh, value)
+// --option=, -f=, -fgh=                  => (option, ""), (f, ""), (fgh, "")
 fn optionTokenToOptionTuple(token: *const Token) OptionTuple {
     var kv_iter = mem.tokenize(u8, token.value, "=");
 
@@ -334,7 +334,7 @@ fn processValue(
         // by attaching it then take the entire values as single value
         //
         // For ex: -f=v1,v2
-        // flag = f
+        // option = f
         // value = v1,v2
         if (arg.verifyValueInAllowedValues(value)) {
             return self.args_ctx.putMatchedArg(arg, .{ .single = value });
