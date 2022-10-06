@@ -94,7 +94,7 @@ args_ctx: ArgsContext,
 err_builder: ErrorBuilder,
 cmd: *const Command,
 pos_args_idx: usize,
-consume_pos_args: bool,
+consume_cmd_args: bool,
 
 pub fn init(
     allocator: Allocator,
@@ -108,7 +108,7 @@ pub fn init(
         .err_builder = ErrorBuilder.init(),
         .cmd = command,
         .pos_args_idx = 0,
-        .consume_pos_args = command.setting.takes_value,
+        .consume_cmd_args = command.setting.takes_value,
     };
 }
 
@@ -124,10 +124,10 @@ pub fn parse(self: *Parser) Error!ArgsContext {
             break;
         }
 
-        if (self.consume_pos_args) {
+        if (self.consume_cmd_args) {
             try self.consumePositionalArgument(token);
             // Skip current token if it has been consumed otherwise further process it
-            if (self.consume_pos_args) continue;
+            if (self.consume_cmd_args) continue;
         }
 
         if (token.isShortFlag() or token.isLongFlag()) {
@@ -173,7 +173,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
 fn consumePositionalArgument(self: *Parser, token: *const Token) Error!void {
     // All positional arguments has been consumed
     if (self.pos_args_idx >= self.cmd.countArgs()) {
-        self.consume_pos_args = false;
+        self.consume_cmd_args = false;
         return;
     }
 
@@ -183,7 +183,7 @@ fn consumePositionalArgument(self: *Parser, token: *const Token) Error!void {
             self.err_builder.setErr(Error.CommandArgumentNotProvided);
             return self.err_builder.err;
         } else {
-            self.consume_pos_args = false;
+            self.consume_cmd_args = false;
             return;
         }
     }
