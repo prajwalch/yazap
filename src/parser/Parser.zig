@@ -108,7 +108,7 @@ pub fn init(
         .err_builder = ErrorBuilder.init(),
         .cmd = command,
         .cmd_args_idx = 0,
-        .consume_cmd_args = command.setting.takes_value,
+        .consume_cmd_args = (command.setting.takes_value and command.args.items.len >= 1),
     };
 }
 
@@ -131,7 +131,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
         }
 
         if (token.isShortFlag() or token.isLongFlag()) {
-            if (self.cmd.countArgs() == 0) {
+            if (self.cmd.countOptions() == 0) {
                 self.err_builder.setErr(Error.UnknownFlag);
                 return self.err_builder.err;
             }
@@ -187,23 +187,18 @@ fn consumeCommandArg(self: *Parser, token: *const Token) Error!void {
             return;
         }
     }
+    const arg = &self.cmd.args.items[self.cmd_args_idx];
+    self.cmd_args_idx += 1;
 
-    for (self.cmd.args.items[self.cmd_args_idx..]) |*arg, idx| {
-        if ((arg.short_name == null) and (arg.long_name == null)) {
-            self.cmd_args_idx += idx + 1;
-
-            self.processValue(arg, token.value, false) catch |err| switch (err) {
-                InternalError.ArgValueNotProvided,
-                InternalError.EmptyArgValueNotAllowed,
-                => break,
-                else => |e| {
-                    self.err_builder.setErr(e);
-                    return e;
-                },
-            };
-            break;
-        }
-    }
+    self.processValue(arg, token.value, false) catch |err| switch (err) {
+        InternalError.ArgValueNotProvided,
+        InternalError.EmptyArgValueNotAllowed,
+        => return,
+        else => |e| {
+            self.err_builder.setErr(e);
+            return e;
+        },
+    };
 }
 
 fn parseArg(self: *Parser, token: *const Token) InternalError!void {

@@ -18,9 +18,9 @@ allocator: Allocator,
 name: []const u8,
 description: ?[]const u8 = null,
 args: ArrayList(Arg) = .{},
+options: ArrayList(Arg) = .{},
 subcommands: ArrayList(Command) = .{},
 setting: Setting = .{},
-help_options: Help.Options = .{},
 
 /// Creates a new instance of it
 pub fn new(allocator: Allocator, name: []const u8) Command {
@@ -36,6 +36,7 @@ pub fn newWithDescription(allocator: Allocator, name: []const u8, description: [
 /// Release all allocated memory
 pub fn deinit(self: *Command) void {
     self.args.deinit(self.allocator);
+    self.options.deinit(self.allocator);
 
     for (self.subcommands.items) |*subcommand| {
         subcommand.deinit();
@@ -45,14 +46,10 @@ pub fn deinit(self: *Command) void {
 
 /// Appends the new arg into the args list
 pub fn addArg(self: *Command, new_arg: Arg) !void {
-    try self.args.append(self.allocator, new_arg);
-
-    if (!(self.help_options.include_args) or !(self.help_options.include_flags)) {
-        if ((new_arg.short_name == null) and (new_arg.long_name == null)) {
-            self.help_options.include_args = true;
-        } else {
-            self.help_options.include_flags = true;
-        }
+    if ((new_arg.short_name == null) and (new_arg.long_name == null)) {
+        try self.args.append(self.allocator, new_arg);
+    } else {
+        try self.options.append(self.allocator, new_arg);
     }
 }
 
@@ -106,6 +103,10 @@ pub fn countArgs(self: *const Command) usize {
     return (self.args.items.len);
 }
 
+pub fn countOptions(self: *const Command) usize {
+    return (self.options.items.len);
+}
+
 pub fn countSubcommands(self: *const Command) usize {
     return (self.subcommands.items.len);
 }
@@ -113,7 +114,7 @@ pub fn countSubcommands(self: *const Command) usize {
 /// Linearly searches for an argument with short name equals to given `short_name`.
 /// Returns a const pointer of a found argument otherwise null.
 pub fn findArgByShortName(self: *const Command, short_name: u8) ?*const Arg {
-    for (self.args.items) |*arg| {
+    for (self.options.items) |*arg| {
         if (arg.short_name) |s| {
             if (s == short_name) return arg;
         }
@@ -124,7 +125,7 @@ pub fn findArgByShortName(self: *const Command, short_name: u8) ?*const Arg {
 /// Linearly searches for an argument with long name equals to given `long_name`.
 /// Returns a const pointer of a found argument otherwise null.
 pub fn findArgByLongName(self: *const Command, long_name: []const u8) ?*const Arg {
-    for (self.args.items) |*arg| {
+    for (self.options.items) |*arg| {
         if (arg.long_name) |l| {
             if (mem.eql(u8, l, long_name)) return arg;
         }
@@ -145,7 +146,7 @@ pub fn findSubcommand(self: *const Command, provided_subcmd: []const u8) ?*const
 }
 
 pub fn help(self: *const Command) Help {
-    return Help.init(self, self.help_options);
+    return Help.init(self);
 }
 
 test "emit methods docs" {

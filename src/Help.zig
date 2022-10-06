@@ -12,10 +12,10 @@ pub const Options = struct {
 };
 
 cmd: *const Command,
-options: Options,
+options: Options = .{},
 
-pub fn init(cmd: *const Command, opt: Options) Help {
-    return Help{ .cmd = cmd, .options = opt };
+pub fn init(cmd: *const Command) Help {
+    return Help{ .cmd = cmd };
 }
 
 // Help message is divided into 3 sections:  Header, Commands and Options.
@@ -64,17 +64,16 @@ fn writeHeader(self: *Help, writer: anytype) !void {
     }
     try writer.print("Usage: {s} ", .{self.cmd.name});
 
-    if (self.options.include_args) {
+    if (self.cmd.countArgs() >= 1) {
+        self.options.include_flags = true;
         const braces = getBraces(self.cmd.setting.arg_required);
 
         for (self.cmd.args.items) |arg| {
-            if ((arg.short_name == null) and (arg.long_name == null)) {
-                try writer.print("{c}{s}{c} ", .{ braces[0], arg.name, braces[1] });
-            }
+            try writer.print("{c}{s}{c} ", .{ braces[0], arg.name, braces[1] });
         }
     }
 
-    if (self.options.include_flags) try writer.writeAll("[OPTIONS] ");
+    if (self.cmd.countOptions() >= 1) try writer.writeAll("[OPTIONS] ");
 
     if (self.cmd.countSubcommands() >= 1) {
         self.options.include_subcmds = true;
