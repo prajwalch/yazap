@@ -427,6 +427,7 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
     // zig fmt: off
     if (valid_subcmd.setting.takes_value
         or valid_subcmd.countArgs() >= 1
+        or valid_subcmd.countOptions() >= 1
         or valid_subcmd.countSubcommands() >= 1) {
         // zig fmt: on
         const help = valid_subcmd.help();
