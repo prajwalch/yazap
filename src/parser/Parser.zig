@@ -93,7 +93,7 @@ tokenizer: Tokenizer,
 args_ctx: ArgsContext,
 err_builder: ErrorBuilder,
 cmd: *const Command,
-pos_args_idx: usize,
+cmd_args_idx: usize,
 consume_cmd_args: bool,
 
 pub fn init(
@@ -107,7 +107,7 @@ pub fn init(
         .args_ctx = ArgsContext.init(allocator),
         .err_builder = ErrorBuilder.init(),
         .cmd = command,
-        .pos_args_idx = 0,
+        .cmd_args_idx = 0,
         .consume_cmd_args = command.setting.takes_value,
     };
 }
@@ -172,7 +172,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
 
 fn consumePositionalArgument(self: *Parser, token: *const Token) Error!void {
     // All positional arguments has been consumed
-    if (self.pos_args_idx >= self.cmd.countArgs()) {
+    if (self.cmd_args_idx >= self.cmd.countArgs()) {
         self.consume_cmd_args = false;
         return;
     }
@@ -188,9 +188,9 @@ fn consumePositionalArgument(self: *Parser, token: *const Token) Error!void {
         }
     }
 
-    for (self.cmd.args.items[self.pos_args_idx..]) |*arg, idx| {
+    for (self.cmd.args.items[self.cmd_args_idx..]) |*arg, idx| {
         if ((arg.short_name == null) and (arg.long_name == null)) {
-            self.pos_args_idx += idx + 1;
+            self.cmd_args_idx += idx + 1;
 
             self.processValue(arg, token.value, false) catch |err| switch (err) {
                 InternalError.ArgValueNotProvided,
