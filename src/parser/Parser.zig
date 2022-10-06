@@ -108,7 +108,7 @@ pub fn init(
         .err_builder = ErrorBuilder.init(),
         .cmd = command,
         .cmd_args_idx = 0,
-        .consume_cmd_args = (command.setting.takes_value and command.args.items.len >= 1),
+        .consume_cmd_args = (command.setting.takes_value and command.countArgs() >= 1),
     };
 }
 
