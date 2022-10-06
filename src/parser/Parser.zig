@@ -275,17 +275,17 @@ fn flagTokenToFlagTuple(token: *const Token) FlagTuple {
     var kv_iter = mem.tokenize(u8, token.value, "=");
 
     return switch (token.tag) {
-        .short_flag,
-        .short_flag_with_tail,
-        .long_flag,
+        .short_option,
+        .short_option_with_tail,
+        .long_option,
         => .{ token.value, null },
 
-        .short_flag_with_value,
-        .short_flag_with_empty_value,
-        .short_flags_with_value,
-        .short_flags_with_empty_value,
-        .long_flag_with_value,
-        .long_flag_with_empty_value,
+        .short_option_with_value,
+        .short_option_with_empty_value,
+        .short_options_with_value,
+        .short_options_with_empty_value,
+        .long_option_with_value,
+        .long_option_with_empty_value,
         => .{ kv_iter.next().?, kv_iter.rest() },
 
         else => unreachable,

@@ -4,25 +4,25 @@ const mem = std.mem;
 pub const Token = struct {
     pub const Tag = enum {
         // -f
-        short_flag,
+        short_option,
         // -f=value
-        short_flag_with_value,
+        short_option_with_value,
         // -f=
-        short_flag_with_empty_value,
+        short_option_with_empty_value,
         // -fvalue or -fgh
-        short_flag_with_tail,
+        short_option_with_tail,
         // -fgh=value
-        short_flags_with_value,
+        short_options_with_value,
         // -fgh=
-        short_flags_with_empty_value,
+        short_options_with_empty_value,
         // --flag
-        long_flag,
+        long_option,
         // --flag=value
-        long_flag_with_value,
+        long_option_with_value,
         // --flag=
-        long_flag_with_empty_value,
+        long_option_with_empty_value,
         // -h, --help
-        help_flag,
+        help_option,
         // arg
         some_argument,
     };
@@ -37,12 +37,12 @@ pub const Token = struct {
     pub fn isShortFlag(self: *const Token) bool {
         // zig fmt: off
         return (
-            self.tag == .short_flag
-            or self.tag == .short_flag_with_value
-            or self.tag == .short_flag_with_empty_value
-            or self.tag == .short_flag_with_tail
-            or self.tag == .short_flags_with_value
-            or self.tag == .short_flags_with_empty_value
+            self.tag == .short_option
+            or self.tag == .short_option_with_value
+            or self.tag == .short_option_with_empty_value
+            or self.tag == .short_option_with_tail
+            or self.tag == .short_options_with_value
+            or self.tag == .short_options_with_empty_value
         );
         // zig fmt: on
     }
@@ -50,15 +50,15 @@ pub const Token = struct {
     pub fn isLongFlag(self: *const Token) bool {
         // zig fmt: off
         return (
-            self.tag == .long_flag
-            or self.tag == .long_flag_with_value
-            or self.tag == .long_flag_with_empty_value
+            self.tag == .long_option
+            or self.tag == .long_option_with_value
+            or self.tag == .long_option_with_empty_value
         );
         // zig fmt: on
     }
 
     pub fn isHelpFlag(self: *const Token) bool {
-        return (self.tag == .help_flag);
+        return (self.tag == .help_option);
     }
 };
 
@@ -125,18 +125,18 @@ pub const Tokenizer = struct {
         const tag: Token.Tag = blk: {
             // Check for 'help' flag
             if (std.mem.eql(u8, flag, "help"))
-                break :blk .help_flag;
+                break :blk .help_option;
 
             if (mem.indexOfScalar(u8, flag, '=')) |eql_pos| {
                 const has_value = (eql_pos + 1) < flag.len;
 
                 if (has_value) {
-                    break :blk .long_flag_with_value;
+                    break :blk .long_option_with_value;
                 } else {
-                    break :blk .long_flag_with_empty_value;
+                    break :blk .long_option_with_empty_value;
                 }
             }
-            break :blk .long_flag;
+            break :blk .long_option;
         };
 
         return Token.init(flag, tag);
@@ -147,31 +147,31 @@ pub const Tokenizer = struct {
         const tag: Token.Tag = blk: {
             // Check for 'h' flag
             if (std.mem.eql(u8, flag, "h"))
-                break :blk .help_flag;
+                break :blk .help_option;
 
             if (mem.indexOfScalar(u8, flag, '=')) |eql_pos| {
-                const is_flags = (flag[0..eql_pos]).len > 1;
+                const is_options = (flag[0..eql_pos]).len > 1;
                 const has_value = (eql_pos + 1) < flag.len;
 
-                if (is_flags) {
+                if (is_options) {
                     if (has_value) {
-                        break :blk .short_flags_with_value;
+                        break :blk .short_options_with_value;
                     } else {
-                        break :blk .short_flags_with_empty_value;
+                        break :blk .short_options_with_empty_value;
                     }
                 } else {
                     if (has_value) {
-                        break :blk .short_flag_with_value;
+                        break :blk .short_option_with_value;
                     } else {
-                        break :blk .short_flag_with_empty_value;
+                        break :blk .short_option_with_empty_value;
                     }
                 }
             } else {
                 // has tail?
                 // for ex: -fgh or -fvalue
-                if (flag.len > 1) break :blk .short_flag_with_tail;
+                if (flag.len > 1) break :blk .short_option_with_tail;
             }
-            break :blk .short_flag;
+            break :blk .short_option;
         };
 
         return Token.init(flag, tag);
@@ -207,17 +207,17 @@ test "tokenizer" {
 
     var tokenizer = Tokenizer.init(args);
 
-    try expectToken(tokenizer.nextToken().?, .help_flag);
-    try expectToken(tokenizer.nextToken().?, .short_flag);
-    try expectToken(tokenizer.nextToken().?, .short_flag_with_value);
-    try expectToken(tokenizer.nextToken().?, .short_flag_with_empty_value);
-    try expectToken(tokenizer.nextToken().?, .short_flag_with_tail);
-    try expectToken(tokenizer.nextToken().?, .short_flags_with_value);
-    try expectToken(tokenizer.nextToken().?, .short_flags_with_empty_value);
+    try expectToken(tokenizer.nextToken().?, .help_option);
+    try expectToken(tokenizer.nextToken().?, .short_option);
+    try expectToken(tokenizer.nextToken().?, .short_option_with_value);
+    try expectToken(tokenizer.nextToken().?, .short_option_with_empty_value);
+    try expectToken(tokenizer.nextToken().?, .short_option_with_tail);
+    try expectToken(tokenizer.nextToken().?, .short_options_with_value);
+    try expectToken(tokenizer.nextToken().?, .short_options_with_empty_value);
 
-    try expectToken(tokenizer.nextToken().?, .long_flag);
-    try expectToken(tokenizer.nextToken().?, .long_flag_with_value);
-    try expectToken(tokenizer.nextToken().?, .long_flag_with_empty_value);
+    try expectToken(tokenizer.nextToken().?, .long_option);
+    try expectToken(tokenizer.nextToken().?, .long_option_with_value);
+    try expectToken(tokenizer.nextToken().?, .long_option_with_empty_value);
 
     try expectToken(tokenizer.nextToken().?, .some_argument);
 }
