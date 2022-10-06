@@ -85,9 +85,9 @@ pub const Tokenizer = struct {
         }
 
         if (mem.startsWith(u8, arg, "--")) {
-            return processLongFlag(arg);
+            return processLongOption(arg);
         } else if (mem.startsWith(u8, arg, "-")) {
-            return processShortFlag(arg);
+            return processShortOption(arg);
         }
 
         return Token.init(arg, .some_argument);
@@ -120,7 +120,7 @@ pub const Tokenizer = struct {
         return self.args[self.cursor..];
     }
 
-    fn processLongFlag(arg: []const u8) Token {
+    fn processLongOption(arg: []const u8) Token {
         const flag = mem.trimLeft(u8, arg, "--");
         const tag: Token.Tag = blk: {
             // Check for 'help' flag
@@ -142,7 +142,7 @@ pub const Tokenizer = struct {
         return Token.init(flag, tag);
     }
 
-    fn processShortFlag(arg: []const u8) Token {
+    fn processShortOption(arg: []const u8) Token {
         const flag = mem.trimLeft(u8, arg, "-");
         const tag: Token.Tag = blk: {
             // Check for 'h' flag
