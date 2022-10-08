@@ -216,7 +216,7 @@ fn parseShortOption(self: *Parser, token: *const Token) InternalError!void {
     while (short_option.next()) |option| {
         self.err_builder.setProvidedArg(@as(*const [1]u8, option));
 
-        const arg = self.cmd.findArgByShortName(option.*) orelse {
+        const arg = self.cmd.findShortOption(option.*) orelse {
             return Error.UnknownFlag;
         };
         self.err_builder.setArg(arg);
@@ -251,7 +251,7 @@ fn parseLongOption(self: *Parser, token: *const Token) InternalError!void {
     const option_tuple = optionTokenToOptionTuple(token);
     self.err_builder.setProvidedArg(option_tuple[0]);
 
-    const arg = self.cmd.findArgByLongName(option_tuple[0]) orelse {
+    const arg = self.cmd.findLongOption(option_tuple[0]) orelse {
         return Error.UnknownFlag;
     };
     self.err_builder.setArg(arg);

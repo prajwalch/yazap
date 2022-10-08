@@ -113,7 +113,7 @@ pub fn countSubcommands(self: *const Command) usize {
 
 /// Linearly searches for an argument with short name equals to given `short_name`.
 /// Returns a const pointer of a found argument otherwise null.
-pub fn findArgByShortName(self: *const Command, short_name: u8) ?*const Arg {
+pub fn findShortOption(self: *const Command, short_name: u8) ?*const Arg {
     for (self.options.items) |*arg| {
         if (arg.short_name) |s| {
             if (s == short_name) return arg;
@@ -124,7 +124,7 @@ pub fn findArgByShortName(self: *const Command, short_name: u8) ?*const Arg {
 
 /// Linearly searches for an argument with long name equals to given `long_name`.
 /// Returns a const pointer of a found argument otherwise null.
-pub fn findArgByLongName(self: *const Command, long_name: []const u8) ?*const Arg {
+pub fn findLongOption(self: *const Command, long_name: []const u8) ?*const Arg {
     for (self.options.items) |*arg| {
         if (arg.long_name) |l| {
             if (mem.eql(u8, l, long_name)) return arg;
