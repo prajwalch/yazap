@@ -39,7 +39,7 @@ test "arg required error" {
     };
 
     var app = try initAppArgs(allocator);
-    app.rootCommand().argRequired(true);
+    app.rootCommand().applySetting(.arg_required);
     defer app.deinit();
 
     try testing.expectError(error.CommandArgumentNotProvided, app.parseFrom(argv));
@@ -51,7 +51,7 @@ test "subcommand required error" {
     };
 
     var app = try initAppArgs(allocator);
-    app.rootCommand().subcommandRequired(true);
+    app.rootCommand().applySetting(.subcommand_required);
     defer app.deinit();
 
     try testing.expectError(error.CommandSubcommandNotProvided, app.parseFrom(argv));
@@ -112,11 +112,10 @@ test "arg.takes_multiple_values" {
 
     var app = try initAppArgs(allocator);
     defer app.deinit();
-    app.rootCommand().takesValue(true);
+    app.rootCommand().applySetting(.takes_value);
 
     var files = Arg.new("files");
-    //files.takesValue(true);
-    files.takesMultipleValues(true);
+    files.applySetting(.takes_multiple_values);
 
     try app.rootCommand().addArg(files);
     var args = try app.parseFrom(argv);
@@ -131,7 +130,7 @@ test "using displayHelp and displaySubcommandHelp help api" {
 
     var app = try initAppArgs(allocator);
     defer app.deinit();
-    app.rootCommand().takesValue(false);
+    app.rootCommand().removeSetting(.takes_value);
 
     var subcmd = app.createCommand("subcmd", null);
     try subcmd.addArg(flag.boolean("bool", null, null));

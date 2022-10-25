@@ -3,12 +3,13 @@
 const Arg = @This();
 const std = @import("std");
 const ArgsContext = @import("parser/ArgsContext.zig");
+const MakeSettings = @import("settings.zig").MakeSettings;
 
-const Settings = struct {
-    takes_value: bool = false,
-    takes_multiple_values: bool = false,
-    allow_empty_value: bool = false,
-};
+const Settings = MakeSettings(&[_][]const u8{
+    "takes_value",
+    "takes_multiple_values",
+    "allow_empty_value",
+});
 
 name: []const u8,
 short_name: ?u8,
@@ -57,56 +58,34 @@ pub fn setDescription(self: *Arg, description: []const u8) void {
 }
 
 /// Sets the minimum number of values required to provide for an argument.
-/// Implicitly sets the `Arg.takesValue(true)`
+/// Implicitly applies the `.takes_value` setting
 pub fn minValues(self: *Arg, num: usize) void {
     if (num >= 1) {
         self.min_values = num;
-        self.takesValue(true);
+        self.applySetting(.takes_value);
     }
 }
 
 /// Sets the maximum number of values an argument can take.
-/// Implicitly sets the `Arg.takesValue(true)`
+/// Implicitly applies the `.takes_value` setting
 pub fn maxValues(self: *Arg, num: usize) void {
     self.max_values = num;
-    self.takesValue(true);
+    self.applySetting(.takes_value);
 }
 
 /// Sets the allowed values for an argument.
 /// Value outside of allowed values will be consider as error.
-/// Implicitly sets the `Arg.takesValue(true)`
+/// Implicitly applies the `.takes_value` setting
 pub fn allowedValues(self: *Arg, values: []const []const u8) void {
     self.allowed_values = values;
-    self.takesValue(true);
+    self.applySetting(.takes_value);
 }
 
 /// Sets separator between the values of an argument.
-/// Implicitly sets the `Arg.takesValue(true)`
+/// Implicitly applies the `.takes_value` setting
 pub fn valuesDelimiter(self: *Arg, delimiter: []const u8) void {
     self.values_delimiter = delimiter;
-    self.takesValue(true);
-}
-
-/// Specifies that an argument will takes a value
-pub fn takesValue(self: *Arg, b: bool) void {
-    self.settings.takes_value = b;
-}
-
-/// Specifies that the argument will takes an unknown number of values.
-/// You can use `Arg.maxValues(n)` to limit the number of values.
-///
-/// Note:
-/// Values will continue to be consume until one of the following condition wiil satisfies:
-/// 1. If another flag is found
-/// 2. If parser reaches the end of raw argument
-/// 3. If parser reaches the maximum number of values. Requires to explicitly set `Arg.maxValues(n)`
-pub fn takesMultipleValues(self: *Arg, b: bool) void {
-    self.settings.takes_multiple_values = b;
-}
-
-/// Specifies wether an argument can take a empty value or not
-pub fn allowedEmptyValue(self: *Arg, b: bool) void {
-    self.settings.allow_empty_value = b;
+    self.applySetting(.takes_value);
 }
 
 pub fn verifyValueInAllowedValues(self: *const Arg, value_to_check: []const u8) bool {
@@ -118,6 +97,18 @@ pub fn verifyValueInAllowedValues(self: *const Arg, value_to_check: []const u8) 
     } else {
         return true;
     }
+}
+
+pub fn applySetting(self: *Arg, option: Settings.Options) void {
+    return self.settings.apply(option);
+}
+
+pub fn removeSetting(self: *Arg, option: Settings.Options) void {
+    return self.settings.remove(option);
+}
+
+pub fn isSettingApplied(self: *const Arg, option: Settings.Options) bool {
+    return self.settings.isApplied(option);
 }
 
 test "emit methods docs" {
