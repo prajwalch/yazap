@@ -108,7 +108,7 @@ pub fn init(
         .err_builder = ErrorBuilder.init(),
         .cmd = command,
         .cmd_args_idx = 0,
-        .consume_cmd_args = (command.setting.takes_value and command.countArgs() >= 1),
+        .consume_cmd_args = (command.isSettingApplied(.takes_value) and command.countArgs() >= 1),
     };
 }
 
@@ -162,7 +162,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
     }
 
     if (!(self.args_ctx.isPresent("help"))) {
-        if (self.cmd.setting.subcommand_required and self.args_ctx.subcommand == null) {
+        if (self.cmd.isSettingApplied(.subcommand_required) and self.args_ctx.subcommand == null) {
             self.err_builder.setErr(Error.CommandSubcommandNotProvided);
             return self.err_builder.err;
         }
@@ -179,7 +179,7 @@ fn consumeCommandArg(self: *Parser, token: *const Token) Error!void {
 
     // Looks like we found a option
     if (token.tag != .some_argument) {
-        if (self.cmd.setting.arg_required and (self.args_ctx.args.count() == 0)) {
+        if (self.cmd.isSettingApplied(.arg_required) and (self.args_ctx.args.count() == 0)) {
             self.err_builder.setErr(Error.CommandArgumentNotProvided);
             return self.err_builder.err;
         } else {
@@ -221,7 +221,7 @@ fn parseShortOption(self: *Parser, token: *const Token) InternalError!void {
         };
         self.err_builder.setArg(arg);
 
-        if (!(arg.settings.takes_value)) {
+        if (!(arg.isSettingApplied(.takes_value))) {
             if (short_option.hasValue()) {
                 return Error.UnneededAttachedValue;
             } else if (short_option.hasEmptyValue()) {
@@ -256,7 +256,7 @@ fn parseLongOption(self: *Parser, token: *const Token) InternalError!void {
     };
     self.err_builder.setArg(arg);
 
-    if (!(arg.settings.takes_value)) {
+    if (!(arg.isSettingApplied(.takes_value))) {
         if (option_tuple[1] != null) {
             return Error.UnneededAttachedValue;
         } else {
@@ -356,7 +356,7 @@ fn processValue(
         const max_eqls_one = (has_max_num and (arg.max_values.? == 1));
 
         // If maximum number and takes_multiple_values is not set we are not looking for more values
-        if ((!has_max_num or max_eqls_one) and !(arg.settings.takes_multiple_values)) {
+        if ((!has_max_num or max_eqls_one) and !(arg.isSettingApplied(.takes_multiple_values))) {
             // If values contains only one value, we can be sure that the minimum number of values is set to 1
             // therefore return it as a single value instead
             if (values.items.len == 1) {
@@ -366,7 +366,7 @@ fn processValue(
                 return self.args_ctx.putMatchedArg(arg, .{ .many = values });
             }
         }
-        if (arg.settings.takes_multiple_values) {
+        if (arg.isSettingApplied(.takes_multiple_values)) {
             if (!has_max_num) {
                 try self.consumeValuesTillNextOption(arg, &values);
                 return self.args_ctx.putMatchedArg(arg, .{ .many = values });
@@ -410,7 +410,7 @@ fn verifyAndAppendValue(
 ) InternalError!void {
     self.err_builder.setProvidedArg(value);
 
-    if ((value.len == 0) and !(arg.settings.allow_empty_value))
+    if ((value.len == 0) and !(arg.isSettingApplied(.allow_empty_value)))
         return InternalError.EmptyArgValueNotAllowed;
     if (!(arg.verifyValueInAllowedValues(value)))
         return InternalError.ProvidedValueIsNotValidOption;
@@ -425,14 +425,14 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
     };
 
     // zig fmt: off
-    if (valid_subcmd.setting.takes_value
+    if (valid_subcmd.isSettingApplied(.takes_value)
         or valid_subcmd.countArgs() >= 1
         or valid_subcmd.countOptions() >= 1
         or valid_subcmd.countSubcommands() >= 1) {
         // zig fmt: on
         const help = valid_subcmd.help();
         const subcmd_argv = self.tokenizer.restArg() orelse {
-            if (!(valid_subcmd.setting.arg_required)) {
+            if (!(valid_subcmd.isSettingApplied(.arg_required))) {
                 return MatchedSubCommand.initWithArg(
                     valid_subcmd.name,
                     ArgsContext.init(self.allocator),

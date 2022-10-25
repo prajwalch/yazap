@@ -3,16 +3,16 @@ const Command = @This();
 const std = @import("std");
 const Arg = @import("Arg.zig");
 const Help = @import("Help.zig");
+const MakeSettings = @import("settings.zig").MakeSettings;
 
 const mem = std.mem;
 const ArrayList = std.ArrayListUnmanaged;
 const Allocator = mem.Allocator;
-
-const Setting = struct {
-    takes_value: bool = false,
-    arg_required: bool = false,
-    subcommand_required: bool = false,
-};
+const Settings = MakeSettings(&[_][]const u8{
+    "takes_value",
+    "arg_required",
+    "subcommand_required",
+});
 
 allocator: Allocator,
 name: []const u8,
@@ -20,7 +20,7 @@ description: ?[]const u8 = null,
 args: ArrayList(Arg) = .{},
 options: ArrayList(Arg) = .{},
 subcommands: ArrayList(Command) = .{},
-setting: Setting = .{},
+settings: Settings = .{},
 
 /// Creates a new instance of it
 pub fn new(allocator: Allocator, name: []const u8) Command {
@@ -81,22 +81,7 @@ pub fn takesNValues(self: *Command, arg_name: []const u8, n: usize) !void {
     if (n > 1) arg.valuesDelimiter(",");
 
     try self.addArg(arg);
-    self.takesValue(true);
-}
-
-/// Specifies that the command takes value. Default to 'false`
-pub fn takesValue(self: *Command, b: bool) void {
-    self.setting.takes_value = b;
-}
-
-/// Specifies that argument is required to provide. Default to `false`
-pub fn argRequired(self: *Command, boolean: bool) void {
-    self.setting.arg_required = boolean;
-}
-
-/// Specifies that sub-command is required to provide. Default to `false`
-pub fn subcommandRequired(self: *Command, boolean: bool) void {
-    self.setting.subcommand_required = boolean;
+    self.applySetting(.takes_value);
 }
 
 pub fn countArgs(self: *const Command) usize {
@@ -143,6 +128,18 @@ pub fn findSubcommand(self: *const Command, provided_subcmd: []const u8) ?*const
     }
 
     return null;
+}
+
+pub fn applySetting(self: *Command, option: Settings.Options) void {
+    return self.settings.apply(option);
+}
+
+pub fn removeSetting(self: *Command, option: Settings.Options) void {
+    return self.settings.remove(option);
+}
+
+pub fn isSettingApplied(self: *const Command, option: Settings.Options) bool {
+    return self.settings.isApplied(option);
 }
 
 pub fn help(self: *const Command) Help {
