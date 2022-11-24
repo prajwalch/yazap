@@ -83,13 +83,13 @@ pub fn parseFrom(self: *Yazap, argv: []const [:0]const u8) Error!(*const ArgsCon
 
 /// Displays the help message of root command
 pub fn displayHelp(self: *Yazap) !void {
-    if (self.command_help) |*h| return h.writeAll();
+    if (self.command_help) |*h| return h.writeAll(std.io.getStdOut().writer());
 }
 
 /// Displays the help message of subcommand if it is provided on command line
 /// otherwise it will display nothing
 pub fn displaySubcommandHelp(self: *Yazap) !void {
-    if (self.subcommand_help) |*h| return h.writeAll();
+    if (self.subcommand_help) |*h| return h.writeAll(std.io.getStdOut().writer());
 }
 
 fn displayHelpAndExitIfFound(self: *Yazap) !void {

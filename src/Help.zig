@@ -15,8 +15,8 @@ pub const Options = MakeSettings(&[_][]const u8{
 cmd: *const Command,
 options: Options = .{},
 
-pub fn init(cmd: *const Command) Help {
-    return Help{ .cmd = cmd };
+pub fn init(cmd: *const Command, options: ?Options) Help {
+    return Help{ .cmd = cmd, .options = options orelse .{} };
 }
 
 // Help message is divided into 3 sections:  Header, Commands and Options.
@@ -38,8 +38,8 @@ pub fn init(cmd: *const Command) Help {
 // | ...                     |
 // \_________________________/
 
-pub fn writeAll(self: *Help) !void {
-    var buffer = std.io.bufferedWriter(std.io.getStdOut().writer());
+pub fn writeAll(self: *Help, stream: anytype) !void {
+    var buffer = std.io.bufferedWriter(stream);
     var writer = buffer.writer();
 
     try self.writeHeader(writer);
