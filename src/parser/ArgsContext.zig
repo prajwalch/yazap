@@ -39,20 +39,17 @@ pub const MatchedArgValue = union(enum) {
 pub const MatchedSubCommand = struct {
     name: []const u8,
     ctx: ?ArgsContext,
-    help: ?Help,
 
     pub fn initWithoutArg(name: []const u8) MatchedSubCommand {
         return MatchedSubCommand{
             .name = name,
             .ctx = null,
-            .help = null,
         };
     }
 
-    pub fn initWithArg(name: []const u8, args_ctx: ArgsContext, help: Help) MatchedSubCommand {
+    pub fn initWithArg(name: []const u8, args_ctx: ArgsContext) MatchedSubCommand {
         var self = initWithoutArg(name);
         self.ctx = args_ctx;
-        self.help = help;
         return self;
     }
 

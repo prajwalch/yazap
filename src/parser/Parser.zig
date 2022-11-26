@@ -430,13 +430,11 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
         or valid_subcmd.countOptions() >= 1
         or valid_subcmd.countSubcommands() >= 1) {
         // zig fmt: on
-        const help = valid_subcmd.help();
         const subcmd_argv = self.tokenizer.restArg() orelse {
             if (!(valid_subcmd.isSettingApplied(.arg_required))) {
                 return MatchedSubCommand.initWithArg(
                     valid_subcmd.name,
                     ArgsContext.init(self.allocator),
-                    help,
                 );
             }
             self.err_builder.setCmd(valid_subcmd);
@@ -450,7 +448,7 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
             return err;
         };
 
-        return MatchedSubCommand.initWithArg(valid_subcmd.name, subcmd_ctx, help);
+        return MatchedSubCommand.initWithArg(valid_subcmd.name, subcmd_ctx);
     }
     return MatchedSubCommand.initWithoutArg(valid_subcmd.name);
 }

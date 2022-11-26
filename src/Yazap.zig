@@ -70,9 +70,7 @@ pub fn parseFrom(self: *Yazap, argv: []const [:0]const u8) Error!(*const ArgsCon
     };
 
     // Store the given subcommand's help writer
-    if (self.args_ctx.?.subcommand) |subcmd| {
-        self.subcommand_help = subcmd.help;
-    }
+    self.setSubcommandHelp();
     try self.displayHelpAndExitIfFound();
     return &self.args_ctx.?;
 }
@@ -88,31 +86,37 @@ pub fn displaySubcommandHelp(self: *Yazap) !void {
     if (self.subcommand_help) |*h| return h.writeAll(std.io.getStdOut().writer());
 }
 
+fn setSubcommandHelp(self: *Yazap) void {
+    self.subcommand_help = self.findSubcommandHelp(&self.args_ctx.?);
+}
+
+fn findSubcommandHelp(self: *Yazap, ctx: *ArgsContext) ?Help {
+    if (ctx.subcommand) |subcmd| {
+        if (subcmd.ctx) |*subcmd_ctx| {
+            if (subcmd_ctx.isPresent("help")) {
+                return self.command.findSubcommand(subcmd.name).?.help();
+            } else return self.findSubcommandHelp(subcmd_ctx);
+        }
+    }
+    return null;
+}
+
 fn displayHelpAndExitIfFound(self: *Yazap) !void {
-    var args_ctx = self.args_ctx orelse return;
+    var args_ctx = self.args_ctx.?;
     var help_displayed = false;
 
     if (args_ctx.isPresent("help")) {
         try self.displayHelp();
         help_displayed = true;
-    } else if (currentSubcommandCtx(&args_ctx)) |subcmd_ctx| {
-        if (subcmd_ctx.isPresent("help")) {
-            try self.displaySubcommandHelp();
-            help_displayed = true;
-        }
+    } else {
+        try self.displaySubcommandHelp();
+        help_displayed = (self.subcommand_help != null);
     }
 
     if (help_displayed) {
         self.deinit();
         std.process.exit(0);
     }
-}
-
-fn currentSubcommandCtx(args_ctx: *ArgsContext) ?*ArgsContext {
-    if (args_ctx.subcommand) |subcmd| {
-        if (subcmd.ctx) |*ctx| return ctx;
-    }
-    return null;
 }
 
 test "emit docs" {
