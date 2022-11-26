@@ -17,7 +17,6 @@ pub const Error = error{
 
 allocator: Allocator,
 command: Command,
-command_help: ?Help,
 subcommand_help: ?Help = null,
 args_ctx: ?ArgsContext = null,
 process_args: ?[]const [:0]u8 = null,
@@ -34,7 +33,6 @@ pub fn init(
             cmd.description = description;
             break :blk cmd;
         },
-        .command_help = null,
     };
 }
 
@@ -65,8 +63,6 @@ pub fn parseProcess(self: *Yazap) Error!(*const ArgsContext) {
 
 /// Starts parsing the given arguments
 pub fn parseFrom(self: *Yazap, argv: []const [:0]const u8) Error!(*const ArgsContext) {
-    self.command_help = self.rootCommand().help();
-
     var parser = Parser.init(self.allocator, Tokenizer.init(argv), self.rootCommand());
     self.args_ctx = parser.parse() catch |e| {
         try parser.err_builder.logError();
@@ -83,7 +79,7 @@ pub fn parseFrom(self: *Yazap, argv: []const [:0]const u8) Error!(*const ArgsCon
 
 /// Displays the help message of root command
 pub fn displayHelp(self: *Yazap) !void {
-    if (self.command_help) |*h| return h.writeAll(std.io.getStdOut().writer());
+    return self.command.help().writeAll(std.io.getStdOut().writer());
 }
 
 /// Displays the help message of subcommand if it is provided on command line
