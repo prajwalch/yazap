@@ -91,12 +91,13 @@ fn setSubcommandHelp(self: *Yazap) void {
 }
 
 fn findSubcommandHelp(self: *Yazap, ctx: *ArgsContext) ?Help {
-    if (ctx.subcommand) |subcmd| {
-        if (subcmd.ctx) |*subcmd_ctx| {
-            if (subcmd_ctx.isPresent("help")) {
-                return self.command.findSubcommand(subcmd.name).?.help();
-            } else return self.findSubcommandHelp(subcmd_ctx);
-        }
+    if ((ctx.subcommand != null) and (ctx.subcommand.?.ctx != null)) {
+        var subcmd_name = ctx.subcommand.?.name;
+        var subcmd_ctx = &ctx.subcommand.?.ctx.?;
+
+        if (subcmd_ctx.isPresent("help")) {
+            return self.command.findSubcommand(subcmd_name).?.help();
+        } else return self.findSubcommandHelp(subcmd_ctx);
     }
     return null;
 }
