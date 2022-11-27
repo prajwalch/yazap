@@ -13,7 +13,7 @@ pub const Options = MakeSettings(&[_][]const u8{
 });
 
 cmd: *const Command,
-options: Options = .{},
+options: Options,
 
 pub fn init(cmd: *const Command, options: ?Options) Help {
     return Help{ .cmd = cmd, .options = options orelse .{} };
