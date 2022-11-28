@@ -42,6 +42,7 @@ pub fn writeAll(self: *Help, stream: anytype) !void {
     var buffer = std.io.bufferedWriter(stream);
     var writer = buffer.writer();
 
+    try self.writeDescription(writer);
     try self.writeHeader(writer);
     try self.writeCommands(writer);
     try self.writeOptions(writer);
@@ -57,12 +58,15 @@ pub fn writeAll(self: *Help, stream: anytype) !void {
     try buffer.flush();
 }
 
-fn writeHeader(self: *Help, writer: anytype) !void {
+fn writeDescription(self: *Help, writer: anytype) !void {
     if (self.cmd.description) |des| {
         try writer.print("{s}", .{des});
         try writeNewLine(writer);
         try writeNewLine(writer);
     }
+}
+
+fn writeHeader(self: *Help, writer: anytype) !void {
     try writer.writeAll("\nUsage: ");
 
     if (self.options.parent_cmds) |parent_cmds| {
