@@ -154,6 +154,6 @@ fn getBraces(required: bool) Braces {
     return if (required) .{ '<', '>' } else .{ '[', ']' };
 }
 
-fn writeNewLine(writer: anytype) !void {
+inline fn writeNewLine(writer: anytype) !void {
     return writer.writeByte('\n');
 }
