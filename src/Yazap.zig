@@ -50,7 +50,7 @@ pub fn createCommand(self: *Yazap, cmd_name: []const u8, cmd_description: ?[]con
     return cmd;
 }
 
-/// Returns a pointer of a root `Command`.
+/// Returns a pointer to a root `Command`.
 pub fn rootCommand(self: *Yazap) *Command {
     return &self.command;
 }
