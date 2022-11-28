@@ -70,8 +70,9 @@ fn writeHeader(self: *Help, writer: anytype) !void {
             try writer.print("{s} ", .{parent_cmd});
     }
 
-    if (self.cmd.countArgs() >= 1) {
-        self.options.include_args = true;
+    try writer.print("{s} ", .{self.cmd.name});
+
+    if (self.options.include_args) {
         const braces = getBraces(self.cmd.isSettingApplied(.arg_required));
 
         for (self.cmd.args.items) |arg| {
@@ -79,10 +80,9 @@ fn writeHeader(self: *Help, writer: anytype) !void {
         }
     }
 
-    if (self.cmd.countOptions() >= 1) try writer.writeAll("[OPTIONS] ");
+    if (self.options.include_flags) try writer.writeAll("[OPTIONS] ");
 
-    if (self.cmd.countSubcommands() >= 1) {
-        self.options.include_subcmds = true;
+    if (self.options.include_subcmds) {
         const braces = getBraces(self.cmd.isSettingApplied(.subcommand_required));
 
         try writer.print("{c}COMMAND{c}", .{ braces[0], braces[1] });

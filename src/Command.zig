@@ -143,7 +143,11 @@ pub fn isSettingApplied(self: *const Command, option: Settings.Options) bool {
 }
 
 pub fn help(self: *const Command) Help {
-    return Help.init(self, null);
+    return Help.init(self, Help.Options{
+        .include_args = (self.countArgs() >= 1),
+        .include_subcmds = (self.countSubcommands() >= 1),
+        .include_flags = (self.countOptions() >= 1),
+    });
 }
 
 test "emit methods docs" {
