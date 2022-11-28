@@ -89,10 +89,10 @@ const ShortOption = struct {
 };
 
 allocator: Allocator,
+cmd: *const Command,
 tokenizer: Tokenizer,
 args_ctx: ArgsContext,
 err_builder: ErrorBuilder,
-cmd: *const Command,
 cmd_args_idx: usize,
 consume_cmd_args: bool,
 
