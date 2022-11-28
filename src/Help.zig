@@ -110,10 +110,10 @@ fn writeCommands(self: *Help, writer: anytype) !void {
 }
 
 fn writeOptions(self: *Help, writer: anytype) !void {
-    if (self.options.include_flags) {
-        try writer.writeAll("Options:");
-        try writeNewLine(writer);
+    try writer.writeAll("Options:");
+    try writeNewLine(writer);
 
+    if (self.options.include_flags) {
         for (self.cmd.args.items) |arg| {
             if ((arg.short_name == null) and (arg.long_name == null)) continue;
 
