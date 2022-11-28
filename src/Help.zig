@@ -91,10 +91,6 @@ fn writeHeader(self: *Help, writer: anytype) !void {
     try writeNewLine(writer);
 }
 
-fn getBraces(required: bool) Braces {
-    return if (required) .{ '<', '>' } else .{ '[', ']' };
-}
-
 fn writeCommands(self: *Help, writer: anytype) !void {
     if (!(self.options.include_subcmds)) return;
 
@@ -156,6 +152,10 @@ fn writeOptions(self: *Help, writer: anytype) !void {
         }
     }
     try writer.writeAll(" -h, --help\n\tPrint this help and exit\n");
+}
+
+fn getBraces(required: bool) Braces {
+    return if (required) .{ '<', '>' } else .{ '[', ']' };
 }
 
 fn writeNewLine(writer: anytype) !void {
