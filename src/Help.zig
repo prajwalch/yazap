@@ -46,15 +46,8 @@ pub fn writeAll(self: *Help, stream: anytype) !void {
     try self.writeHeader(writer);
     try self.writeCommands(writer);
     try self.writeOptions(writer);
+    try self.writeFooter(writer);
 
-    if (self.options.include_subcmds) {
-        try writeNewLine(writer);
-        try writer.print(
-            "Run '{s} <command> -h' or '{s} <command> --help' to get help for specific command",
-            .{ self.cmd.name, self.cmd.name },
-        );
-        try writeNewLine(writer);
-    }
     try buffer.flush();
 }
 
@@ -152,6 +145,17 @@ fn writeOptions(self: *Help, writer: anytype) !void {
         }
     }
     try writer.writeAll(" -h, --help\n\tPrint this help and exit\n");
+}
+
+fn writeFooter(self: *Help, writer: anytype) !void {
+    if (self.options.include_subcmds) {
+        try writeNewLine(writer);
+        try writer.print(
+            "Run '{s} <command> -h' or '{s} <command> --help' to get help for specific command",
+            .{ self.cmd.name, self.cmd.name },
+        );
+        try writeNewLine(writer);
+    }
 }
 
 fn getBraces(required: bool) Braces {
