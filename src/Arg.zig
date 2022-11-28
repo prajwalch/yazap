@@ -2,7 +2,6 @@
 
 const Arg = @This();
 const std = @import("std");
-const ArgsContext = @import("parser/ArgsContext.zig");
 const MakeSettings = @import("settings.zig").MakeSettings;
 
 const Settings = MakeSettings(&[_][]const u8{
