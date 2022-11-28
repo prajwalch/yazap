@@ -3,14 +3,14 @@ const Help = @This();
 
 const std = @import("std");
 const Command = @import("Command.zig");
-const MakeSettings = @import("settings.zig").MakeSettings;
 const Braces = std.meta.Tuple(&[2]type{ u8, u8 });
 
-pub const Options = MakeSettings(&[_][]const u8{
-    "include_args",
-    "include_subcmds",
-    "include_flags",
-});
+pub const Options = struct {
+    parent_cmds: ?[]const []const u8 = null,
+    include_args: bool = false,
+    include_subcmds: bool = false,
+    include_flags: bool = false,
+};
 
 cmd: *const Command,
 options: Options,
@@ -46,7 +46,7 @@ pub fn writeAll(self: *Help, stream: anytype) !void {
     try self.writeCommands(writer);
     try self.writeOptions(writer);
 
-    if (self.options.isApplied(.include_subcmds)) {
+    if (self.options.include_subcmds) {
         try writeNewLine(writer);
         try writer.print(
             "Run '{s} <command> -h' or '{s} <command> --help' to get help for specific command",
@@ -63,10 +63,15 @@ fn writeHeader(self: *Help, writer: anytype) !void {
         try writeNewLine(writer);
         try writeNewLine(writer);
     }
-    try writer.print("Usage: {s} ", .{self.cmd.name});
+    try writer.writeAll("\nUsage: ");
+
+    if (self.options.parent_cmds) |parent_cmds| {
+        for (parent_cmds) |parent_cmd|
+            try writer.print("{s} ", .{parent_cmd});
+    }
 
     if (self.cmd.countArgs() >= 1) {
-        self.options.apply(.include_args);
+        self.options.include_args = true;
         const braces = getBraces(self.cmd.isSettingApplied(.arg_required));
 
         for (self.cmd.args.items) |arg| {
@@ -77,7 +82,7 @@ fn writeHeader(self: *Help, writer: anytype) !void {
     if (self.cmd.countOptions() >= 1) try writer.writeAll("[OPTIONS] ");
 
     if (self.cmd.countSubcommands() >= 1) {
-        self.options.apply(.include_subcmds);
+        self.options.include_subcmds = true;
         const braces = getBraces(self.cmd.isSettingApplied(.subcommand_required));
 
         try writer.print("{c}COMMAND{c}", .{ braces[0], braces[1] });
@@ -91,7 +96,7 @@ fn getBraces(required: bool) Braces {
 }
 
 fn writeCommands(self: *Help, writer: anytype) !void {
-    if (!(self.options.isApplied(.include_subcmds))) return;
+    if (!(self.options.include_subcmds)) return;
 
     try writer.writeAll("Commands:");
     try writeNewLine(writer);
@@ -105,7 +110,7 @@ fn writeCommands(self: *Help, writer: anytype) !void {
 }
 
 fn writeOptions(self: *Help, writer: anytype) !void {
-    if (self.options.isApplied(.include_flags)) {
+    if (self.options.include_flags) {
         try writer.writeAll("Options:");
         try writeNewLine(writer);
 
