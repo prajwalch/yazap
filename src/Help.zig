@@ -66,7 +66,6 @@ fn writeHeader(self: *Help, writer: anytype) !void {
         for (parent_cmds) |parent_cmd|
             try writer.print("{s} ", .{parent_cmd});
     }
-
     try writer.print("{s} ", .{self.cmd.name});
 
     if (self.options.include_args) {
@@ -77,14 +76,13 @@ fn writeHeader(self: *Help, writer: anytype) !void {
         }
     }
 
-    if (self.options.include_flags) try writer.writeAll("[OPTIONS] ");
-
+    if (self.options.include_flags)
+        try writer.writeAll("[OPTIONS] ");
     if (self.options.include_subcmds) {
         const braces = getBraces(self.cmd.isSettingApplied(.subcommand_required));
-
         try writer.print("{c}COMMAND{c}", .{ braces[0], braces[1] });
-        try writeNewLine(writer);
     }
+    try writeNewLine(writer);
     try writeNewLine(writer);
 }
 
