@@ -60,7 +60,7 @@ fn writeDescription(self: *Help, writer: anytype) !void {
 }
 
 fn writeHeader(self: *Help, writer: anytype) !void {
-    try writer.writeAll("\nUsage: ");
+    try writer.writeAll("Usage: ");
 
     if (self.options.parent_cmds) |parent_cmds| {
         for (parent_cmds) |parent_cmd|
