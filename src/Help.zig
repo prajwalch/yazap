@@ -107,19 +107,17 @@ fn writeOptions(self: *Help, writer: anytype) !void {
     try writeNewLine(writer);
 
     if (self.options.include_flags) {
-        for (self.cmd.args.items) |arg| {
-            if ((arg.short_name == null) and (arg.long_name == null)) continue;
-
-            if (arg.short_name) |short_name|
+        for (self.cmd.options.items) |option| {
+            if (option.short_name) |short_name|
                 try writer.print(" -{c},", .{short_name});
-            if (arg.long_name) |long_name|
+            if (option.long_name) |long_name|
                 try writer.print(" --{s} ", .{long_name});
 
-            if (arg.isSettingApplied(.takes_value)) {
+            if (option.isSettingApplied(.takes_value)) {
                 // TODO: Add new `Arg.placeholderName()` to display proper placeholder
 
                 // Required options: <A | B | C>
-                if (arg.allowed_values) |values| {
+                if (option.allowed_values) |values| {
                     try writer.writeByte('{');
 
                     for (values) |value, idx| {
@@ -132,11 +130,11 @@ fn writeOptions(self: *Help, writer: anytype) !void {
                     }
                     try writer.writeByte('}');
                 } else {
-                    try writer.print("<{s}>", .{arg.name});
+                    try writer.print("<{s}>", .{option.name});
                 }
             }
 
-            if (arg.description) |des_txt| {
+            if (option.description) |des_txt| {
                 try writeNewLine(writer);
                 try writer.print("\t{s}", .{des_txt});
                 try writeNewLine(writer);
