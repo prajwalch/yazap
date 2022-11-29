@@ -154,7 +154,7 @@ fn writeFooter(self: *Help, writer: anytype) !void {
     }
 }
 
-fn getBraces(required: bool) Braces {
+inline fn getBraces(required: bool) Braces {
     return if (required) .{ '<', '>' } else .{ '[', ']' };
 }
 
