@@ -1,6 +1,25 @@
 //! Help message writer
 const Help = @This();
 
+// Help message is divided into 5 different sections:
+// Description, Header, Commands, Options and Footer.
+//
+// DESCRIPTION
+// _________________________
+//
+// Usage: <command name> ...
+// _________________________
+//
+// Commands:
+// ...
+// _________________________
+//
+// Options:
+// ...
+// _________________________
+//
+// FOOTER
+
 const std = @import("std");
 const Command = @import("Command.zig");
 const Braces = std.meta.Tuple(&[2]type{ u8, u8 });
@@ -18,25 +37,6 @@ options: Options,
 pub fn init(cmd: *const Command, options: ?Options) Help {
     return Help{ .cmd = cmd, .options = options orelse .{} };
 }
-
-// Help message is divided into 3 sections:  Header, Commands and Options.
-// For each section there is a seperate functions for writing contents of them.
-//
-//  _________________________
-// /                         \
-// | Usage: <cmd name> ...   |
-// |                         |
-// | DESCRIPTION:            |
-// | ...                     |
-// |_________________________|
-// |                         |
-// | COMMANDS:               |
-// | ...                     |
-// |_________________________|
-// |                         |
-// | OPTIONS:                |
-// | ...                     |
-// \_________________________/
 
 pub fn writeAll(self: *Help, stream: anytype) !void {
     var buffer = std.io.bufferedWriter(stream);
