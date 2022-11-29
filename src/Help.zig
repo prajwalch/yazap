@@ -93,7 +93,7 @@ fn writeCommands(self: *Help, writer: anytype) !void {
     try writeNewLine(writer);
 
     for (self.cmd.subcommands.items) |subcmd| {
-        try writer.print(" {s}\t", .{subcmd.name});
+        try writer.print(" {s:<20} ", .{subcmd.name});
         if (subcmd.description) |d| try writer.print("{s}", .{d});
         try writeNewLine(writer);
     }
