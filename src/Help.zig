@@ -120,8 +120,6 @@ fn writeOptions(self: *Help, writer: anytype) !void {
 
             if (option.isSettingApplied(.takes_value)) {
                 // TODO: Add new `Arg.placeholderName()` to display proper placeholder
-
-                // Required options: <A | B | C>
                 if (option.allowed_values) |values| {
                     try writer.writeByte('{');
 
