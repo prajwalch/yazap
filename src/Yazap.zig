@@ -96,8 +96,20 @@ fn findSubcommandHelp(self: *Yazap, ctx: *ArgsContext) ?Help {
         const subcmd_ctx = &ctx.subcommand.?.ctx.?;
 
         if (subcmd_ctx.isPresent("help")) {
-            return self.command.findSubcommand(subcmd_name).?.help();
+            return findSubcommandRecursive(&self.command, subcmd_name).?.help();
         } else return self.findSubcommandHelp(subcmd_ctx);
+    }
+    return null;
+}
+
+// TODO: Maybe move it to `Command`?
+fn findSubcommandRecursive(cmd: *const Command, subcmd_name: []const u8) ?*const Command {
+    for (cmd.subcommands.items) |*subcmd| {
+        if (std.mem.eql(u8, subcmd.name, subcmd_name)) {
+            return subcmd;
+        } else if (findSubcommandRecursive(subcmd, subcmd_name)) |s| {
+            return s;
+        }
     }
     return null;
 }
