@@ -119,9 +119,14 @@ pub fn parse(self: *Parser) Error!ArgsContext {
     while (self.tokenizer.nextToken()) |*token| {
         self.err_builder.setProvidedArg(token.value);
 
-        if (token.isHelpOption()) {
-            try self.args_ctx.putMatchedArg(&Arg.new("help"), .none);
-            break;
+        if (mem.eql(u8, token.value, "help") or mem.eql(u8, token.value, "h")) {
+            // Check whether help is enabled for `cmd`
+            if (self.cmd.isSettingApplied(.enable_help)) {
+                try self.args_ctx.putMatchedArg(&Arg.new("help"), .none);
+                break;
+            } else {
+                // Return error?
+            }
         }
 
         if (self.consume_cmd_args) {

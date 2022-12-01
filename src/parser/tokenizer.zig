@@ -21,8 +21,6 @@ pub const Token = struct {
         long_option_with_value,
         // --option=
         long_option_with_empty_value,
-        // -h, --help
-        help_option,
         // arg
         some_argument,
     };
@@ -55,10 +53,6 @@ pub const Token = struct {
             or self.tag == .long_option_with_empty_value
         );
         // zig fmt: on
-    }
-
-    pub fn isHelpOption(self: *const Token) bool {
-        return (self.tag == .help_option);
     }
 };
 
@@ -105,7 +99,7 @@ pub const Tokenizer = struct {
     pub fn nextNonOptionArg(self: *Tokenizer) ?[]const u8 {
         var next_token = self.nextToken() orelse return null;
 
-        if (next_token.isShortOption() or next_token.isLongOption() or next_token.isHelpOption()) {
+        if (next_token.isShortOption() or next_token.isLongOption()) {
             self.cursor -= 1;
             return null;
         }
@@ -123,10 +117,6 @@ pub const Tokenizer = struct {
     fn processLongOption(arg: []const u8) Token {
         const option = mem.trimLeft(u8, arg, "--");
         const tag: Token.Tag = blk: {
-            // Check for 'help' option
-            if (std.mem.eql(u8, option, "help"))
-                break :blk .help_option;
-
             if (mem.indexOfScalar(u8, option, '=')) |eql_pos| {
                 const has_value = (eql_pos + 1) < option.len;
 
@@ -145,10 +135,6 @@ pub const Tokenizer = struct {
     fn processShortOption(arg: []const u8) Token {
         const option = mem.trimLeft(u8, arg, "-");
         const tag: Token.Tag = blk: {
-            // Check for 'h' option
-            if (std.mem.eql(u8, option, "h"))
-                break :blk .help_option;
-
             if (mem.indexOfScalar(u8, option, '=')) |eql_pos| {
                 const is_options = (option[0..eql_pos]).len > 1;
                 const has_value = (eql_pos + 1) < option.len;
@@ -189,7 +175,6 @@ fn expectToken(actual_token: Token, expected_tag: Token.Tag) !void {
 
 test "tokenizer" {
     const args = &.{
-        "-h",
         "-f",
         "-f=val",
         "-f=",
@@ -207,7 +192,6 @@ test "tokenizer" {
 
     var tokenizer = Tokenizer.init(args);
 
-    try expectToken(tokenizer.nextToken().?, .help_option);
     try expectToken(tokenizer.nextToken().?, .short_option);
     try expectToken(tokenizer.nextToken().?, .short_option_with_value);
     try expectToken(tokenizer.nextToken().?, .short_option_with_empty_value);
