@@ -181,7 +181,8 @@ pub fn enableFor(cmd: *Command) void {
     }
 }
 
-/// Searches which subcommand's help to invoke
+/// Returns a `Help` of a subcommand if present on the command line with `-h` or `--h` option,
+/// otherwise null if none of the subcommands were present
 pub fn findSubcommandHelp(cmd: *const Command, ctx: *ArgsContext) ?Help {
     if ((ctx.subcommand != null) and (ctx.subcommand.?.ctx != null)) {
         const subcmd_name = ctx.subcommand.?.name;
