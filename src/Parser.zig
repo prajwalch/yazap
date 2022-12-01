@@ -1,9 +1,9 @@
 const Parser = @This();
 
 const std = @import("std");
+const args_context = @import("args_context.zig");
 const Arg = @import("Arg.zig");
 const Command = @import("Command.zig");
-const ArgsContext = @import("ArgsContext.zig");
 const ErrorBuilder = @import("ErrorBuilder.zig");
 const Token = @import("tokenizer.zig").Token;
 const Tokenizer = @import("tokenizer.zig").Tokenizer;
@@ -11,7 +11,8 @@ const Tokenizer = @import("tokenizer.zig").Tokenizer;
 const mem = std.mem;
 const Allocator = std.mem.Allocator;
 const OptionTuple = std.meta.Tuple(&[_]type{ []const u8, ?[]const u8 });
-const MatchedSubCommand = ArgsContext.MatchedSubCommand;
+const ArgsContext = args_context.ArgsContext;
+const MatchedSubCommand = args_context.MatchedSubCommand;
 
 pub const Error = error{
     UnknownFlag,

@@ -4,7 +4,7 @@ const std = @import("std");
 const help = @import("help.zig");
 const Command = @import("Command.zig");
 const Parser = @import("Parser.zig");
-const ArgsContext = @import("ArgsContext.zig");
+const ArgsContext = @import("args_context.zig").ArgsContext;
 const Tokenizer = @import("tokenizer.zig").Tokenizer;
 const PrintError = @import("ErrorBuilder.zig").PrintError;
 
