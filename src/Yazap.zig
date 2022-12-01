@@ -3,7 +3,6 @@ const Yazap = @This();
 const std = @import("std");
 const help = @import("help.zig");
 const Command = @import("Command.zig");
-//const Help = @import("Help.zig");
 const Parser = @import("parser/Parser.zig");
 const ArgsContext = @import("parser/ArgsContext.zig");
 const Tokenizer = @import("parser/tokenizer.zig").Tokenizer;
