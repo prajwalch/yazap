@@ -1,8 +1,8 @@
 const Command = @This();
 
 const std = @import("std");
+const help = @import("help.zig");
 const Arg = @import("Arg.zig");
-const Help = @import("Help.zig");
 const MakeSettings = @import("settings.zig").MakeSettings;
 
 const mem = std.mem;
@@ -12,6 +12,7 @@ const Settings = MakeSettings(&[_][]const u8{
     "takes_value",
     "arg_required",
     "subcommand_required",
+    "enable_help",
 });
 
 allocator: Allocator,
@@ -60,7 +61,10 @@ pub fn addArgs(self: *Command, args: []Arg) !void {
 
 /// Appends the new subcommand into the subcommands list
 pub fn addSubcommand(self: *Command, new_subcommand: Command) !void {
-    return self.subcommands.append(self.allocator, new_subcommand);
+    // Add help option for subcommand
+    var subcmd = new_subcommand;
+    help.enableFor(&subcmd);
+    return self.subcommands.append(self.allocator, subcmd);
 }
 
 /// Appends the `subcommands` into the subcommands list
@@ -142,8 +146,8 @@ pub fn isSettingApplied(self: *const Command, option: Settings.Options) bool {
     return self.settings.isApplied(option);
 }
 
-pub fn help(self: *const Command) Help {
-    return Help.init(self, Help.Options{
+pub fn getHelp(self: *const Command) help.Help {
+    return help.Help.init(self, help.Help.Options{
         .include_args = (self.countArgs() >= 1),
         .include_subcmds = (self.countSubcommands() >= 1),
         .include_flags = (self.countOptions() >= 1),

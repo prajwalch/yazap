@@ -1,8 +1,9 @@
 const Yazap = @This();
 
 const std = @import("std");
+const help = @import("help.zig");
 const Command = @import("Command.zig");
-const Help = @import("Help.zig");
+//const Help = @import("Help.zig");
 const Parser = @import("parser/Parser.zig");
 const ArgsContext = @import("parser/ArgsContext.zig");
 const Tokenizer = @import("parser/tokenizer.zig").Tokenizer;
@@ -17,7 +18,7 @@ pub const Error = error{
 
 allocator: Allocator,
 command: Command,
-subcommand_help: ?Help = null,
+subcommand_help: ?help.Help = null,
 args_ctx: ?ArgsContext = null,
 process_args: ?[]const [:0]u8 = null,
 
@@ -63,6 +64,8 @@ pub fn parseProcess(self: *Yazap) Error!(*const ArgsContext) {
 
 /// Starts parsing the given arguments
 pub fn parseFrom(self: *Yazap, argv: []const [:0]const u8) Error!(*const ArgsContext) {
+    help.enableFor(&self.command);
+
     var parser = Parser.init(self.allocator, Tokenizer.init(argv), self.rootCommand());
     self.args_ctx = parser.parse() catch |e| {
         try parser.err_builder.logError();
@@ -70,48 +73,20 @@ pub fn parseFrom(self: *Yazap, argv: []const [:0]const u8) Error!(*const ArgsCon
     };
 
     // Store the given subcommand's help writer
-    self.setSubcommandHelp();
+    self.subcommand_help = help.findSubcommandHelp(&self.command, &self.args_ctx.?);
     try self.displayHelpAndExitIfFound();
     return &self.args_ctx.?;
 }
 
 /// Displays the help message of root command
 pub fn displayHelp(self: *Yazap) !void {
-    return self.command.help().writeAll(std.io.getStdOut().writer());
+    return self.command.getHelp().writeAll(std.io.getStdOut().writer());
 }
 
 /// Displays the help message of subcommand if it is provided on command line
 /// otherwise it will display nothing
 pub fn displaySubcommandHelp(self: *Yazap) !void {
     if (self.subcommand_help) |*h| return h.writeAll(std.io.getStdOut().writer());
-}
-
-fn setSubcommandHelp(self: *Yazap) void {
-    self.subcommand_help = self.findSubcommandHelp(&self.args_ctx.?);
-}
-
-fn findSubcommandHelp(self: *Yazap, ctx: *ArgsContext) ?Help {
-    if ((ctx.subcommand != null) and (ctx.subcommand.?.ctx != null)) {
-        const subcmd_name = ctx.subcommand.?.name;
-        const subcmd_ctx = &ctx.subcommand.?.ctx.?;
-
-        if (subcmd_ctx.isPresent("help")) {
-            return findSubcommandRecursive(&self.command, subcmd_name).?.help();
-        } else return self.findSubcommandHelp(subcmd_ctx);
-    }
-    return null;
-}
-
-// TODO: Maybe move it to `Command`?
-fn findSubcommandRecursive(cmd: *const Command, subcmd_name: []const u8) ?*const Command {
-    for (cmd.subcommands.items) |*subcmd| {
-        if (std.mem.eql(u8, subcmd.name, subcmd_name)) {
-            return subcmd;
-        } else if (findSubcommandRecursive(subcmd, subcmd_name)) |s| {
-            return s;
-        }
-    }
-    return null;
 }
 
 fn displayHelpAndExitIfFound(self: *Yazap) !void {
