@@ -3,10 +3,10 @@ const Yazap = @This();
 const std = @import("std");
 const help = @import("help.zig");
 const Command = @import("Command.zig");
-const Parser = @import("parser/Parser.zig");
-const ArgsContext = @import("parser/ArgsContext.zig");
-const Tokenizer = @import("parser/tokenizer.zig").Tokenizer;
-const PrintError = @import("parser/ErrorBuilder.zig").PrintError;
+const Parser = @import("Parser.zig");
+const ArgsContext = @import("ArgsContext.zig");
+const Tokenizer = @import("tokenizer.zig").Tokenizer;
+const PrintError = @import("ErrorBuilder.zig").PrintError;
 
 const Allocator = std.mem.Allocator;
 

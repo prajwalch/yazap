@@ -3,8 +3,8 @@
 const ErrorBuilder = @This();
 
 const std = @import("std");
-const Arg = @import("../Arg.zig");
-const Command = @import("../Command.zig");
+const Arg = @import("Arg.zig");
+const Command = @import("Command.zig");
 const ParserError = @import("Parser.zig").Error;
 
 const log = std.log;

@@ -1,8 +1,8 @@
 const Parser = @This();
 
 const std = @import("std");
-const Arg = @import("../Arg.zig");
-const Command = @import("../Command.zig");
+const Arg = @import("Arg.zig");
+const Command = @import("Command.zig");
 const ArgsContext = @import("ArgsContext.zig");
 const ErrorBuilder = @import("ErrorBuilder.zig");
 const Token = @import("tokenizer.zig").Token;

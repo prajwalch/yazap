@@ -4,8 +4,8 @@
 const ArgsContext = @This();
 
 const std = @import("std");
-const Arg = @import("../Arg.zig");
-const Help = @import("../help.zig").Help;
+const Arg = @import("Arg.zig");
+const Help = @import("help.zig").Help;
 const ArgHashMap = std.StringHashMap(MatchedArgValue);
 
 pub const MatchedArgValue = union(enum) {
