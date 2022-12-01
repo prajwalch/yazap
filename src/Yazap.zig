@@ -72,7 +72,8 @@ pub fn parseFrom(self: *Yazap, argv: []const [:0]const u8) Error!(*const ArgsCon
         return e;
     };
 
-    // Store the given subcommand's help writer
+    // Set the `Help` of a subcommand present on the command line with the `-h` or `--help` option
+    // remains null if none of the subcommands were present
     self.subcommand_help = help.findSubcommandHelp(&self.command, &self.args_ctx.?);
     try self.displayHelpAndExitIfFound();
     return &self.args_ctx.?;
