@@ -334,47 +334,45 @@ fn processValue(
         // For ex: -f=v1,v2
         // option = f
         // value = v1,v2
-        if (arg.verifyValueInAllowedValues(value)) {
-            return self.args_ctx.putMatchedArg(arg, .{ .single = value });
-        } else {
+        if (!arg.verifyValueInAllowedValues(value)) {
             return InternalError.ProvidedValueIsNotValidOption;
         }
-    } else {
-        var values = std.ArrayList([]const u8).init(self.allocator);
-        errdefer values.deinit();
-
-        try self.verifyAndAppendValue(arg, &values, value);
-        // Consume minimum number of required values first
-        if (arg.min_values) |min| {
-            try self.consumeNValues(arg, &values, min);
-            // Not enough values
-            if (values.items.len < min) return error.TooFewArgValue;
-        }
-        const has_max_num = (arg.max_values != null);
-        const max_eqls_one = (has_max_num and (arg.max_values.? == 1));
-
-        // If maximum number and takes_multiple_values is not set we are not looking for more values
-        if ((!has_max_num or max_eqls_one) and !(arg.isSettingApplied(.takes_multiple_values))) {
-            // If values contains only one value, we can be sure that the minimum number of values is set to 1
-            // therefore return it as a single value instead
-            if (values.items.len == 1) {
-                values.deinit();
-                return self.args_ctx.putMatchedArg(arg, .{ .single = value });
-            } else {
-                return self.args_ctx.putMatchedArg(arg, .{ .many = values });
-            }
-        }
-        if (arg.isSettingApplied(.takes_multiple_values)) {
-            if (!has_max_num) {
-                try self.consumeValuesTillNextOption(arg, &values);
-                return self.args_ctx.putMatchedArg(arg, .{ .many = values });
-            }
-        }
-        if (has_max_num) {
-            try self.consumeNValues(arg, &values, arg.max_values.?);
-        }
-        return self.args_ctx.putMatchedArg(arg, .{ .many = values });
+        return self.args_ctx.putMatchedArg(arg, .{ .single = value });
     }
+
+    var values = std.ArrayList([]const u8).init(self.allocator);
+    errdefer values.deinit();
+
+    try self.verifyAndAppendValue(arg, &values, value);
+    // Consume minimum number of required values first
+    if (arg.min_values) |min| {
+        try self.consumeNValues(arg, &values, min);
+        // Not enough values
+        if (values.items.len < min) return error.TooFewArgValue;
+    }
+    const has_max_num = (arg.max_values != null);
+    const max_eqls_one = (has_max_num and (arg.max_values.? == 1));
+
+    // If maximum number and takes_multiple_values is not set we are not looking for more values
+    if ((!has_max_num or max_eqls_one) and !(arg.isSettingApplied(.takes_multiple_values))) {
+        if (values.items.len > 1) {
+            return self.args_ctx.putMatchedArg(arg, .{ .many = values });
+        }
+        // If values contains only one value, we can be sure that the minimum number of values is set to 1
+        // therefore return it as a single value instead
+        values.deinit();
+        return self.args_ctx.putMatchedArg(arg, .{ .single = value });
+    }
+    if (arg.isSettingApplied(.takes_multiple_values)) {
+        if (!has_max_num) {
+            try self.consumeValuesTillNextOption(arg, &values);
+            return self.args_ctx.putMatchedArg(arg, .{ .many = values });
+        }
+    }
+    if (has_max_num) {
+        try self.consumeNValues(arg, &values, arg.max_values.?);
+    }
+    return self.args_ctx.putMatchedArg(arg, .{ .many = values });
 }
 
 fn consumeNValues(
@@ -421,32 +419,34 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
         self.err_builder.setErr(Error.UnknownCommand);
         return self.err_builder.err;
     };
-
     // zig fmt: off
-    if (valid_subcmd.isSettingApplied(.takes_value)
-        or valid_subcmd.countArgs() >= 1
-        or valid_subcmd.countOptions() >= 1
-        or valid_subcmd.countSubcommands() >= 1) {
-        // zig fmt: on
-        const subcmd_argv = self.tokenizer.restArg() orelse {
-            if (!(valid_subcmd.isSettingApplied(.arg_required))) {
-                return MatchedSubCommand.initWithArg(
-                    valid_subcmd.name,
-                    ArgsContext.init(self.allocator),
-                );
-            }
+    const takes_takes = valid_subcmd.isSettingApplied(.takes_value)
+        or (valid_subcmd.countArgs() >= 1)
+        or (valid_subcmd.countOptions() >= 1)
+        or (valid_subcmd.countSubcommands() >= 1);
+    // zig fmt: on
+
+    if (!takes_takes) {
+        return MatchedSubCommand.initWithoutArg(valid_subcmd.name);
+    }
+
+    const subcmd_argv = self.tokenizer.restArg() orelse {
+        if (valid_subcmd.isSettingApplied(.arg_required)) {
             self.err_builder.setCmd(valid_subcmd);
             self.err_builder.setErr(Error.CommandArgumentNotProvided);
             return self.err_builder.err;
-        };
-        var parser = Parser.init(self.allocator, Tokenizer.init(subcmd_argv), valid_subcmd);
-        const subcmd_ctx = parser.parse() catch |err| {
-            // Bubble up the error trace to the parent command that happened while parsing subcommand
-            self.err_builder = parser.err_builder;
-            return err;
-        };
+        }
+        return MatchedSubCommand.initWithArg(
+            valid_subcmd.name,
+            ArgsContext.init(self.allocator),
+        );
+    };
+    var parser = Parser.init(self.allocator, Tokenizer.init(subcmd_argv), valid_subcmd);
+    const subcmd_ctx = parser.parse() catch |err| {
+        // Bubble up the error trace to the parent command that happened while parsing subcommand
+        self.err_builder = parser.err_builder;
+        return err;
+    };
 
-        return MatchedSubCommand.initWithArg(valid_subcmd.name, subcmd_ctx);
-    }
-    return MatchedSubCommand.initWithoutArg(valid_subcmd.name);
+    return MatchedSubCommand.initWithArg(valid_subcmd.name, subcmd_ctx);
 }
