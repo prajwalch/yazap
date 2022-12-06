@@ -137,11 +137,6 @@ pub fn parse(self: *Parser) Error!ArgsContext {
         }
 
         if (token.isShortOption() or token.isLongOption()) {
-            if (self.cmd.countOptions() == 0) {
-                self.err_builder.setErr(Error.UnknownFlag);
-                return self.err_builder.err;
-            }
-
             self.parseOption(token) catch |err| switch (err) {
                 InternalError.ArgValueNotProvided => {
                     self.err_builder.setErr(Error.FlagValueNotProvided);
