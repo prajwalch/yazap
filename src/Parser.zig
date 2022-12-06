@@ -136,25 +136,27 @@ pub fn parse(self: *Parser) Error!ArgsContext {
             if (self.consume_cmd_args) continue;
         }
 
-        if (token.isShortOption() or token.isLongOption()) {
-            self.parseOption(token) catch |err| switch (err) {
-                InternalError.ArgValueNotProvided => {
-                    self.err_builder.setErr(Error.FlagValueNotProvided);
-                    return self.err_builder.err;
-                },
-                InternalError.EmptyArgValueNotAllowed => {
-                    self.err_builder.setErr(Error.EmptyFlagValueNotAllowed);
-                    return self.err_builder.err;
-                },
-                else => |e| {
-                    self.err_builder.setErr(e);
-                    return e;
-                },
-            };
-        } else {
-            const subcmd = try self.parseSubCommand(token.value);
-            try self.args_ctx.setSubcommand(subcmd);
+        if (!token.isShortOption() and !token.isLongOption()) {
+            try self.args_ctx.setSubcommand(
+                try self.parseSubCommand(token.value),
+            );
+            continue;
         }
+
+        self.parseOption(token) catch |err| switch (err) {
+            InternalError.ArgValueNotProvided => {
+                self.err_builder.setErr(Error.FlagValueNotProvided);
+                return self.err_builder.err;
+            },
+            InternalError.EmptyArgValueNotAllowed => {
+                self.err_builder.setErr(Error.EmptyFlagValueNotAllowed);
+                return self.err_builder.err;
+            },
+            else => |e| {
+                self.err_builder.setErr(e);
+                return e;
+            },
+        };
     }
 
     if (!(self.args_ctx.isPresent("help"))) {
