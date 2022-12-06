@@ -157,11 +157,6 @@ pub fn parse(self: *Parser) Error!ArgsContext {
                 },
             };
         } else {
-            if (self.cmd.countSubcommands() == 0) {
-                self.err_builder.setErr(Error.UnknownCommand);
-                return Error.UnknownCommand;
-            }
-
             const subcmd = try self.parseSubCommand(token.value);
             try self.args_ctx.setSubcommand(subcmd);
         }
