@@ -355,13 +355,13 @@ fn processValue(
 
     // If maximum number and takes_multiple_values is not set we are not looking for more values
     if ((!has_max_num or max_eqls_one) and !(arg.isSettingApplied(.takes_multiple_values))) {
-        if (values.items.len > 1) {
-            return self.args_ctx.putMatchedArg(arg, .{ .many = values });
-        }
         // If values contains only one value, we can be sure that the minimum number of values is set to 1
         // therefore return it as a single value instead
-        values.deinit();
-        return self.args_ctx.putMatchedArg(arg, .{ .single = value });
+        if (values.items.len == 1) {
+            values.deinit();
+            return self.args_ctx.putMatchedArg(arg, .{ .single = value });
+        }
+        return self.args_ctx.putMatchedArg(arg, .{ .many = values });
     }
     if (arg.isSettingApplied(.takes_multiple_values)) {
         if (!has_max_num) {
