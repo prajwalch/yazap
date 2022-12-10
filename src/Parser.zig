@@ -430,7 +430,7 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
         return MatchedSubCommand.initWithoutArg(subcmd.name);
     }
 
-    const subcmd_argv = self.tokenizer.restArg() orelse {
+    const args = self.tokenizer.restArg() orelse {
         if (subcmd.isSettingApplied(.arg_required)) {
             self.err_builder.setCmd(subcmd);
             self.err_builder.setErr(Error.CommandArgumentNotProvided);
@@ -441,7 +441,7 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
             ArgsContext.init(self.allocator),
         );
     };
-    var parser = Parser.init(self.allocator, Tokenizer.init(subcmd_argv), subcmd);
+    var parser = Parser.init(self.allocator, Tokenizer.init(args), subcmd);
     const subcmd_ctx = parser.parse() catch |err| {
         // Bubble up the error trace to the parent command that happened while parsing subcommand
         self.err_builder = parser.err_builder;
