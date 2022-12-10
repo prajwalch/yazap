@@ -420,13 +420,13 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
         return self.err_builder.err;
     };
     // zig fmt: off
-    const takes_takes = valid_subcmd.isSettingApplied(.takes_value)
+    const takes_value = valid_subcmd.isSettingApplied(.takes_value)
         or (valid_subcmd.countArgs() >= 1)
         or (valid_subcmd.countOptions() >= 1)
         or (valid_subcmd.countSubcommands() >= 1);
     // zig fmt: on
 
-    if (!takes_takes) {
+    if (!takes_value) {
         return MatchedSubCommand.initWithoutArg(valid_subcmd.name);
     }
 
