@@ -415,38 +415,38 @@ fn verifyAndAppendValue(
 }
 
 fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubCommand {
-    const valid_subcmd = self.cmd.findSubcommand(provided_subcmd) orelse {
+    const subcmd = self.cmd.findSubcommand(provided_subcmd) orelse {
         self.err_builder.setErr(Error.UnknownCommand);
         return self.err_builder.err;
     };
     // zig fmt: off
-    const takes_value = valid_subcmd.isSettingApplied(.takes_value)
-        or (valid_subcmd.countArgs() >= 1)
-        or (valid_subcmd.countOptions() >= 1)
-        or (valid_subcmd.countSubcommands() >= 1);
+    const takes_value = subcmd.isSettingApplied(.takes_value)
+        or (subcmd.countArgs() >= 1)
+        or (subcmd.countOptions() >= 1)
+        or (subcmd.countSubcommands() >= 1);
     // zig fmt: on
 
     if (!takes_value) {
-        return MatchedSubCommand.initWithoutArg(valid_subcmd.name);
+        return MatchedSubCommand.initWithoutArg(subcmd.name);
     }
 
     const subcmd_argv = self.tokenizer.restArg() orelse {
-        if (valid_subcmd.isSettingApplied(.arg_required)) {
-            self.err_builder.setCmd(valid_subcmd);
+        if (subcmd.isSettingApplied(.arg_required)) {
+            self.err_builder.setCmd(subcmd);
             self.err_builder.setErr(Error.CommandArgumentNotProvided);
             return self.err_builder.err;
         }
         return MatchedSubCommand.initWithArg(
-            valid_subcmd.name,
+            subcmd.name,
             ArgsContext.init(self.allocator),
         );
     };
-    var parser = Parser.init(self.allocator, Tokenizer.init(subcmd_argv), valid_subcmd);
+    var parser = Parser.init(self.allocator, Tokenizer.init(subcmd_argv), subcmd);
     const subcmd_ctx = parser.parse() catch |err| {
         // Bubble up the error trace to the parent command that happened while parsing subcommand
         self.err_builder = parser.err_builder;
         return err;
     };
 
-    return MatchedSubCommand.initWithArg(valid_subcmd.name, subcmd_ctx);
+    return MatchedSubCommand.initWithArg(subcmd.name, subcmd_ctx);
 }
