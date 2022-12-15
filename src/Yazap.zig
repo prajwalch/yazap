@@ -41,6 +41,10 @@ pub fn deinit(self: *Yazap) void {
     if (self.args_ctx) |*ctx| ctx.deinit();
     if (self.process_args) |pargs| std.process.argsFree(self.allocator, pargs);
     self.command.deinit();
+
+    if (self.subcommand_help) |subcmd_help| {
+        subcmd_help.parent_cmds.?.deinit();
+    }
 }
 
 /// Creates a new `Command` with given name by setting a allocator to it
@@ -63,18 +67,14 @@ pub fn parseProcess(self: *Yazap) Error!(*const ArgsContext) {
 
 /// Starts parsing the given arguments
 pub fn parseFrom(self: *Yazap, argv: []const [:0]const u8) Error!(*const ArgsContext) {
-    help.enableFor(&self.command);
+    try self.addBuiltinArgs();
 
     var parser = Parser.init(self.allocator, Tokenizer.init(argv), self.rootCommand());
     self.args_ctx = parser.parse() catch |e| {
         try parser.err_builder.logError();
         return e;
     };
-
-    // Set the `Help` of a subcommand present on the command line with the `-h` or `--help` option
-    // remains null if none of the subcommands were present
-    self.subcommand_help = help.findSubcommandHelp(&self.command, &self.args_ctx.?);
-    try self.displayHelpAndExitIfFound();
+    try self.handleBuiltinArgs();
     return &self.args_ctx.?;
 }
 
@@ -87,6 +87,19 @@ pub fn displayHelp(self: *Yazap) !void {
 /// otherwise it will display nothing
 pub fn displaySubcommandHelp(self: *Yazap) !void {
     if (self.subcommand_help) |*h| return h.writeAll(std.io.getStdOut().writer());
+}
+
+fn addBuiltinArgs(self: *Yazap) !void {
+    help.enableFor(&self.command);
+}
+
+fn handleBuiltinArgs(self: *Yazap) !void {
+    // Set the `Help` of a subcommand present on the command line with the `-h` or `--help` option
+    // remains null if none of the subcommands were present
+    if (help.findSubcommand(self.rootCommand(), &self.args_ctx.?)) |subcmd| {
+        self.subcommand_help = try help.Help.init(self.allocator, self.rootCommand(), subcmd);
+    }
+    try self.displayHelpAndExitIfFound();
 }
 
 fn displayHelpAndExitIfFound(self: *Yazap) !void {

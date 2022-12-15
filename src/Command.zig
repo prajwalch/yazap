@@ -146,12 +146,9 @@ pub fn isSettingApplied(self: *const Command, option: Settings.Options) bool {
     return self.settings.isApplied(option);
 }
 
+// TODO: Remove this function
 pub fn getHelp(self: *const Command) help.Help {
-    return help.Help.init(self, help.Help.Options{
-        .include_args = (self.countArgs() >= 1),
-        .include_subcmds = (self.countSubcommands() >= 1),
-        .include_flags = (self.countOptions() >= 1),
-    });
+    return help.Help.init(self.allocator, self, self.name) catch unreachable;
 }
 
 test "emit methods docs" {
