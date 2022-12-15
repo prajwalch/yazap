@@ -28,17 +28,32 @@ const Braces = std.meta.Tuple(&[2]type{ u8, u8 });
 /// FOOTER
 pub const Help = struct {
     pub const Options = struct {
-        parent_cmds: ?[]const []const u8 = null,
         include_args: bool = false,
         include_subcmds: bool = false,
         include_flags: bool = false,
     };
 
     cmd: *const Command,
+    parent_cmds: ?std.ArrayList([]const u8) = null,
     options: Options,
 
-    pub fn init(cmd: *const Command, options: ?Options) Help {
-        return Help{ .cmd = cmd, .options = options orelse .{} };
+    pub fn init(
+        allocator: mem.Allocator,
+        root_cmd: *const Command,
+        subcmd: []const u8,
+    ) !Help {
+        var self = Help{ .cmd = root_cmd, .options = .{} };
+
+        if (!mem.eql(u8, root_cmd.name, subcmd)) {
+            self.parent_cmds = std.ArrayList([]const u8).init(allocator);
+            try self.setCommandAndItsParents(root_cmd, subcmd);
+        }
+        self.options = Options{
+            .include_args = (self.cmd.countArgs() >= 1),
+            .include_subcmds = (self.cmd.countSubcommands() >= 1),
+            .include_flags = (self.cmd.countOptions() >= 1),
+        };
+        return self;
     }
 
     pub fn writeAll(self: *Help, stream: anytype) !void {
@@ -65,8 +80,8 @@ pub const Help = struct {
     fn writeHeader(self: *Help, writer: anytype) !void {
         try writer.writeAll("Usage: ");
 
-        if (self.options.parent_cmds) |parent_cmds| {
-            for (parent_cmds) |parent_cmd|
+        if (self.parent_cmds) |parent_cmds| {
+            for (parent_cmds.items) |parent_cmd|
                 try writer.print("{s} ", .{parent_cmd});
         }
         try writer.print("{s} ", .{self.cmd.name});
@@ -162,6 +177,22 @@ pub const Help = struct {
         }
     }
 
+    fn setCommandAndItsParents(self: *Help, parent_cmd: *const Command, subcmd_name: []const u8) mem.Allocator.Error!void {
+        try self.parent_cmds.?.append(parent_cmd.name);
+
+        for (parent_cmd.subcommands.items) |*subcmd| {
+            if (std.mem.eql(u8, subcmd.name, subcmd_name)) {
+                self.cmd = subcmd;
+                break;
+            }
+            try setCommandAndItsParents(self, subcmd, subcmd_name);
+            // Command is already found; stop searching
+            if (mem.eql(u8, self.cmd.name, subcmd_name)) break;
+
+            _ = self.parent_cmds.?.popOrNull();
+        }
+    }
+
     inline fn getBraces(required: bool) Braces {
         return if (required) .{ '<', '>' } else .{ '[', ']' };
     }
@@ -183,25 +214,17 @@ pub fn enableFor(cmd: *Command) void {
 
 /// Returns a `Help` of a subcommand if present on the command line with `-h` or `--h` option,
 /// otherwise null if none of the subcommands were present
-pub fn findSubcommandHelp(cmd: *const Command, ctx: *ArgsContext) ?Help {
+pub fn findSubcommand(root_cmd: *const Command, ctx: *ArgsContext) ?[]const u8 {
     if ((ctx.subcommand != null) and (ctx.subcommand.?.ctx != null)) {
         const subcmd_name = ctx.subcommand.?.name;
         const subcmd_ctx = &ctx.subcommand.?.ctx.?;
 
         if (subcmd_ctx.isPresent("help")) {
-            return findSubcommandRecursive(cmd, subcmd_name).?.getHelp();
-        } else return findSubcommandHelp(cmd, subcmd_ctx);
-    }
-    return null;
-}
-
-// TODO: Maybe move it to `Command`?
-fn findSubcommandRecursive(cmd: *const Command, subcmd_name: []const u8) ?*const Command {
-    for (cmd.subcommands.items) |*subcmd| {
-        if (std.mem.eql(u8, subcmd.name, subcmd_name)) {
-            return subcmd;
-        } else if (findSubcommandRecursive(subcmd, subcmd_name)) |s| {
-            return s;
+            return subcmd_name;
+        } else {
+            // If current subcommand's arg doesnot have `help` option
+            // start to look its child subcommand's arg. (This happens recursively)
+            return findSubcommand(root_cmd, subcmd_ctx);
         }
     }
     return null;
