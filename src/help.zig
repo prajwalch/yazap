@@ -27,32 +27,22 @@ const Braces = std.meta.Tuple(&[2]type{ u8, u8 });
 ///
 /// FOOTER
 pub const Help = struct {
-    pub const Options = struct {
-        include_args: bool = false,
-        include_subcmds: bool = false,
-        include_flags: bool = false,
-    };
-
     cmd: *const Command,
     parent_cmds: ?std.ArrayList([]const u8) = null,
-    options: Options,
+    include_args: bool = false,
+    include_subcmds: bool = false,
+    include_flags: bool = false,
 
-    pub fn init(
-        allocator: mem.Allocator,
-        root_cmd: *const Command,
-        subcmd: []const u8,
-    ) !Help {
-        var self = Help{ .cmd = root_cmd, .options = .{} };
+    pub fn init(allocator: mem.Allocator, root_cmd: *const Command, subcmd: []const u8) !Help {
+        var self = Help{ .cmd = root_cmd };
 
         if (!mem.eql(u8, root_cmd.name, subcmd)) {
             self.parent_cmds = std.ArrayList([]const u8).init(allocator);
             try self.setCommandAndItsParents(root_cmd, subcmd);
         }
-        self.options = Options{
-            .include_args = (self.cmd.countArgs() >= 1),
-            .include_subcmds = (self.cmd.countSubcommands() >= 1),
-            .include_flags = (self.cmd.countOptions() >= 1),
-        };
+        self.include_args = (self.cmd.countArgs() >= 1);
+        self.include_subcmds = (self.cmd.countSubcommands() >= 1);
+        self.include_flags = (self.cmd.countOptions() >= 1);
         return self;
     }
 
@@ -80,13 +70,10 @@ pub const Help = struct {
     fn writeHeader(self: *Help, writer: anytype) !void {
         try writer.writeAll("Usage: ");
 
-        if (self.parent_cmds) |parent_cmds| {
-            for (parent_cmds.items) |parent_cmd|
-                try writer.print("{s} ", .{parent_cmd});
-        }
+        try self.writeParents(writer);
         try writer.print("{s} ", .{self.cmd.name});
 
-        if (self.options.include_args) {
+        if (self.include_args) {
             const braces = getBraces(self.cmd.isSettingApplied(.arg_required));
 
             for (self.cmd.args.items) |arg| {
@@ -94,9 +81,9 @@ pub const Help = struct {
             }
         }
 
-        if (self.options.include_flags)
+        if (self.include_flags)
             try writer.writeAll("[OPTIONS] ");
-        if (self.options.include_subcmds) {
+        if (self.include_subcmds) {
             const braces = getBraces(self.cmd.isSettingApplied(.subcommand_required));
             try writer.print("{c}COMMAND{c}", .{ braces[0], braces[1] });
         }
@@ -104,8 +91,15 @@ pub const Help = struct {
         try writeNewLine(writer);
     }
 
+    fn writeParents(self: *Help, writer: anytype) !void {
+        if (self.parent_cmds) |parent_cmds| {
+            for (parent_cmds.items) |parent_cmd|
+                try writer.print("{s} ", .{parent_cmd});
+        }
+    }
+
     fn writeCommands(self: *Help, writer: anytype) !void {
-        if (!(self.options.include_subcmds)) return;
+        if (!(self.include_subcmds)) return;
 
         try writer.writeAll("Commands:");
         try writeNewLine(writer);
@@ -119,7 +113,7 @@ pub const Help = struct {
     }
 
     fn writeOptions(self: *Help, writer: anytype) !void {
-        if (!self.options.include_flags) return;
+        if (!self.include_flags) return;
 
         try writer.writeAll("Options:");
         try writeNewLine(writer);
@@ -167,7 +161,7 @@ pub const Help = struct {
     }
 
     fn writeFooter(self: *Help, writer: anytype) !void {
-        if (self.options.include_subcmds) {
+        if (self.include_subcmds) {
             try writeNewLine(writer);
             try writer.print(
                 "Run '{s} <command> -h' or '{s} <command> --help' to get help for specific command",
