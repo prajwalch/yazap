@@ -28,7 +28,7 @@ const Braces = std.meta.Tuple(&[2]type{ u8, u8 });
 /// FOOTER
 pub const Help = struct {
     cmd: *const Command,
-    parent_cmds: ?std.ArrayList([]const u8) = null,
+    parents: ?std.ArrayList([]const u8) = null,
     include_args: bool = false,
     include_subcmds: bool = false,
     include_flags: bool = false,
@@ -37,7 +37,7 @@ pub const Help = struct {
         var self = Help{ .cmd = root_cmd };
 
         if (!mem.eql(u8, root_cmd.name, subcmd)) {
-            self.parent_cmds = std.ArrayList([]const u8).init(allocator);
+            self.parents = std.ArrayList([]const u8).init(allocator);
             try self.setCommandAndItsParents(root_cmd, subcmd);
         }
         self.include_args = (self.cmd.countArgs() >= 1);
@@ -92,8 +92,8 @@ pub const Help = struct {
     }
 
     fn writeParents(self: *Help, writer: anytype) !void {
-        if (self.parent_cmds) |parent_cmds| {
-            for (parent_cmds.items) |parent_cmd|
+        if (self.parents) |parents| {
+            for (parents.items) |parent_cmd|
                 try writer.print("{s} ", .{parent_cmd});
         }
     }
@@ -172,7 +172,7 @@ pub const Help = struct {
     }
 
     fn setCommandAndItsParents(self: *Help, parent_cmd: *const Command, subcmd_name: []const u8) mem.Allocator.Error!void {
-        try self.parent_cmds.?.append(parent_cmd.name);
+        try self.parents.?.append(parent_cmd.name);
 
         for (parent_cmd.subcommands.items) |*subcmd| {
             if (std.mem.eql(u8, subcmd.name, subcmd_name)) {
@@ -183,7 +183,7 @@ pub const Help = struct {
             // Command is already found; stop searching
             if (mem.eql(u8, self.cmd.name, subcmd_name)) break;
 
-            _ = self.parent_cmds.?.popOrNull();
+            _ = self.parents.?.popOrNull();
         }
     }
 

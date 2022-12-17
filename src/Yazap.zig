@@ -43,7 +43,7 @@ pub fn deinit(self: *Yazap) void {
     self.command.deinit();
 
     if (self.subcommand_help) |subcmd_help| {
-        subcmd_help.parent_cmds.?.deinit();
+        subcmd_help.parents.?.deinit();
     }
 }
 
