@@ -206,8 +206,8 @@ pub fn enableFor(cmd: *Command) void {
     }
 }
 
-/// Returns a `Help` of a subcommand if present on the command line with `-h` or `--h` option,
-/// otherwise null if none of the subcommands were present
+/// Returns which subcommand is active on command line with `-h` ot `--help` option
+/// null if none of the subcommands were present
 pub fn findSubcommand(root_cmd: *const Command, ctx: *ArgsContext) ?[]const u8 {
     if ((ctx.subcommand != null) and (ctx.subcommand.?.ctx != null)) {
         const subcmd_name = ctx.subcommand.?.name;
