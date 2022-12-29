@@ -1,51 +1,36 @@
 const std = @import("std");
-const EnumField = std.builtin.TypeInfo.EnumField;
 
-pub fn MakeSettings(comptime options_name: []const []const u8) type {
+pub fn MakeSettings(comptime AnonOption: type) type {
+    if (@typeInfo(AnonOption) != .Enum)
+        @compileError(
+            @src().fn_name ++ " expected `AnonOption` to be enum, found " ++ @typeName(AnonOption),
+        );
+
     return struct {
         const Self = @This();
-        pub const Options = MakeOptions(options_name);
+        pub const Option = AnonOption;
+        options: std.EnumMap(Option, bool) = .{},
 
-        options: std.EnumMap(Options, bool) = .{},
-
-        pub fn apply(self: *Self, opt: Options) void {
-            return self.options.put(opt, true);
+        pub fn apply(self: *Self, option: Option) void {
+            return self.options.put(option, true);
         }
 
-        pub fn remove(self: *Self, opt: Options) void {
-            return self.options.remove(opt);
+        pub fn remove(self: *Self, option: Option) void {
+            return self.options.remove(option);
         }
 
-        pub fn isApplied(self: *const Self, opt: Options) bool {
-            return self.options.contains(opt);
+        pub fn isApplied(self: *const Self, option: Option) bool {
+            return self.options.contains(option);
         }
     };
 }
 
-fn MakeOptions(comptime options_name: []const []const u8) type {
-    var fields: []const EnumField = &[_]EnumField{};
-    for (options_name) |option_name, idx| {
-        fields = fields ++ &[_]EnumField{
-            .{ .name = option_name, .value = idx },
-        };
-    }
-    return @Type(.{
-        .Enum = .{
-            .layout = .Auto,
-            .tag_type = u8,
-            .fields = fields,
-            .decls = &.{},
-            .is_exhaustive = true,
-        },
-    });
-}
-
 test "settings generator" {
-    const CmdSettings = MakeSettings(&[_][]const u8{
-        "takes_value",
-        "subcommand_required",
+    const CmdSettings = MakeSettings(struct {
+        /// will doc comment visible?
+        takes_value: bool,
+        subcommand_required: bool,
     });
-
     var settings = CmdSettings{};
 
     try std.testing.expectEqual(false, settings.isApplied(.takes_value));

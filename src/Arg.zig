@@ -4,10 +4,10 @@ const Arg = @This();
 const std = @import("std");
 const MakeSettings = @import("settings.zig").MakeSettings;
 
-const Settings = MakeSettings(&[_][]const u8{
-    "takes_value",
-    "takes_multiple_values",
-    "allow_empty_value",
+const Settings = MakeSettings(enum {
+    takes_value,
+    takes_multiple_values,
+    allow_empty_value,
 });
 
 name: []const u8,
@@ -98,15 +98,15 @@ pub fn verifyValueInAllowedValues(self: *const Arg, value_to_check: []const u8) 
     }
 }
 
-pub fn applySetting(self: *Arg, option: Settings.Options) void {
+pub fn applySetting(self: *Arg, option: Settings.Option) void {
     return self.settings.apply(option);
 }
 
-pub fn removeSetting(self: *Arg, option: Settings.Options) void {
+pub fn removeSetting(self: *Arg, option: Settings.Option) void {
     return self.settings.remove(option);
 }
 
-pub fn isSettingApplied(self: *const Arg, option: Settings.Options) bool {
+pub fn isSettingApplied(self: *const Arg, option: Settings.Option) bool {
     return self.settings.isApplied(option);
 }
 

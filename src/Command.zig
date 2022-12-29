@@ -8,11 +8,11 @@ const MakeSettings = @import("settings.zig").MakeSettings;
 const mem = std.mem;
 const ArrayList = std.ArrayListUnmanaged;
 const Allocator = mem.Allocator;
-const Settings = MakeSettings(&[_][]const u8{
-    "takes_value",
-    "arg_required",
-    "subcommand_required",
-    "enable_help",
+const Settings = MakeSettings(enum {
+    takes_value,
+    arg_required,
+    subcommand_required,
+    enable_help,
 });
 
 allocator: Allocator,
@@ -134,15 +134,15 @@ pub fn findSubcommand(self: *const Command, provided_subcmd: []const u8) ?*const
     return null;
 }
 
-pub fn applySetting(self: *Command, option: Settings.Options) void {
+pub fn applySetting(self: *Command, option: Settings.Option) void {
     return self.settings.apply(option);
 }
 
-pub fn removeSetting(self: *Command, option: Settings.Options) void {
+pub fn removeSetting(self: *Command, option: Settings.Option) void {
     return self.settings.remove(option);
 }
 
-pub fn isSettingApplied(self: *const Command, option: Settings.Options) bool {
+pub fn isSettingApplied(self: *const Command, option: Settings.Option) bool {
     return self.settings.isApplied(option);
 }
 
