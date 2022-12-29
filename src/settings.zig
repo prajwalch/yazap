@@ -26,10 +26,10 @@ pub fn MakeSettings(comptime AnonOption: type) type {
 }
 
 test "settings generator" {
-    const CmdSettings = MakeSettings(struct {
+    const CmdSettings = MakeSettings(enum {
         /// will doc comment visible?
-        takes_value: bool,
-        subcommand_required: bool,
+        takes_value,
+        subcommand_required,
     });
     var settings = CmdSettings{};
 
