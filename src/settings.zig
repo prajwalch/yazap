@@ -9,10 +9,11 @@ pub fn MakeSettings(comptime AnonOption: type) type {
     return struct {
         const Self = @This();
         pub const Option = AnonOption;
-        options: std.EnumMap(Option, bool) = .{},
+
+        options: std.EnumSet(Option) = .{},
 
         pub fn apply(self: *Self, option: Option) void {
-            return self.options.put(option, true);
+            return self.options.insert(option);
         }
 
         pub fn remove(self: *Self, option: Option) void {
