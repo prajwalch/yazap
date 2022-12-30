@@ -24,14 +24,8 @@ subcommands: ArrayList(Command) = .{},
 settings: Settings = .{},
 
 /// Creates a new instance of it
-pub fn new(allocator: Allocator, name: []const u8) Command {
-    return Command{ .allocator = allocator, .name = name };
-}
-
-pub fn newWithDescription(allocator: Allocator, name: []const u8, description: []const u8) Command {
-    var self = Command.new(allocator, name);
-    self.description = description;
-    return self;
+pub fn new(allocator: Allocator, name: []const u8, description: ?[]const u8) Command {
+    return Command{ .allocator = allocator, .name = name, .description = description };
 }
 
 /// Release all allocated memory

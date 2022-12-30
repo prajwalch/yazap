@@ -21,18 +21,10 @@ subcommand_help: ?help.Help = null,
 args_ctx: ?ArgsContext = null,
 process_args: ?[]const [:0]u8 = null,
 
-pub fn init(
-    allocator: Allocator,
-    cmd_name: []const u8,
-    description: ?[]const u8,
-) Yazap {
+pub fn init(allocator: Allocator, cmd_name: []const u8, description: ?[]const u8) Yazap {
     return Yazap{
         .allocator = allocator,
-        .command = blk: {
-            var cmd = Command.new(allocator, cmd_name);
-            cmd.description = description;
-            break :blk cmd;
-        },
+        .command = Command.new(allocator, cmd_name, description),
     };
 }
 
@@ -49,9 +41,7 @@ pub fn deinit(self: *Yazap) void {
 
 /// Creates a new `Command` with given name by setting a allocator to it
 pub fn createCommand(self: *Yazap, cmd_name: []const u8, cmd_description: ?[]const u8) Command {
-    var cmd = Command.new(self.allocator, cmd_name);
-    cmd.description = cmd_description;
-    return cmd;
+    return Command.new(self.allocator, cmd_name, cmd_description);
 }
 
 /// Returns a pointer to a root `Command`.
