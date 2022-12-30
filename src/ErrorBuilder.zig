@@ -47,7 +47,6 @@ pub fn logError(err_builder: *ErrorBuilder) PrintError!void {
         ParserError.CommandSubcommandNotProvided => log.err("The command '{s}' requires a subcommand but none is provided", .{err_builder.cmd.?.name}),
         ParserError.FlagValueNotProvided => log.err("The flag '{s}' takes a value but none is provided\n", .{err_builder.provided_arg}),
         ParserError.UnneededAttachedValue => log.err("Arg '{s}' does not takes value but provided\n", .{err_builder.arg.?.name}),
-        ParserError.UnneededEmptyAttachedValue => log.err("Arg '{s}' does not takes value but provided empty value\n", .{err_builder.arg.?.name}),
         ParserError.EmptyFlagValueNotAllowed => log.err("The flag '{s}' does not allow to pass empty value\n", .{err_builder.arg.?.name}),
         ParserError.ProvidedValueIsNotValidOption => {
             log.err("Invalid value '{s}' for arg '{s}'\nValid options are:", .{

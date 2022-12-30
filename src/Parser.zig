@@ -21,7 +21,6 @@ pub const Error = error{
     CommandSubcommandNotProvided,
     FlagValueNotProvided,
     UnneededAttachedValue,
-    UnneededEmptyAttachedValue,
     EmptyFlagValueNotAllowed,
     ProvidedValueIsNotValidOption,
     TooFewArgValue,
@@ -66,15 +65,7 @@ const ShortOption = struct {
 
     pub fn hasValue(self: *ShortOption) bool {
         if (self.value) |v| {
-            return (v.len >= 1);
-        } else {
-            return false;
-        }
-    }
-
-    pub fn hasEmptyValue(self: *ShortOption) bool {
-        if (self.value) |v| {
-            return (v.len == 0);
+            return (v.len >= 0);
         } else {
             return false;
         }
@@ -222,12 +213,9 @@ fn parseShortOption(self: *Parser, token: *const Token) InternalError!void {
         if (!(arg.isSettingApplied(.takes_value))) {
             if (short_option.hasValue()) {
                 return Error.UnneededAttachedValue;
-            } else if (short_option.hasEmptyValue()) {
-                return Error.UnneededEmptyAttachedValue;
-            } else {
-                try self.args_ctx.putMatchedArg(arg, .none);
-                continue;
             }
+            try self.args_ctx.putMatchedArg(arg, .none);
+            continue;
         }
 
         const value = short_option.getValue() orelse blk: {
