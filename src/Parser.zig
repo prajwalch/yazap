@@ -64,11 +64,7 @@ const ShortOption = struct {
     }
 
     pub fn hasValue(self: *ShortOption) bool {
-        if (self.value) |v| {
-            return (v.len >= 0);
-        } else {
-            return false;
-        }
+        return ((self.value != null) and (self.value.?.len >= 0));
     }
 
     pub fn hasTail(self: *ShortOption) bool {
