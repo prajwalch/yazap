@@ -6,14 +6,9 @@ const Command = @import("Command.zig");
 const Parser = @import("Parser.zig");
 const ArgsContext = @import("args_context.zig").ArgsContext;
 const Tokenizer = @import("tokenizer.zig").Tokenizer;
-const PrintError = @import("ErrorBuilder.zig").PrintError;
+const YazapError = @import("error.zig").YazapError;
 
 const Allocator = std.mem.Allocator;
-
-pub const Error = error{
-    InvalidCmdLine,
-    Overflow,
-} || Parser.Error || PrintError;
 
 allocator: Allocator,
 command: Command,
@@ -50,18 +45,18 @@ pub fn rootCommand(self: *Yazap) *Command {
 }
 
 /// Starts parsing the process arguments
-pub fn parseProcess(self: *Yazap) Error!(*const ArgsContext) {
+pub fn parseProcess(self: *Yazap) YazapError!(*const ArgsContext) {
     self.process_args = try std.process.argsAlloc(self.allocator);
     return self.parseFrom(self.process_args.?[1..]);
 }
 
 /// Starts parsing the given arguments
-pub fn parseFrom(self: *Yazap, argv: []const [:0]const u8) Error!(*const ArgsContext) {
+pub fn parseFrom(self: *Yazap, argv: []const [:0]const u8) YazapError!(*const ArgsContext) {
     try self.addBuiltinArgs();
 
     var parser = Parser.init(self.allocator, Tokenizer.init(argv), self.rootCommand());
     self.args_ctx = parser.parse() catch |e| {
-        try parser.err_builder.logError();
+        try parser.err.log(e);
         return e;
     };
     try self.handleBuiltinArgs();

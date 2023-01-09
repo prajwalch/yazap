@@ -2,9 +2,9 @@ const Parser = @This();
 
 const std = @import("std");
 const args_context = @import("args_context.zig");
+const erro = @import("error.zig");
 const Arg = @import("Arg.zig");
 const Command = @import("Command.zig");
-const ErrorBuilder = @import("ErrorBuilder.zig");
 const Token = @import("tokenizer.zig").Token;
 const Tokenizer = @import("tokenizer.zig").Tokenizer;
 
@@ -14,23 +14,8 @@ const OptionTuple = std.meta.Tuple(&[_]type{ []const u8, ?[]const u8 });
 const ArgsContext = args_context.ArgsContext;
 const MatchedSubCommand = args_context.MatchedSubCommand;
 
-pub const Error = error{
-    UnknownFlag,
-    UnknownCommand,
-    CommandArgumentNotProvided,
-    CommandSubcommandNotProvided,
-    FlagValueNotProvided,
-    UnneededAttachedValue,
-    EmptyFlagValueNotAllowed,
-    ProvidedValueIsNotValidOption,
-    TooFewArgValue,
-    TooManyArgValue,
-} || Allocator.Error;
-
-const InternalError = error{
-    ArgValueNotProvided,
-    EmptyArgValueNotAllowed,
-} || Error;
+const Error = erro.ParseError || erro.AllocatorError;
+const InternalError = error{ ArgValueNotProvided, EmptyArgValueNotAllowed } || Error;
 
 const ShortOption = struct {
     name: []const u8,
@@ -78,23 +63,19 @@ const ShortOption = struct {
 
 allocator: Allocator,
 cmd: *const Command,
+err: erro.Error,
 tokenizer: Tokenizer,
 args_ctx: ArgsContext,
-err_builder: ErrorBuilder,
 cmd_args_idx: usize,
 consume_cmd_args: bool,
 
-pub fn init(
-    allocator: Allocator,
-    tokenizer: Tokenizer,
-    command: *const Command,
-) Parser {
+pub fn init(allocator: Allocator, tokenizer: Tokenizer, command: *const Command) Parser {
     return Parser{
         .allocator = allocator,
+        .cmd = command,
+        .err = erro.Error.init(),
         .tokenizer = tokenizer,
         .args_ctx = ArgsContext.init(allocator),
-        .err_builder = ErrorBuilder.init(),
-        .cmd = command,
         .cmd_args_idx = 0,
         .consume_cmd_args = (command.isSettingApplied(.takes_value) and command.countArgs() >= 1),
     };
@@ -102,11 +83,8 @@ pub fn init(
 
 pub fn parse(self: *Parser) Error!ArgsContext {
     errdefer self.args_ctx.deinit();
-    self.err_builder.setCmd(self.cmd);
 
     while (self.tokenizer.nextToken()) |*token| {
-        self.err_builder.setProvidedArg(token.value);
-
         if (mem.eql(u8, token.value, "help") or mem.eql(u8, token.value, "h")) {
             // Check whether help is enabled for `cmd`
             if (self.cmd.isSettingApplied(.enable_help)) {
@@ -132,24 +110,19 @@ pub fn parse(self: *Parser) Error!ArgsContext {
 
         self.parseOption(token) catch |err| switch (err) {
             InternalError.ArgValueNotProvided => {
-                self.err_builder.setErr(Error.FlagValueNotProvided);
-                return self.err_builder.err;
+                return Error.FlagValueNotProvided;
             },
             InternalError.EmptyArgValueNotAllowed => {
-                self.err_builder.setErr(Error.EmptyFlagValueNotAllowed);
-                return self.err_builder.err;
+                return Error.EmptyFlagValueNotAllowed;
             },
-            else => |e| {
-                self.err_builder.setErr(e);
-                return e;
-            },
+            else => |e| return e,
         };
     }
 
     if (!(self.args_ctx.isPresent("help"))) {
         if (self.cmd.isSettingApplied(.subcommand_required) and self.args_ctx.subcommand == null) {
-            self.err_builder.setErr(Error.CommandSubcommandNotProvided);
-            return self.err_builder.err;
+            self.err.setContext(.{ .valid_cmd = self.cmd.name });
+            return Error.CommandSubcommandNotProvided;
         }
     }
     return self.args_ctx;
@@ -165,8 +138,8 @@ fn consumeCommandArg(self: *Parser, token: *const Token) Error!void {
     // Looks like we found a option
     if (token.tag != .some_argument) {
         if (self.cmd.isSettingApplied(.arg_required) and (self.args_ctx.args.count() == 0)) {
-            self.err_builder.setErr(Error.CommandArgumentNotProvided);
-            return self.err_builder.err;
+            self.err.setContext(.{ .valid_cmd = self.cmd.name });
+            return Error.CommandArgumentNotProvided;
         } else {
             self.consume_cmd_args = false;
             return;
@@ -179,10 +152,7 @@ fn consumeCommandArg(self: *Parser, token: *const Token) Error!void {
         InternalError.ArgValueNotProvided,
         InternalError.EmptyArgValueNotAllowed,
         => return,
-        else => |e| {
-            self.err_builder.setErr(e);
-            return e;
-        },
+        else => |e| return e,
     };
 }
 
@@ -199,15 +169,14 @@ fn parseShortOption(self: *Parser, token: *const Token) InternalError!void {
     var short_option = ShortOption.init(option_tuple[0], option_tuple[1]);
 
     while (short_option.next()) |option| {
-        self.err_builder.setProvidedArg(@as(*const [1]u8, option));
-
         const arg = self.cmd.findShortOption(option.*) orelse {
+            self.err.setContext(.{ .invalid_arg = @as(*const [1]u8, option) });
             return Error.UnknownFlag;
         };
-        self.err_builder.setArg(arg);
 
         if (!(arg.isSettingApplied(.takes_value))) {
             if (short_option.hasValue()) {
+                self.err.setContext(.{ .valid_arg = arg.name });
                 return Error.UnneededAttachedValue;
             }
             try self.args_ctx.putMatchedArg(arg, .none);
@@ -231,15 +200,14 @@ fn parseShortOption(self: *Parser, token: *const Token) InternalError!void {
 
 fn parseLongOption(self: *Parser, token: *const Token) InternalError!void {
     const option_tuple = optionTokenToOptionTuple(token);
-    self.err_builder.setProvidedArg(option_tuple[0]);
-
     const arg = self.cmd.findLongOption(option_tuple[0]) orelse {
+        self.err.setContext(.{ .invalid_arg = option_tuple[0] });
         return Error.UnknownFlag;
     };
-    self.err_builder.setArg(arg);
 
     if (!(arg.isSettingApplied(.takes_value))) {
         if (option_tuple[1] != null) {
+            self.err.setContext(.{ .valid_arg = option_tuple[0] });
             return Error.UnneededAttachedValue;
         } else {
             return self.args_ctx.putMatchedArg(arg, .none);
@@ -274,18 +242,14 @@ fn optionTokenToOptionTuple(token: *const Token) OptionTuple {
     };
 }
 
-fn consumeArgValue(
-    self: *Parser,
-    arg: *const Arg,
-    attached_value: ?[]const u8,
-) InternalError!void {
-    // Only set arg if caller didn't set it already
-    if (self.err_builder.arg == null) self.err_builder.setArg(arg);
-
+fn consumeArgValue(self: *Parser, arg: *const Arg, attached_value: ?[]const u8) InternalError!void {
     if (attached_value) |val| {
         return self.processValue(arg, val, true);
     } else {
-        const value = self.tokenizer.nextNonOptionArg() orelse return InternalError.ArgValueNotProvided;
+        const value = self.tokenizer.nextNonOptionArg() orelse {
+            self.err.setContext(.{ .valid_arg = arg.name });
+            return InternalError.ArgValueNotProvided;
+        };
         return self.processValue(arg, value, false);
     }
 }
@@ -296,8 +260,6 @@ fn processValue(
     value: []const u8,
     is_attached_value: bool,
 ) InternalError!void {
-    self.err_builder.setProvidedArg(value);
-
     if (arg.values_delimiter) |delimiter| {
         if (mem.containsAtLeast(u8, value, 1, delimiter)) {
             var values_iter = mem.split(u8, value, delimiter);
@@ -319,6 +281,7 @@ fn processValue(
         // option = f
         // value = v1,v2
         if (!arg.verifyValueInAllowedValues(value)) {
+            self.err.setContext(.{ .valid_arg = arg.name, .invalid_value = value });
             return InternalError.ProvidedValueIsNotValidOption;
         }
         return self.args_ctx.putMatchedArg(arg, .{ .single = value });
@@ -332,7 +295,10 @@ fn processValue(
     if (arg.min_values) |min| {
         try self.consumeNValues(arg, &values, min);
         // Not enough values
-        if (values.items.len < min) return error.TooFewArgValue;
+        if (values.items.len < min) {
+            self.err.setContext(.{ .valid_arg = arg.name, .min_num_values = arg.min_values.? });
+            return error.TooFewArgValue;
+        }
     }
     const has_max_num = (arg.max_values != null);
     const max_eqls_one = (has_max_num and (arg.max_values.? == 1));
@@ -350,12 +316,16 @@ fn processValue(
     if (arg.isSettingApplied(.takes_multiple_values)) {
         if (!has_max_num) {
             try self.consumeValuesTillNextOption(arg, &values);
+            // TODO: Handle `TooManyArgValue` error here not on `putMatchedArg`
+            self.err.setContext(.{ .valid_arg = arg.name, .max_num_values = arg.max_values.? });
             return self.args_ctx.putMatchedArg(arg, .{ .many = values });
         }
     }
     if (has_max_num) {
         try self.consumeNValues(arg, &values, arg.max_values.?);
     }
+    // TODO: Handle `TooManyArgValue` error here not on `putMatchedArg`
+    self.err.setContext(.{ .valid_arg = arg.name, .max_num_values = arg.max_values.? });
     return self.args_ctx.putMatchedArg(arg, .{ .many = values });
 }
 
@@ -388,20 +358,22 @@ fn verifyAndAppendValue(
     list: *std.ArrayList([]const u8),
     value: []const u8,
 ) InternalError!void {
-    self.err_builder.setProvidedArg(value);
+    self.err.setContext(.{ .valid_arg = arg.name });
 
     if ((value.len == 0) and !(arg.isSettingApplied(.allow_empty_value)))
         return InternalError.EmptyArgValueNotAllowed;
-    if (!(arg.verifyValueInAllowedValues(value)))
-        return InternalError.ProvidedValueIsNotValidOption;
 
+    if (!(arg.verifyValueInAllowedValues(value))) {
+        self.err.setContext(.{ .valid_values = arg.allowed_values.? });
+        return InternalError.ProvidedValueIsNotValidOption;
+    }
     try list.append(value);
 }
 
 fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubCommand {
     const subcmd = self.cmd.findSubcommand(provided_subcmd) orelse {
-        self.err_builder.setErr(Error.UnknownCommand);
-        return self.err_builder.err;
+        self.err.setContext(.{ .invalid_arg = provided_subcmd });
+        return Error.UnknownCommand;
     };
     // zig fmt: off
     const takes_value = subcmd.isSettingApplied(.takes_value)
@@ -416,9 +388,8 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
 
     const args = self.tokenizer.restArg() orelse {
         if (subcmd.isSettingApplied(.arg_required)) {
-            self.err_builder.setCmd(subcmd);
-            self.err_builder.setErr(Error.CommandArgumentNotProvided);
-            return self.err_builder.err;
+            self.err.setContext(.{ .valid_cmd = provided_subcmd });
+            return Error.CommandArgumentNotProvided;
         }
         return MatchedSubCommand.initWithArg(
             subcmd.name,
@@ -428,7 +399,8 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
     var parser = Parser.init(self.allocator, Tokenizer.init(args), subcmd);
     const subcmd_ctx = parser.parse() catch |err| {
         // Bubble up the error trace to the parent command that happened while parsing subcommand
-        self.err_builder = parser.err_builder;
+        //self.err_builder = parser.err_builder;
+        self.err = parser.err;
         return err;
     };
 
