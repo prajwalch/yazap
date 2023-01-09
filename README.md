@@ -56,17 +56,17 @@ Please visit [here](https://prajwalch.github.io/yazap/) for documentation refere
 Checkout [examples/](/examples) for more.
 
 ### Initializing the yazap
-The first step in using the `yazap` is making an instance of [Yazap](https://prajwalch.github.io/yazap/#root;Yazap)
-by calling `Yazap.init(allocator, "Your app name", "Your app description")` or `Yazap.init(allocator, "Your app name", null)` which internally creates a root command for your app.
+The first step in using the `yazap` is making an instance of [App](https://prajwalch.github.io/yazap/#root;App)
+by calling `App.init(allocator, "Your app name", "Your app description")` or `App.init(allocator, "Your app name", null)` which internally creates a root command for your app.
 ```zig
-var app = Yazap.init(allocator, "myls", "My custom ls");
+var app = App.init(allocator, "myls", "My custom ls");
 defer app.deinit();
 ```
 
 ### Getting a root command
-[Yazap](https://prajwalch.github.io/yazap/#root;Yazap) itself don't provides an any methods to add arguments for your command.
+[App](https://prajwalch.github.io/yazap/#root;App) itself don't provides an any methods to add arguments for your command.
 Its only purpose is to initialize the library, invkoing parser and deinitilize all the structures therefore you must have to use
-root command to add arguments and subcommands. You can simply get it by calling `Yazap.rootCommand` which returns a pointer to it.
+root command to add arguments and subcommands. You can simply get it by calling `App.rootCommand` which returns a pointer to it.
 ```zig
 var myls = app.rootCommand();
 ```
@@ -99,7 +99,7 @@ Here we also use the [flag](https://prajwalch.github.io/yazap/#root;flag) module
 different kind of flags quickly and easily.
 
 ### Adding subcommands
-You can use `Yazap.createCommand("name", "Subcommand description")` or `Yazap.createCommand("name", null)` to create a subcommand with previously given allocator instead of manually using `Command.new(allocator, "name")` by passing the same allocator twice.
+You can use `App.createCommand("name", "Subcommand description")` or `App.createCommand("name", null)` to create a subcommand with previously given allocator instead of manually using `Command.new(allocator, "name")` by passing the same allocator twice.
 Once you create a subcommand you can add its own arguments and subcommands just like root command.
 ```zig
 var update_cmd = app.createCommand("update", "Update the app or check for new updates");
@@ -159,7 +159,7 @@ if (ls_args.isPresent("color")) {
 
 ### Handling help
 You don't have to manually handle `-h` and `--help` but if you want to display help manually
-say like when argument is empty you can use `Yazap.displayHelp` and `Yazap.displaySubcommandHelp`.
+say like when argument is empty you can use `App.displayHelp` and `App.displaySubcommandHelp`.
 ```zig
 if (!(ls_args.hasArgs())) {
     try app.displayHelp();
@@ -182,10 +182,10 @@ const yazap = @import("yazap");
 const allocator = std.heap.page_allocator;
 const log = std.log;
 const flag = yazap.flag;
-const Yazap = yazap.Yazap;
+const App = yazap.App;
 
 pub fn main() anyerror!void {
-    var app = Yazap.init(allocator, "myls", "My custom ls");
+    var app = App.init(allocator, "myls", "My custom ls");
     defer app.deinit();
 
     var myls = app.rootCommand();
