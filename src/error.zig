@@ -1,6 +1,4 @@
 const std = @import("std");
-const Arg = @import("Arg.zig");
-
 // zig fmt: off
 pub const YazapError = error{ InvalidCmdLine, Overflow }
     || ParseError
