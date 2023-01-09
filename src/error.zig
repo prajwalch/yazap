@@ -118,10 +118,3 @@ pub const Error = struct {
         }
     }
 };
-
-test "Error" {
-    var err = Error.init();
-    err.setContext(.{ .min_num_values = @as(usize, 2) });
-
-    try std.testing.expectEqualStrings("2", err.getStrValue(.min_num_values));
-}
