@@ -118,3 +118,7 @@ pub const Error = struct {
         }
     }
 };
+
+test "emit docs" {
+    std.testing.refAllDecls(@This());
+}
