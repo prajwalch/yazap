@@ -1,4 +1,4 @@
-const Yazap = @This();
+const App = @This();
 
 const std = @import("std");
 const help = @import("help.zig");
@@ -6,7 +6,7 @@ const Command = @import("Command.zig");
 const Parser = @import("Parser.zig");
 const ArgsContext = @import("args_context.zig").ArgsContext;
 const Tokenizer = @import("tokenizer.zig").Tokenizer;
-const YazapError = @import("error.zig").YazapError;
+const AppError = @import("error.zig").AppError;
 
 const Allocator = std.mem.Allocator;
 
@@ -16,15 +16,15 @@ subcommand_help: ?help.Help = null,
 args_ctx: ?ArgsContext = null,
 process_args: ?[]const [:0]u8 = null,
 
-pub fn init(allocator: Allocator, cmd_name: []const u8, description: ?[]const u8) Yazap {
-    return Yazap{
+pub fn init(allocator: Allocator, cmd_name: []const u8, description: ?[]const u8) App {
+    return App{
         .allocator = allocator,
         .command = Command.new(allocator, cmd_name, description),
     };
 }
 
-/// Deinitialize all the structures of `yazap` and release all the memory used by them
-pub fn deinit(self: *Yazap) void {
+/// Deinitialize all the structures of `app` and release all the memory used by them
+pub fn deinit(self: *App) void {
     if (self.args_ctx) |*ctx| ctx.deinit();
     if (self.process_args) |pargs| std.process.argsFree(self.allocator, pargs);
     self.command.deinit();
@@ -35,23 +35,23 @@ pub fn deinit(self: *Yazap) void {
 }
 
 /// Creates a new `Command` with given name by setting a allocator to it
-pub fn createCommand(self: *Yazap, cmd_name: []const u8, cmd_description: ?[]const u8) Command {
+pub fn createCommand(self: *App, cmd_name: []const u8, cmd_description: ?[]const u8) Command {
     return Command.new(self.allocator, cmd_name, cmd_description);
 }
 
 /// Returns a pointer to a root `Command`.
-pub fn rootCommand(self: *Yazap) *Command {
+pub fn rootCommand(self: *App) *Command {
     return &self.command;
 }
 
 /// Starts parsing the process arguments
-pub fn parseProcess(self: *Yazap) YazapError!(*const ArgsContext) {
+pub fn parseProcess(self: *App) AppError!(*const ArgsContext) {
     self.process_args = try std.process.argsAlloc(self.allocator);
     return self.parseFrom(self.process_args.?[1..]);
 }
 
 /// Starts parsing the given arguments
-pub fn parseFrom(self: *Yazap, argv: []const [:0]const u8) YazapError!(*const ArgsContext) {
+pub fn parseFrom(self: *App, argv: []const [:0]const u8) AppError!(*const ArgsContext) {
     try self.addBuiltinArgs();
 
     var parser = Parser.init(self.allocator, Tokenizer.init(argv), self.rootCommand());
@@ -64,21 +64,21 @@ pub fn parseFrom(self: *Yazap, argv: []const [:0]const u8) YazapError!(*const Ar
 }
 
 /// Displays the help message of root command
-pub fn displayHelp(self: *Yazap) !void {
+pub fn displayHelp(self: *App) !void {
     return self.command.getHelp().writeAll(std.io.getStdOut().writer());
 }
 
 /// Displays the help message of subcommand if it is provided on command line
 /// otherwise it will display nothing
-pub fn displaySubcommandHelp(self: *Yazap) !void {
+pub fn displaySubcommandHelp(self: *App) !void {
     if (self.subcommand_help) |*h| return h.writeAll(std.io.getStdOut().writer());
 }
 
-fn addBuiltinArgs(self: *Yazap) !void {
+fn addBuiltinArgs(self: *App) !void {
     help.enableFor(&self.command);
 }
 
-fn handleBuiltinArgs(self: *Yazap) !void {
+fn handleBuiltinArgs(self: *App) !void {
     // Set the `Help` of a subcommand present on the command line with the `-h` or `--help` option
     // remains null if none of the subcommands were present
     if (help.findSubcommand(self.rootCommand(), &self.args_ctx.?)) |subcmd| {
@@ -87,7 +87,7 @@ fn handleBuiltinArgs(self: *Yazap) !void {
     try self.displayHelpAndExitIfFound();
 }
 
-fn displayHelpAndExitIfFound(self: *Yazap) !void {
+fn displayHelpAndExitIfFound(self: *App) !void {
     var args_ctx = self.args_ctx.?;
     var help_displayed = false;
 

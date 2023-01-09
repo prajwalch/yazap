@@ -2,21 +2,21 @@ const std = @import("std");
 const Command = @import("Command.zig");
 const flag = @import("flag.zig");
 const Arg = @import("Arg.zig");
-const Yazap = @import("Yazap.zig");
+const App = @import("App.zig");
 const testing = std.testing;
 
 const allocator = testing.allocator;
 
-fn initAppArgs(alloc: std.mem.Allocator) !Yazap {
-    var yazap = Yazap.init(alloc, "app", "Test app description");
-    errdefer yazap.deinit();
+fn initAppArgs(alloc: std.mem.Allocator) !App {
+    var app = App.init(alloc, "app", "Test app description");
+    errdefer app.deinit();
 
-    var app = yazap.rootCommand();
+    var root_cmd = app.rootCommand();
 
-    try app.takesSingleValue("ARG-ONE");
-    try app.takesNValues("ARG-MANY", 3);
+    try root_cmd.takesSingleValue("ARG-ONE");
+    try root_cmd.takesNValues("ARG-MANY", 3);
 
-    try app.addArgs(&[_]Arg{
+    try root_cmd.addArgs(&[_]Arg{
         flag.boolean("bool-flag", 'b', null),
         flag.boolean("bool-flag2", 'c', null),
         flag.argOne("arg-one-flag", '1', null),
@@ -28,8 +28,8 @@ fn initAppArgs(alloc: std.mem.Allocator) !Yazap {
         }, null),
     });
 
-    try app.addSubcommand(yazap.createCommand("subcmd1", "First sub command"));
-    return yazap;
+    try root_cmd.addSubcommand(app.createCommand("subcmd1", "First sub command"));
+    return app;
 }
 
 test "arg required error" {
