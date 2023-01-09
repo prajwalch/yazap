@@ -49,18 +49,6 @@ pub const Error = struct {
         self.constructAndPutContext(anon_ctx);
     }
 
-    fn getStrValue(self: *Error, ctx_kind: ContextKind) []const u8 {
-        return self.context.getAssertContains(ctx_kind).single;
-    }
-
-    fn getIntValue(self: *Error, ctx_kind: ContextKind) usize {
-        return self.context.getAssertContains(ctx_kind).single_num;
-    }
-
-    fn getStrValues(self: *Error, ctx_kind: ContextKind) []const []const u8 {
-        return self.context.getAssertContains(ctx_kind).many;
-    }
-
     pub fn log(self: *Error, err_set: YazapError) YazapError!void {
         // TODO: currently, using `std.io.bufferedWriter` gives
         // `buffered_writer.zig:9:37: error: container 'std.fs.file.File' has no member called 'Error'`
@@ -103,6 +91,18 @@ pub const Error = struct {
             },
             else => |e| try writer.print("error: Probably some os error occured `{s}`", .{@errorName(e)}),
         }
+    }
+
+    fn getStrValue(self: *Error, ctx_kind: ContextKind) []const u8 {
+        return self.context.getAssertContains(ctx_kind).single;
+    }
+
+    fn getIntValue(self: *Error, ctx_kind: ContextKind) usize {
+        return self.context.getAssertContains(ctx_kind).single_num;
+    }
+
+    fn getStrValues(self: *Error, ctx_kind: ContextKind) []const []const u8 {
+        return self.context.getAssertContains(ctx_kind).many;
     }
 
     // TODO: Remove this function once we eliminate that use of anonymous struct for context parameter
