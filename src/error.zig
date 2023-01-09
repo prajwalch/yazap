@@ -34,6 +34,7 @@ pub const ContextKind = enum {
 };
 pub const ContextValueKind = union(enum) {
     single: []const u8,
+    single_num: usize,
     many: []const []const u8,
 };
 
@@ -48,11 +49,15 @@ pub const Error = struct {
         self.constructAndPutContext(anon_ctx);
     }
 
-    pub fn getValue(self: *Error, ctx_kind: ContextKind) []const u8 {
+    fn getStrValue(self: *Error, ctx_kind: ContextKind) []const u8 {
         return self.context.getAssertContains(ctx_kind).single;
     }
 
-    pub fn getValues(self: *Error, ctx_kind: ContextKind) []const []const u8 {
+    fn getIntValue(self: *Error, ctx_kind: ContextKind) usize {
+        return self.context.getAssertContains(ctx_kind).single_num;
+    }
+
+    fn getStrValues(self: *Error, ctx_kind: ContextKind) []const []const u8 {
         return self.context.getAssertContains(ctx_kind).many;
     }
 
@@ -66,35 +71,35 @@ pub const Error = struct {
         switch (err_set) {
             AllocatorError.OutOfMemory => try writer.print("error: Unable to allocate memory\n", .{}),
 
-            ParseError.UnknownFlag => try writer.print("Unknown flag '{s}'\n", .{self.getValue(.invalid_arg)}),
-            ParseError.UnknownCommand => try writer.print("Unknown Command '{s}'\n", .{self.getValue(.invalid_arg)}),
+            ParseError.UnknownFlag => try writer.print("Unknown flag '{s}'\n", .{self.getStrValue(.invalid_arg)}),
+            ParseError.UnknownCommand => try writer.print("Unknown Command '{s}'\n", .{self.getStrValue(.invalid_arg)}),
             ParseError.CommandArgumentNotProvided => {
-                try writer.print("The command '{s}' requires a value but none is provided\n", .{self.getValue(.valid_cmd)});
+                try writer.print("The command '{s}' requires a value but none is provided\n", .{self.getStrValue(.valid_cmd)});
             },
             ParseError.CommandSubcommandNotProvided => {
-                try writer.print("The command '{s}' requires a subcommand but none is provided", .{self.getValue(.valid_cmd)});
+                try writer.print("The command '{s}' requires a subcommand but none is provided", .{self.getStrValue(.valid_cmd)});
             },
-            ParseError.FlagValueNotProvided => try writer.print("The flag '{s}' takes a value but none is provided\n", .{self.getValue(.valid_arg)}),
-            ParseError.UnneededAttachedValue => try writer.print("Arg '{s}' does not takes value but provided\n", .{self.getValue(.valid_arg)}),
-            ParseError.EmptyFlagValueNotAllowed => try writer.print("The flag '{s}' does not allow to pass empty value\n", .{self.getValue(.valid_arg)}),
+            ParseError.FlagValueNotProvided => try writer.print("The flag '{s}' takes a value but none is provided\n", .{self.getStrValue(.valid_arg)}),
+            ParseError.UnneededAttachedValue => try writer.print("Arg '{s}' does not takes value but provided\n", .{self.getStrValue(.valid_arg)}),
+            ParseError.EmptyFlagValueNotAllowed => try writer.print("The flag '{s}' does not allow to pass empty value\n", .{self.getStrValue(.valid_arg)}),
             ParseError.ProvidedValueIsNotValidOption => {
                 try writer.print("Invalid value '{s}' for arg '{s}'\nValid options are:", .{
-                    self.getValue(.invalid_value),
-                    self.getValue(.valid_arg),
+                    self.getStrValue(.invalid_value),
+                    self.getStrValue(.valid_arg),
                 });
-                for (self.getValues(.valid_values)) |v|
+                for (self.getStrValues(.valid_values)) |v|
                     try writer.print("{s}\n", .{v});
             },
-            ParseError.TooFewArgValue => try writer.print("Too few values for Arg '{s}'\n Expected at least '{s}'\n", .{
-                self.getValue(.valid_arg),
-                self.getValue(.min_num_values),
+            ParseError.TooFewArgValue => try writer.print("Too few values for Arg '{s}'\n Expected at least '{d}'\n", .{
+                self.getStrValue(.valid_arg),
+                self.getIntValue(.min_num_values),
             }),
             ParseError.TooManyArgValue => {
                 try writer.print(
                     \\Too many values for arg '{s}'
                     \\
-                    \\Expected number of values to be {s}
-                , .{ self.getValue(.valid_arg), self.getValue(.max_num_values) });
+                    \\Expected number of values to be {d}
+                , .{ self.getStrValue(.valid_arg), self.getIntValue(.max_num_values) });
             },
             else => |e| try writer.print("error: Probably some os error occured `{s}`", .{@errorName(e)}),
         }
@@ -105,10 +110,11 @@ pub const Error = struct {
         inline for (std.meta.fields(@TypeOf(anon_ctx))) |field| {
             const value = @field(anon_ctx, field.name);
             const ctx_kind = @field(ContextKind, field.name);
-            const val_kind = switch (comptime ctx_kind) {
-                .valid_values => .{ .many = value },
-                .min_num_values, .max_num_values => .{ .single = std.fmt.comptimePrint("{d}", .{value}) },
-                else => .{ .single = value },
+            const val_kind = switch (@TypeOf(value)) {
+                usize => .{ .single_num = value },
+                []const u8 => .{ .single = value },
+                []const []const u8 => .{ .many = value },
+                else => unreachable,
             };
             self.context.put(ctx_kind, val_kind);
         }
@@ -119,5 +125,5 @@ test "Error" {
     var err = Error.init();
     err.setContext(.{ .min_num_values = @as(usize, 2) });
 
-    try std.testing.expectEqualStrings("2", err.getValue(.min_num_values));
+    try std.testing.expectEqualStrings("2", err.getStrValue(.min_num_values));
 }
