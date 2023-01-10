@@ -31,9 +31,9 @@ pub const ContextKind = enum {
     max_num_values,
 };
 pub const ContextValueKind = union(enum) {
-    single: []const u8,
-    single_num: usize,
-    many: []const []const u8,
+    string: []const u8,
+    number: usize,
+    strings: []const []const u8,
 };
 
 pub const Error = struct {
@@ -82,7 +82,7 @@ pub const Error = struct {
             }),
             ParseError.TooManyArgValue => {
                 try writer.print(
-                    \\Too many values for arg '{s}'
+                    \\Too strings values for arg '{s}'
                     \\
                     \\Expected number of values to be {d}
                 , .{ self.getStrValue(.valid_arg), self.getIntValue(.max_num_values) });
@@ -92,11 +92,11 @@ pub const Error = struct {
     }
 
     fn getStrValue(self: *Error, ctx_kind: ContextKind) []const u8 {
-        return self.context.getAssertContains(ctx_kind).single;
+        return self.context.getAssertContains(ctx_kind).string;
     }
 
     fn getIntValue(self: *Error, ctx_kind: ContextKind) usize {
-        return self.context.getAssertContains(ctx_kind).single_num;
+        return self.context.getAssertContains(ctx_kind).number;
     }
 
     fn getStrValues(self: *Error, ctx_kind: ContextKind) []const []const u8 {
@@ -109,9 +109,9 @@ pub const Error = struct {
             const value = @field(anon_ctx, field.name);
             const ctx_kind = @field(ContextKind, field.name);
             const val_kind = switch (@TypeOf(value)) {
-                usize => .{ .single_num = value },
-                []const u8 => .{ .single = value },
-                []const []const u8 => .{ .many = value },
+                usize => .{ .number = value },
+                []const u8 => .{ .string = value },
+                []const []const u8 => .{ .strings = value },
                 else => unreachable,
             };
             self.context.put(ctx_kind, val_kind);
