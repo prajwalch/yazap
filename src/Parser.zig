@@ -314,11 +314,9 @@ fn processValue(
         }
         return self.args_ctx.putMatchedArg(arg, .{ .many = values });
     }
-    if (arg.isSettingApplied(.takes_multiple_values)) {
-        if (!has_max_num) {
-            try self.consumeValuesTillNextOption(arg, &values);
-            return self.args_ctx.putMatchedArg(arg, .{ .many = values });
-        }
+    if (arg.isSettingApplied(.takes_multiple_values) and !(has_max_num)) {
+        try self.consumeValuesTillNextOption(arg, &values);
+        return self.args_ctx.putMatchedArg(arg, .{ .many = values });
     }
     if (has_max_num) {
         try self.consumeNValues(arg, &values, arg.max_values.?);
