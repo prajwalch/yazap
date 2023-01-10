@@ -100,7 +100,7 @@ pub const Error = struct {
     }
 
     fn getStrValues(self: *Error, ctx_kind: ContextKind) []const []const u8 {
-        return self.context.getAssertContains(ctx_kind).many;
+        return self.context.getAssertContains(ctx_kind).strings;
     }
 
     // TODO: Remove this function once we eliminate that use of anonymous struct for context parameter
