@@ -269,6 +269,8 @@ fn processValue(
             while (values_iter.next()) |val| {
                 try self.verifyAndAppendValue(arg, &values, val);
             }
+            // FIXME: Verify that `values.items.len` is not less than arg.min_values, if set
+            // FIXME: Verify that `values.items.len` is not more than arg.max_values, if set
             return self.args_ctx.putMatchedArg(arg, .{ .many = values });
         }
     }
