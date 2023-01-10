@@ -159,7 +159,7 @@ if (ls_args.isPresent("color")) {
 
 ### Handling help
 Handling `-h` or `--help` and displaying usage is done automatically but if you want to display help
-manually when `-h` or `--help` is not present on command line you call call `App.displayHelp` and
+manually when `-h` or `--help` is not present on command line you can call `App.displayHelp` and
 `App.displaySubcommandHelp` to display root level help and provided subcommand help respectively.
 This is useful in condition like when argument is not provided.
 ```zig
