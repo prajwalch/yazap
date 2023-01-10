@@ -72,7 +72,7 @@ var myls = app.rootCommand();
 ```
 
 ### Adding arguments
-After you get the root command it's time to add argument by using an appropriate methods provided by `Command`.
+After you get the root command you can start to add argument by using an appropriate methods provided by `Command`.
 See [Command](https://prajwalch.github.io/yazap/#root;Command) to see all the available API.
 ```zig
 try myls.addArg(flag.boolean("all", 'a', "Don't ignore the hidden directories"));
