@@ -270,7 +270,6 @@ fn processValue(
                 try self.verifyAndAppendValue(arg, &values, val);
             }
             // FIXME: Verify that `values.items.len` is not less than arg.min_values, if set
-            // FIXME: Verify that `values.items.len` is not more than arg.max_values, if set
             return self.args_ctx.putMatchedArg(arg, .{ .many = values });
         }
     }
@@ -318,18 +317,12 @@ fn processValue(
     if (arg.isSettingApplied(.takes_multiple_values)) {
         if (!has_max_num) {
             try self.consumeValuesTillNextOption(arg, &values);
-            // FIXME: Not handling the `error.TooManyArgValue` here will result in the
-            // `max_num_values` not being set
-            self.err.setContext(.{ .valid_arg = arg.name, .max_num_values = arg.max_values.? });
             return self.args_ctx.putMatchedArg(arg, .{ .many = values });
         }
     }
     if (has_max_num) {
         try self.consumeNValues(arg, &values, arg.max_values.?);
     }
-    // FIXME: Not handling the `error.TooManyArgValue` here will result in the
-    // `max_num_values` not being set
-    self.err.setContext(.{ .valid_arg = arg.name, .max_num_values = arg.max_values.? });
     return self.args_ctx.putMatchedArg(arg, .{ .many = values });
 }
 
@@ -363,6 +356,11 @@ fn verifyAndAppendValue(
     value: []const u8,
 ) InternalError!void {
     self.err.setContext(.{ .valid_arg = arg.name });
+
+    if ((arg.max_values != null) and (list.items.len >= arg.max_values.?)) {
+        self.err.setContext(.{ .max_num_values = arg.max_values.? });
+        return InternalError.TooManyArgValue;
+    }
 
     if ((value.len == 0) and !(arg.isSettingApplied(.allow_empty_value)))
         return InternalError.EmptyArgValueNotAllowed;
