@@ -73,7 +73,7 @@ pub fn takesSingleValue(self: *Command, arg_name: []const u8) !void {
 
 /// Creates an [Argument](/#root;Arg) with given name and specifies that command will take `n` values
 pub fn takesNValues(self: *Command, arg_name: []const u8, n: usize) !void {
-    var arg = Arg.new(arg_name);
+    var arg = Arg.new(arg_name, null);
     arg.minValues(1);
     arg.maxValues(n);
     if (n > 1) arg.valuesDelimiter(",");

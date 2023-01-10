@@ -5,9 +5,8 @@ const Arg = @import("Arg.zig");
 
 /// Defines a boolean flag
 pub fn boolean(name: []const u8, short_name: ?u8, description: ?[]const u8) Arg {
-    var arg = Arg.new(name);
+    var arg = Arg.new(name, description);
     arg.setLongNameSameAsName();
-    arg.description = description;
 
     if (short_name) |n| arg.shortName(n);
 
@@ -26,11 +25,10 @@ pub fn argN(
     max_values: usize,
     description: ?[]const u8,
 ) Arg {
-    var arg = Arg.new(name);
+    var arg = Arg.new(name, description);
     arg.minValues(1);
     arg.maxValues(max_values);
     arg.setLongNameSameAsName();
-    arg.description = description;
 
     if (short_name) |n| arg.shortName(n);
     if (max_values > 1) arg.valuesDelimiter(",");

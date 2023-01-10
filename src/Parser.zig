@@ -88,7 +88,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
         if (mem.eql(u8, token.value, "help") or mem.eql(u8, token.value, "h")) {
             // Check whether help is enabled for `cmd`
             if (self.cmd.isSettingApplied(.enable_help)) {
-                try self.args_ctx.putMatchedArg(&Arg.new("help"), .none);
+                try self.args_ctx.putMatchedArg(&Arg.new("help", null), .none);
                 break;
             } else {
                 // Return error?

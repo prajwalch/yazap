@@ -114,7 +114,7 @@ test "arg.takes_multiple_values" {
     defer app.deinit();
     app.rootCommand().applySetting(.takes_value);
 
-    var files = Arg.new("files");
+    var files = Arg.new("files", null);
     files.applySetting(.takes_multiple_values);
 
     try app.rootCommand().addArg(files);

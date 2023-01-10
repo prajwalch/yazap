@@ -21,12 +21,12 @@ values_delimiter: ?[]const u8,
 settings: Settings,
 
 /// Creates a new instance of it
-pub fn new(name: []const u8) Arg {
+pub fn new(name: []const u8, description: ?[]const u8) Arg {
     return Arg{
         .name = name,
         .short_name = null,
         .long_name = null,
-        .description = null,
+        .description = description,
         .allowed_values = null,
         .values_delimiter = null,
         .settings = Settings{},
@@ -50,10 +50,6 @@ pub fn longName(self: *Arg, long_name: []const u8) void {
 
 pub fn setLongNameSameAsName(self: *Arg) void {
     self.longName(self.name);
-}
-
-pub fn setDescription(self: *Arg, description: []const u8) void {
-    self.description = description;
 }
 
 /// Sets the minimum number of values required to provide for an argument.
