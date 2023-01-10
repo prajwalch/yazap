@@ -1,4 +1,5 @@
 const std = @import("std");
+const fmt = std.fmt;
 // zig fmt: off
 pub const YazapError = error{ InvalidCmdLine, Overflow }
     || ParseError
@@ -91,16 +92,46 @@ pub const Error = struct {
         }
     }
 
-    fn getStrValue(self: *Error, ctx_kind: ContextKind) []const u8 {
-        return self.context.getAssertContains(ctx_kind).string;
+    fn getStrValue(self: *Error, comptime ctx_kind: ContextKind) []const u8 {
+        return self.getValue([]const u8, ctx_kind);
     }
 
-    fn getIntValue(self: *Error, ctx_kind: ContextKind) usize {
-        return self.context.getAssertContains(ctx_kind).number;
+    fn getIntValue(self: *Error, comptime ctx_kind: ContextKind) usize {
+        return self.getValue(usize, ctx_kind);
     }
 
-    fn getStrValues(self: *Error, ctx_kind: ContextKind) []const []const u8 {
-        return self.context.getAssertContains(ctx_kind).strings;
+    fn getStrValues(self: *Error, comptime ctx_kind: ContextKind) []const []const u8 {
+        return self.getValue([]const []const u8, ctx_kind);
+    }
+
+    fn getValue(self: *Error, comptime T: type, comptime ctx_kind: ContextKind) T {
+        const value = self.context.get(ctx_kind) orelse {
+            @panic(fmt.comptimePrint("No any value is found that associates with `{s}`", .{
+                @tagName(ctx_kind),
+            }));
+        };
+        if (!verifyGivenType(T, value)) {
+            @panic(fmt.comptimePrint("Given value type `{s}` does not matched with Type of found value", .{
+                @typeName(T),
+            }));
+        }
+
+        return switch (T) {
+            usize => value.number,
+            []const u8 => value.string,
+            []const []const u8 => value.strings,
+            else => @panic(""),
+        };
+    }
+
+    /// Verifies that the given T is equal to T of value
+    fn verifyGivenType(comptime T: type, value: ContextValueKind) bool {
+        const active_tag = std.meta.activeTag(value);
+        const matched_tag = inline for (std.meta.fields(ContextValueKind)) |field| {
+            // Check the field whose T is equal to given T
+            if (field.field_type == T) break @field(ContextValueKind, field.name);
+        };
+        return (active_tag == matched_tag);
     }
 
     // TODO: Remove this function once we eliminate that use of anonymous struct for context parameter
