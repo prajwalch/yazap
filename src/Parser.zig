@@ -316,7 +316,8 @@ fn processValue(
     if (arg.isSettingApplied(.takes_multiple_values)) {
         if (!has_max_num) {
             try self.consumeValuesTillNextOption(arg, &values);
-            // TODO: Handle `TooManyArgValue` error here not on `putMatchedArg`
+            // FIXME: Not handling the `error.TooManyArgValue` here will result in the
+            // `max_num_values` not being set
             self.err.setContext(.{ .valid_arg = arg.name, .max_num_values = arg.max_values.? });
             return self.args_ctx.putMatchedArg(arg, .{ .many = values });
         }
@@ -324,7 +325,8 @@ fn processValue(
     if (has_max_num) {
         try self.consumeNValues(arg, &values, arg.max_values.?);
     }
-    // TODO: Handle `TooManyArgValue` error here not on `putMatchedArg`
+    // FIXME: Not handling the `error.TooManyArgValue` here will result in the
+    // `max_num_values` not being set
     self.err.setContext(.{ .valid_arg = arg.name, .max_num_values = arg.max_values.? });
     return self.args_ctx.putMatchedArg(arg, .{ .many = values });
 }
