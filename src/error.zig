@@ -83,7 +83,7 @@ pub const Error = struct {
             }),
             ParseError.TooManyArgValue => {
                 try writer.print(
-                    \\Too strings values for arg '{s}'
+                    \\Too many values for arg '{s}'
                     \\
                     \\Expected number of values to be {d}
                 , .{ self.getStrValue(.valid_arg), self.getIntValue(.max_num_values) });
