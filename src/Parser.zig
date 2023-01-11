@@ -392,7 +392,7 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
     return MatchedSubCommand.initWithArg(subcmd.name, subcmd_ctx);
 }
 
-pub fn putMatchedArg(self: *Parser, arg: *const Arg, value: args_context.MatchedArgValue) Error!void {
+fn putMatchedArg(self: *Parser, arg: *const Arg, value: args_context.MatchedArgValue) Error!void {
     if ((arg.min_values != null) and (value.count() < arg.min_values.?)) {
         self.err.setContext(.{ .valid_arg = arg.name, .min_num_values = arg.min_values.? });
         return Error.TooFewArgValue;
