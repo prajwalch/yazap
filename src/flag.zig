@@ -43,7 +43,7 @@ pub fn argN(
     arg.setLongNameSameAsName();
 
     if (short_name) |n| arg.shortName(n);
-    if (max_values > 1) arg.valuesDelimiter(",");
+    if (max_values > 1) arg.setDefaultValuesDelimiter();
 
     return arg;
 }

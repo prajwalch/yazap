@@ -4,6 +4,7 @@ const Arg = @This();
 const std = @import("std");
 const MakeSettings = @import("settings.zig").MakeSettings;
 
+const DEFAULT_VALUES_DELIMITER = ",";
 const Settings = MakeSettings(enum {
     takes_value,
     takes_multiple_values,
@@ -74,6 +75,11 @@ pub fn maxValues(self: *Arg, num: usize) void {
 pub fn allowedValues(self: *Arg, values: []const []const u8) void {
     self.allowed_values = values;
     self.applySetting(.takes_value);
+}
+
+/// Sets the default separator between the values of an argument.
+pub fn setDefaultValuesDelimiter(self: *Arg) void {
+    self.valuesDelimiter(DEFAULT_VALUES_DELIMITER);
 }
 
 /// Sets separator between the values of an argument.
