@@ -87,7 +87,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
         if (mem.eql(u8, token.value, "help") or mem.eql(u8, token.value, "h")) {
             // Check whether help is enabled for `cmd`
             if (self.cmd.isSettingApplied(.enable_help)) {
-                try self.args_ctx.putMatchedArg(&Arg.new("help", null), .none);
+                try self.putMatchedArg(&Arg.new("help", null), .none);
                 break;
             } else {
                 // Return error?
@@ -169,7 +169,7 @@ fn parseShortOption(self: *Parser, token: *const Token) Error!void {
                 self.err.setContext(.{ .valid_arg = arg.name });
                 return Error.UnneededAttachedValue;
             }
-            try self.args_ctx.putMatchedArg(arg, .none);
+            try self.putMatchedArg(arg, .none);
             continue;
         }
 
@@ -200,7 +200,7 @@ fn parseLongOption(self: *Parser, token: *const Token) Error!void {
             self.err.setContext(.{ .valid_arg = option_tuple[0] });
             return Error.UnneededAttachedValue;
         } else {
-            return self.args_ctx.putMatchedArg(arg, .none);
+            return self.putMatchedArg(arg, .none);
         }
     }
     return self.consumeArgValue(arg, option_tuple[1]);
@@ -260,7 +260,7 @@ fn processValue(
                 try self.verifyAndAppendValue(arg, &values, val);
             }
             // FIXME: Verify that `values.items.len` is not less than arg.min_values, if set
-            return self.args_ctx.putMatchedArg(arg, .{ .many = values });
+            return self.putMatchedArg(arg, .{ .many = values });
         }
     }
 
@@ -275,7 +275,7 @@ fn processValue(
             self.err.setContext(.{ .valid_arg = arg.name, .invalid_value = value });
             return Error.ProvidedValueIsNotValidOption;
         }
-        return self.args_ctx.putMatchedArg(arg, .{ .single = value });
+        return self.putMatchedArg(arg, .{ .single = value });
     }
 
     var values = std.ArrayList([]const u8).init(self.allocator);
@@ -285,11 +285,6 @@ fn processValue(
     // Consume minimum number of required values first
     if (arg.min_values) |min| {
         try self.consumeNValues(arg, &values, min);
-        // Not enough values
-        if (values.items.len < min) {
-            self.err.setContext(.{ .valid_arg = arg.name, .min_num_values = arg.min_values.? });
-            return error.TooFewArgValue;
-        }
     }
     const has_max_num = (arg.max_values != null);
     const max_eqls_one = (has_max_num and (arg.max_values.? == 1));
@@ -300,17 +295,17 @@ fn processValue(
         // therefore return it as a single value instead
         if (values.items.len == 1) {
             values.deinit();
-            return self.args_ctx.putMatchedArg(arg, .{ .single = value });
+            return self.putMatchedArg(arg, .{ .single = value });
         }
-        return self.args_ctx.putMatchedArg(arg, .{ .many = values });
+        return self.putMatchedArg(arg, .{ .many = values });
     }
     if (has_max_num) {
         try self.consumeNValues(arg, &values, arg.max_values.?);
-        return self.args_ctx.putMatchedArg(arg, .{ .many = values });
+        return self.putMatchedArg(arg, .{ .many = values });
     }
     if (arg.isSettingApplied(.takes_multiple_values)) {
         try self.consumeValuesTillNextOption(arg, &values);
-        return self.args_ctx.putMatchedArg(arg, .{ .many = values });
+        return self.putMatchedArg(arg, .{ .many = values });
     }
 }
 
@@ -395,4 +390,54 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
     };
 
     return MatchedSubCommand.initWithArg(subcmd.name, subcmd_ctx);
+}
+
+pub fn putMatchedArg(self: *Parser, arg: *const Arg, value: args_context.MatchedArgValue) Error!void {
+    if ((arg.min_values != null) and (value.count() < arg.min_values.?)) {
+        self.err.setContext(.{ .valid_arg = arg.name, .min_num_values = arg.min_values.? });
+        return Error.TooFewArgValue;
+    }
+
+    var ctx = &self.args_ctx;
+    var maybe_old_value = ctx.args.getPtr(arg.name);
+
+    if (maybe_old_value) |old_value| {
+        // To fix the const error
+        var new_value = value;
+
+        switch (old_value.*) {
+            .none => if (!(new_value.isNone())) {
+                return ctx.args.put(arg.name, new_value);
+            },
+            .single => |old_single_value| {
+                if (new_value.isSingle()) {
+                    // If both old and new value are single then
+                    // store them in a single ArrayList and create a new key
+                    var many = std.ArrayList([]const u8).init(self.allocator);
+                    try many.append(old_single_value);
+                    try many.append(new_value.single);
+
+                    return ctx.args.put(arg.name, .{ .many = many });
+                } else if (new_value.isMany()) {
+                    // If old value is single but the new value is many then
+                    // append the old one into new many value
+                    try new_value.many.append(old_single_value);
+                    return ctx.args.put(arg.name, new_value);
+                }
+            },
+            .many => |*old_many_values| {
+                if (new_value.isSingle()) {
+                    // If old value is many and the new value is single then
+                    // append the new single value into old many value
+                    try old_many_values.append(new_value.single);
+                } else if (new_value.isMany()) {
+                    // If both old and new value is many, append all new values into old value
+                    try old_many_values.appendSlice(new_value.many.toOwnedSlice());
+                }
+            },
+        }
+    } else {
+        // We don't have old value, put the new value
+        return ctx.args.put(arg.name, value);
+    }
 }

@@ -83,50 +83,6 @@ pub const ArgsContext = struct {
         }
     }
 
-    pub fn putMatchedArg(self: *ArgsContext, arg: *const Arg, value: MatchedArgValue) !void {
-        var maybe_old_value = self.args.getPtr(arg.name);
-
-        if (maybe_old_value) |old_value| {
-            // To fix the const error
-            var new_value = value;
-
-            switch (old_value.*) {
-                .none => if (!(new_value.isNone())) {
-                    return self.args.put(arg.name, new_value);
-                },
-                .single => |old_single_value| {
-                    if (new_value.isSingle()) {
-                        // If both old and new value are single then
-                        // store them in a single ArrayList and create a new key
-                        var many = std.ArrayList([]const u8).init(self.allocator);
-                        try many.append(old_single_value);
-                        try many.append(new_value.single);
-
-                        return self.args.put(arg.name, .{ .many = many });
-                    } else if (new_value.isMany()) {
-                        // If old value is single but the new value is many then
-                        // append the old one into new many value
-                        try new_value.many.append(old_single_value);
-                        return self.args.put(arg.name, new_value);
-                    }
-                },
-                .many => |*old_many_values| {
-                    if (new_value.isSingle()) {
-                        // If old value is many and the new value is single then
-                        // append the new single value into old many value
-                        try old_many_values.append(new_value.single);
-                    } else if (new_value.isMany()) {
-                        // If both old and new value is many, append all new values into old value
-                        try old_many_values.appendSlice(new_value.many.toOwnedSlice());
-                    }
-                },
-            }
-        } else {
-            // We don't have old value, put the new value
-            return self.args.put(arg.name, value);
-        }
-    }
-
     pub fn setSubcommand(self: *ArgsContext, subcommand: MatchedSubCommand) !void {
         if (self.subcommand != null) return;
 
