@@ -18,6 +18,18 @@ pub fn argOne(name: []const u8, short_name: ?u8, description: ?[]const u8) Arg {
     return argN(name, short_name, 1, description);
 }
 
+/// Defines a single argument flag with given pre-defined values
+pub fn option(
+    name: []const u8,
+    short_name: ?u8,
+    options: []const []const u8,
+    description: ?[]const u8,
+) Arg {
+    var arg = argN(name, short_name, 1, description);
+    arg.allowedValues(options);
+    return arg;
+}
+
 /// Defines a given `max_values` number of arguments flag
 pub fn argN(
     name: []const u8,
@@ -33,18 +45,6 @@ pub fn argN(
     if (short_name) |n| arg.shortName(n);
     if (max_values > 1) arg.valuesDelimiter(",");
 
-    return arg;
-}
-
-/// Defines a single argument flag with given pre-defined values
-pub fn option(
-    name: []const u8,
-    short_name: ?u8,
-    options: []const []const u8,
-    description: ?[]const u8,
-) Arg {
-    var arg = argN(name, short_name, 1, description);
-    arg.allowedValues(options);
     return arg;
 }
 
