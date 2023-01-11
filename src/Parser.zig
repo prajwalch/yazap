@@ -15,7 +15,6 @@ const ArgsContext = args_context.ArgsContext;
 const MatchedSubCommand = args_context.MatchedSubCommand;
 
 const Error = erro.ParseError || erro.AllocatorError;
-const InternalError = error{ ArgValueNotProvided, EmptyArgValueNotAllowed } || Error;
 
 const ShortOption = struct {
     name: []const u8,
@@ -107,16 +106,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
             );
             continue;
         }
-
-        self.parseOption(token) catch |err| switch (err) {
-            InternalError.ArgValueNotProvided => {
-                return Error.FlagValueNotProvided;
-            },
-            InternalError.EmptyArgValueNotAllowed => {
-                return Error.EmptyFlagValueNotAllowed;
-            },
-            else => |e| return e,
-        };
+        try self.parseOption(token);
     }
 
     if (!(self.args_ctx.isPresent("help"))) {
@@ -149,14 +139,14 @@ fn consumeCommandArg(self: *Parser, token: *const Token) Error!void {
     self.cmd_args_idx += 1;
 
     self.processValue(arg, token.value, false) catch |err| switch (err) {
-        InternalError.ArgValueNotProvided,
-        InternalError.EmptyArgValueNotAllowed,
+        Error.ArgValueNotProvided,
+        Error.EmptyArgValueNotAllowed,
         => return,
         else => |e| return e,
     };
 }
 
-fn parseOption(self: *Parser, token: *const Token) InternalError!void {
+fn parseOption(self: *Parser, token: *const Token) Error!void {
     if (token.isShortOption()) {
         try self.parseShortOption(token);
     } else if (token.isLongOption()) {
@@ -164,7 +154,7 @@ fn parseOption(self: *Parser, token: *const Token) InternalError!void {
     }
 }
 
-fn parseShortOption(self: *Parser, token: *const Token) InternalError!void {
+fn parseShortOption(self: *Parser, token: *const Token) Error!void {
     const option_tuple = optionTokenToOptionTuple(token);
     var short_option = ShortOption.init(option_tuple[0], option_tuple[1]);
 
@@ -198,7 +188,7 @@ fn parseShortOption(self: *Parser, token: *const Token) InternalError!void {
     }
 }
 
-fn parseLongOption(self: *Parser, token: *const Token) InternalError!void {
+fn parseLongOption(self: *Parser, token: *const Token) Error!void {
     const option_tuple = optionTokenToOptionTuple(token);
     const arg = self.cmd.findLongOption(option_tuple[0]) orelse {
         self.err.setContext(.{ .invalid_arg = option_tuple[0] });
@@ -242,13 +232,13 @@ fn optionTokenToOptionTuple(token: *const Token) OptionTuple {
     };
 }
 
-fn consumeArgValue(self: *Parser, arg: *const Arg, attached_value: ?[]const u8) InternalError!void {
+fn consumeArgValue(self: *Parser, arg: *const Arg, attached_value: ?[]const u8) Error!void {
     if (attached_value) |val| {
         return self.processValue(arg, val, true);
     } else {
         const value = self.tokenizer.nextNonOptionArg() orelse {
             self.err.setContext(.{ .valid_arg = arg.name });
-            return InternalError.ArgValueNotProvided;
+            return Error.ArgValueNotProvided;
         };
         return self.processValue(arg, value, false);
     }
@@ -259,7 +249,7 @@ fn processValue(
     arg: *const Arg,
     value: []const u8,
     is_attached_value: bool,
-) InternalError!void {
+) Error!void {
     if (arg.values_delimiter) |delimiter| {
         if (mem.containsAtLeast(u8, value, 1, delimiter)) {
             var values_iter = mem.split(u8, value, delimiter);
@@ -283,7 +273,7 @@ fn processValue(
         // value = v1,v2
         if (!arg.verifyValueInAllowedValues(value)) {
             self.err.setContext(.{ .valid_arg = arg.name, .invalid_value = value });
-            return InternalError.ProvidedValueIsNotValidOption;
+            return Error.ProvidedValueIsNotValidOption;
         }
         return self.args_ctx.putMatchedArg(arg, .{ .single = value });
     }
@@ -329,7 +319,7 @@ fn consumeNValues(
     arg: *const Arg,
     list: *std.ArrayList([]const u8),
     num: usize,
-) InternalError!void {
+) Error!void {
     var i: usize = 1;
     while (i < num) : (i += 1) {
         const value = self.tokenizer.nextNonOptionArg() orelse return;
@@ -341,7 +331,7 @@ fn consumeValuesTillNextOption(
     self: *Parser,
     arg: *const Arg,
     list: *std.ArrayList([]const u8),
-) InternalError!void {
+) Error!void {
     while (self.tokenizer.nextNonOptionArg()) |value| {
         try self.verifyAndAppendValue(arg, list, value);
     }
@@ -352,20 +342,20 @@ fn verifyAndAppendValue(
     arg: *const Arg,
     list: *std.ArrayList([]const u8),
     value: []const u8,
-) InternalError!void {
+) Error!void {
     self.err.setContext(.{ .valid_arg = arg.name });
 
     if ((arg.max_values != null) and (list.items.len >= arg.max_values.?)) {
         self.err.setContext(.{ .max_num_values = arg.max_values.? });
-        return InternalError.TooManyArgValue;
+        return Error.TooManyArgValue;
     }
 
     if ((value.len == 0) and !(arg.isSettingApplied(.allow_empty_value)))
-        return InternalError.EmptyArgValueNotAllowed;
+        return Error.EmptyArgValueNotAllowed;
 
     if (!(arg.verifyValueInAllowedValues(value))) {
         self.err.setContext(.{ .valid_values = arg.allowed_values.? });
-        return InternalError.ProvidedValueIsNotValidOption;
+        return Error.ProvidedValueIsNotValidOption;
     }
     try list.append(value);
 }

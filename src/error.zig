@@ -13,9 +13,9 @@ pub const ParseError = error{
     UnknownCommand,
     CommandArgumentNotProvided,
     CommandSubcommandNotProvided,
-    FlagValueNotProvided,
+    ArgValueNotProvided,
     UnneededAttachedValue,
-    EmptyFlagValueNotAllowed,
+    EmptyArgValueNotAllowed,
     ProvidedValueIsNotValidOption,
     TooFewArgValue,
     TooManyArgValue,
@@ -66,9 +66,9 @@ pub const Error = struct {
             ParseError.CommandSubcommandNotProvided => {
                 try writer.print("The command '{s}' requires a subcommand but none is provided", .{self.getStrValue(.valid_cmd)});
             },
-            ParseError.FlagValueNotProvided => try writer.print("The flag '{s}' takes a value but none is provided\n", .{self.getStrValue(.valid_arg)}),
+            ParseError.ArgValueNotProvided => try writer.print("The arg '{s}' takes a value but none is provided\n", .{self.getStrValue(.valid_arg)}),
             ParseError.UnneededAttachedValue => try writer.print("Arg '{s}' does not takes value but provided\n", .{self.getStrValue(.valid_arg)}),
-            ParseError.EmptyFlagValueNotAllowed => try writer.print("The flag '{s}' does not allow to pass empty value\n", .{self.getStrValue(.valid_arg)}),
+            ParseError.EmptyArgValueNotAllowed => try writer.print("The arg '{s}' does not allow to pass empty value\n", .{self.getStrValue(.valid_arg)}),
             ParseError.ProvidedValueIsNotValidOption => {
                 try writer.print("Invalid value '{s}' for arg '{s}'\nValid options are:", .{
                     self.getStrValue(.invalid_value),
