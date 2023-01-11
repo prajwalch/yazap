@@ -48,6 +48,21 @@ pub const Error = struct {
         self.constructAndPutContext(anon_ctx);
     }
 
+    // TODO: Remove this function once we eliminate that use of anonymous struct for context parameter
+    fn constructAndPutContext(self: *Error, anon_ctx: anytype) void {
+        inline for (std.meta.fields(@TypeOf(anon_ctx))) |field| {
+            const value = @field(anon_ctx, field.name);
+            const ctx_kind = @field(ContextKind, field.name);
+            const val_kind = switch (@TypeOf(value)) {
+                usize => .{ .number = value },
+                []const u8 => .{ .string = value },
+                []const []const u8 => .{ .strings = value },
+                else => unreachable,
+            };
+            self.context.put(ctx_kind, val_kind);
+        }
+    }
+
     pub fn log(self: *Error, err_set: YazapError) YazapError!void {
         // TODO: currently, using `std.io.bufferedWriter` gives
         // `buffered_writer.zig:9:37: error: container 'std.fs.file.File' has no member called 'Error'`
@@ -132,21 +147,6 @@ pub const Error = struct {
             if (field.field_type == T) break @field(ContextValueKind, field.name);
         };
         return (active_tag == matched_tag);
-    }
-
-    // TODO: Remove this function once we eliminate that use of anonymous struct for context parameter
-    fn constructAndPutContext(self: *Error, anon_ctx: anytype) void {
-        inline for (std.meta.fields(@TypeOf(anon_ctx))) |field| {
-            const value = @field(anon_ctx, field.name);
-            const ctx_kind = @field(ContextKind, field.name);
-            const val_kind = switch (@TypeOf(value)) {
-                usize => .{ .number = value },
-                []const u8 => .{ .string = value },
-                []const []const u8 => .{ .strings = value },
-                else => unreachable,
-            };
-            self.context.put(ctx_kind, val_kind);
-        }
     }
 };
 
