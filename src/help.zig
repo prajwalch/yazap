@@ -46,6 +46,22 @@ pub const Help = struct {
         return self;
     }
 
+    fn setCommandAndItsParents(self: *Help, parent_cmd: *const Command, subcmd_name: []const u8) mem.Allocator.Error!void {
+        try self.parents.?.append(parent_cmd.name);
+
+        for (parent_cmd.subcommands.items) |*subcmd| {
+            if (std.mem.eql(u8, subcmd.name, subcmd_name)) {
+                self.cmd = subcmd;
+                break;
+            }
+            try setCommandAndItsParents(self, subcmd, subcmd_name);
+            // Command is already found; stop searching
+            if (mem.eql(u8, self.cmd.name, subcmd_name)) break;
+
+            _ = self.parents.?.popOrNull();
+        }
+    }
+
     pub fn writeAll(self: *Help, stream: anytype) !void {
         var buffer = std.io.bufferedWriter(stream);
         var writer = buffer.writer();
@@ -89,6 +105,10 @@ pub const Help = struct {
         }
         try writeNewLine(writer);
         try writeNewLine(writer);
+    }
+
+    inline fn getBraces(required: bool) Braces {
+        return if (required) .{ '<', '>' } else .{ '[', ']' };
     }
 
     fn writeParents(self: *Help, writer: anytype) !void {
@@ -169,26 +189,6 @@ pub const Help = struct {
             );
             try writeNewLine(writer);
         }
-    }
-
-    fn setCommandAndItsParents(self: *Help, parent_cmd: *const Command, subcmd_name: []const u8) mem.Allocator.Error!void {
-        try self.parents.?.append(parent_cmd.name);
-
-        for (parent_cmd.subcommands.items) |*subcmd| {
-            if (std.mem.eql(u8, subcmd.name, subcmd_name)) {
-                self.cmd = subcmd;
-                break;
-            }
-            try setCommandAndItsParents(self, subcmd, subcmd_name);
-            // Command is already found; stop searching
-            if (mem.eql(u8, self.cmd.name, subcmd_name)) break;
-
-            _ = self.parents.?.popOrNull();
-        }
-    }
-
-    inline fn getBraces(required: bool) Braces {
-        return if (required) .{ '<', '>' } else .{ '[', ']' };
     }
 
     inline fn writeNewLine(writer: anytype) !void {
