@@ -38,17 +38,8 @@ pub const MatchedSubCommand = struct {
     name: []const u8,
     ctx: ?ArgsContext,
 
-    pub fn initWithoutArg(name: []const u8) MatchedSubCommand {
-        return MatchedSubCommand{
-            .name = name,
-            .ctx = null,
-        };
-    }
-
-    pub fn initWithArg(name: []const u8, args_ctx: ArgsContext) MatchedSubCommand {
-        var self = initWithoutArg(name);
-        self.ctx = args_ctx;
-        return self;
+    pub fn init(name: []const u8, args_ctx: ?ArgsContext) MatchedSubCommand {
+        return MatchedSubCommand{ .name = name, .ctx = args_ctx };
     }
 
     pub fn deinit(self: *MatchedSubCommand) void {

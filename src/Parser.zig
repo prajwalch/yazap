@@ -368,7 +368,7 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
     // zig fmt: on
 
     if (!takes_value) {
-        return MatchedSubCommand.initWithoutArg(subcmd.name);
+        return MatchedSubCommand.init(subcmd.name, null);
     }
 
     const args = self.tokenizer.restArg() orelse {
@@ -376,7 +376,7 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
             self.err.setContext(.{ .valid_cmd = provided_subcmd });
             return Error.CommandArgumentNotProvided;
         }
-        return MatchedSubCommand.initWithArg(
+        return MatchedSubCommand.init(
             subcmd.name,
             ArgsContext.init(self.allocator),
         );
@@ -389,7 +389,7 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
         return err;
     };
 
-    return MatchedSubCommand.initWithArg(subcmd.name, subcmd_ctx);
+    return MatchedSubCommand.init(subcmd.name, subcmd_ctx);
 }
 
 fn putMatchedArg(self: *Parser, arg: *const Arg, value: args_context.MatchedArgValue) Error!void {
