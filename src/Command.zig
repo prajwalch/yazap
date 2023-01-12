@@ -76,7 +76,7 @@ pub fn takesNValues(self: *Command, arg_name: []const u8, n: usize) !void {
     var arg = Arg.new(arg_name, null);
     arg.minValues(1);
     arg.maxValues(n);
-    if (n > 1) arg.valuesDelimiter(",");
+    if (n > 1) arg.setDefaultValuesDelimiter();
 
     try self.addArg(arg);
     self.applySetting(.takes_value);
