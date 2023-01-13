@@ -66,7 +66,7 @@ err: erro.Error,
 tokenizer: Tokenizer,
 args_ctx: ArgsContext,
 cmd_args_idx: usize,
-consume_cmd_args: bool,
+parse_cmd_args: bool,
 
 pub fn init(allocator: Allocator, tokenizer: Tokenizer, command: *const Command) Parser {
     return Parser{
@@ -76,7 +76,7 @@ pub fn init(allocator: Allocator, tokenizer: Tokenizer, command: *const Command)
         .tokenizer = tokenizer,
         .args_ctx = ArgsContext.init(allocator),
         .cmd_args_idx = 0,
-        .consume_cmd_args = (command.isSettingApplied(.takes_value) and command.countArgs() >= 1),
+        .parse_cmd_args = (command.isSettingApplied(.takes_value) and command.countArgs() >= 1),
     };
 }
 
@@ -94,10 +94,10 @@ pub fn parse(self: *Parser) Error!ArgsContext {
             }
         }
 
-        if (self.consume_cmd_args) {
-            try self.consumeCommandArg(token);
+        if (self.parse_cmd_args) {
+            try self.parseCommandArg(token);
             // Skip current token if it has been consumed otherwise further process it
-            if (self.consume_cmd_args) continue;
+            if (self.parse_cmd_args) continue;
         }
 
         if (!token.isShortOption() and !token.isLongOption()) {
@@ -118,25 +118,24 @@ pub fn parse(self: *Parser) Error!ArgsContext {
     return self.args_ctx;
 }
 
-fn consumeCommandArg(self: *Parser, token: *const Token) Error!void {
-    // All positional arguments has been consumed
+fn parseCommandArg(self: *Parser, token: *const Token) Error!void {
+    // All the arguments are parsed
     if (self.cmd_args_idx >= self.cmd.countArgs()) {
-        self.consume_cmd_args = false;
+        self.parse_cmd_args = false;
         return;
     }
-
-    // Looks like we found a option
+    // we found a option
     if (token.tag != .some_argument) {
         if (self.cmd.isSettingApplied(.arg_required) and (self.args_ctx.args.count() == 0)) {
             self.err.setContext(.{ .valid_cmd = self.cmd.name });
             return Error.CommandArgumentNotProvided;
         } else {
-            self.consume_cmd_args = false;
+            self.parse_cmd_args = false;
             return;
         }
     }
     const arg = &self.cmd.args.items[self.cmd_args_idx];
-    self.cmd_args_idx += 1;
+    defer self.cmd_args_idx += 1;
 
     self.processValue(arg, token.value, false) catch |err| switch (err) {
         Error.ArgValueNotProvided,
