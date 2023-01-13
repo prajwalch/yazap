@@ -160,7 +160,7 @@ fn parseCommandArg(self: *Parser, token: *const Token) Error!void {
         values.deinit();
         return self.putMatchedArg(arg, .{ .single = token.value });
     }
-    try self.verifyAndAppendValue(arg, &values, token.value);
+    try self.verifyAndAppendValue(arg, token.value, &values);
     try self.consumeNValues(arg, &values, num_values_to_consume -% 1);
 
     return self.putMatchedArg(arg, .{ .many = values });
@@ -309,7 +309,7 @@ fn splitValue(
     errdefer values.deinit();
 
     while (it.next()) |val| {
-        try self.verifyAndAppendValue(arg, &values, val);
+        try self.verifyAndAppendValue(arg, val, &values);
     }
     return values;
 }
@@ -323,7 +323,7 @@ fn consumeNValues(
     var i: usize = 1;
     while (i <= num) : (i += 1) {
         const value = self.tokenizer.nextNonOptionArg() orelse return;
-        try self.verifyAndAppendValue(arg, list, value);
+        try self.verifyAndAppendValue(arg, value, list);
     }
 }
 
@@ -333,15 +333,15 @@ fn consumeValuesTillNextOption(
     list: *std.ArrayList([]const u8),
 ) Error!void {
     while (self.tokenizer.nextNonOptionArg()) |value| {
-        try self.verifyAndAppendValue(arg, list, value);
+        try self.verifyAndAppendValue(arg, value, list);
     }
 }
 
 fn verifyAndAppendValue(
     self: *Parser,
     arg: *const Arg,
-    list: *std.ArrayList([]const u8),
     value: []const u8,
+    list: *std.ArrayList([]const u8),
 ) Error!void {
     try self.verifyValue(arg, value);
     try list.append(value);
