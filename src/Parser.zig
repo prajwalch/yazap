@@ -137,12 +137,33 @@ fn parseCommandArg(self: *Parser, token: *const Token) Error!void {
     const arg = &self.cmd.args.items[self.cmd_args_idx];
     defer self.cmd_args_idx += 1;
 
-    self.processValue(arg, token.value, false) catch |err| switch (err) {
-        Error.ArgValueNotProvided,
-        Error.EmptyArgValueNotAllowed,
-        => return,
-        else => |e| return e,
+    if (arg.values_delimiter) |delimiter| {
+        if (try self.splitValue(arg, token.value, delimiter)) |values| {
+            return self.putMatchedArg(arg, .{ .many = values });
+        }
+    }
+    var values = std.ArrayList([]const u8).init(self.allocator);
+    errdefer values.deinit();
+
+    // TODO: This code and the code at line 255 is exactly same.
+    // Either move it a function or do something about this.
+    const num_values_to_consume = arg.max_values orelse arg.min_values orelse blk: {
+        if (arg.isSettingApplied(.takes_multiple_values)) {
+            try self.consumeValuesTillNextOption(arg, &values);
+            return self.putMatchedArg(arg, .{ .many = values });
+        }
+        break :blk 1;
     };
+
+    if (num_values_to_consume <= 1) {
+        try self.verifyValue(arg, token.value);
+        values.deinit();
+        return self.putMatchedArg(arg, .{ .single = token.value });
+    }
+    try self.verifyAndAppendValue(arg, &values, token.value);
+    try self.consumeNValues(arg, &values, num_values_to_consume -% 1);
+
+    return self.putMatchedArg(arg, .{ .many = values });
 }
 
 fn parseOption(self: *Parser, token: *const Token) Error!void {
