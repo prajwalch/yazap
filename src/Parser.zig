@@ -145,7 +145,7 @@ fn parseCommandArg(self: *Parser, token: *const Token) Error!void {
     var values = std.ArrayList([]const u8).init(self.allocator);
     errdefer values.deinit();
 
-    // TODO: This code and the code at line 255 is exactly same.
+    // TODO: This code and the code at line 262 is exactly same.
     // Either move it a function or do something about this.
     const num_values_to_consume = arg.max_values orelse arg.min_values orelse blk: {
         if (arg.isSettingApplied(.takes_multiple_values)) {
