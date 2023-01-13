@@ -288,7 +288,6 @@ fn parseAttachedValue(self: *Parser, arg: *const Arg, attached_value: []const u8
             return self.putMatchedArg(arg, .{ .many = values });
         }
     }
-    // consume as a single value
     try self.verifyValue(arg, attached_value);
     try self.putMatchedArg(arg, .{ .single = attached_value });
 }
