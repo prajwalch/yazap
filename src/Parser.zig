@@ -276,35 +276,25 @@ fn processValue(
         return self.putMatchedArg(arg, .{ .single = value });
     }
 
+fn splitValue(
+    self: *Parser,
+    arg: *const Arg,
+    value: []const u8,
+    delimiter: []const u8,
+) !(?std.ArrayList([]const u8)) {
+    // zig fmt: off
+    if (!(takesMorethanOneValue(arg))
+        or !(mem.containsAtLeast(u8, value, 1, delimiter))) return null;
+    // zig fmt: on
+
+    var it = mem.split(u8, value, delimiter);
     var values = std.ArrayList([]const u8).init(self.allocator);
     errdefer values.deinit();
 
-    try self.verifyAndAppendValue(arg, &values, value);
-    // Consume minimum number of required values first
-    if (arg.min_values) |min| {
-        try self.consumeNValues(arg, &values, min);
+    while (it.next()) |val| {
+        try self.verifyAndAppendValue(arg, &values, val);
     }
-    const has_max_num = (arg.max_values != null);
-    const max_eqls_one = (has_max_num and (arg.max_values.? == 1));
-
-    // If maximum number and takes_multiple_values is not set we are not looking for more values
-    if ((!has_max_num or max_eqls_one) and !(arg.isSettingApplied(.takes_multiple_values))) {
-        // If values contains only one value, we can be sure that the minimum number of values is set to 1
-        // therefore return it as a single value instead
-        if (values.items.len == 1) {
-            values.deinit();
-            return self.putMatchedArg(arg, .{ .single = value });
-        }
-        return self.putMatchedArg(arg, .{ .many = values });
-    }
-    if (has_max_num) {
-        try self.consumeNValues(arg, &values, arg.max_values.?);
-        return self.putMatchedArg(arg, .{ .many = values });
-    }
-    if (arg.isSettingApplied(.takes_multiple_values)) {
-        try self.consumeValuesTillNextOption(arg, &values);
-        return self.putMatchedArg(arg, .{ .many = values });
-    }
+    return values;
 }
 
 fn consumeNValues(
