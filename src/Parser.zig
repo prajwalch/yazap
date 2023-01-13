@@ -391,10 +391,7 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
 }
 
 fn putMatchedArg(self: *Parser, arg: *const Arg, value: args_context.MatchedArgValue) Error!void {
-    if ((arg.min_values != null) and (value.count() < arg.min_values.?)) {
-        self.err.setContext(.{ .valid_arg = arg.name, .min_num_values = arg.min_values.? });
-        return Error.TooFewArgValue;
-    }
+    try self.verifyValuesLength(arg, value.count());
 
     var ctx = &self.args_ctx;
     var maybe_old_value = ctx.args.getPtr(arg.name);
@@ -438,4 +435,62 @@ fn putMatchedArg(self: *Parser, arg: *const Arg, value: args_context.MatchedArgV
         // We don't have old value, put the new value
         return ctx.args.put(arg.name, value);
     }
+}
+
+fn verifyValuesLength(self: *Parser, arg: *const Arg, len: usize) Error!void {
+    if ((len > 1) and !(takesMorethanOneValue(arg))) {
+        self.err.setContext(.{ .valid_arg = arg.name, .max_num_values = 1 });
+        return Error.TooManyArgValue;
+    }
+    if ((arg.min_values != null) and (len < arg.min_values.?)) {
+        self.err.setContext(.{ .valid_arg = arg.name, .min_num_values = arg.min_values.? });
+        return Error.TooFewArgValue;
+    }
+
+    if ((arg.max_values != null) and (len > arg.max_values.?)) {
+        self.err.setContext(.{ .valid_arg = arg.name, .max_num_values = arg.max_values.? });
+        return Error.TooManyArgValue;
+    }
+}
+
+fn takesMorethanOneValue(arg: *const Arg) bool {
+    const num_values = arg.max_values orelse arg.min_values orelse 1;
+    return ((num_values > 1) or (arg.isSettingApplied(.takes_multiple_values)));
+}
+
+fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubCommand {
+    const subcmd = self.cmd.findSubcommand(provided_subcmd) orelse {
+        self.err.setContext(.{ .invalid_arg = provided_subcmd });
+        return Error.UnknownCommand;
+    };
+    // zig fmt: off
+    const takes_value = subcmd.isSettingApplied(.takes_value)
+        or (subcmd.countArgs() >= 1)
+        or (subcmd.countOptions() >= 1)
+        or (subcmd.countSubcommands() >= 1);
+    // zig fmt: on
+
+    if (!takes_value) {
+        return MatchedSubCommand.init(subcmd.name, null);
+    }
+
+    const args = self.tokenizer.restArg() orelse {
+        if (subcmd.isSettingApplied(.arg_required)) {
+            self.err.setContext(.{ .valid_cmd = provided_subcmd });
+            return Error.CommandArgumentNotProvided;
+        }
+        return MatchedSubCommand.init(
+            subcmd.name,
+            ArgsContext.init(self.allocator),
+        );
+    };
+    var parser = Parser.init(self.allocator, Tokenizer.init(args), subcmd);
+    const subcmd_ctx = parser.parse() catch |err| {
+        // Bubble up the error trace to the parent command that happened while parsing subcommand
+        //self.err_builder = parser.err_builder;
+        self.err = parser.err;
+        return err;
+    };
+
+    return MatchedSubCommand.init(subcmd.name, subcmd_ctx);
 }
