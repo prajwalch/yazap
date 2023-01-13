@@ -253,49 +253,45 @@ fn optionTokenToOptionTuple(token: *const Token) OptionTuple {
 }
 
 fn parseOptionValue(self: *Parser, arg: *const Arg, attached_value: ?[]const u8) Error!void {
-    if (attached_value) |val| {
-        return self.processValue(arg, val, true);
-    } else {
-        const value = self.tokenizer.nextNonOptionArg() orelse {
-            self.err.setContext(.{ .valid_arg = arg.name });
-            return Error.ArgValueNotProvided;
-        };
-        return self.processValue(arg, value, false);
+    if (attached_value) |value| {
+        return self.parseAttachedValue(arg, value);
     }
+    var values = std.ArrayList([]const u8).init(self.allocator);
+    errdefer values.deinit();
+
+    const num_values_to_consume = arg.max_values orelse arg.min_values orelse blk: {
+        if (arg.isSettingApplied(.takes_multiple_values)) {
+            try self.consumeValuesTillNextOption(arg, &values);
+            return self.putMatchedArg(arg, .{ .many = values });
+        }
+        break :blk 1;
+    };
+    try self.consumeNValues(arg, &values, num_values_to_consume);
+
+    if (values.items.len == 0) {
+        self.err.setContext(.{ .valid_arg = arg.name });
+        return Error.ArgValueNotProvided;
+    }
+    if (values.items.len == 1) {
+        const value = values.pop();
+        values.deinit();
+
+        try self.verifyValue(arg, value);
+        return self.putMatchedArg(arg, .{ .single = value });
+    }
+    return self.putMatchedArg(arg, .{ .many = values });
 }
 
-fn processValue(
-    self: *Parser,
-    arg: *const Arg,
-    value: []const u8,
-    is_attached_value: bool,
-) Error!void {
+fn parseAttachedValue(self: *Parser, arg: *const Arg, attached_value: []const u8) Error!void {
     if (arg.values_delimiter) |delimiter| {
-        if (mem.containsAtLeast(u8, value, 1, delimiter)) {
-            var values_iter = mem.split(u8, value, delimiter);
-            var values = std.ArrayList([]const u8).init(self.allocator);
-            errdefer values.deinit();
-
-            while (values_iter.next()) |val| {
-                try self.verifyAndAppendValue(arg, &values, val);
-            }
+        if (try self.splitValue(arg, attached_value, delimiter)) |values| {
             return self.putMatchedArg(arg, .{ .many = values });
         }
     }
-
-    if (is_attached_value) {
-        // When values delimiter is not set and multiple values are passed
-        // by attaching it then take the entire values as single value
-        //
-        // For ex: -f=v1,v2
-        // option = f
-        // value = v1,v2
-        if (!arg.verifyValueInAllowedValues(value)) {
-            self.err.setContext(.{ .valid_arg = arg.name, .invalid_value = value });
-            return Error.ProvidedValueIsNotValidOption;
-        }
-        return self.putMatchedArg(arg, .{ .single = value });
-    }
+    // consume as a single value
+    try self.verifyValue(arg, attached_value);
+    try self.putMatchedArg(arg, .{ .single = attached_value });
+}
 
 fn splitValue(
     self: *Parser,
@@ -325,7 +321,7 @@ fn consumeNValues(
     num: usize,
 ) Error!void {
     var i: usize = 1;
-    while (i < num) : (i += 1) {
+    while (i <= num) : (i += 1) {
         const value = self.tokenizer.nextNonOptionArg() orelse return;
         try self.verifyAndAppendValue(arg, list, value);
     }
