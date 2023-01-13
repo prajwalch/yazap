@@ -119,12 +119,11 @@ pub fn parse(self: *Parser) Error!ArgsContext {
 }
 
 fn parseCommandArg(self: *Parser, token: *const Token) Error!void {
-    // All the arguments are parsed
     if (self.cmd_args_idx >= self.cmd.countArgs()) {
         self.parse_cmd_args = false;
         return;
     }
-    // we found a option
+
     if (token.tag != .some_argument) {
         if (self.cmd.isSettingApplied(.arg_required) and (self.args_ctx.args.count() == 0)) {
             self.err.setContext(.{ .valid_cmd = self.cmd.name });
@@ -162,7 +161,6 @@ fn parseCommandArg(self: *Parser, token: *const Token) Error!void {
     }
     try self.verifyAndAppendValue(arg, token.value, &values);
     try self.consumeNValues(arg, num_values_to_consume -% 1, &values);
-
     return self.putMatchedArg(arg, .{ .many = values });
 }
 
