@@ -183,7 +183,7 @@ fn parseShortOption(self: *Parser, token: *const Token) Error!void {
                 break :blk null;
             }
         };
-        try self.consumeArgValue(arg, value);
+        try self.parseOptionValue(arg, value);
     }
 }
 
@@ -202,7 +202,7 @@ fn parseLongOption(self: *Parser, token: *const Token) Error!void {
             return self.putMatchedArg(arg, .none);
         }
     }
-    return self.consumeArgValue(arg, option_tuple[1]);
+    return self.parseOptionValue(arg, option_tuple[1]);
 }
 
 // Converts a option token to a tuple holding a option name and an optional value
@@ -231,7 +231,7 @@ fn optionTokenToOptionTuple(token: *const Token) OptionTuple {
     };
 }
 
-fn consumeArgValue(self: *Parser, arg: *const Arg, attached_value: ?[]const u8) Error!void {
+fn parseOptionValue(self: *Parser, arg: *const Arg, attached_value: ?[]const u8) Error!void {
     if (attached_value) |val| {
         return self.processValue(arg, val, true);
     } else {
