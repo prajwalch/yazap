@@ -336,58 +336,20 @@ fn verifyAndAppendValue(
     list: *std.ArrayList([]const u8),
     value: []const u8,
 ) Error!void {
-    self.err.setContext(.{ .valid_arg = arg.name });
+    try self.verifyValue(arg, value);
+    try list.append(value);
+}
 
-    if ((arg.max_values != null) and (list.items.len >= arg.max_values.?)) {
-        self.err.setContext(.{ .max_num_values = arg.max_values.? });
-        return Error.TooManyArgValue;
-    }
+fn verifyValue(self: *Parser, arg: *const Arg, value: []const u8) Error!void {
+    self.err.setContext(.{ .valid_arg = arg.name });
 
     if ((value.len == 0) and !(arg.isSettingApplied(.allow_empty_value)))
         return Error.EmptyArgValueNotAllowed;
 
     if (!(arg.verifyValueInAllowedValues(value))) {
-        self.err.setContext(.{ .valid_values = arg.allowed_values.? });
+        self.err.setContext(.{ .invalid_value = value, .valid_values = arg.allowed_values.? });
         return Error.ProvidedValueIsNotValidOption;
     }
-    try list.append(value);
-}
-
-fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubCommand {
-    const subcmd = self.cmd.findSubcommand(provided_subcmd) orelse {
-        self.err.setContext(.{ .invalid_arg = provided_subcmd });
-        return Error.UnknownCommand;
-    };
-    // zig fmt: off
-    const takes_value = subcmd.isSettingApplied(.takes_value)
-        or (subcmd.countArgs() >= 1)
-        or (subcmd.countOptions() >= 1)
-        or (subcmd.countSubcommands() >= 1);
-    // zig fmt: on
-
-    if (!takes_value) {
-        return MatchedSubCommand.init(subcmd.name, null);
-    }
-
-    const args = self.tokenizer.restArg() orelse {
-        if (subcmd.isSettingApplied(.arg_required)) {
-            self.err.setContext(.{ .valid_cmd = provided_subcmd });
-            return Error.CommandArgumentNotProvided;
-        }
-        return MatchedSubCommand.init(
-            subcmd.name,
-            ArgsContext.init(self.allocator),
-        );
-    };
-    var parser = Parser.init(self.allocator, Tokenizer.init(args), subcmd);
-    const subcmd_ctx = parser.parse() catch |err| {
-        // Bubble up the error trace to the parent command that happened while parsing subcommand
-        //self.err_builder = parser.err_builder;
-        self.err = parser.err;
-        return err;
-    };
-
-    return MatchedSubCommand.init(subcmd.name, subcmd_ctx);
 }
 
 fn putMatchedArg(self: *Parser, arg: *const Arg, value: args_context.MatchedArgValue) Error!void {
