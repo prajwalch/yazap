@@ -3,8 +3,7 @@ const yazap = @import("yazap");
 
 const allocator = std.heap.page_allocator;
 const flag = yazap.flag;
-const Arg = yazap.Arg;
-const Yazap = yazap.Yazap;
+const App = yazap.App;
 
 // git init
 // git commit -m "message"
@@ -12,7 +11,7 @@ const Yazap = yazap.Yazap;
 // git push <remote> <branch_name>
 
 pub fn main() anyerror!void {
-    var app = Yazap.init(allocator, "mygit", null);
+    var app = App.init(allocator, "mygit", null);
     defer app.deinit();
 
     var git = app.rootCommand();

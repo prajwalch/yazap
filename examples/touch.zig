@@ -3,11 +3,10 @@ const yazap = @import("yazap");
 
 const allocator = std.heap.page_allocator;
 const flag = yazap.flag;
-const Command = yazap.Command;
-const Yazap = yazap.Yazap;
+const App = yazap.App;
 
 pub fn main() anyerror!void {
-    var app = Yazap.init(allocator, "mytouch", null);
+    var app = App.init(allocator, "mytouch", null);
     defer app.deinit();
 
     var touch = app.rootCommand();
