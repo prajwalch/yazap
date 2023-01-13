@@ -161,7 +161,7 @@ fn parseCommandArg(self: *Parser, token: *const Token) Error!void {
         return self.putMatchedArg(arg, .{ .single = token.value });
     }
     try self.verifyAndAppendValue(arg, token.value, &values);
-    try self.consumeNValues(arg, &values, num_values_to_consume -% 1);
+    try self.consumeNValues(arg, num_values_to_consume -% 1, &values);
 
     return self.putMatchedArg(arg, .{ .many = values });
 }
@@ -266,7 +266,7 @@ fn parseOptionValue(self: *Parser, arg: *const Arg, attached_value: ?[]const u8)
         }
         break :blk 1;
     };
-    try self.consumeNValues(arg, &values, num_values_to_consume);
+    try self.consumeNValues(arg, num_values_to_consume, &values);
 
     if (values.items.len == 0) {
         self.err.setContext(.{ .valid_arg = arg.name });
@@ -317,8 +317,8 @@ fn splitValue(
 fn consumeNValues(
     self: *Parser,
     arg: *const Arg,
-    list: *std.ArrayList([]const u8),
     num: usize,
+    list: *std.ArrayList([]const u8),
 ) Error!void {
     var i: usize = 1;
     while (i <= num) : (i += 1) {
