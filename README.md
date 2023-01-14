@@ -4,8 +4,8 @@ but also subcommands, nested subcommands and custom arguments.
 
 Inspired by [clap-rs](https://github.com/clap-rs/clap) and [andrewrk/ziglang: src-self-hosted/arg.zig](https://git.sr.ht/~andrewrk/ziglang/tree/725b6ee634f01355da4a6badc5675751b85f0bf0/src-self-hosted/arg.zig)
 
-## Supports:
-- Providing comma-seperated values for command (`touch one,two,three`).
+## Features:
+- Providing comma-seperated values for command (`touch one,two,three`)
 - Option (short and long)
     * Providing value using `=`, using space and without using space (`-f=value, -f value, -fvalue`)
     * Providing comma-seperated values using `=` and without using space (`-f=v1,v2,v3, -fv1,v2,v3`)
@@ -17,7 +17,7 @@ Inspired by [clap-rs](https://github.com/clap-rs/clap) and [andrewrk/ziglang: sr
 - Automatic help generation
 - Defining custom [Argument](https://prajwalch.github.io/yazap/#root;Arg)
 
-## Doesn't supports:
+## What doesn't supports:
 - Providing comma-seperated values using space (`-f v1,v2,v3`)
 - Providing value and comma-seperated values for multiple chained options using space (`-abc value, -abc v1,v2,v3`)
 - Automatic generation of shell completion (in progress)
