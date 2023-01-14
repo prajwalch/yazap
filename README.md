@@ -1,6 +1,6 @@
-# yazap
-**yazap** is a command line argument parser for [zig](http://ziglang.org) which provides simple and easy to use API for you to define
-custom Argument, flag, subcommand and nested subcommand.
+# Yazap
+**Yazap** is a [zig](https://ziglang.org) library that is designed to make the process of parsing
+command line arguments effortless with simple and easy-to-use API.
 
 Inspired from [clap-rs](https://github.com/clap-rs/clap) and [andrewrk/ziglang: src-self-hosted/arg.zig](https://git.sr.ht/~andrewrk/ziglang/tree/725b6ee634f01355da4a6badc5675751b85f0bf0/src-self-hosted/arg.zig)
 
