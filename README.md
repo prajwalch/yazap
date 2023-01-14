@@ -17,7 +17,7 @@ Inspired from [clap-rs](https://github.com/clap-rs/clap) and [andrewrk/ziglang: 
 - Automatic help generation
 - Defining custom [Argument](https://prajwalch.github.io/yazap/#root;Arg)
 
-## Doesnot supports:
+## Doesn't supports:
 - Providing comma-seperated values using space (`-f v1,v2,v3`)
 - Providing value and comma-seperated values for multiple chained options using space (`-abc value, -abc v1,v2,v3`)
 - Automatic generation of shell completion (in progress)
