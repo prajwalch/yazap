@@ -55,6 +55,7 @@ Please visit [here](https://prajwalch.github.io/yazap/) for documentation refere
 ## Example
 Checkout [examples/](/examples) for more.
 
+## Usage
 ### Initializing the yazap
 The first step in using the `yazap` is making an instance of [App](https://prajwalch.github.io/yazap/#root;App)
 by calling `App.init(allocator, "Your app name", "Your app description")` or `App.init(allocator, "Your app name", null)` which internally creates a root command for your app.
