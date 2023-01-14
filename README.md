@@ -4,35 +4,23 @@ command line arguments effortless with simple and easy-to-use API.
 
 Inspired from [clap-rs](https://github.com/clap-rs/clap) and [andrewrk/ziglang: src-self-hosted/arg.zig](https://git.sr.ht/~andrewrk/ziglang/tree/725b6ee634f01355da4a6badc5675751b85f0bf0/src-self-hosted/arg.zig)
 
-## Features
-- Flags
-    * boolean/no argument flag (`-f, --flag`)
-    * single argument flag (`-f, --flag <VALUE>`)
-    * multi argument flag (`-f, --flag <VALUES>`)
-        
-        Note: You have to explicitly set the number of arguments for it
-    
-    * single argument flag with options (`-f, --flag <A | B | C>`)
-
-    * Support passing value using space `-f value`
-    no space `-fvalue` and using `=` (`-f=value`)
-
-    * Support chaining multiple short flags
-        + `-xy` where both `x` and `y` does not take value
-        + `-xyz=value`
-
-    * Support for specifying flag multiple times (`-x a -x b -x c`)
-
-- Subcommand
-    * `app bool-cmd`
-    * `app single-arg-cmd <ARG>`
-    * `app multi-arg-cmd <ARG1> <ARG2> <ARGS3...>`
-    * `app flag-cmd [flags]`
-    * `app arg-and-flag-cmd <ARG> [FLAGS]`
-    * Nested subcommand
-
+Supports:
+- Providing comma-seperated values for command (`touch one,two,three`).
+- Option (short and long)
+    * Providing value using `=`, using space and without using space (`-f=value, -f value, -fvalue`)
+    * Providing comma-seperated values using `=` and without using space (`-f=v1,v2,v3, -fv1,v2,v3`)
+    * Chaining multiple short boolean options (`-abc`)
+    * Providing value and comma-seperated values for multiple chained options using `=` (`-abc=val`, `-abc=v1,v2,v3`)
+    * Specifying option multiple times (`-a 1 -a 2 -a 3`)
+- Nested subcommands
+- Automatic handling help flag (`-h` and `--help`)
+- Automatic help generation
 - Defining custom [Argument](https://prajwalch.github.io/yazap/#root;Arg)
-- Auto help text generation
+
+Doesnot supports:
+- Providing comma-seperated values using space (`-f v1,v2,v3`)
+- Providing value and comma-seperated values for multiple chained options using space (`-abc value, -abc v1,v2,v3`)
+- Automatic generation of shell completion (in progress)
 
 
 ## Installation Guide
