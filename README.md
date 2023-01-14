@@ -50,10 +50,17 @@ Also note that if you're using zig `v0.10.0` or higher you have to use [v0.10.0 
     const yazap = @import("yazap");
     ```
 ## Docs
-Please visit [here](https://prajwalch.github.io/yazap/) for documentation reference
+Visit [here](https://prajwalch.github.io/yazap/) for complete documentation
 
-## Example
-Checkout [examples/](/examples) for more.
+## Building and running examples
+The examples are present [here](/examples) and to build all of them run:
+```bash
+$ zig build examples
+```
+Then after the compilation finishes you can run them as:
+```bash
+$ ./zig-out/bin/example_name
+```
 
 ## Usage
 ### Initializing the yazap
