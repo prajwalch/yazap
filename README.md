@@ -25,8 +25,6 @@ Inspired by [clap-rs](https://github.com/clap-rs/clap) and [andrewrk/ziglang: sr
 
 ## Installing
 Before you follow below steps be sure to initialize your project as repo by running `git init`.
-> **Note**
-> If you're using zig `v0.10.0` or higher you have to use [v0.10.0 branch](https://github.com/PrajwalCH/yazap/tree/v0.10.0).
 
 1. On your root project make a directory named `libs`
 2. Run `git submodule add https://github.com/PrajwalCH/yazap libs/yazap`
