@@ -65,13 +65,13 @@ pub fn parseFrom(self: *App, argv: []const [:0]const u8) YazapError!(*const Args
 
 /// Displays the help message of root command
 pub fn displayHelp(self: *App) !void {
-    return self.command.getHelp().writeAll(std.io.getStdOut().writer());
+    return self.command.getHelp().writeAll(std.io.getStdErr().writer());
 }
 
 /// Displays the help message of subcommand if it is provided on command line
 /// otherwise it will display nothing
 pub fn displaySubcommandHelp(self: *App) !void {
-    if (self.subcommand_help) |*h| return h.writeAll(std.io.getStdOut().writer());
+    if (self.subcommand_help) |*h| return h.writeAll(std.io.getStdErr().writer());
 }
 
 fn addBuiltinArgs(self: *App) !void {
