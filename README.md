@@ -109,7 +109,7 @@ Once you're done adding arguments and subcommands call `app.parseProcess` to sta
 to obtain the raw arguments then it invokes the parser and later returns the constant pointer to a [ArgsContext](https://prajwalch.github.io/yazap/#root;ArgsContext). Alternately you can make a call to `app.parseFrom`
 by passing your own raw arguments which can be useful on test.
 ```zig
-var ls_args = try app.parseProcess();
+const ls_args = try app.parseProcess();
 
 if (ls_args.isPresent("version")) {
     log.info("v0.1.0", .{});
@@ -211,7 +211,7 @@ pub fn main() anyerror!void {
         "never",
     }, null));
 
-    var ls_args = try app.parseProcess();
+    const ls_args = try app.parseProcess();
 
     if (!(ls_args.hasArgs())) {
         try app.displayHelp();
