@@ -141,15 +141,15 @@ pub const Help = struct {
         for (self.cmd.options.items) |option| {
             if (option.short_name) |short_name|
                 try writer.print(" -{c},", .{short_name});
-            if (option.long_name) |long_name| {
-                // When short name is null, add left padding in-order to
-                // align all long names in the same line
-                //
-                // 6 comes by counting (` `) + (`-`) + (`x`) + (`,`)
-                // where x is some short name
-                const padding: usize = if (option.short_name == null) 6 else 0;
-                try writer.print(" {[1]s:>[0]}{[2]s} ", .{ padding, "--", long_name });
-            }
+
+            const long_name = option.long_name orelse option.name;
+            // When short name is null, add left padding in-order to
+            // align all long names in the same line
+            //
+            // 6 comes by counting (` `) + (`-`) + (`x`) + (`,`)
+            // where x is some short name
+            const padding: usize = if (option.short_name == null) 6 else 0;
+            try writer.print(" {[1]s:>[0]}{[2]s} ", .{ padding, "--", long_name });
 
             if (option.isSettingApplied(.takes_value)) {
                 // TODO: Add new `Arg.placeholderName()` to display proper placeholder
