@@ -154,6 +154,7 @@ fn parseCommandArg(self: *Parser, token: *const Token) Error!void {
     // Either move it a function or do something about this.
     const num_values_to_consume = arg.max_values orelse arg.min_values orelse blk: {
         if (arg.isSettingApplied(.takes_multiple_values)) {
+            try self.verifyAndAppendValue(arg, token.value, &values);
             try self.consumeValuesTillNextOption(arg, &values);
             return self.putMatchedArg(arg, .{ .many = values });
         }
