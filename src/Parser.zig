@@ -110,6 +110,12 @@ pub fn parse(self: *Parser) Error!ArgsContext {
     }
 
     if (!(self.args_ctx.isPresent("help"))) {
+        const takes_value_and_is_required = (self.parse_cmd_args and (self.cmd.isSettingApplied(.arg_required)));
+        if (takes_value_and_is_required and !(self.args_ctx.hasArgs())) {
+            self.err.setContext(.{ .valid_cmd = self.cmd.name });
+            return Error.CommandArgumentNotProvided;
+        }
+
         if (self.cmd.isSettingApplied(.subcommand_required) and self.args_ctx.subcommand == null) {
             self.err.setContext(.{ .valid_cmd = self.cmd.name });
             return Error.CommandSubcommandNotProvided;
