@@ -80,15 +80,15 @@ pub fn setValuesDelimiter(self: *Arg, delimiter: []const u8) void {
 }
 
 pub fn setSetting(self: *Arg, option: Settings.Option) void {
-    return self.settings.apply(option);
+    return self.settings.set(option);
 }
 
 pub fn unsetSetting(self: *Arg, option: Settings.Option) void {
-    return self.settings.remove(option);
+    return self.settings.unset(option);
 }
 
 pub fn isSettingSet(self: *const Arg, option: Settings.Option) bool {
-    return self.settings.isApplied(option);
+    return self.settings.isSet(option);
 }
 
 pub fn verifyValueInAllowedValues(self: *const Arg, value_to_check: []const u8) bool {

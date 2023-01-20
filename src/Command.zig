@@ -129,15 +129,15 @@ pub fn findSubcommand(self: *const Command, provided_subcmd: []const u8) ?*const
 }
 
 pub fn setSetting(self: *Command, option: Settings.Option) void {
-    return self.settings.apply(option);
+    return self.settings.set(option);
 }
 
 pub fn unsetSetting(self: *Command, option: Settings.Option) void {
-    return self.settings.remove(option);
+    return self.settings.unset(option);
 }
 
 pub fn isSettingSet(self: *const Command, option: Settings.Option) bool {
-    return self.settings.isApplied(option);
+    return self.settings.isSet(option);
 }
 
 // TODO: Remove this function
