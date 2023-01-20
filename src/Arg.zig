@@ -55,9 +55,7 @@ pub fn setNameAsLongName(self: *Arg) void {
 
 /// Sets the minimum number of values required to provide for an argument.
 pub fn setMinValues(self: *Arg, num: usize) void {
-    if (num >= 1) {
-        self.min_values = num;
-    }
+    self.min_values = if (num >= 1) num else null;
 }
 
 /// Sets the maximum number of values an argument can take.
