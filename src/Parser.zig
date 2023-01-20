@@ -167,8 +167,9 @@ fn parseCommandArg(self: *Parser, token: *const Token) Error!void {
 
     if (num_values_to_consume <= 1) {
         try self.verifyValue(arg, token.value);
+        try self.putMatchedArg(arg, .{ .single = token.value });
         values.deinit();
-        return self.putMatchedArg(arg, .{ .single = token.value });
+        return;
     }
     try self.verifyAndAppendValue(arg, token.value, &values);
     try self.consumeNValues(arg, num_values_to_consume -% 1, &values);
