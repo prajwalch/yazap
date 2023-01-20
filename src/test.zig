@@ -141,6 +141,7 @@ test "Option with min values" {
     srcs.setShortName('s');
     srcs.setMinValues(2);
     srcs.setValuesDelimiter(":");
+    srcs.applySetting(.takes_value);
 
     try app.rootCommand().addArg(srcs);
     try testing.expectError(error.TooFewArgValue, app.parseFrom(&.{"-s=f1"}));
@@ -157,6 +158,7 @@ test "Option with max values" {
     srcs.setMinValues(2);
     srcs.setMaxValues(5);
     srcs.setValuesDelimiter(":");
+    srcs.applySetting(.takes_value);
 
     try app.rootCommand().addArg(srcs);
     try testing.expectError(error.TooManyArgValue, app.parseFrom(
@@ -173,6 +175,7 @@ test "Option with allowed values" {
     var stdd = Arg.new("std", null);
     stdd.setLongName("std");
     stdd.setAllowedValues(&.{ "c99", "c11", "c17" });
+    stdd.applySetting(.takes_value);
 
     try app.rootCommand().addArg(stdd);
     try testing.expectError(error.ProvidedValueIsNotValidOption, app.parseFrom(&.{"--std=c100"}));
