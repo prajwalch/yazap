@@ -43,7 +43,7 @@ test "command that takes many values using delimiter" {
 
     var paths = Arg.new("PATHS", null);
     paths.applySetting(.takes_multiple_values);
-    paths.valuesDelimiter(":");
+    paths.setValuesDelimiter(":");
 
     try app.rootCommand().addArg(paths);
     app.rootCommand().applySetting(.takes_value);
@@ -92,7 +92,7 @@ test "Option that does not takes value" {
     errdefer app.deinit();
 
     var recursive = Arg.new("version", null);
-    recursive.shortName('v');
+    recursive.setShortName('v');
 
     try app.rootCommand().addArg(recursive);
     try testing.expectError(error.UnneededAttachedValue, app.parseFrom(&.{"-v=13"}));
@@ -105,7 +105,7 @@ test "Option that takes single value" {
     errdefer app.deinit();
 
     var browser = Arg.new("output", null);
-    browser.shortName('o');
+    browser.setShortName('o');
     browser.applySetting(.takes_value);
 
     try app.rootCommand().addArg(browser);
@@ -119,8 +119,8 @@ test "Option that takes many/multiple values" {
     errdefer app.deinit();
 
     var srcs = Arg.new("sources", null);
-    srcs.shortName('s');
-    srcs.valuesDelimiter(":");
+    srcs.setShortName('s');
+    srcs.setValuesDelimiter(":");
     srcs.applySetting(.takes_value);
     srcs.applySetting(.takes_multiple_values);
 
@@ -138,9 +138,9 @@ test "Option with min values" {
     errdefer app.deinit();
 
     var srcs = Arg.new("sources", null);
-    srcs.shortName('s');
-    srcs.minValues(2);
-    srcs.valuesDelimiter(":");
+    srcs.setShortName('s');
+    srcs.setMinValues(2);
+    srcs.setValuesDelimiter(":");
 
     try app.rootCommand().addArg(srcs);
     try testing.expectError(error.TooFewArgValue, app.parseFrom(&.{"-s=f1"}));
@@ -153,10 +153,10 @@ test "Option with max values" {
     errdefer app.deinit();
 
     var srcs = Arg.new("sources", null);
-    srcs.shortName('s');
-    srcs.minValues(2);
-    srcs.maxValues(5);
-    srcs.valuesDelimiter(":");
+    srcs.setShortName('s');
+    srcs.setMinValues(2);
+    srcs.setMaxValues(5);
+    srcs.setValuesDelimiter(":");
 
     try app.rootCommand().addArg(srcs);
     try testing.expectError(error.TooManyArgValue, app.parseFrom(
@@ -171,8 +171,8 @@ test "Option with allowed values" {
     errdefer app.deinit();
 
     var stdd = Arg.new("std", null);
-    stdd.longName("std");
-    stdd.allowedValues(&.{ "c99", "c11", "c17" });
+    stdd.setLongName("std");
+    stdd.setAllowedValues(&.{ "c99", "c11", "c17" });
 
     try app.rootCommand().addArg(stdd);
     try testing.expectError(error.ProvidedValueIsNotValidOption, app.parseFrom(&.{"--std=c100"}));

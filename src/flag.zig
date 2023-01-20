@@ -8,7 +8,7 @@ pub fn boolean(name: []const u8, short_name: ?u8, description: ?[]const u8) Arg 
     var arg = Arg.new(name, description);
     arg.setLongNameSameAsName();
 
-    if (short_name) |n| arg.shortName(n);
+    if (short_name) |n| arg.setShortName(n);
 
     return arg;
 }
@@ -26,7 +26,7 @@ pub fn option(
     description: ?[]const u8,
 ) Arg {
     var arg = argN(name, short_name, 1, description);
-    arg.allowedValues(options);
+    arg.setAllowedValues(options);
     return arg;
 }
 
@@ -38,11 +38,11 @@ pub fn argN(
     description: ?[]const u8,
 ) Arg {
     var arg = Arg.new(name, description);
-    arg.minValues(1);
-    arg.maxValues(max_values);
+    arg.setMinValues(1);
+    arg.setMaxValues(max_values);
     arg.setLongNameSameAsName();
 
-    if (short_name) |n| arg.shortName(n);
+    if (short_name) |n| arg.setShortName(n);
     if (max_values > 1) arg.setDefaultValuesDelimiter();
 
     return arg;

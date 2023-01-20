@@ -35,27 +35,27 @@ pub fn new(name: []const u8, description: ?[]const u8) Arg {
 }
 
 /// Sets the short name of the argument
-pub fn shortName(self: *Arg, short_name: u8) void {
+pub fn setShortName(self: *Arg, short_name: u8) void {
     self.short_name = short_name;
 }
 
 /// Sets the short name of the argument from the name
 pub fn setShortNameFromName(self: *Arg) void {
-    self.shortName(self.name[0]);
+    self.setShortName(self.name[0]);
 }
 
 /// Sets the long name of the argument
-pub fn longName(self: *Arg, long_name: []const u8) void {
+pub fn setLongName(self: *Arg, long_name: []const u8) void {
     self.long_name = long_name;
 }
 
 pub fn setLongNameSameAsName(self: *Arg) void {
-    self.longName(self.name);
+    self.setLongName(self.name);
 }
 
 /// Sets the minimum number of values required to provide for an argument.
 /// Implicitly applies the `.takes_value` setting
-pub fn minValues(self: *Arg, num: usize) void {
+pub fn setMinValues(self: *Arg, num: usize) void {
     if (num >= 1) {
         self.min_values = num;
         self.applySetting(.takes_value);
@@ -64,7 +64,7 @@ pub fn minValues(self: *Arg, num: usize) void {
 
 /// Sets the maximum number of values an argument can take.
 /// Implicitly applies the `.takes_value` setting
-pub fn maxValues(self: *Arg, num: usize) void {
+pub fn setMaxValues(self: *Arg, num: usize) void {
     self.max_values = num;
     self.applySetting(.takes_value);
 }
@@ -72,19 +72,19 @@ pub fn maxValues(self: *Arg, num: usize) void {
 /// Sets the allowed values for an argument.
 /// Value outside of allowed values will be consider as error.
 /// Implicitly applies the `.takes_value` setting
-pub fn allowedValues(self: *Arg, values: []const []const u8) void {
+pub fn setAllowedValues(self: *Arg, values: []const []const u8) void {
     self.allowed_values = values;
     self.applySetting(.takes_value);
 }
 
 /// Sets the default separator between the values of an argument.
 pub fn setDefaultValuesDelimiter(self: *Arg) void {
-    self.valuesDelimiter(DEFAULT_VALUES_DELIMITER);
+    self.setValuesDelimiter(DEFAULT_VALUES_DELIMITER);
 }
 
 /// Sets separator between the values of an argument.
 /// Implicitly applies the `.takes_value` setting
-pub fn valuesDelimiter(self: *Arg, delimiter: []const u8) void {
+pub fn setValuesDelimiter(self: *Arg, delimiter: []const u8) void {
     self.values_delimiter = delimiter;
     self.applySetting(.takes_value);
 }
