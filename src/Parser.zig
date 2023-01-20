@@ -29,11 +29,11 @@ const ShortOption = struct {
         };
     }
 
-    pub fn next(self: *ShortOption) ?*const u8 {
+    pub fn next(self: *ShortOption) ?u8 {
         if (self.isAtEnd()) return null;
         defer self.cursor += 1;
 
-        return &self.name[self.cursor];
+        return self.name[self.cursor];
     }
 
     pub fn getValue(self: *ShortOption) ?[]const u8 {
@@ -45,6 +45,10 @@ const ShortOption = struct {
         defer self.cursor = self.name.len;
 
         return self.name[self.cursor..];
+    }
+
+    pub fn getCurrentOptionAsStr(self: *ShortOption) []const u8 {
+        return self.name[self.cursor - 1 .. self.cursor];
     }
 
     pub fn hasValue(self: *ShortOption) bool {
@@ -184,8 +188,8 @@ fn parseShortOption(self: *Parser, token: *const Token) Error!void {
     var short_option = ShortOption.init(option_tuple[0], option_tuple[1]);
 
     while (short_option.next()) |option| {
-        const arg = self.cmd.findShortOption(option.*) orelse {
-            self.err.setContext(.{ .invalid_arg = @as(*const [1]u8, option) });
+        const arg = self.cmd.findShortOption(option) orelse {
+            self.err.setContext(.{ .invalid_arg = short_option.getCurrentOptionAsStr() });
             return Error.UnknownFlag;
         };
 
