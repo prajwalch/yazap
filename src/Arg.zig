@@ -91,7 +91,7 @@ pub fn isSettingSet(self: *const Arg, option: Settings.Option) bool {
     return self.settings.isSet(option);
 }
 
-pub fn verifyValueInAllowedValues(self: *const Arg, value_to_check: []const u8) bool {
+pub fn isValidValue(self: *const Arg, value_to_check: []const u8) bool {
     if (self.allowed_values) |values| {
         for (values) |value| {
             if (std.mem.eql(u8, value, value_to_check)) return true;

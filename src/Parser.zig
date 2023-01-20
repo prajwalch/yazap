@@ -363,7 +363,7 @@ fn verifyValue(self: *Parser, arg: *const Arg, value: []const u8) Error!void {
     if ((value.len == 0) and !(arg.isSettingSet(.allow_empty_value)))
         return Error.EmptyArgValueNotAllowed;
 
-    if (!(arg.verifyValueInAllowedValues(value))) {
+    if (!(arg.isValidValue(value))) {
         self.err.setContext(.{ .invalid_value = value, .valid_values = arg.allowed_values.? });
         return Error.ProvidedValueIsNotValidOption;
     }
