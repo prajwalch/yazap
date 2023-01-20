@@ -1,155 +1,181 @@
 const std = @import("std");
-const Command = @import("Command.zig");
-const flag = @import("flag.zig");
-const Arg = @import("Arg.zig");
-const App = @import("App.zig");
+const lib = @import("lib.zig");
+
 const testing = std.testing;
-
 const allocator = testing.allocator;
+const flag = lib.flag;
+const App = lib.App;
+const Arg = lib.Arg;
 
-fn initAppArgs(alloc: std.mem.Allocator) !App {
-    var app = App.init(alloc, "app", "Test app description");
+test "command that takes single value" {
+    var app = App.init(allocator, "rm", null);
     errdefer app.deinit();
 
-    var root_cmd = app.rootCommand();
-
-    try root_cmd.takesSingleValue("ARG-ONE");
-    try root_cmd.takesNValues("ARG-MANY", 3);
-
-    try root_cmd.addArgs(&[_]Arg{
-        flag.boolean("bool-flag", 'b', null),
-        flag.boolean("bool-flag2", 'c', null),
-        flag.argOne("arg-one-flag", '1', null),
-        flag.argN("argn-flag", '3', 3, null),
-        flag.option("option-flag", 'o', &[_][]const u8{
-            "opt1",
-            "opt2",
-            "opt3",
-        }, null),
-    });
-
-    try root_cmd.addSubcommand(app.createCommand("subcmd1", "First sub command"));
-    return app;
-}
-
-test "arg required error" {
-    const argv: []const [:0]const u8 = &.{
-        "--mode",
-        "debug",
-    };
-
-    var app = try initAppArgs(allocator);
-    app.rootCommand().applySetting(.arg_required);
-    defer app.deinit();
-
-    try testing.expectError(error.CommandArgumentNotProvided, app.parseFrom(argv));
-}
-
-test "subcommand required error" {
-    const argv: []const [:0]const u8 = &.{
-        "",
-    };
-
-    var app = try initAppArgs(allocator);
-    app.rootCommand().applySetting(.subcommand_required);
-    defer app.deinit();
-
-    try testing.expectError(error.CommandSubcommandNotProvided, app.parseFrom(argv));
-}
-
-test "command that takes value" {
-    const argv: []const [:0]const u8 = &.{
-        "argone",
-        "argmany1",
-        "argmany2",
-        "argmany3",
-    };
-
-    var app = try initAppArgs(allocator);
-    defer app.deinit();
-
-    var matches = try app.parseFrom(argv);
-    try testing.expectEqualStrings("argone", matches.valueOf("ARG-ONE").?);
-
-    const many_values = matches.valuesOf("ARG-MANY").?;
-    try testing.expectEqualStrings("argmany1", many_values[0]);
-    try testing.expectEqualStrings("argmany2", many_values[1]);
-    try testing.expectEqualStrings("argmany3", many_values[2]);
-}
-
-test "flags" {
-    const argv: []const [:0]const u8 = &.{
-        "-bc",
-        "-1one",
-        "--argn-flag=val1,val2,val3",
-        "--option-flag",
-        "opt2",
-    };
-
-    var app = try initAppArgs(allocator);
-    defer app.deinit();
-
-    var matches = try app.parseFrom(argv);
-    try testing.expect(matches.isPresent("bool-flag") == true);
-    try testing.expect(matches.isPresent("bool-flag2") == true);
-    try testing.expectEqualStrings("one", matches.valueOf("arg-one-flag").?);
-    //try testing.expect(2 == matches.valuesOf("arg-one-flag").?.len);
-
-    const argn_values = matches.valuesOf("argn-flag").?;
-    try testing.expectEqualStrings("val1", argn_values[0]);
-    try testing.expectEqualStrings("val2", argn_values[1]);
-    try testing.expectEqualStrings("val3", argn_values[2]);
-    try testing.expectEqualStrings("opt2", matches.valueOf("option-flag").?);
-}
-
-test "arg.takes_multiple_values" {
-    const argv: []const [:0]const u8 = &.{
-        "file1.zig",
-        "file1.zig",
-        "file1.zig",
-        "file1.zig",
-    };
-
-    var app = try initAppArgs(allocator);
-    defer app.deinit();
+    try app.rootCommand().addArg(Arg.new("PATH", null));
     app.rootCommand().applySetting(.takes_value);
 
-    var files = Arg.new("files", null);
-    files.applySetting(.takes_multiple_values);
+    const args = try app.parseFrom(&.{"test.txt"});
+    try testing.expectEqualStrings("test.txt", args.valueOf("PATH").?);
 
-    try app.rootCommand().addArg(files);
-    var args = try app.parseFrom(argv);
-
-    if (args.valuesOf("files")) |f| {
-        try testing.expect(f.len == 4);
-    }
+    app.deinit();
 }
 
-test "using displayHelp and displaySubcommandHelp help api" {
-    const argv: []const [:0]const u8 = &.{"subcmd"};
+test "command that takes many values" {
+    var app = App.init(allocator, "rm", null);
+    errdefer app.deinit();
 
-    var app = try initAppArgs(allocator);
-    defer app.deinit();
-    app.rootCommand().removeSetting(.takes_value);
+    var paths = Arg.new("PATHS", null);
+    paths.applySetting(.takes_multiple_values);
+    paths.applySetting(.takes_value);
 
-    var subcmd = app.createCommand("subcmd", null);
-    try subcmd.addArg(flag.boolean("bool", null, null));
-    try app.rootCommand().addSubcommand(subcmd);
+    try app.rootCommand().addArg(paths);
+    app.rootCommand().applySetting(.takes_value);
 
-    var args = try app.parseFrom(argv);
+    const args = try app.parseFrom(&.{ "a", "b", "c" });
+    try testing.expectEqualSlices([]const u8, &.{ "a", "b", "c" }, args.valuesOf("PATHS").?);
 
-    if (args.subcommandContext("subcmd")) |sargs| {
-        if (!sargs.hasArgs()) {
-            try app.displaySubcommandHelp();
-        }
-    }
+    app.deinit();
 }
 
-test "auto help generation" {
-    const argv: []const [:0]const u8 = &.{"-h"};
+test "command that takes many values using delimiter" {
+    var app = App.init(allocator, "rm", null);
+    errdefer app.deinit();
 
-    var app = try initAppArgs(allocator);
-    defer app.deinit();
+    var paths = Arg.new("PATHS", null);
+    paths.applySetting(.takes_multiple_values);
+    paths.valuesDelimiter(":");
 
-    _ = try app.parseFrom(argv);
+    try app.rootCommand().addArg(paths);
+    app.rootCommand().applySetting(.takes_value);
+
+    const args = try app.parseFrom(&.{"a:b:c"});
+
+    // This gives weird error like:
+    // index 0 incorrect. expected { 97 }, found { 97 }
+    //try testing.expectEqualSlices([]const u8, &.{ "a", "b", "c" }, args.valuesOf("PATHS").?);
+
+    const given_paths = args.valuesOf("PATHS");
+    try testing.expectEqual(true, given_paths != null);
+    try testing.expectEqual(@as(usize, 3), given_paths.?.len);
+    try testing.expectEqualStrings("a", given_paths.?[0]);
+    try testing.expectEqualStrings("b", given_paths.?[1]);
+    try testing.expectEqualStrings("c", given_paths.?[2]);
+
+    app.deinit();
+}
+
+test "command that takes required value" {
+    var app = App.init(allocator, "rm", null);
+    errdefer app.deinit();
+
+    try app.rootCommand().addArg(Arg.new("PATH", null));
+    app.rootCommand().applySetting(.takes_value);
+    app.rootCommand().applySetting(.arg_required);
+    try testing.expectError(error.CommandArgumentNotProvided, app.parseFrom(&.{}));
+
+    app.deinit();
+}
+
+test "command requires subcommand" {
+    var app = App.init(allocator, "git", null);
+    errdefer app.deinit();
+
+    try app.rootCommand().addSubcommand(app.createCommand("init", null));
+    app.rootCommand().applySetting(.subcommand_required);
+    try testing.expectError(error.CommandSubcommandNotProvided, app.parseFrom(&.{}));
+
+    app.deinit();
+}
+
+test "Option that does not takes value" {
+    var app = App.init(allocator, "clang", null);
+    errdefer app.deinit();
+
+    var recursive = Arg.new("version", null);
+    recursive.shortName('v');
+
+    try app.rootCommand().addArg(recursive);
+    try testing.expectError(error.UnneededAttachedValue, app.parseFrom(&.{"-v=13"}));
+
+    app.deinit();
+}
+
+test "Option that takes single value" {
+    var app = App.init(allocator, "clang", null);
+    errdefer app.deinit();
+
+    var browser = Arg.new("output", null);
+    browser.shortName('o');
+    browser.applySetting(.takes_value);
+
+    try app.rootCommand().addArg(browser);
+    try testing.expectError(error.ArgValueNotProvided, app.parseFrom(&.{"-o"}));
+
+    app.deinit();
+}
+
+test "Option that takes many/multiple values" {
+    var app = App.init(allocator, "clang", null);
+    errdefer app.deinit();
+
+    var srcs = Arg.new("sources", null);
+    srcs.shortName('s');
+    srcs.valuesDelimiter(":");
+    srcs.applySetting(.takes_value);
+    srcs.applySetting(.takes_multiple_values);
+
+    // ex: clang sources...
+    try app.rootCommand().addArg(srcs);
+    const args = try app.parseFrom(&.{ "-s", "f1", "f2", "f3", "f4", "f5" });
+
+    try testing.expectEqual(@as(usize, 5), args.valuesOf("sources").?.len);
+
+    app.deinit();
+}
+
+test "Option with min values" {
+    var app = App.init(allocator, "clang", null);
+    errdefer app.deinit();
+
+    var srcs = Arg.new("sources", null);
+    srcs.shortName('s');
+    srcs.minValues(2);
+    srcs.valuesDelimiter(":");
+
+    try app.rootCommand().addArg(srcs);
+    try testing.expectError(error.TooFewArgValue, app.parseFrom(&.{"-s=f1"}));
+
+    app.deinit();
+}
+
+test "Option with max values" {
+    var app = App.init(allocator, "clang", null);
+    errdefer app.deinit();
+
+    var srcs = Arg.new("sources", null);
+    srcs.shortName('s');
+    srcs.minValues(2);
+    srcs.maxValues(5);
+    srcs.valuesDelimiter(":");
+
+    try app.rootCommand().addArg(srcs);
+    try testing.expectError(error.TooManyArgValue, app.parseFrom(
+        &.{"-s=f1:f2:f3:f4:f5:f6"},
+    ));
+
+    app.deinit();
+}
+
+test "Option with allowed values" {
+    var app = App.init(allocator, "clang", null);
+    errdefer app.deinit();
+
+    var stdd = Arg.new("std", null);
+    stdd.longName("std");
+    stdd.allowedValues(&.{ "c99", "c11", "c17" });
+
+    try app.rootCommand().addArg(stdd);
+    try testing.expectError(error.ProvidedValueIsNotValidOption, app.parseFrom(&.{"--std=c100"}));
+
+    app.deinit();
 }
