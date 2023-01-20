@@ -41,6 +41,7 @@ pub fn argN(
     arg.setMinValues(1);
     arg.setMaxValues(max_values);
     arg.setNameAsLongName();
+    arg.setSetting(.takes_value);
 
     if (short_name) |n| arg.setShortName(n);
     if (max_values > 1) arg.setDefaultValuesDelimiter();
