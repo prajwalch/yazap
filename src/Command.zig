@@ -79,7 +79,7 @@ pub fn takesNValues(self: *Command, arg_name: []const u8, n: usize) !void {
     if (n > 1) arg.setDefaultValuesDelimiter();
 
     try self.addArg(arg);
-    self.applySetting(.takes_value);
+    self.setSetting(.takes_value);
 }
 
 pub fn countArgs(self: *const Command) usize {
@@ -128,15 +128,15 @@ pub fn findSubcommand(self: *const Command, provided_subcmd: []const u8) ?*const
     return null;
 }
 
-pub fn applySetting(self: *Command, option: Settings.Option) void {
+pub fn setSetting(self: *Command, option: Settings.Option) void {
     return self.settings.apply(option);
 }
 
-pub fn removeSetting(self: *Command, option: Settings.Option) void {
+pub fn unsetSetting(self: *Command, option: Settings.Option) void {
     return self.settings.remove(option);
 }
 
-pub fn isSettingApplied(self: *const Command, option: Settings.Option) bool {
+pub fn isSettingSet(self: *const Command, option: Settings.Option) bool {
     return self.settings.isApplied(option);
 }
 

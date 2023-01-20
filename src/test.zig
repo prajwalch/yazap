@@ -12,7 +12,7 @@ test "command that takes single value" {
     errdefer app.deinit();
 
     try app.rootCommand().addArg(Arg.new("PATH", null));
-    app.rootCommand().applySetting(.takes_value);
+    app.rootCommand().setSetting(.takes_value);
 
     const args = try app.parseFrom(&.{"test.txt"});
     try testing.expectEqualStrings("test.txt", args.valueOf("PATH").?);
@@ -25,11 +25,11 @@ test "command that takes many values" {
     errdefer app.deinit();
 
     var paths = Arg.new("PATHS", null);
-    paths.applySetting(.takes_multiple_values);
-    paths.applySetting(.takes_value);
+    paths.setSetting(.takes_multiple_values);
+    paths.setSetting(.takes_value);
 
     try app.rootCommand().addArg(paths);
-    app.rootCommand().applySetting(.takes_value);
+    app.rootCommand().setSetting(.takes_value);
 
     const args = try app.parseFrom(&.{ "a", "b", "c" });
     try testing.expectEqualSlices([]const u8, &.{ "a", "b", "c" }, args.valuesOf("PATHS").?);
@@ -42,11 +42,11 @@ test "command that takes many values using delimiter" {
     errdefer app.deinit();
 
     var paths = Arg.new("PATHS", null);
-    paths.applySetting(.takes_multiple_values);
+    paths.setSetting(.takes_multiple_values);
     paths.setValuesDelimiter(":");
 
     try app.rootCommand().addArg(paths);
-    app.rootCommand().applySetting(.takes_value);
+    app.rootCommand().setSetting(.takes_value);
 
     const args = try app.parseFrom(&.{"a:b:c"});
 
@@ -69,8 +69,8 @@ test "command that takes required value" {
     errdefer app.deinit();
 
     try app.rootCommand().addArg(Arg.new("PATH", null));
-    app.rootCommand().applySetting(.takes_value);
-    app.rootCommand().applySetting(.arg_required);
+    app.rootCommand().setSetting(.takes_value);
+    app.rootCommand().setSetting(.arg_required);
     try testing.expectError(error.CommandArgumentNotProvided, app.parseFrom(&.{}));
 
     app.deinit();
@@ -81,7 +81,7 @@ test "command requires subcommand" {
     errdefer app.deinit();
 
     try app.rootCommand().addSubcommand(app.createCommand("init", null));
-    app.rootCommand().applySetting(.subcommand_required);
+    app.rootCommand().setSetting(.subcommand_required);
     try testing.expectError(error.CommandSubcommandNotProvided, app.parseFrom(&.{}));
 
     app.deinit();
@@ -106,7 +106,7 @@ test "Option that takes single value" {
 
     var browser = Arg.new("output", null);
     browser.setShortName('o');
-    browser.applySetting(.takes_value);
+    browser.setSetting(.takes_value);
 
     try app.rootCommand().addArg(browser);
     try testing.expectError(error.ArgValueNotProvided, app.parseFrom(&.{"-o"}));
@@ -121,8 +121,8 @@ test "Option that takes many/multiple values" {
     var srcs = Arg.new("sources", null);
     srcs.setShortName('s');
     srcs.setValuesDelimiter(":");
-    srcs.applySetting(.takes_value);
-    srcs.applySetting(.takes_multiple_values);
+    srcs.setSetting(.takes_value);
+    srcs.setSetting(.takes_multiple_values);
 
     // ex: clang sources...
     try app.rootCommand().addArg(srcs);
@@ -141,7 +141,7 @@ test "Option with min values" {
     srcs.setShortName('s');
     srcs.setMinValues(2);
     srcs.setValuesDelimiter(":");
-    srcs.applySetting(.takes_value);
+    srcs.setSetting(.takes_value);
 
     try app.rootCommand().addArg(srcs);
     try testing.expectError(error.TooFewArgValue, app.parseFrom(&.{"-s=f1"}));
@@ -158,7 +158,7 @@ test "Option with max values" {
     srcs.setMinValues(2);
     srcs.setMaxValues(5);
     srcs.setValuesDelimiter(":");
-    srcs.applySetting(.takes_value);
+    srcs.setSetting(.takes_value);
 
     try app.rootCommand().addArg(srcs);
     try testing.expectError(error.TooManyArgValue, app.parseFrom(
@@ -175,7 +175,7 @@ test "Option with allowed values" {
     var stdd = Arg.new("std", null);
     stdd.setLongName("std");
     stdd.setAllowedValues(&.{ "c99", "c11", "c17" });
-    stdd.applySetting(.takes_value);
+    stdd.setSetting(.takes_value);
 
     try app.rootCommand().addArg(stdd);
     try testing.expectError(error.ProvidedValueIsNotValidOption, app.parseFrom(&.{"--std=c100"}));

@@ -80,7 +80,7 @@ pub fn init(allocator: Allocator, tokenizer: Tokenizer, command: *const Command)
         .tokenizer = tokenizer,
         .args_ctx = ArgsContext.init(allocator),
         .cmd_args_idx = 0,
-        .parse_cmd_args = (command.isSettingApplied(.takes_value) and command.countArgs() >= 1),
+        .parse_cmd_args = (command.isSettingSet(.takes_value) and command.countArgs() >= 1),
     };
 }
 
@@ -90,7 +90,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
     while (self.tokenizer.nextToken()) |*token| {
         if (mem.eql(u8, token.value, "help") or mem.eql(u8, token.value, "h")) {
             // Check whether help is enabled for `cmd`
-            if (self.cmd.isSettingApplied(.enable_help)) {
+            if (self.cmd.isSettingSet(.enable_help)) {
                 try self.putMatchedArg(&Arg.new("help", null), .none);
                 break;
             } else {
@@ -114,13 +114,13 @@ pub fn parse(self: *Parser) Error!ArgsContext {
     }
 
     if (!(self.args_ctx.isPresent("help"))) {
-        const takes_value_and_is_required = (self.parse_cmd_args and (self.cmd.isSettingApplied(.arg_required)));
+        const takes_value_and_is_required = (self.parse_cmd_args and (self.cmd.isSettingSet(.arg_required)));
         if (takes_value_and_is_required and !(self.args_ctx.hasArgs())) {
             self.err.setContext(.{ .valid_cmd = self.cmd.name });
             return Error.CommandArgumentNotProvided;
         }
 
-        if (self.cmd.isSettingApplied(.subcommand_required) and self.args_ctx.subcommand == null) {
+        if (self.cmd.isSettingSet(.subcommand_required) and self.args_ctx.subcommand == null) {
             self.err.setContext(.{ .valid_cmd = self.cmd.name });
             return Error.CommandSubcommandNotProvided;
         }
@@ -135,7 +135,7 @@ fn parseCommandArg(self: *Parser, token: *const Token) Error!void {
     }
 
     if (token.tag != .some_argument) {
-        if (self.cmd.isSettingApplied(.arg_required) and (self.args_ctx.args.count() == 0)) {
+        if (self.cmd.isSettingSet(.arg_required) and (self.args_ctx.args.count() == 0)) {
             self.err.setContext(.{ .valid_cmd = self.cmd.name });
             return Error.CommandArgumentNotProvided;
         } else {
@@ -157,7 +157,7 @@ fn parseCommandArg(self: *Parser, token: *const Token) Error!void {
     // TODO: This code and the code at line 262 is exactly same.
     // Either move it a function or do something about this.
     const num_values_to_consume = arg.max_values orelse arg.min_values orelse blk: {
-        if (arg.isSettingApplied(.takes_multiple_values)) {
+        if (arg.isSettingSet(.takes_multiple_values)) {
             try self.verifyAndAppendValue(arg, token.value, &values);
             try self.consumeValuesTillNextOption(arg, &values);
             return self.putMatchedArg(arg, .{ .many = values });
@@ -194,7 +194,7 @@ fn parseShortOption(self: *Parser, token: *const Token) Error!void {
             return Error.UnknownFlag;
         };
 
-        if (!(arg.isSettingApplied(.takes_value))) {
+        if (!(arg.isSettingSet(.takes_value))) {
             if (short_option.hasValue()) {
                 self.err.setContext(.{ .valid_arg = arg.name });
                 return Error.UnneededAttachedValue;
@@ -225,7 +225,7 @@ fn parseLongOption(self: *Parser, token: *const Token) Error!void {
         return Error.UnknownFlag;
     };
 
-    if (!(arg.isSettingApplied(.takes_value))) {
+    if (!(arg.isSettingSet(.takes_value))) {
         if (option_tuple[1] != null) {
             self.err.setContext(.{ .valid_arg = option_tuple[0] });
             return Error.UnneededAttachedValue;
@@ -270,7 +270,7 @@ fn parseOptionValue(self: *Parser, arg: *const Arg, attached_value: ?[]const u8)
     errdefer values.deinit();
 
     const num_values_to_consume = arg.max_values orelse arg.min_values orelse blk: {
-        if (arg.isSettingApplied(.takes_multiple_values)) {
+        if (arg.isSettingSet(.takes_multiple_values)) {
             try self.consumeValuesTillNextOption(arg, &values);
             return self.putMatchedArg(arg, .{ .many = values });
         }
@@ -360,7 +360,7 @@ fn verifyAndAppendValue(
 fn verifyValue(self: *Parser, arg: *const Arg, value: []const u8) Error!void {
     self.err.setContext(.{ .valid_arg = arg.name });
 
-    if ((value.len == 0) and !(arg.isSettingApplied(.allow_empty_value)))
+    if ((value.len == 0) and !(arg.isSettingSet(.allow_empty_value)))
         return Error.EmptyArgValueNotAllowed;
 
     if (!(arg.verifyValueInAllowedValues(value))) {
@@ -435,7 +435,7 @@ fn verifyValuesLength(self: *Parser, arg: *const Arg, len: usize) Error!void {
 
 fn takesMorethanOneValue(arg: *const Arg) bool {
     const num_values = arg.max_values orelse arg.min_values orelse 1;
-    return ((num_values > 1) or (arg.isSettingApplied(.takes_multiple_values)));
+    return ((num_values > 1) or (arg.isSettingSet(.takes_multiple_values)));
 }
 
 fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubCommand {
@@ -444,7 +444,7 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
         return Error.UnknownCommand;
     };
     // zig fmt: off
-    const takes_value = subcmd.isSettingApplied(.takes_value)
+    const takes_value = subcmd.isSettingSet(.takes_value)
         or (subcmd.countArgs() >= 1)
         or (subcmd.countOptions() >= 1)
         or (subcmd.countSubcommands() >= 1);
@@ -455,7 +455,7 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
     }
 
     const args = self.tokenizer.restArg() orelse {
-        if (subcmd.isSettingApplied(.arg_required)) {
+        if (subcmd.isSettingSet(.arg_required)) {
             self.err.setContext(.{ .valid_cmd = provided_subcmd });
             return Error.CommandArgumentNotProvided;
         }

@@ -79,6 +79,18 @@ pub fn setValuesDelimiter(self: *Arg, delimiter: []const u8) void {
     self.values_delimiter = delimiter;
 }
 
+pub fn setSetting(self: *Arg, option: Settings.Option) void {
+    return self.settings.apply(option);
+}
+
+pub fn unsetSetting(self: *Arg, option: Settings.Option) void {
+    return self.settings.remove(option);
+}
+
+pub fn isSettingSet(self: *const Arg, option: Settings.Option) bool {
+    return self.settings.isApplied(option);
+}
+
 pub fn verifyValueInAllowedValues(self: *const Arg, value_to_check: []const u8) bool {
     if (self.allowed_values) |values| {
         for (values) |value| {
@@ -87,18 +99,6 @@ pub fn verifyValueInAllowedValues(self: *const Arg, value_to_check: []const u8) 
         return false;
     }
     return true;
-}
-
-pub fn applySetting(self: *Arg, option: Settings.Option) void {
-    return self.settings.apply(option);
-}
-
-pub fn removeSetting(self: *Arg, option: Settings.Option) void {
-    return self.settings.remove(option);
-}
-
-pub fn isSettingApplied(self: *const Arg, option: Settings.Option) bool {
-    return self.settings.isApplied(option);
 }
 
 test "emit methods docs" {

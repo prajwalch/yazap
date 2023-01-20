@@ -90,11 +90,11 @@ pub const Help = struct {
         try writer.print("{s} ", .{self.cmd.name});
 
         if (self.include_args) {
-            const braces = getBraces(self.cmd.isSettingApplied(.arg_required));
+            const braces = getBraces(self.cmd.isSettingSet(.arg_required));
 
             for (self.cmd.args.items) |arg| {
                 try writer.print("{c}{s}", .{ braces[0], arg.name });
-                if (arg.isSettingApplied(.takes_multiple_values))
+                if (arg.isSettingSet(.takes_multiple_values))
                     try writer.writeAll("...");
                 try writer.print("{c} ", .{braces[1]});
             }
@@ -103,7 +103,7 @@ pub const Help = struct {
         if (self.include_flags)
             try writer.writeAll("[OPTIONS] ");
         if (self.include_subcmds) {
-            const braces = getBraces(self.cmd.isSettingApplied(.subcommand_required));
+            const braces = getBraces(self.cmd.isSettingSet(.subcommand_required));
             try writer.print("{c}COMMAND{c}", .{ braces[0], braces[1] });
         }
         try writeNewLine(writer);
@@ -154,7 +154,7 @@ pub const Help = struct {
             const padding: usize = if (option.short_name == null) 6 else 0;
             try writer.print(" {[1]s:>[0]}{[2]s} ", .{ padding, "--", long_name });
 
-            if (option.isSettingApplied(.takes_value)) {
+            if (option.isSettingSet(.takes_value)) {
                 // TODO: Add new `Arg.placeholderName()` to display proper placeholder
                 if (option.allowed_values) |values| {
                     try writer.writeByte('{');
@@ -205,7 +205,7 @@ pub fn enableFor(cmd: *Command) void {
         or cmd.countOptions() >= 1
         or cmd.countSubcommands() >= 1) {
         // zig fmt: on
-        cmd.applySetting(.enable_help);
+        cmd.setSetting(.enable_help);
     }
 }
 
