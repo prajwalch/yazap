@@ -370,6 +370,9 @@ fn verifyValue(self: *Parser, arg: *const Arg, value: []const u8) Error!void {
 }
 
 fn putMatchedArg(self: *Parser, arg: *const Arg, value: args_context.MatchedArgValue) Error!void {
+    errdefer {
+        if (value.isMany()) value.many.deinit();
+    }
     try self.verifyValuesLength(arg, value.count());
 
     var ctx = &self.args_ctx;
