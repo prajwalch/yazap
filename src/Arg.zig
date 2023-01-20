@@ -49,7 +49,7 @@ pub fn setLongName(self: *Arg, long_name: []const u8) void {
     self.long_name = long_name;
 }
 
-pub fn setLongNameSameAsName(self: *Arg) void {
+pub fn setNameAsLongName(self: *Arg) void {
     self.setLongName(self.name);
 }
 
