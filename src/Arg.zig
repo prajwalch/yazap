@@ -60,7 +60,7 @@ pub fn setMinValues(self: *Arg, num: usize) void {
 
 /// Sets the maximum number of values an argument can take.
 pub fn setMaxValues(self: *Arg, num: usize) void {
-    self.max_values = num;
+    self.max_values = if (num >= 1) num else null;
 }
 
 /// Sets the allowed values for an argument.
