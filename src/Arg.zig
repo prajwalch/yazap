@@ -54,27 +54,21 @@ pub fn setNameAsLongName(self: *Arg) void {
 }
 
 /// Sets the minimum number of values required to provide for an argument.
-/// Implicitly applies the `.takes_value` setting
 pub fn setMinValues(self: *Arg, num: usize) void {
     if (num >= 1) {
         self.min_values = num;
-        self.applySetting(.takes_value);
     }
 }
 
 /// Sets the maximum number of values an argument can take.
-/// Implicitly applies the `.takes_value` setting
 pub fn setMaxValues(self: *Arg, num: usize) void {
     self.max_values = num;
-    self.applySetting(.takes_value);
 }
 
 /// Sets the allowed values for an argument.
 /// Value outside of allowed values will be consider as error.
-/// Implicitly applies the `.takes_value` setting
 pub fn setAllowedValues(self: *Arg, values: []const []const u8) void {
     self.allowed_values = values;
-    self.applySetting(.takes_value);
 }
 
 /// Sets the default separator between the values of an argument.
@@ -83,10 +77,8 @@ pub fn setDefaultValuesDelimiter(self: *Arg) void {
 }
 
 /// Sets separator between the values of an argument.
-/// Implicitly applies the `.takes_value` setting
 pub fn setValuesDelimiter(self: *Arg, delimiter: []const u8) void {
     self.values_delimiter = delimiter;
-    self.applySetting(.takes_value);
 }
 
 pub fn verifyValueInAllowedValues(self: *const Arg, value_to_check: []const u8) bool {
