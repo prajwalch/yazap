@@ -24,10 +24,7 @@ pub fn build(b: *std.build.Builder) void {
 
     const examples_step = b.step("examples", "Build all the example");
 
-    inline for (.{
-        "git",
-        "touch",
-    }) |example_name| {
+    inline for (.{ "git", "touch", "ls" }) |example_name| {
         const example_exe = b.addExecutable(example_name, "examples/" ++ example_name ++ ".zig");
         example_exe.setTarget(target);
         example_exe.setBuildMode(mode);
