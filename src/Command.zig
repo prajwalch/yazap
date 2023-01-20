@@ -82,6 +82,18 @@ pub fn takesNValues(self: *Command, arg_name: []const u8, n: usize) !void {
     self.setSetting(.takes_value);
 }
 
+pub fn setSetting(self: *Command, option: Settings.Option) void {
+    return self.settings.set(option);
+}
+
+pub fn unsetSetting(self: *Command, option: Settings.Option) void {
+    return self.settings.unset(option);
+}
+
+pub fn isSettingSet(self: *const Command, option: Settings.Option) bool {
+    return self.settings.isSet(option);
+}
+
 pub fn countArgs(self: *const Command) usize {
     return (self.args.items.len);
 }
@@ -126,18 +138,6 @@ pub fn findSubcommand(self: *const Command, provided_subcmd: []const u8) ?*const
     }
 
     return null;
-}
-
-pub fn setSetting(self: *Command, option: Settings.Option) void {
-    return self.settings.set(option);
-}
-
-pub fn unsetSetting(self: *Command, option: Settings.Option) void {
-    return self.settings.unset(option);
-}
-
-pub fn isSettingSet(self: *const Command, option: Settings.Option) bool {
-    return self.settings.isSet(option);
 }
 
 // TODO: Remove this function
