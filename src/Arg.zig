@@ -85,9 +85,8 @@ pub fn verifyValueInAllowedValues(self: *const Arg, value_to_check: []const u8) 
             if (std.mem.eql(u8, value, value_to_check)) return true;
         }
         return false;
-    } else {
-        return true;
     }
+    return true;
 }
 
 pub fn applySetting(self: *Arg, option: Settings.Option) void {
