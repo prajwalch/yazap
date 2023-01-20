@@ -283,10 +283,11 @@ fn parseOptionValue(self: *Parser, arg: *const Arg, attached_value: ?[]const u8)
     }
     if (values.items.len == 1) {
         const value = values.pop();
-        values.deinit();
-
         try self.verifyValue(arg, value);
-        return self.putMatchedArg(arg, .{ .single = value });
+        try self.putMatchedArg(arg, .{ .single = value });
+
+        values.deinit();
+        return;
     }
     return self.putMatchedArg(arg, .{ .many = values });
 }
