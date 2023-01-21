@@ -140,11 +140,6 @@ pub fn findSubcommand(self: *const Command, provided_subcmd: []const u8) ?*const
     return null;
 }
 
-// TODO: Remove this function
-pub fn getHelp(self: *const Command) help.Help {
-    return help.Help.init(self.allocator, self, self.name) catch unreachable;
-}
-
 test "emit methods docs" {
     std.testing.refAllDecls(@This());
 }

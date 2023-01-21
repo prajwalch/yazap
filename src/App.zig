@@ -65,7 +65,12 @@ pub fn parseFrom(self: *App, argv: []const [:0]const u8) YazapError!(*const Args
 
 /// Displays the help message of root command
 pub fn displayHelp(self: *App) !void {
-    return self.command.getHelp().writeAll(std.io.getStdErr().writer());
+    var cmd_help = help.Help.init(
+        self.allocator,
+        self.rootCommand(),
+        self.rootCommand().name,
+    ) catch unreachable;
+    return cmd_help.writeAll(std.io.getStdErr().writer());
 }
 
 /// Displays the help message of subcommand if it is provided on command line
