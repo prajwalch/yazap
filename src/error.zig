@@ -125,7 +125,7 @@ pub const Error = struct {
                 @tagName(ctx_kind),
             }));
         };
-        if (!verifyGivenType(T, value)) {
+        if (!isValidType(T, value)) {
             @panic(fmt.comptimePrint("Given value type `{s}` does not matched with Type of found value", .{
                 @typeName(T),
             }));
@@ -139,8 +139,8 @@ pub const Error = struct {
         };
     }
 
-    /// Verifies that the given T is equal to T of value
-    fn verifyGivenType(comptime T: type, value: ContextValueKind) bool {
+    /// Checks if the given T is equal to T of value
+    fn isValidType(comptime T: type, value: ContextValueKind) bool {
         const active_tag = std.meta.activeTag(value);
         const matched_tag = inline for (std.meta.fields(ContextValueKind)) |field| {
             // Check the field whose T is equal to given T
