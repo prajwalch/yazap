@@ -11,7 +11,7 @@ test "command that takes single value" {
     var app = App.init(allocator, "rm", null);
     errdefer app.deinit();
 
-    try app.rootCommand().addArg(Arg.new("PATH", null));
+    try app.rootCommand().addArg(Arg.init("PATH", null));
     app.rootCommand().setSetting(.takes_value);
 
     const args = try app.parseFrom(&.{"test.txt"});
@@ -24,7 +24,7 @@ test "command that takes many values" {
     var app = App.init(allocator, "rm", null);
     errdefer app.deinit();
 
-    var paths = Arg.new("PATHS", null);
+    var paths = Arg.init("PATHS", null);
     paths.setSetting(.takes_multiple_values);
     paths.setSetting(.takes_value);
 
@@ -41,7 +41,7 @@ test "command that takes many values using delimiter" {
     var app = App.init(allocator, "rm", null);
     errdefer app.deinit();
 
-    var paths = Arg.new("PATHS", null);
+    var paths = Arg.init("PATHS", null);
     paths.setSetting(.takes_multiple_values);
     paths.setValuesDelimiter(":");
 
@@ -68,7 +68,7 @@ test "command that takes required value" {
     var app = App.init(allocator, "rm", null);
     errdefer app.deinit();
 
-    try app.rootCommand().addArg(Arg.new("PATH", null));
+    try app.rootCommand().addArg(Arg.init("PATH", null));
     app.rootCommand().setSetting(.takes_value);
     app.rootCommand().setSetting(.arg_required);
     try testing.expectError(error.CommandArgumentNotProvided, app.parseFrom(&.{}));
@@ -91,7 +91,7 @@ test "Option that does not takes value" {
     var app = App.init(allocator, "clang", null);
     errdefer app.deinit();
 
-    var recursive = Arg.new("version", null);
+    var recursive = Arg.init("version", null);
     recursive.setShortName('v');
 
     try app.rootCommand().addArg(recursive);
@@ -104,7 +104,7 @@ test "Option that takes single value" {
     var app = App.init(allocator, "clang", null);
     errdefer app.deinit();
 
-    var browser = Arg.new("output", null);
+    var browser = Arg.init("output", null);
     browser.setShortName('o');
     browser.setSetting(.takes_value);
 
@@ -118,7 +118,7 @@ test "Option that takes many/multiple values" {
     var app = App.init(allocator, "clang", null);
     errdefer app.deinit();
 
-    var srcs = Arg.new("sources", null);
+    var srcs = Arg.init("sources", null);
     srcs.setShortName('s');
     srcs.setValuesDelimiter(":");
     srcs.setSetting(.takes_value);
@@ -137,7 +137,7 @@ test "Option with min values" {
     var app = App.init(allocator, "clang", null);
     errdefer app.deinit();
 
-    var srcs = Arg.new("sources", null);
+    var srcs = Arg.init("sources", null);
     srcs.setShortName('s');
     srcs.setMinValues(2);
     srcs.setValuesDelimiter(":");
@@ -153,7 +153,7 @@ test "Option with max values" {
     var app = App.init(allocator, "clang", null);
     errdefer app.deinit();
 
-    var srcs = Arg.new("sources", null);
+    var srcs = Arg.init("sources", null);
     srcs.setShortName('s');
     srcs.setMinValues(2);
     srcs.setMaxValues(5);
@@ -172,7 +172,7 @@ test "Option with allowed values" {
     var app = App.init(allocator, "clang", null);
     errdefer app.deinit();
 
-    var stdd = Arg.new("std", null);
+    var stdd = Arg.init("std", null);
     stdd.setLongName("std");
     stdd.setAllowedValues(&.{ "c99", "c11", "c17" });
     stdd.setSetting(.takes_value);

@@ -91,7 +91,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
         if (mem.eql(u8, token.value, "help") or mem.eql(u8, token.value, "h")) {
             // Check whether help is enabled for `cmd`
             if (self.cmd.isSettingSet(.enable_help)) {
-                try self.putMatchedArg(&Arg.new("help", null), .none);
+                try self.putMatchedArg(&Arg.init("help", null), .none);
                 break;
             } else {
                 // Return error?

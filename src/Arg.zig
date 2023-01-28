@@ -22,7 +22,7 @@ values_delimiter: ?[]const u8,
 settings: Settings,
 
 /// Creates a new instance of it
-pub fn new(name: []const u8, description: ?[]const u8) Arg {
+pub fn init(name: []const u8, description: ?[]const u8) Arg {
     return Arg{
         .name = name,
         .short_name = null,
