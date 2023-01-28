@@ -24,7 +24,7 @@ subcommands: ArrayList(Command) = .{},
 settings: Settings = .{},
 
 /// Creates a new instance of it
-pub fn new(allocator: Allocator, name: []const u8, description: ?[]const u8) Command {
+pub fn init(allocator: Allocator, name: []const u8, description: ?[]const u8) Command {
     return Command{ .allocator = allocator, .name = name, .description = description };
 }
 

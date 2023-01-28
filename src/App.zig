@@ -19,7 +19,7 @@ process_args: ?[]const [:0]u8 = null,
 pub fn init(allocator: Allocator, cmd_name: []const u8, description: ?[]const u8) App {
     return App{
         .allocator = allocator,
-        .command = Command.new(allocator, cmd_name, description),
+        .command = Command.init(allocator, cmd_name, description),
     };
 }
 
@@ -36,7 +36,7 @@ pub fn deinit(self: *App) void {
 
 /// Creates a new `Command` with given name by setting a allocator to it
 pub fn createCommand(self: *App, cmd_name: []const u8, cmd_description: ?[]const u8) Command {
-    return Command.new(self.allocator, cmd_name, cmd_description);
+    return Command.init(self.allocator, cmd_name, cmd_description);
 }
 
 /// Returns a pointer to a root `Command`.
