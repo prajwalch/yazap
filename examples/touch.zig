@@ -17,7 +17,7 @@ pub fn main() anyerror!void {
     try touch.addArg(flag.boolean("no-create", 'c', "Do not create any files"));
     try touch.addArg(flag.boolean("version", 'v', "Display app version"));
 
-    var args = try app.parseProcess();
+    const args = try app.parseProcess();
 
     if (args.isPresent("version")) {
         std.debug.print("v0.1.0", .{});

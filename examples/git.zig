@@ -33,7 +33,7 @@ pub fn main() anyerror!void {
     try git.addSubcommand(cmd_pull);
     try git.addSubcommand(cmd_push);
 
-    var args = try app.parseProcess();
+    const args = try app.parseProcess();
 
     if (args.isPresent("init")) {
         std.debug.print("Initilize empty repo", .{});
