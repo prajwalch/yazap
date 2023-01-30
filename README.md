@@ -34,7 +34,7 @@ Inspired by [clap-rs](https://github.com/clap-rs/clap) and [andrewrk/ziglang: sr
     ```zig
     exe.addPackagePath("yazap", "libs/yazap/src/lib.zig");
     ```
-4. Now you can import this library on your src file as
+5. Now you can import this library on your src file as
     ```zig
     const yazap = @import("yazap");
     ```
