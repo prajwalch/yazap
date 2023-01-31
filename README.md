@@ -1,6 +1,6 @@
 # Yazap
 > **Note**
-> Tested on: v0.9.1 and v0.10.0
+> Tested on: v0.9.1 and v0.10.x
 
 **Yazap** is a simple and easy-to-use [zig](https://ziglang.org) library that is designed for parsing not only flags
 but also subcommands, nested subcommands and custom arguments.
