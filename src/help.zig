@@ -110,7 +110,7 @@ pub const Help = struct {
         try writeNewLine(writer);
     }
 
-    inline fn getBraces(required: bool) Braces {
+    fn getBraces(required: bool) Braces {
         return if (required) .{ '<', '>' } else .{ '[', ']' };
     }
 
@@ -194,7 +194,7 @@ pub const Help = struct {
         }
     }
 
-    inline fn writeNewLine(writer: anytype) !void {
+    fn writeNewLine(writer: anytype) !void {
         return writer.writeByte('\n');
     }
 };
