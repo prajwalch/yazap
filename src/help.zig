@@ -190,8 +190,8 @@ pub const Help = struct {
                 "Run '{s} <command> -h' or '{s} <command> --help' to get help for specific command",
                 .{ self.cmd.name, self.cmd.name },
             );
-            try writeNewLine(writer);
         }
+        try writeNewLine(writer);
     }
 
     fn writeNewLine(writer: anytype) !void {
