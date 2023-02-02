@@ -182,3 +182,48 @@ test "Option with allowed values" {
 
     app.deinit();
 }
+
+test "passing positional argument before options" {
+    var app = App.init(allocator, "ls", null);
+    errdefer app.deinit();
+
+    try app.rootCommand().takesSingleValue("PATH");
+    try app.rootCommand().addArg(flag.boolean("all", 'a', null));
+    app.rootCommand().setSetting(.arg_required);
+
+    const args = try app.parseFrom(&.{ ".", "-a" });
+    try testing.expectEqualStrings(".", args.valueOf("PATH").?);
+    try testing.expectEqual(true, args.isPresent("all"));
+
+    app.deinit();
+}
+
+test "passing positional argument after options" {
+    var app = App.init(allocator, "ls", null);
+    errdefer app.deinit();
+
+    try app.rootCommand().takesSingleValue("PATH");
+    try app.rootCommand().addArg(flag.boolean("all", 'a', null));
+
+    const args = try app.parseFrom(&.{ "-a", "." });
+    try testing.expectEqualStrings(".", args.valueOf("PATH").?);
+    try testing.expectEqual(true, args.isPresent("all"));
+
+    app.deinit();
+}
+
+test "passing positional argument before and after options" {
+    var app = App.init(allocator, "ls", null);
+    errdefer app.deinit();
+
+    try app.rootCommand().takesSingleValue("PATH");
+    try app.rootCommand().addArg(flag.boolean("all", 'a', null));
+    try app.rootCommand().addArg(flag.boolean("one-line", '1', null));
+
+    const args = try app.parseFrom(&.{ "-1", ".", "-a" });
+    try testing.expectEqualStrings(".", args.valueOf("PATH").?);
+    try testing.expectEqual(true, args.isPresent("one-line"));
+    try testing.expectEqual(true, args.isPresent("all"));
+
+    app.deinit();
+}

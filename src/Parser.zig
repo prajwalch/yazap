@@ -69,8 +69,6 @@ cmd: *const Command,
 err: erro.Error,
 tokenizer: Tokenizer,
 args_ctx: ArgsContext,
-cmd_args_idx: usize,
-parse_cmd_args: bool,
 
 pub fn init(allocator: Allocator, tokenizer: Tokenizer, command: *const Command) Parser {
     return Parser{
@@ -79,13 +77,16 @@ pub fn init(allocator: Allocator, tokenizer: Tokenizer, command: *const Command)
         .err = erro.Error.init(),
         .tokenizer = tokenizer,
         .args_ctx = ArgsContext.init(allocator),
-        .cmd_args_idx = 0,
-        .parse_cmd_args = (command.isSettingSet(.takes_value) and command.countArgs() >= 1),
     };
 }
 
 pub fn parse(self: *Parser) Error!ArgsContext {
     errdefer self.args_ctx.deinit();
+
+    const takes_pos_args =
+        (self.cmd.isSettingSet(.takes_value) and self.cmd.countArgs() >= 1);
+    var pos_args_idx: usize = 0;
+    var parsed_all_pos_args = false;
 
     while (self.tokenizer.nextToken()) |*token| {
         if (mem.eql(u8, token.value, "help") or mem.eql(u8, token.value, "h")) {
@@ -98,24 +99,27 @@ pub fn parse(self: *Parser) Error!ArgsContext {
             }
         }
 
-        if (self.parse_cmd_args) {
-            try self.parseCommandArg(token);
-            // Skip current token if it has been consumed otherwise further process it
-            if (self.parse_cmd_args) continue;
-        }
-
-        if (!token.isShortOption() and !token.isLongOption()) {
-            try self.args_ctx.setSubcommand(
-                try self.parseSubCommand(token.value),
-            );
+        if (token.isShortOption() or token.isLongOption()) {
+            try self.parseOption(token);
             continue;
         }
-        try self.parseOption(token);
+
+        if (takes_pos_args and !parsed_all_pos_args) {
+            try self.parseCommandArg(token, pos_args_idx);
+            pos_args_idx += 1;
+            parsed_all_pos_args = (pos_args_idx >= self.cmd.countArgs());
+            continue;
+        }
+        try self.args_ctx.setSubcommand(
+            try self.parseSubCommand(token.value),
+        );
     }
 
     if (!(self.args_ctx.isPresent("help"))) {
-        const takes_value_and_is_required = (self.parse_cmd_args and (self.cmd.isSettingSet(.arg_required)));
-        if (takes_value_and_is_required and !(self.args_ctx.hasArgs())) {
+        const takes_pos_args_and_is_required =
+            (takes_pos_args and (self.cmd.isSettingSet(.arg_required)));
+
+        if (takes_pos_args_and_is_required and !parsed_all_pos_args) {
             self.err.setContext(.{ .valid_cmd = self.cmd.name });
             return Error.CommandArgumentNotProvided;
         }
@@ -128,23 +132,8 @@ pub fn parse(self: *Parser) Error!ArgsContext {
     return self.args_ctx;
 }
 
-fn parseCommandArg(self: *Parser, token: *const Token) Error!void {
-    if (self.cmd_args_idx >= self.cmd.countArgs()) {
-        self.parse_cmd_args = false;
-        return;
-    }
-
-    if (token.tag != .some_argument) {
-        if (self.cmd.isSettingSet(.arg_required) and (self.args_ctx.args.count() == 0)) {
-            self.err.setContext(.{ .valid_cmd = self.cmd.name });
-            return Error.CommandArgumentNotProvided;
-        } else {
-            self.parse_cmd_args = false;
-            return;
-        }
-    }
-    const arg = &self.cmd.args.items[self.cmd_args_idx];
-    defer self.cmd_args_idx += 1;
+fn parseCommandArg(self: *Parser, token: *const Token, pos_arg_idx: usize) Error!void {
+    const arg = &self.cmd.args.items[pos_arg_idx];
 
     if (arg.values_delimiter) |delimiter| {
         if (try self.splitValue(arg, token.value, delimiter)) |values| {
