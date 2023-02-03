@@ -9,8 +9,8 @@ const mem = std.mem;
 const ArrayList = std.ArrayListUnmanaged;
 const Allocator = mem.Allocator;
 const Settings = MakeSettings(enum {
-    takes_value,
-    arg_required,
+    takes_positional_arg,
+    positional_arg_required,
     subcommand_required,
     enable_help,
 });
@@ -79,7 +79,7 @@ pub fn takesNValues(self: *Command, arg_name: []const u8, n: usize) !void {
     if (n > 1) arg.setDefaultValuesDelimiter();
 
     try self.addArg(arg);
-    self.setSetting(.takes_value);
+    self.setSetting(.takes_positional_arg);
 }
 
 pub fn setSetting(self: *Command, option: Settings.Option) void {

@@ -84,7 +84,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
     errdefer self.args_ctx.deinit();
 
     const takes_pos_args =
-        (self.cmd.isSettingSet(.takes_value) and self.cmd.countArgs() >= 1);
+        (self.cmd.isSettingSet(.takes_positional_arg) and self.cmd.countArgs() >= 1);
     var pos_args_idx: usize = 0;
     var parsed_all_pos_args = false;
 
@@ -117,7 +117,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
 
     if (!(self.args_ctx.isPresent("help"))) {
         const takes_pos_args_and_is_required =
-            (takes_pos_args and (self.cmd.isSettingSet(.arg_required)));
+            (takes_pos_args and (self.cmd.isSettingSet(.positional_arg_required)));
 
         if (takes_pos_args_and_is_required and !parsed_all_pos_args) {
             self.err.setContext(.{ .valid_cmd = self.cmd.name });
@@ -433,7 +433,7 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
         return Error.UnknownCommand;
     };
     // zig fmt: off
-    const takes_value = subcmd.isSettingSet(.takes_value)
+    const takes_value = subcmd.isSettingSet(.takes_positional_arg)
         or (subcmd.countArgs() >= 1)
         or (subcmd.countOptions() >= 1)
         or (subcmd.countSubcommands() >= 1);
@@ -444,7 +444,7 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
     }
 
     const args = self.tokenizer.restArg() orelse {
-        if (subcmd.isSettingSet(.arg_required)) {
+        if (subcmd.isSettingSet(.positional_arg_required)) {
             self.err.setContext(.{ .valid_cmd = provided_subcmd });
             return Error.CommandArgumentNotProvided;
         }
