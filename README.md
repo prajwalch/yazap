@@ -32,7 +32,9 @@ Requires [zig v0.11.x](https://ziglang.org)
 3. Run `git submodule add https://github.com/PrajwalCH/yazap libs/yazap`
 4. After above step is complete add the following code snippet on your `build.zig` file
     ```zig
-    exe.addPackagePath("yazap", "libs/yazap/src/lib.zig");
+    exe.addAnonymousModule("yazap", .{
+            .source_file = .{ .path = "src/lib.zig" },
+    });
     ```
 5. Now you can import this library on your src file as
     ```zig
