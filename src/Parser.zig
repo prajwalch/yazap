@@ -396,7 +396,7 @@ fn putMatchedArg(self: *Parser, arg: *const Arg, value: args_context.MatchedArgV
                     try old_many_values.append(new_value.single);
                 } else if (new_value.isMany()) {
                     // If both old and new value is many, append all new values into old value
-                    try old_many_values.appendSlice(new_value.many.toOwnedSlice());
+                    try old_many_values.appendSlice(try new_value.many.toOwnedSlice());
                 }
             },
         }
