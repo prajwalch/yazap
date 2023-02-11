@@ -4,7 +4,6 @@ const Command = @import("Command.zig");
 const ArgsContext = @import("args_context.zig").ArgsContext;
 
 const mem = std.mem;
-const Braces = std.meta.Tuple(&[2]type{ u8, u8 });
 
 /// Help message writer
 ///
@@ -110,7 +109,7 @@ pub const Help = struct {
         try writeNewLine(writer);
     }
 
-    fn getBraces(required: bool) Braces {
+    fn getBraces(required: bool) struct { u8, u8 } {
         return if (required) .{ '<', '>' } else .{ '[', ']' };
     }
 

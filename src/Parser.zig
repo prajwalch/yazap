@@ -10,7 +10,6 @@ const Tokenizer = @import("tokenizer.zig").Tokenizer;
 
 const mem = std.mem;
 const Allocator = std.mem.Allocator;
-const OptionTuple = std.meta.Tuple(&[_]type{ []const u8, ?[]const u8 });
 const ArgsContext = args_context.ArgsContext;
 const MatchedSubCommand = args_context.MatchedSubCommand;
 
@@ -230,7 +229,7 @@ fn parseLongOption(self: *Parser, token: *const Token) Error!void {
 // --option, -f, -fgh                     => (option, null), (f, null), (fgh, null)
 // --option=value, -f=value, -fgh=value   => (option, value), (f, value), (fgh, value)
 // --option=, -f=, -fgh=                  => (option, ""), (f, ""), (fgh, "")
-fn optionTokenToOptionTuple(token: *const Token) OptionTuple {
+fn optionTokenToOptionTuple(token: *const Token) struct { []const u8, ?[]const u8 } {
     var kv_iter = mem.tokenize(u8, token.value, "=");
 
     return switch (token.tag) {
