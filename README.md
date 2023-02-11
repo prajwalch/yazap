@@ -1,6 +1,4 @@
 # Yazap
-> **Note**
-> Tested on: v0.9.1 and v0.10.x
 
 **Yazap** is a simple and easy-to-use [zig](https://ziglang.org) library that is designed for parsing not only flags
 but also subcommands, nested subcommands and custom arguments.
@@ -27,6 +25,8 @@ Inspired by [clap-rs](https://github.com/clap-rs/clap) and [andrewrk/ziglang: sr
 
 
 ## Installing
+Requires [zig v0.11.x](https://ziglang.org)
+
 1. Initialize your project as repository (if not initialized already) by running `git init`
 2. On your root project make a directory named `libs`
 3. Run `git submodule add https://github.com/PrajwalCH/yazap libs/yazap`
