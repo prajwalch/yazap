@@ -21,12 +21,12 @@ pub fn main() anyerror!void {
 
     var cmd_pull = app.createCommand("pull", "Fetch from remote branch and merge it to local");
     try cmd_pull.takesSingleValue("REMOTE");
-    cmd_pull.setSetting(.arg_required);
+    cmd_pull.setSetting(.positional_arg_required);
 
     var cmd_push = app.createCommand("push", "Update the remote branch");
     try cmd_push.takesSingleValue("REMOTE");
     try cmd_push.takesSingleValue("BRANCH_NAME");
-    cmd_push.setSetting(.arg_required);
+    cmd_push.setSetting(.positional_arg_required);
 
     try git.addSubcommand(app.createCommand("init", "Create an empty Git repository or reinitialize an existing one"));
     try git.addSubcommand(cmd_commit);
