@@ -33,7 +33,7 @@ Requires [zig v0.11.x](https://ziglang.org)
 4. After above step is complete add the following code snippet on your `build.zig` file
     ```zig
     exe.addAnonymousModule("yazap", .{
-        .source_file = .{ .path = "src/lib.zig" },
+        .source_file = .{ .path = "libs/yazap/src/lib.zig" },
     });
     ```
 5. Now you can import this library on your src file as
