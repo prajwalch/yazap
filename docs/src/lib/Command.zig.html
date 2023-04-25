@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>Command.zig - source view</title>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <style>
+      body{
+        font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
+        margin: 0;
+        line-height: 1.5;
+      }
+
+      pre > code {
+        display: block;
+        overflow: auto;
+        line-height: normal;
+        margin: 0em;
+      }
+      .tok-kw {
+          color: #333;
+          font-weight: bold;
+      }
+      .tok-str {
+          color: #d14;
+      }
+      .tok-builtin {
+          color: #005C7A;
+      }
+      .tok-comment {
+          color: #545454;
+          font-style: italic;
+      }
+      .tok-fn {
+          color: #900;
+          font-weight: bold;
+      }
+      .tok-null {
+          color: #005C5C;
+      }
+      .tok-number {
+          color: #005C5C;
+      }
+      .tok-type {
+          color: #458;
+          font-weight: bold;
+      }
+      pre {
+        counter-reset: line;
+      }
+      pre .line:before {
+        counter-increment: line;
+        content: counter(line);
+        display: inline-block;
+        padding-right: 1em;
+        width: 2em;
+        text-align: right;
+        color: #999;
+      }
+      
+      .line {
+        width: 100%;
+        display: inline-block;
+      }
+      .line:target {
+        border-top: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        background: #fafafa;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body{
+            background:#222;
+            color: #ccc;
+        }
+        pre > code {
+            color: #ccc;
+            background: #222;
+            border: unset;
+        }
+        .line:target {
+            border-top: 1px solid #444;
+            border-bottom: 1px solid #444;
+            background: #333;
+        }
+        .tok-kw {
+            color: #eee;
+        }
+        .tok-str {
+            color: #2e5;
+        }
+        .tok-builtin {
+            color: #ff894c;
+        }
+        .tok-comment {
+            color: #aa7;
+        }
+        .tok-fn {
+            color: #B1A0F8;
+        }
+        .tok-null {
+            color: #ff8080;
+        }
+        .tok-number {
+            color: #ff8080;
+        }
+        .tok-type {
+            color: #68f;
+        }
+      }
+    </style>
+</head>
+<body>
+<pre><code><span class="line" id="L1"><span class="tok-kw">const</span> Command = <span class="tok-builtin">@This</span>();</span>
+<span class="line" id="L2"></span>
+<span class="line" id="L3"><span class="tok-kw">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>);</span>
+<span class="line" id="L4"><span class="tok-kw">const</span> help = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;help.zig&quot;</span>);</span>
+<span class="line" id="L5"><span class="tok-kw">const</span> Arg = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;Arg.zig&quot;</span>);</span>
+<span class="line" id="L6"><span class="tok-kw">const</span> MakeSettings = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;settings.zig&quot;</span>).MakeSettings;</span>
+<span class="line" id="L7"></span>
+<span class="line" id="L8"><span class="tok-kw">const</span> mem = std.mem;</span>
+<span class="line" id="L9"><span class="tok-kw">const</span> ArrayList = std.ArrayListUnmanaged;</span>
+<span class="line" id="L10"><span class="tok-kw">const</span> Allocator = mem.Allocator;</span>
+<span class="line" id="L11"><span class="tok-kw">const</span> Settings = MakeSettings(<span class="tok-kw">enum</span> {</span>
+<span class="line" id="L12">    takes_positional_arg,</span>
+<span class="line" id="L13">    positional_arg_required,</span>
+<span class="line" id="L14">    subcommand_required,</span>
+<span class="line" id="L15">    enable_help,</span>
+<span class="line" id="L16">});</span>
+<span class="line" id="L17"></span>
+<span class="line" id="L18">allocator: Allocator,</span>
+<span class="line" id="L19">name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>,</span>
+<span class="line" id="L20">description: ?[]<span class="tok-kw">const</span> <span class="tok-type">u8</span> = <span class="tok-null">null</span>,</span>
+<span class="line" id="L21">args: ArrayList(Arg) = .{},</span>
+<span class="line" id="L22">options: ArrayList(Arg) = .{},</span>
+<span class="line" id="L23">subcommands: ArrayList(Command) = .{},</span>
+<span class="line" id="L24">settings: Settings = .{},</span>
+<span class="line" id="L25"></span>
+<span class="line" id="L26"><span class="tok-comment">/// Creates a new instance of it</span></span>
+<span class="line" id="L27"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">init</span>(allocator: Allocator, name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>, description: ?[]<span class="tok-kw">const</span> <span class="tok-type">u8</span>) Command {</span>
+<span class="line" id="L28">    <span class="tok-kw">return</span> Command{ .allocator = allocator, .name = name, .description = description };</span>
+<span class="line" id="L29">}</span>
+<span class="line" id="L30"></span>
+<span class="line" id="L31"><span class="tok-comment">/// Release all allocated memory</span></span>
+<span class="line" id="L32"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">deinit</span>(self: *Command) <span class="tok-type">void</span> {</span>
+<span class="line" id="L33">    self.args.deinit(self.allocator);</span>
+<span class="line" id="L34">    self.options.deinit(self.allocator);</span>
+<span class="line" id="L35"></span>
+<span class="line" id="L36">    <span class="tok-kw">for</span> (self.subcommands.items) |*subcommand| {</span>
+<span class="line" id="L37">        subcommand.deinit();</span>
+<span class="line" id="L38">    }</span>
+<span class="line" id="L39">    self.subcommands.deinit(self.allocator);</span>
+<span class="line" id="L40">}</span>
+<span class="line" id="L41"></span>
+<span class="line" id="L42"><span class="tok-comment">/// Appends the new arg into the args list</span></span>
+<span class="line" id="L43"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">addArg</span>(self: *Command, new_arg: Arg) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L44">    <span class="tok-kw">if</span> ((new_arg.short_name == <span class="tok-null">null</span>) <span class="tok-kw">and</span> (new_arg.long_name == <span class="tok-null">null</span>)) {</span>
+<span class="line" id="L45">        <span class="tok-kw">try</span> self.args.append(self.allocator, new_arg);</span>
+<span class="line" id="L46">    } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L47">        <span class="tok-kw">try</span> self.options.append(self.allocator, new_arg);</span>
+<span class="line" id="L48">    }</span>
+<span class="line" id="L49">}</span>
+<span class="line" id="L50"></span>
+<span class="line" id="L51"><span class="tok-comment">/// Appends args into the args list</span></span>
+<span class="line" id="L52"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">addArgs</span>(self: *Command, args: []Arg) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L53">    <span class="tok-kw">for</span> (args) |arg| <span class="tok-kw">try</span> self.addArg(arg);</span>
+<span class="line" id="L54">}</span>
+<span class="line" id="L55"></span>
+<span class="line" id="L56"><span class="tok-comment">/// Appends the new subcommand into the subcommands list</span></span>
+<span class="line" id="L57"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">addSubcommand</span>(self: *Command, new_subcommand: Command) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L58">    <span class="tok-comment">// Add help option for subcommand</span>
+</span>
+<span class="line" id="L59">    <span class="tok-kw">var</span> subcmd = new_subcommand;</span>
+<span class="line" id="L60">    help.enableFor(&amp;subcmd);</span>
+<span class="line" id="L61">    <span class="tok-kw">return</span> self.subcommands.append(self.allocator, subcmd);</span>
+<span class="line" id="L62">}</span>
+<span class="line" id="L63"></span>
+<span class="line" id="L64"><span class="tok-comment">/// Appends the `subcommands` into the subcommands list</span></span>
+<span class="line" id="L65"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">addSubcommands</span>(self: *Command, subcommands: []Command) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L66">    <span class="tok-kw">for</span> (subcommands) |subcmd| <span class="tok-kw">try</span> self.addSubcommand(subcmd);</span>
+<span class="line" id="L67">}</span>
+<span class="line" id="L68"></span>
+<span class="line" id="L69"><span class="tok-comment">/// Create a new [Argument](/#root;Arg) with the given name and specifies that Command will take single value</span></span>
+<span class="line" id="L70"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">takesSingleValue</span>(self: *Command, arg_name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L71">    <span class="tok-kw">try</span> self.takesNValues(arg_name, <span class="tok-number">1</span>);</span>
+<span class="line" id="L72">}</span>
+<span class="line" id="L73"></span>
+<span class="line" id="L74"><span class="tok-comment">/// Creates an [Argument](/#root;Arg) with given name and specifies that command will take `n` values</span></span>
+<span class="line" id="L75"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">takesNValues</span>(self: *Command, arg_name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>, n: <span class="tok-type">usize</span>) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L76">    <span class="tok-kw">var</span> arg = Arg.init(arg_name, <span class="tok-null">null</span>);</span>
+<span class="line" id="L77">    arg.setMinValues(<span class="tok-number">1</span>);</span>
+<span class="line" id="L78">    arg.setMaxValues(n);</span>
+<span class="line" id="L79">    <span class="tok-kw">if</span> (n &gt; <span class="tok-number">1</span>) arg.setDefaultValuesDelimiter();</span>
+<span class="line" id="L80"></span>
+<span class="line" id="L81">    <span class="tok-kw">try</span> self.addArg(arg);</span>
+<span class="line" id="L82">    self.setSetting(.takes_positional_arg);</span>
+<span class="line" id="L83">}</span>
+<span class="line" id="L84"></span>
+<span class="line" id="L85"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">setSetting</span>(self: *Command, option: Settings.Option) <span class="tok-type">void</span> {</span>
+<span class="line" id="L86">    <span class="tok-kw">return</span> self.settings.set(option);</span>
+<span class="line" id="L87">}</span>
+<span class="line" id="L88"></span>
+<span class="line" id="L89"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">unsetSetting</span>(self: *Command, option: Settings.Option) <span class="tok-type">void</span> {</span>
+<span class="line" id="L90">    <span class="tok-kw">return</span> self.settings.unset(option);</span>
+<span class="line" id="L91">}</span>
+<span class="line" id="L92"></span>
+<span class="line" id="L93"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">isSettingSet</span>(self: *<span class="tok-kw">const</span> Command, option: Settings.Option) <span class="tok-type">bool</span> {</span>
+<span class="line" id="L94">    <span class="tok-kw">return</span> self.settings.isSet(option);</span>
+<span class="line" id="L95">}</span>
+<span class="line" id="L96"></span>
+<span class="line" id="L97"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">countArgs</span>(self: *<span class="tok-kw">const</span> Command) <span class="tok-type">usize</span> {</span>
+<span class="line" id="L98">    <span class="tok-kw">return</span> (self.args.items.len);</span>
+<span class="line" id="L99">}</span>
+<span class="line" id="L100"></span>
+<span class="line" id="L101"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">countOptions</span>(self: *<span class="tok-kw">const</span> Command) <span class="tok-type">usize</span> {</span>
+<span class="line" id="L102">    <span class="tok-kw">return</span> (self.options.items.len);</span>
+<span class="line" id="L103">}</span>
+<span class="line" id="L104"></span>
+<span class="line" id="L105"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">countSubcommands</span>(self: *<span class="tok-kw">const</span> Command) <span class="tok-type">usize</span> {</span>
+<span class="line" id="L106">    <span class="tok-kw">return</span> (self.subcommands.items.len);</span>
+<span class="line" id="L107">}</span>
+<span class="line" id="L108"></span>
+<span class="line" id="L109"><span class="tok-comment">/// Linearly searches for an argument with short name equals to given `short_name`.</span></span>
+<span class="line" id="L110"><span class="tok-comment">/// Returns a const pointer of a found argument otherwise null.</span></span>
+<span class="line" id="L111"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">findShortOption</span>(self: *<span class="tok-kw">const</span> Command, short_name: <span class="tok-type">u8</span>) ?*<span class="tok-kw">const</span> Arg {</span>
+<span class="line" id="L112">    <span class="tok-kw">for</span> (self.options.items) |*arg| {</span>
+<span class="line" id="L113">        <span class="tok-kw">if</span> (arg.short_name) |s| {</span>
+<span class="line" id="L114">            <span class="tok-kw">if</span> (s == short_name) <span class="tok-kw">return</span> arg;</span>
+<span class="line" id="L115">        }</span>
+<span class="line" id="L116">    }</span>
+<span class="line" id="L117">    <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
+<span class="line" id="L118">}</span>
+<span class="line" id="L119"></span>
+<span class="line" id="L120"><span class="tok-comment">/// Linearly searches for an argument with long name equals to given `long_name`.</span></span>
+<span class="line" id="L121"><span class="tok-comment">/// Returns a const pointer of a found argument otherwise null.</span></span>
+<span class="line" id="L122"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">findLongOption</span>(self: *<span class="tok-kw">const</span> Command, long_name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) ?*<span class="tok-kw">const</span> Arg {</span>
+<span class="line" id="L123">    <span class="tok-kw">for</span> (self.options.items) |*arg| {</span>
+<span class="line" id="L124">        <span class="tok-kw">if</span> (arg.long_name) |l| {</span>
+<span class="line" id="L125">            <span class="tok-kw">if</span> (mem.eql(<span class="tok-type">u8</span>, l, long_name)) <span class="tok-kw">return</span> arg;</span>
+<span class="line" id="L126">        }</span>
+<span class="line" id="L127">    }</span>
+<span class="line" id="L128">    <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
+<span class="line" id="L129">}</span>
+<span class="line" id="L130"></span>
+<span class="line" id="L131"><span class="tok-comment">/// Linearly searches a sub-command with name equals to given `subcmd_name`.</span></span>
+<span class="line" id="L132"><span class="tok-comment">/// Returns a const pointer of a found sub-command otherwise null.</span></span>
+<span class="line" id="L133"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">findSubcommand</span>(self: *<span class="tok-kw">const</span> Command, provided_subcmd: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) ?*<span class="tok-kw">const</span> Command {</span>
+<span class="line" id="L134">    <span class="tok-kw">for</span> (self.subcommands.items) |*subcmd| {</span>
+<span class="line" id="L135">        <span class="tok-kw">if</span> (std.mem.eql(<span class="tok-type">u8</span>, subcmd.name, provided_subcmd)) {</span>
+<span class="line" id="L136">            <span class="tok-kw">return</span> subcmd;</span>
+<span class="line" id="L137">        }</span>
+<span class="line" id="L138">    }</span>
+<span class="line" id="L139"></span>
+<span class="line" id="L140">    <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
+<span class="line" id="L141">}</span>
+<span class="line" id="L142"></span>
+<span class="line" id="L143"><span class="tok-kw">test</span> <span class="tok-str">&quot;emit methods docs&quot;</span> {</span>
+<span class="line" id="L144">    std.testing.refAllDecls(<span class="tok-builtin">@This</span>());</span>
+<span class="line" id="L145">}</span>
+<span class="line" id="L146"></span>
+</code></pre></body>
+</html>

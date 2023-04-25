@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>tokenizer.zig - source view</title>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <style>
+      body{
+        font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
+        margin: 0;
+        line-height: 1.5;
+      }
+
+      pre > code {
+        display: block;
+        overflow: auto;
+        line-height: normal;
+        margin: 0em;
+      }
+      .tok-kw {
+          color: #333;
+          font-weight: bold;
+      }
+      .tok-str {
+          color: #d14;
+      }
+      .tok-builtin {
+          color: #005C7A;
+      }
+      .tok-comment {
+          color: #545454;
+          font-style: italic;
+      }
+      .tok-fn {
+          color: #900;
+          font-weight: bold;
+      }
+      .tok-null {
+          color: #005C5C;
+      }
+      .tok-number {
+          color: #005C5C;
+      }
+      .tok-type {
+          color: #458;
+          font-weight: bold;
+      }
+      pre {
+        counter-reset: line;
+      }
+      pre .line:before {
+        counter-increment: line;
+        content: counter(line);
+        display: inline-block;
+        padding-right: 1em;
+        width: 2em;
+        text-align: right;
+        color: #999;
+      }
+      
+      .line {
+        width: 100%;
+        display: inline-block;
+      }
+      .line:target {
+        border-top: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        background: #fafafa;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body{
+            background:#222;
+            color: #ccc;
+        }
+        pre > code {
+            color: #ccc;
+            background: #222;
+            border: unset;
+        }
+        .line:target {
+            border-top: 1px solid #444;
+            border-bottom: 1px solid #444;
+            background: #333;
+        }
+        .tok-kw {
+            color: #eee;
+        }
+        .tok-str {
+            color: #2e5;
+        }
+        .tok-builtin {
+            color: #ff894c;
+        }
+        .tok-comment {
+            color: #aa7;
+        }
+        .tok-fn {
+            color: #B1A0F8;
+        }
+        .tok-null {
+            color: #ff8080;
+        }
+        .tok-number {
+            color: #ff8080;
+        }
+        .tok-type {
+            color: #68f;
+        }
+      }
+    </style>
+</head>
+<body>
+<pre><code><span class="line" id="L1"><span class="tok-kw">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>);</span>
+<span class="line" id="L2"><span class="tok-kw">const</span> mem = std.mem;</span>
+<span class="line" id="L3"></span>
+<span class="line" id="L4"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Token = <span class="tok-kw">struct</span> {</span>
+<span class="line" id="L5">    <span class="tok-kw">pub</span> <span class="tok-kw">const</span> Tag = <span class="tok-kw">enum</span> {</span>
+<span class="line" id="L6">        <span class="tok-comment">// -f</span>
+</span>
+<span class="line" id="L7">        short_option,</span>
+<span class="line" id="L8">        <span class="tok-comment">// -f=value</span>
+</span>
+<span class="line" id="L9">        short_option_with_value,</span>
+<span class="line" id="L10">        <span class="tok-comment">// -f=</span>
+</span>
+<span class="line" id="L11">        short_option_with_empty_value,</span>
+<span class="line" id="L12">        <span class="tok-comment">// -fvalue or -fgh</span>
+</span>
+<span class="line" id="L13">        short_option_with_tail,</span>
+<span class="line" id="L14">        <span class="tok-comment">// -fgh=value</span>
+</span>
+<span class="line" id="L15">        short_options_with_value,</span>
+<span class="line" id="L16">        <span class="tok-comment">// -fgh=</span>
+</span>
+<span class="line" id="L17">        short_options_with_empty_value,</span>
+<span class="line" id="L18">        <span class="tok-comment">// --option</span>
+</span>
+<span class="line" id="L19">        long_option,</span>
+<span class="line" id="L20">        <span class="tok-comment">// --option=value</span>
+</span>
+<span class="line" id="L21">        long_option_with_value,</span>
+<span class="line" id="L22">        <span class="tok-comment">// --option=</span>
+</span>
+<span class="line" id="L23">        long_option_with_empty_value,</span>
+<span class="line" id="L24">        <span class="tok-comment">// arg</span>
+</span>
+<span class="line" id="L25">        some_argument,</span>
+<span class="line" id="L26">    };</span>
+<span class="line" id="L27"></span>
+<span class="line" id="L28">    value: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>,</span>
+<span class="line" id="L29">    tag: Tag,</span>
+<span class="line" id="L30"></span>
+<span class="line" id="L31">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">init</span>(value: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>, tag: Tag) Token {</span>
+<span class="line" id="L32">        <span class="tok-kw">return</span> Token{ .value = value, .tag = tag };</span>
+<span class="line" id="L33">    }</span>
+<span class="line" id="L34"></span>
+<span class="line" id="L35">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">isShortOption</span>(self: *<span class="tok-kw">const</span> Token) <span class="tok-type">bool</span> {</span>
+<span class="line" id="L36">        <span class="tok-comment">// zig fmt: off</span>
+</span>
+<span class="line" id="L37">        <span class="tok-kw">return</span> (</span>
+<span class="line" id="L38">            self.tag == .short_option</span>
+<span class="line" id="L39">            <span class="tok-kw">or</span> self.tag == .short_option_with_value</span>
+<span class="line" id="L40">            <span class="tok-kw">or</span> self.tag == .short_option_with_empty_value</span>
+<span class="line" id="L41">            <span class="tok-kw">or</span> self.tag == .short_option_with_tail</span>
+<span class="line" id="L42">            <span class="tok-kw">or</span> self.tag == .short_options_with_value</span>
+<span class="line" id="L43">            <span class="tok-kw">or</span> self.tag == .short_options_with_empty_value</span>
+<span class="line" id="L44">        );</span>
+<span class="line" id="L45">        <span class="tok-comment">// zig fmt: on</span>
+</span>
+<span class="line" id="L46">    }</span>
+<span class="line" id="L47"></span>
+<span class="line" id="L48">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">isLongOption</span>(self: *<span class="tok-kw">const</span> Token) <span class="tok-type">bool</span> {</span>
+<span class="line" id="L49">        <span class="tok-comment">// zig fmt: off</span>
+</span>
+<span class="line" id="L50">        <span class="tok-kw">return</span> (</span>
+<span class="line" id="L51">            self.tag == .long_option</span>
+<span class="line" id="L52">            <span class="tok-kw">or</span> self.tag == .long_option_with_value</span>
+<span class="line" id="L53">            <span class="tok-kw">or</span> self.tag == .long_option_with_empty_value</span>
+<span class="line" id="L54">        );</span>
+<span class="line" id="L55">        <span class="tok-comment">// zig fmt: on</span>
+</span>
+<span class="line" id="L56">    }</span>
+<span class="line" id="L57">};</span>
+<span class="line" id="L58"></span>
+<span class="line" id="L59"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Tokenizer = <span class="tok-kw">struct</span> {</span>
+<span class="line" id="L60">    args: []<span class="tok-kw">const</span> [:<span class="tok-number">0</span>]<span class="tok-kw">const</span> <span class="tok-type">u8</span>,</span>
+<span class="line" id="L61">    cursor: <span class="tok-type">usize</span>,</span>
+<span class="line" id="L62"></span>
+<span class="line" id="L63">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">init</span>(args: []<span class="tok-kw">const</span> [:<span class="tok-number">0</span>]<span class="tok-kw">const</span> <span class="tok-type">u8</span>) Tokenizer {</span>
+<span class="line" id="L64">        <span class="tok-kw">return</span> Tokenizer{ .args = args, .cursor = <span class="tok-number">0</span> };</span>
+<span class="line" id="L65">    }</span>
+<span class="line" id="L66"></span>
+<span class="line" id="L67">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">nextToken</span>(self: *Tokenizer) ?Token {</span>
+<span class="line" id="L68">        <span class="tok-kw">var</span> arg = self.nextRawArg() <span class="tok-kw">orelse</span> <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
+<span class="line" id="L69"></span>
+<span class="line" id="L70">        <span class="tok-kw">if</span> (arg.len == <span class="tok-number">0</span>) {</span>
+<span class="line" id="L71">            <span class="tok-kw">while</span> (self.nextRawArg()) |a| {</span>
+<span class="line" id="L72">                <span class="tok-kw">if</span> (a.len &gt;= <span class="tok-number">1</span>) {</span>
+<span class="line" id="L73">                    arg = a;</span>
+<span class="line" id="L74">                    <span class="tok-kw">break</span>;</span>
+<span class="line" id="L75">                }</span>
+<span class="line" id="L76">            } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L77">                <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
+<span class="line" id="L78">            }</span>
+<span class="line" id="L79">        }</span>
+<span class="line" id="L80"></span>
+<span class="line" id="L81">        <span class="tok-kw">if</span> (mem.startsWith(<span class="tok-type">u8</span>, arg, <span class="tok-str">&quot;--&quot;</span>)) {</span>
+<span class="line" id="L82">            <span class="tok-kw">return</span> processLongOption(arg);</span>
+<span class="line" id="L83">        } <span class="tok-kw">else</span> <span class="tok-kw">if</span> (mem.startsWith(<span class="tok-type">u8</span>, arg, <span class="tok-str">&quot;-&quot;</span>)) {</span>
+<span class="line" id="L84">            <span class="tok-kw">return</span> processShortOption(arg);</span>
+<span class="line" id="L85">        }</span>
+<span class="line" id="L86"></span>
+<span class="line" id="L87">        <span class="tok-kw">return</span> Token.init(arg, .some_argument);</span>
+<span class="line" id="L88">    }</span>
+<span class="line" id="L89"></span>
+<span class="line" id="L90">    <span class="tok-comment">/// Returns the next raw argument without converting it to token</span></span>
+<span class="line" id="L91">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">nextRawArg</span>(self: *Tokenizer) ?[]<span class="tok-kw">const</span> <span class="tok-type">u8</span> {</span>
+<span class="line" id="L92">        <span class="tok-kw">if</span> (self.cursor &gt;= self.args.len) <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
+<span class="line" id="L93">        <span class="tok-kw">defer</span> self.cursor += <span class="tok-number">1</span>;</span>
+<span class="line" id="L94"></span>
+<span class="line" id="L95">        <span class="tok-kw">return</span> <span class="tok-builtin">@as</span>([]<span class="tok-kw">const</span> <span class="tok-type">u8</span>, self.args[self.cursor]);</span>
+<span class="line" id="L96">    }</span>
+<span class="line" id="L97"></span>
+<span class="line" id="L98">    <span class="tok-comment">/// Returns the next non option argument</span></span>
+<span class="line" id="L99">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">nextNonOptionArg</span>(self: *Tokenizer) ?[]<span class="tok-kw">const</span> <span class="tok-type">u8</span> {</span>
+<span class="line" id="L100">        <span class="tok-kw">var</span> next_token = self.nextToken() <span class="tok-kw">orelse</span> <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
+<span class="line" id="L101"></span>
+<span class="line" id="L102">        <span class="tok-kw">if</span> (next_token.isShortOption() <span class="tok-kw">or</span> next_token.isLongOption()) {</span>
+<span class="line" id="L103">            self.cursor -= <span class="tok-number">1</span>;</span>
+<span class="line" id="L104">            <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
+<span class="line" id="L105">        }</span>
+<span class="line" id="L106"></span>
+<span class="line" id="L107">        <span class="tok-kw">return</span> next_token.value;</span>
+<span class="line" id="L108">    }</span>
+<span class="line" id="L109"></span>
+<span class="line" id="L110">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">restArg</span>(self: *Tokenizer) ?[]<span class="tok-kw">const</span> [:<span class="tok-number">0</span>]<span class="tok-kw">const</span> <span class="tok-type">u8</span> {</span>
+<span class="line" id="L111">        <span class="tok-kw">if</span> (self.cursor &gt;= self.args.len) <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
+<span class="line" id="L112">        <span class="tok-kw">defer</span> self.cursor = self.args.len;</span>
+<span class="line" id="L113"></span>
+<span class="line" id="L114">        <span class="tok-kw">return</span> self.args[self.cursor..];</span>
+<span class="line" id="L115">    }</span>
+<span class="line" id="L116"></span>
+<span class="line" id="L117">    <span class="tok-kw">fn</span> <span class="tok-fn">processLongOption</span>(arg: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) Token {</span>
+<span class="line" id="L118">        <span class="tok-kw">const</span> option = mem.trimLeft(<span class="tok-type">u8</span>, arg, <span class="tok-str">&quot;--&quot;</span>);</span>
+<span class="line" id="L119">        <span class="tok-kw">const</span> tag: Token.Tag = blk: {</span>
+<span class="line" id="L120">            <span class="tok-kw">if</span> (mem.indexOfScalar(<span class="tok-type">u8</span>, option, <span class="tok-str">'='</span>)) |eql_pos| {</span>
+<span class="line" id="L121">                <span class="tok-kw">const</span> has_value = (eql_pos + <span class="tok-number">1</span>) &lt; option.len;</span>
+<span class="line" id="L122"></span>
+<span class="line" id="L123">                <span class="tok-kw">if</span> (has_value) {</span>
+<span class="line" id="L124">                    <span class="tok-kw">break</span> :blk .long_option_with_value;</span>
+<span class="line" id="L125">                } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L126">                    <span class="tok-kw">break</span> :blk .long_option_with_empty_value;</span>
+<span class="line" id="L127">                }</span>
+<span class="line" id="L128">            }</span>
+<span class="line" id="L129">            <span class="tok-kw">break</span> :blk .long_option;</span>
+<span class="line" id="L130">        };</span>
+<span class="line" id="L131"></span>
+<span class="line" id="L132">        <span class="tok-kw">return</span> Token.init(option, tag);</span>
+<span class="line" id="L133">    }</span>
+<span class="line" id="L134"></span>
+<span class="line" id="L135">    <span class="tok-kw">fn</span> <span class="tok-fn">processShortOption</span>(arg: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) Token {</span>
+<span class="line" id="L136">        <span class="tok-kw">const</span> option = mem.trimLeft(<span class="tok-type">u8</span>, arg, <span class="tok-str">&quot;-&quot;</span>);</span>
+<span class="line" id="L137">        <span class="tok-kw">const</span> tag: Token.Tag = blk: {</span>
+<span class="line" id="L138">            <span class="tok-kw">if</span> (mem.indexOfScalar(<span class="tok-type">u8</span>, option, <span class="tok-str">'='</span>)) |eql_pos| {</span>
+<span class="line" id="L139">                <span class="tok-kw">const</span> is_options = (option[<span class="tok-number">0</span>..eql_pos]).len &gt; <span class="tok-number">1</span>;</span>
+<span class="line" id="L140">                <span class="tok-kw">const</span> has_value = (eql_pos + <span class="tok-number">1</span>) &lt; option.len;</span>
+<span class="line" id="L141"></span>
+<span class="line" id="L142">                <span class="tok-kw">if</span> (is_options) {</span>
+<span class="line" id="L143">                    <span class="tok-kw">if</span> (has_value) {</span>
+<span class="line" id="L144">                        <span class="tok-kw">break</span> :blk .short_options_with_value;</span>
+<span class="line" id="L145">                    } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L146">                        <span class="tok-kw">break</span> :blk .short_options_with_empty_value;</span>
+<span class="line" id="L147">                    }</span>
+<span class="line" id="L148">                } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L149">                    <span class="tok-kw">if</span> (has_value) {</span>
+<span class="line" id="L150">                        <span class="tok-kw">break</span> :blk .short_option_with_value;</span>
+<span class="line" id="L151">                    } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L152">                        <span class="tok-kw">break</span> :blk .short_option_with_empty_value;</span>
+<span class="line" id="L153">                    }</span>
+<span class="line" id="L154">                }</span>
+<span class="line" id="L155">            } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L156">                <span class="tok-comment">// has tail?</span>
+</span>
+<span class="line" id="L157">                <span class="tok-comment">// for ex: -fgh or -fvalue</span>
+</span>
+<span class="line" id="L158">                <span class="tok-kw">if</span> (option.len &gt; <span class="tok-number">1</span>) <span class="tok-kw">break</span> :blk .short_option_with_tail;</span>
+<span class="line" id="L159">            }</span>
+<span class="line" id="L160">            <span class="tok-kw">break</span> :blk .short_option;</span>
+<span class="line" id="L161">        };</span>
+<span class="line" id="L162"></span>
+<span class="line" id="L163">        <span class="tok-kw">return</span> Token.init(option, tag);</span>
+<span class="line" id="L164">    }</span>
+<span class="line" id="L165">};</span>
+<span class="line" id="L166"></span>
+<span class="line" id="L167"><span class="tok-kw">fn</span> <span class="tok-fn">expectToken</span>(actual_token: Token, expected_tag: Token.Tag) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L168">    std.testing.expect(actual_token.tag == expected_tag) <span class="tok-kw">catch</span> |e| {</span>
+<span class="line" id="L169">        std.debug.print(<span class="tok-str">&quot;\nexpected '{s}', found '{s}'\n&quot;</span>, .{</span>
+<span class="line" id="L170">            <span class="tok-builtin">@tagName</span>(expected_tag), <span class="tok-builtin">@tagName</span>(actual_token.tag),</span>
+<span class="line" id="L171">        });</span>
+<span class="line" id="L172">        <span class="tok-kw">return</span> e;</span>
+<span class="line" id="L173">    };</span>
+<span class="line" id="L174">}</span>
+<span class="line" id="L175"></span>
+<span class="line" id="L176"><span class="tok-kw">test</span> <span class="tok-str">&quot;tokenizer&quot;</span> {</span>
+<span class="line" id="L177">    <span class="tok-kw">const</span> args = &amp;.{</span>
+<span class="line" id="L178">        <span class="tok-str">&quot;-f&quot;</span>,</span>
+<span class="line" id="L179">        <span class="tok-str">&quot;-f=val&quot;</span>,</span>
+<span class="line" id="L180">        <span class="tok-str">&quot;-f=&quot;</span>,</span>
+<span class="line" id="L181">        <span class="tok-str">&quot;-fgh&quot;</span>,</span>
+<span class="line" id="L182">        <span class="tok-str">&quot;-fgh=value&quot;</span>,</span>
+<span class="line" id="L183">        <span class="tok-str">&quot;-fgh=&quot;</span>,</span>
+<span class="line" id="L184">        <span class="tok-str">&quot;&quot;</span>,</span>
+<span class="line" id="L185">        <span class="tok-str">&quot;&quot;</span>,</span>
+<span class="line" id="L186">        <span class="tok-str">&quot;--option&quot;</span>,</span>
+<span class="line" id="L187">        <span class="tok-str">&quot;--optioni=value&quot;</span>,</span>
+<span class="line" id="L188">        <span class="tok-str">&quot;--option=&quot;</span>,</span>
+<span class="line" id="L189">        <span class="tok-str">&quot;arg&quot;</span>,</span>
+<span class="line" id="L190">        <span class="tok-str">&quot;&quot;</span>,</span>
+<span class="line" id="L191">    };</span>
+<span class="line" id="L192"></span>
+<span class="line" id="L193">    <span class="tok-kw">var</span> tokenizer = Tokenizer.init(args);</span>
+<span class="line" id="L194"></span>
+<span class="line" id="L195">    <span class="tok-kw">try</span> expectToken(tokenizer.nextToken().?, .short_option);</span>
+<span class="line" id="L196">    <span class="tok-kw">try</span> expectToken(tokenizer.nextToken().?, .short_option_with_value);</span>
+<span class="line" id="L197">    <span class="tok-kw">try</span> expectToken(tokenizer.nextToken().?, .short_option_with_empty_value);</span>
+<span class="line" id="L198">    <span class="tok-kw">try</span> expectToken(tokenizer.nextToken().?, .short_option_with_tail);</span>
+<span class="line" id="L199">    <span class="tok-kw">try</span> expectToken(tokenizer.nextToken().?, .short_options_with_value);</span>
+<span class="line" id="L200">    <span class="tok-kw">try</span> expectToken(tokenizer.nextToken().?, .short_options_with_empty_value);</span>
+<span class="line" id="L201"></span>
+<span class="line" id="L202">    <span class="tok-kw">try</span> expectToken(tokenizer.nextToken().?, .long_option);</span>
+<span class="line" id="L203">    <span class="tok-kw">try</span> expectToken(tokenizer.nextToken().?, .long_option_with_value);</span>
+<span class="line" id="L204">    <span class="tok-kw">try</span> expectToken(tokenizer.nextToken().?, .long_option_with_empty_value);</span>
+<span class="line" id="L205"></span>
+<span class="line" id="L206">    <span class="tok-kw">try</span> expectToken(tokenizer.nextToken().?, .some_argument);</span>
+<span class="line" id="L207">}</span>
+<span class="line" id="L208"></span>
+</code></pre></body>
+</html>
