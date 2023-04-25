@@ -1,19 +1,10 @@
 const std = @import("std");
 
 pub fn build(b: *std.build.Builder) void {
-    const target = b.standardTargetOptions(.{});
-    // Standard release options allow the person running `zig build` to select
-    // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
-    const optimize = b.standardOptimizeOption(.{});
+    const yazap_mod = b.addModule("yazap", .{ .source_file = .{ .path = "src/lib.zig" } });
 
-    const lib = b.addStaticLibrary(.{
-        .name = "yazap",
-        .root_source_file = .{ .path = "src/lib.zig" },
-        .target = target,
-        .optimize = optimize,
-        .version = std.builtin.Version{ .major = 0, .minor = 4 },
-    });
-    lib.install();
+    const target = b.standardTargetOptions(.{});
+    const optimize = b.standardOptimizeOption(.{});
 
     const main_tests = b.addTest(.{ .root_source_file = .{ .path = "src/test.zig" } });
     const test_step = b.step("test", "Run library tests");
@@ -28,17 +19,18 @@ pub fn build(b: *std.build.Builder) void {
     const examples_step = b.step("examples", "Build all the example");
 
     inline for (.{ "git", "touch", "ls" }) |example_name| {
-        const example_exe = b.addExecutable(.{
+        const example = b.addExecutable(.{
             .name = example_name,
-            .root_source_file = .{ .path = "examples/" ++ example_name ++ ".zig" },
+            .root_source_file = .{ .path = b.fmt("examples/{s}.zig", .{example_name}) },
             .target = target,
             .optimize = optimize,
         });
-        example_exe.addAnonymousModule("yazap", .{
+        const install_example = b.addInstallArtifact(example);
+
+        example.addModule("yazap", yazap_mod);
+        example.addAnonymousModule("yazap", .{
             .source_file = .{ .path = "src/lib.zig" },
         });
-        example_exe.install();
-
-        examples_step.dependOn(b.getInstallStep());
+        examples_step.dependOn(&install_example.step);
     }
 }
