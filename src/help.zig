@@ -158,7 +158,7 @@ pub const Help = struct {
                 if (option.allowed_values) |values| {
                     try writer.writeByte('{');
 
-                    for (values) |value, idx| {
+                    for (values, 0..) |value, idx| {
                         try writer.print("{s}", .{value});
 
                         // Only print '|' till second last option
