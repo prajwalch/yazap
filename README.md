@@ -1,6 +1,4 @@
 # Yazap
-> **Note**
-> This branch is only for zig v0.9.1 and v0.10.x. Use [zmaster](https://github.com/PrajwalCH/yazap/tree/zmaster) branch if you're using master branch of zig
 
 **Yazap** is a simple and easy-to-use [zig](https://ziglang.org) library that is designed for parsing not only flags
 but also subcommands, nested subcommands and custom arguments.
