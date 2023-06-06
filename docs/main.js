@@ -4,7 +4,6 @@ var zigAnalysis;
 
 const NAV_MODES = {
   API: "#A;",
-  API_INTERNAL: "#a;",
   GUIDES: "#G;",
 };
 
@@ -17,9 +16,9 @@ const NAV_MODES = {
   const domGuidesMenu = document.getElementById("guidesMenu");
   const domApiMenu = document.getElementById("apiMenu");
   const domGuidesList = document.getElementById("guidesList");
-  const domSectMainPkg = document.getElementById("sectMainPkg");
-  const domSectPkgs = document.getElementById("sectPkgs");
-  const domListPkgs = document.getElementById("listPkgs");
+  const domSectMainMod = document.getElementById("sectMainMod");
+  const domSectMods = document.getElementById("sectMods");
+  const domListMods = document.getElementById("listMods");
   const domSectTypes = document.getElementById("sectTypes");
   const domListTypes = document.getElementById("listTypes");
   const domSectTests = document.getElementById("sectTests");
@@ -56,17 +55,18 @@ const NAV_MODES = {
   const domSectSearchResults = document.getElementById("sectSearchResults");
   const domSectSearchAllResultsLink = document.getElementById("sectSearchAllResultsLink");
   const domDocs = document.getElementById("docs");
-  const domGuides = document.getElementById("guides");
+  const domGuidesSection = document.getElementById("guides");
+  const domActiveGuide = document.getElementById("activeGuide");
+  
   const domListSearchResults = document.getElementById("listSearchResults");
   const domSectSearchNoResults = document.getElementById("sectSearchNoResults");
   const domSectInfo = document.getElementById("sectInfo");
   // const domTdTarget = (document.getElementById("tdTarget"));
-  const domPrivDeclsBox = document.getElementById("privDeclsBox");
   const domTdZigVer = document.getElementById("tdZigVer");
   const domHdrName = document.getElementById("hdrName");
   const domHelpModal = document.getElementById("helpModal");
   const domSearchPlaceholder = document.getElementById("searchPlaceholder");
-  const sourceFileUrlTemplate = "src/{{pkg}}/{{file}}.html#L{{line}}"
+  const sourceFileUrlTemplate = "src/{{mod}}/{{file}}.html#L{{line}}"
   const domLangRefLink = document.getElementById("langRefLink");
 
   let searchTimer = null;
@@ -83,27 +83,28 @@ const NAV_MODES = {
   let typeTypeId = findTypeTypeId();
   let pointerSizeEnum = { One: 0, Many: 1, Slice: 2, C: 3 };
 
-  // for each package, is an array with packages to get to this one
-  let canonPkgPaths = computeCanonicalPackagePaths();
+  let declSearchIndex = new RadixTree();
+  window.search = declSearchIndex;
 
-  // for each decl, is an array with {declNames, pkgNames} to get to this one
+  // for each module, is an array with modules to get to this one
+  let canonModPaths = computeCanonicalModulePaths();
 
+  // for each decl, is an array with {declNames, modNames} to get to this one
   let canonDeclPaths = null; // lazy; use getCanonDeclPath
 
-  // for each type, is an array with {declNames, pkgNames} to get to this one
-
+  // for each type, is an array with {declNames, modNames} to get to this one
   let canonTypeDecls = null; // lazy; use getCanonTypeDecl
 
   let curNav = {
     mode: NAV_MODES.API,
     activeGuide: "",
-    // each element is a package name, e.g. @import("a") then within there @import("b")
-    // starting implicitly from root package
-    pkgNames: [],
-    // same as above except actual packages, not names
-    pkgObjs: [],
+    // each element is a module name, e.g. @import("a") then within there @import("b")
+    // starting implicitly from root module
+    modNames: [],
+    // same as above except actual modules, not names
+    modObjs: [],
     // Each element is a decl name, `a.b.c`, a is 0, b is 1, c is 2, etc.
-    // empty array means refers to the package itself
+    // empty array means refers to the module itself
     declNames: [],
     // these will be all types, except the last one may be a type or a decl
     declObjs: [],
@@ -122,14 +123,25 @@ const NAV_MODES = {
   // map of decl index to list of comptime fn calls
   // let nodesToCallsMap = indexNodesToCalls();
 
+  let guidesSearchIndex = {}; 
+  window.guideSearch = guidesSearchIndex;
+  parseGuides();
+
+  // identifiers can contain '?' so we want to allow typing
+  // the question mark when the search is focused instead of toggling the help modal
+  let canToggleHelpModal = true;
+
   domSearch.disabled = false;
   domSearch.addEventListener("keydown", onSearchKeyDown, false);
+  domSearch.addEventListener("input", onSearchInput, false);
   domSearch.addEventListener("focus", ev => {
     domSearchPlaceholder.classList.add("hidden");
+    canToggleHelpModal = false;
   });
   domSearch.addEventListener("blur", ev => {
     if (domSearch.value.length == 0)
       domSearchPlaceholder.classList.remove("hidden");
+    canToggleHelpModal = true;
   });
   domSectSearchAllResultsLink.addEventListener('click', onClickSearchShowAllResults, false);
   function onClickSearchShowAllResults(ev) {
@@ -138,31 +150,6 @@ const NAV_MODES = {
     searchTrimResults = false;
     onHashChange();
   }
-
-  domPrivDeclsBox.addEventListener(
-    "change",
-    function () {
-      if (this.checked != curNav.showPrivDecls) {
-        if (
-          this.checked &&
-          location.hash.length > 1 &&
-          location.hash[1] != "*"
-        ) {
-          location.hash = "#*" + location.hash.substring(1);
-          return;
-        }
-        if (
-          !this.checked &&
-          location.hash.length > 1 &&
-          location.hash[1] == "*"
-        ) {
-          location.hash = "#" + location.hash.substring(2);
-          return;
-        }
-      }
-    },
-    false
-  );
 
   if (location.hash == "") {
     location.hash = "#A;";
@@ -189,10 +176,9 @@ const NAV_MODES = {
     let suffix = " - Zig";
     switch (curNav.mode) {
       case NAV_MODES.API:
-      case NAV_MODES.API_INTERNAL:
-        let list = curNav.pkgNames.concat(curNav.declNames);
+        let list = curNav.modNames.concat(curNav.declNames);
         if (list.length === 0) {
-          document.title = zigAnalysis.packages[zigAnalysis.rootPkg].name + suffix;
+          document.title = zigAnalysis.modules[zigAnalysis.rootMod].name + suffix;
         } else {
           document.title = list.join(".") + suffix;
         }
@@ -284,8 +270,11 @@ const NAV_MODES = {
 
   function resolveValue(value) {
     let i = 0;
-    while (i < 1000) {
+    while (true) {
       i += 1;
+      if (i >= 10000) {
+        throw "resolveValue quota exceeded"
+      }
 
       if ("refPath" in value.expr) {
         value = { expr: value.expr.refPath[value.expr.refPath.length - 1] };
@@ -307,8 +296,31 @@ const NAV_MODES = {
 
       return value;
     }
-    console.assert(false);
-    return {};
+  }
+
+  function resolveGenericRet(genericFunc) {
+    if (genericFunc.generic_ret == null) return null;
+    let result = resolveValue({expr: genericFunc.generic_ret});
+    
+    let i = 0;
+    while (true) {
+      i += 1;
+      if (i >= 10000) {
+        throw "resolveGenericRet quota exceeded"
+      }
+
+      if ("call" in result.expr) {
+        let call = zigAnalysis.calls[result.expr.call];
+        let resolvedFunc = resolveValue({ expr: call.func });
+        if (!("type" in resolvedFunc.expr)) return null;
+        let callee = getType(resolvedFunc.expr.type);
+        if (!callee.generic_ret) return null;
+        result = resolveValue({ expr: callee.generic_ret });
+        continue;
+      }
+
+      return result;
+    }
   }
 
   //    function typeOfDecl(decl){
@@ -401,12 +413,16 @@ const NAV_MODES = {
     domGuideSwitch.classList.add("active");
     domApiSwitch.classList.remove("active");
     domDocs.classList.add("hidden");
-    domGuides.classList.remove("hidden");
+    domGuidesSection.classList.remove("hidden");
+    domActiveGuide.classList.add("hidden");
     domApiMenu.classList.add("hidden");
+    domSectSearchResults.classList.add("hidden");
+    domSectSearchAllResultsLink.classList.add("hidden");
+    domSectSearchNoResults.classList.add("hidden");
 
     // sidebar guides list
     const section_list = zigAnalysis.guide_sections;
-    resizeDomList(domGuidesList, section_list.length, '<div><h2><span></span></h2><ul class="packages"></ul></div>');
+    resizeDomList(domGuidesList, section_list.length, '<div><h2><span></span></h2><ul class="modules"></ul></div>');
     for (let j = 0; j < section_list.length; j += 1) {
         const section = section_list[j];
         const domSectionName = domGuidesList.children[j].children[0].children[0];
@@ -417,7 +433,7 @@ const NAV_MODES = {
           const guide = section.guides[i];
           let liDom = domGuides.children[i];
           let aDom = liDom.children[0];
-          aDom.textContent = guide.name;
+          aDom.textContent = guide.title;
           aDom.setAttribute("href", NAV_MODES.GUIDES + guide.name);
           if (guide.name === curNav.activeGuide) {
             aDom.classList.add("active");
@@ -429,6 +445,11 @@ const NAV_MODES = {
   
     if (section_list.length > 0) {
       domGuidesMenu.classList.remove("hidden");
+    }
+
+    
+    if (curNavSearch !== "") {
+          return renderSearchGuides();
     }
 
     // main content
@@ -445,9 +466,9 @@ const NAV_MODES = {
     }        
     
     if (activeGuide == undefined) {
-      const root_file_idx = zigAnalysis.packages[zigAnalysis.rootPkg].file;
+      const root_file_idx = zigAnalysis.modules[zigAnalysis.rootMod].file;
       const root_file_name = getFile(root_file_idx).name;
-      domGuides.innerHTML = markdown(`
+      domActiveGuide.innerHTML = markdown(`
           # Zig Guides
           These autodocs don't contain any guide.
 
@@ -461,13 +482,21 @@ const NAV_MODES = {
           You can add guides by specifying which markdown files to include
           in the top level doc comment of your root file, like so:
 
-          (At the top of \`${root_file_name}\`)
+          (At the top of *${root_file_name}*)
           \`\`\`
           //!zig-autodoc-guide: intro.md
           //!zig-autodoc-guide: quickstart.md
-          //!zig-autodoc-section: Advanced topics
-          //!zig-autodoc-guide: ../advanced-docs/advanced-stuff.md
+          //!zig-autodoc-guide: advanced-docs/advanced-stuff.md
           \`\`\`
+
+          You can also create sections to group guides together:
+
+          \`\`\`
+          //!zig-autodoc-section: CLI Usage
+          //!zig-autodoc-guide: cli-basics.md
+          //!zig-autodoc-guide: cli-advanced.md
+          \`\`\`
+           
         
           **Note that this feature is still under heavy development so expect bugs**
           **and missing features!**
@@ -475,15 +504,16 @@ const NAV_MODES = {
           Happy writing!
         `);
     } else {
-      domGuides.innerHTML = markdown(activeGuide.body);
+      domActiveGuide.innerHTML = markdown(activeGuide.body);
     }
+    domActiveGuide.classList.remove("hidden");
   }
 
   function renderApi() {
     // set Api mode
     domApiSwitch.classList.add("active");
     domGuideSwitch.classList.remove("active");
-    domGuides.classList.add("hidden");
+    domGuidesSection.classList.add("hidden");
     domDocs.classList.remove("hidden");
     domApiMenu.classList.remove("hidden");
     domGuidesMenu.classList.add("hidden");
@@ -492,8 +522,8 @@ const NAV_MODES = {
     domFnProto.classList.add("hidden");
     domSectParams.classList.add("hidden");
     domTldDocs.classList.add("hidden");
-    domSectMainPkg.classList.add("hidden");
-    domSectPkgs.classList.add("hidden");
+    domSectMainMod.classList.add("hidden");
+    domSectMods.classList.add("hidden");
     domSectTypes.classList.add("hidden");
     domSectTests.classList.add("hidden");
     domSectDocTests.classList.add("hidden");
@@ -518,33 +548,34 @@ const NAV_MODES = {
 
     renderTitle();
     renderInfo();
-    renderPkgList();
-
-    domPrivDeclsBox.checked = curNav.mode == NAV_MODES.API_INTERNAL;
+    renderModList();
 
     if (curNavSearch !== "") {
-      return renderSearch();
+          return renderSearchAPI();
     }
 
-    let rootPkg = zigAnalysis.packages[zigAnalysis.rootPkg];
-    let pkg = rootPkg;
-    curNav.pkgObjs = [pkg];
-    for (let i = 1; i < curNav.pkgNames.length; i += 1) {
-      let childPkg = zigAnalysis.packages[pkg.table[curNav.pkgNames[i]]];
-      if (childPkg == null) {
+    let rootMod = zigAnalysis.modules[zigAnalysis.rootMod];
+    let mod = rootMod;
+    curNav.modObjs = [mod];
+    for (let i = 0; i < curNav.modNames.length; i += 1) {
+      let childMod = zigAnalysis.modules[mod.table[curNav.modNames[i]]];
+      if (childMod == null) {
         return render404();
       }
-      pkg = childPkg;
-      curNav.pkgObjs.push(pkg);
+      mod = childMod;
+      curNav.modObjs.push(mod);
     }
 
-    let currentType = getType(pkg.main);
+    let currentType = getType(mod.main);
     curNav.declObjs = [currentType];
+    let lastDecl = mod.main;
     for (let i = 0; i < curNav.declNames.length; i += 1) {
       let childDecl = findSubDecl(currentType, curNav.declNames[i]);
-      if (childDecl == null) {
+      window.last_decl = childDecl;
+      if (childDecl == null || childDecl.is_private === true) {
         return render404();
       }
+      lastDecl = childDecl;
 
       let childDeclValue = resolveValue(childDecl.value).expr;
       if ("type" in childDeclValue) {
@@ -569,9 +600,7 @@ const NAV_MODES = {
     let lastIsType = isType(last);
     let lastIsContainerType = isContainerType(last);
 
-    if (lastIsDecl) {
-      renderDocTest(last);
-    }
+    renderDocTest(lastDecl);
 
     if (lastIsContainerType) {
       return renderContainer(last);
@@ -605,7 +634,6 @@ const NAV_MODES = {
   function render() {
     switch (curNav.mode) {
       case NAV_MODES.API:
-      case NAV_MODES.API_INTERNAL:
         return renderApi();
       case NAV_MODES.GUIDES:
         return renderGuides();
@@ -619,7 +647,25 @@ const NAV_MODES = {
     if (!decl.decltest) return;
     const astNode = getAstNode(decl.decltest);
     domSectDocTests.classList.remove("hidden");
-    domDocTestsCode.innerHTML = astNode.code;
+    domDocTestsCode.innerHTML = renderZigSource(astNode.code);
+  }
+
+  function renderZigSource(code) {
+    let lines = code.split("\n");
+    let result = "";
+    let indent_level = 0;
+    for (let i = 0; i < lines.length; i += 1) {
+      let line = lines[i].trim();
+      if (line[0] == "}") indent_level -= 1;
+      for (let j = 0; j < indent_level; j += 1) {
+        result += "    ";
+      }
+      if (line.startsWith("\\\\")) result += "    "
+      result += line;
+      if (i != lines.length - 1) result += "\n";
+      if (line[line.length - 1] == "{") indent_level += 1;
+    }
+    return result;
   }
 
   function renderUnknownDecl(decl) {
@@ -818,24 +864,24 @@ const NAV_MODES = {
   }
 
   function renderNav() {
-    let len = curNav.pkgNames.length + curNav.declNames.length;
+    let len = curNav.modNames.length + curNav.declNames.length;
     resizeDomList(domListNav, len, '<li><a href="#"></a></li>');
     let list = [];
-    let hrefPkgNames = [];
+    let hrefModNames = [];
     let hrefDeclNames = [];
-    for (let i = 0; i < curNav.pkgNames.length; i += 1) {
-      hrefPkgNames.push(curNav.pkgNames[i]);
-      let name = curNav.pkgNames[i];
+    for (let i = 0; i < curNav.modNames.length; i += 1) {
+      hrefModNames.push(curNav.modNames[i]);
+      let name = curNav.modNames[i];
       list.push({
         name: name,
-        link: navLink(hrefPkgNames, hrefDeclNames),
+        link: navLink(hrefModNames, hrefDeclNames),
       });
     }
     for (let i = 0; i < curNav.declNames.length; i += 1) {
       hrefDeclNames.push(curNav.declNames[i]);
       list.push({
         name: curNav.declNames[i],
-        link: navLink(hrefPkgNames, hrefDeclNames),
+        link: navLink(hrefModNames, hrefDeclNames),
       });
     }
 
@@ -866,29 +912,29 @@ const NAV_MODES = {
     domStatus.classList.remove("hidden");
   }
 
-  function renderPkgList() {
-    const rootPkg = zigAnalysis.packages[zigAnalysis.rootPkg];
+  function renderModList() {
+    const rootMod = zigAnalysis.modules[zigAnalysis.rootMod];
     let list = [];
-    for (let key in rootPkg.table) {
-      let pkgIndex = rootPkg.table[key];
-      if (zigAnalysis.packages[pkgIndex] == null) continue;
-      if (key == rootPkg.name) continue;
+    for (let key in rootMod.table) {
+      let modIndex = rootMod.table[key];
+      if (zigAnalysis.modules[modIndex] == null) continue;
+      if (key == rootMod.name) continue;
       list.push({
         name: key,
-        pkg: pkgIndex,
+        mod: modIndex,
       });
     }
 
     {
-      let aDom = domSectMainPkg.children[1].children[0].children[0];
-      aDom.textContent = rootPkg.name;
-      aDom.setAttribute("href", navLinkPkg(zigAnalysis.rootPkg));
-      if (rootPkg.name === curNav.pkgNames[0]) {
+      let aDom = domSectMainMod.children[1].children[0].children[0];
+      aDom.textContent = rootMod.name;
+      aDom.setAttribute("href", navLinkMod(zigAnalysis.rootMod));
+      if (rootMod.name === curNav.modNames[0]) {
         aDom.classList.add("active");
       } else {
         aDom.classList.remove("active");
       }
-      domSectMainPkg.classList.remove("hidden");
+      domSectMainMod.classList.remove("hidden");
     }
 
     list.sort(function (a, b) {
@@ -896,45 +942,45 @@ const NAV_MODES = {
     });
 
     if (list.length !== 0) {
-      resizeDomList(domListPkgs, list.length, '<li><a href="#"></a></li>');
+      resizeDomList(domListMods, list.length, '<li><a href="#"></a></li>');
       for (let i = 0; i < list.length; i += 1) {
-        let liDom = domListPkgs.children[i];
+        let liDom = domListMods.children[i];
         let aDom = liDom.children[0];
         aDom.textContent = list[i].name;
-        aDom.setAttribute("href", navLinkPkg(list[i].pkg));
-        if (list[i].name === curNav.pkgNames[0]) {
+        aDom.setAttribute("href", navLinkMod(list[i].mod));
+        if (list[i].name === curNav.modNames[0]) {
           aDom.classList.add("active");
         } else {
           aDom.classList.remove("active");
         }
       }
 
-      domSectPkgs.classList.remove("hidden");
+      domSectMods.classList.remove("hidden");
     }
   }
 
-  function navLink(pkgNames, declNames, callName) {
+  function navLink(modNames, declNames, callName) {
     let base = curNav.mode;
 
-    if (pkgNames.length === 0 && declNames.length === 0) {
+    if (modNames.length === 0 && declNames.length === 0) {
       return base;
     } else if (declNames.length === 0 && callName == null) {
-      return base + pkgNames.join(".");
+      return base + modNames.join(".");
     } else if (callName == null) {
-      return base + pkgNames.join(".") + ":" + declNames.join(".");
+      return base + modNames.join(".") + ":" + declNames.join(".");
     } else {
       return (
-        base + pkgNames.join(".") + ":" + declNames.join(".") + ";" + callName
+        base + modNames.join(".") + ":" + declNames.join(".") + ";" + callName
       );
     }
   }
 
-  function navLinkPkg(pkgIndex) {
-    return navLink(canonPkgPaths[pkgIndex], []);
+  function navLinkMod(modIndex) {
+    return navLink(canonModPaths[modIndex], []);
   }
 
   function navLinkDecl(childName) {
-    return navLink(curNav.pkgNames, curNav.declNames.concat([childName]));
+    return navLink(curNav.modNames, curNav.declNames.concat([childName]));
   }
 
   function findDeclNavLink(declName) {
@@ -946,12 +992,18 @@ const NAV_MODES = {
       const curDeclName = curNav.declNames[i - 1];
       if (curDeclName == declName) {
         const declPath = curNav.declNames.slice(0, i);
-        return navLink(curNav.pkgNames, declPath);
+        return navLink(curNav.modNames, declPath);
       }
 
-      if (findSubDecl(curDecl, declName) != null) {
-        const declPath = curNav.declNames.slice(0, i).concat([declName]);
-        return navLink(curNav.pkgNames, declPath);
+      const subDecl = findSubDecl(curDecl, declName);
+
+      if (subDecl != null) {
+        if (subDecl.is_private === true) {
+          return sourceFileLink(subDecl);
+        } else {
+          const declPath = curNav.declNames.slice(0, i).concat([declName]);
+          return navLink(curNav.modNames, declPath);
+        }
       }
     }
 
@@ -972,7 +1024,7 @@ const NAV_MODES = {
   //          callName += ')';
 
   //      declNamesCopy.push(callName);
-  //      return navLink(curNav.pkgNames, declNamesCopy);
+  //      return navLink(curNav.modNames, declNamesCopy);
   //  }
 
   function resizeDomListDl(dlDom, desiredLen) {
@@ -1050,6 +1102,23 @@ const NAV_MODES = {
           sentinel += " :" + sentinel_;
         }
         payloadHtml += decl + "[" + start + ".." + end + sentinel + "]";
+        return payloadHtml;
+      }
+      case "sliceLength": {
+        let payloadHtml = "";
+        const lhsExpr = zigAnalysis.exprs[expr.sliceLength.lhs];
+        const startExpr = zigAnalysis.exprs[expr.sliceLength.start];
+        const lenExpr = zigAnalysis.exprs[expr.sliceLength.len];
+        let decl = exprName(lhsExpr, opts);
+        let start = exprName(startExpr, opts);
+        let len = exprName(lenExpr, opts);
+        let sentinel = "";
+        if (expr.sliceLength["sentinel"]) {
+            const sentinelExpr = zigAnalysis.exprs[expr.sliceLength.sentinel];
+            let sentinel_ = exprName(sentinelExpr, options);
+            sentinel += " :" + sentinel_;
+        }
+        payloadHtml += decl + "[" + start + "..][0.." + len + sentinel + "]";
         return payloadHtml;
       }
       case "sliceIndex": {
@@ -1689,7 +1758,7 @@ const NAV_MODES = {
         return payloadHtml + "}";
       }
       case "comptimeExpr": {
-        return zigAnalysis.comptimeExprs[expr.comptimeExpr].code;
+        return renderZigSource(zigAnalysis.comptimeExprs[expr.comptimeExpr].code);
       }
       case "call": {
         let call = zigAnalysis.calls[expr.call];
@@ -1803,19 +1872,28 @@ const NAV_MODES = {
           case typeKinds.Struct: {
             let structObj = typeObj;
             let name = "";
-            if (opts.wantHtml) {
-              if (structObj.is_tuple) {
-                name = "<span class='tok-kw'>tuple</span> { ";
-              } else {
-                name = "<span class='tok-kw'>struct</span> { ";
-              }
-            } else {
-              if (structObj.is_tuple) {
-                name = "tuple { ";
-              } else {
-                name = "struct { ";
+            let layout = "";
+            if (structObj.layout !== null) {
+              switch (structObj.layout.enumLiteral) {
+                case "Packed": {
+                  layout = "packed ";
+                  break;
+                }
+                case "Extern": {
+                  layout = "extern ";
+                  break;
+                }
               }
             }
+            if (opts.wantHtml) {
+              name = "<span class='tok-kw'>" + layout + "struct</span>";
+            } else {
+              name = layout + "struct";
+            }
+            if (structObj.backing_int !== null) {
+              name += "(" + exprName(structObj.backing_int, opts) + ")";
+            }
+            name += " { ";
             if (structObj.field_types.length > 1 && opts.wantHtml) { name += "</br>"; }
             let indent = "";
             if (structObj.field_types.length > 1 && opts.wantHtml) {
@@ -1870,7 +1948,7 @@ const NAV_MODES = {
               name = "enum";
             }
             if (enumObj.tag) {
-              name += " (" + exprName(enumObj.tag, opts) + ")";
+              name += "(" + exprName(enumObj.tag, opts) + ")";
             }
             name += " { ";
             let enumNode = getAstNode(enumObj.src);
@@ -1921,16 +1999,29 @@ const NAV_MODES = {
           case typeKinds.Union: {
             let unionObj = typeObj;
             let name = "";
+            let layout = "";
+            if (unionObj.layout !== null) {
+              switch (unionObj.layout.enumLiteral) {
+                case "Packed": {
+                  layout = "packed ";
+                  break;
+                }
+                case "Extern": {
+                  layout = "extern ";
+                  break;
+                }
+              }
+            }
             if (opts.wantHtml) {
-              name = "<span class='tok-kw'>union</span>";
+              name = "<span class='tok-kw'>" + layout + "union</span>";
             } else {
-              name = "union";
+              name = layout + "union";
             }
             if (unionObj.auto_tag) {
               if (opts.wantHtml) {
-                name += " (<span class='tok-kw'>enum</span>";
+                name += "(<span class='tok-kw'>enum</span>";
               } else {
-                name += " (enum";
+                name += "(enum";
               }
               if (unionObj.tag) {
                 name += "(" + exprName(unionObj.tag, opts) + "))";
@@ -1938,14 +2029,14 @@ const NAV_MODES = {
                 name += ")";
               }
             } else if (unionObj.tag) {
-              name += " (" + exprName(unionObj.tag, opts) + ")";
+              name += "(" + exprName(unionObj.tag, opts) + ")";
             }
             name += " { ";
-            if (unionObj.fields.length > 1 && opts.wantHtml) {
+            if (unionObj.field_types.length > 1 && opts.wantHtml) {
               name += "</br>";
             }
             let indent = "";
-            if (unionObj.fields.length > 1 && opts.wantHtml) {
+            if (unionObj.field_types.length > 1 && opts.wantHtml) {
               indent = "&nbsp;&nbsp;&nbsp;&nbsp;"
             }
             if (opts.indent) {
@@ -1953,17 +2044,17 @@ const NAV_MODES = {
             }
             let unionNode = getAstNode(unionObj.src);
             let field_end = ",";
-            if (unionObj.fields.length > 1 && opts.wantHtml) {
+            if (unionObj.field_types.length > 1 && opts.wantHtml) {
               field_end += "</br>";
             } else {
               field_end += " ";
             }
-            for (let i = 0; i < unionObj.fields.length; i += 1) {
+            for (let i = 0; i < unionObj.field_types.length; i += 1) {
               let fieldNode = getAstNode(unionNode.fields[i]);
               let fieldName = fieldNode.name;
               let html = indent + escapeHtml(fieldName);
 
-              let fieldTypeExpr = unionObj.fields[i];
+              let fieldTypeExpr = unionObj.field_types[i];
               html += ": ";
 
               html += exprName(fieldTypeExpr, { ...opts, indent: indent });
@@ -2396,7 +2487,7 @@ const NAV_MODES = {
     if (
       rootIsStd &&
       typeObj ===
-      getType(zigAnalysis.packages[zigAnalysis.rootPkg].main)
+      getType(zigAnalysis.modules[zigAnalysis.rootMod].main)
     ) {
       name = "std";
     } else {
@@ -2530,13 +2621,13 @@ const NAV_MODES = {
     } else if (
       resolvedValue.expr.string !== undefined ||
       resolvedValue.expr.call !== undefined ||
-      resolvedValue.expr.comptimeExpr
+      resolvedValue.expr.comptimeExpr !== undefined
     ) {
       domFnProtoCode.innerHTML =
         '<span class="tok-kw">const</span> ' +
         escapeHtml(decl.name) +
         ": " +
-        exprName(resolvedValue.expr, { wantHtml: true, wantLink: true }) +
+        exprName(resolvedValue.typeRef !== null ? resolvedValue.typeRef : resolvedValue.expr, { wantHtml: true, wantLink: true }) +
         " = " +
         exprName(decl.value.expr, { wantHtml: true, wantLink: true }) +
         ";";
@@ -2587,13 +2678,13 @@ const NAV_MODES = {
     } else if (
       resolvedVar.expr.string !== undefined ||
       resolvedVar.expr.call !== undefined ||
-      resolvedVar.expr.comptimeExpr
+      resolvedVar.expr.comptimeExpr !== undefined
     ) {
       domFnProtoCode.innerHTML =
         '<span class="tok-kw">var</span> ' +
         escapeHtml(decl.name) +
         ": " +
-        exprName(resolvedVar.expr, { wantHtml: true, wantLink: true }) +
+        exprName(resolvedVar.typeRef !== null ? resolvedVar.typeRef : resolvedVar.expr, { wantHtml: true, wantLink: true }) +
         " = " +
         exprName(decl.value.expr, { wantHtml: true, wantLink: true }) +
         ";";
@@ -2702,7 +2793,7 @@ const NAV_MODES = {
     const srcNode = getAstNode(decl.src);
     const srcFile = getFile(srcNode.file);
     return sourceFileUrlTemplate.
-      replace("{{pkg}}", zigAnalysis.packages[srcFile.pkgIndex].name).
+      replace("{{mod}}", zigAnalysis.modules[srcFile.modIndex].name).
       replace("{{file}}", srcFile.name).
       replace("{{line}}", srcNode.line + 1);
   }
@@ -3050,14 +3141,14 @@ const NAV_MODES = {
   }
 
   function detectRootIsStd() {
-    let rootPkg = zigAnalysis.packages[zigAnalysis.rootPkg];
-    if (rootPkg.table["std"] == null) {
-      // no std mapped into the root package
+    let rootMod = zigAnalysis.modules[zigAnalysis.rootMod];
+    if (rootMod.table["std"] == null) {
+      // no std mapped into the root module
       return false;
     }
-    let stdPkg = zigAnalysis.packages[rootPkg.table["std"]];
-    if (stdPkg == null) return false;
-    return rootPkg.file === stdPkg.file;
+    let stdMod = zigAnalysis.modules[rootMod.table["std"]];
+    if (stdMod == null) return false;
+    return rootMod.file === stdMod.file;
   }
 
   function indexTypeKinds() {
@@ -3112,8 +3203,8 @@ const NAV_MODES = {
   function updateCurNav() {
     curNav = {
       mode: NAV_MODES.API,
-      pkgNames: [],
-      pkgObjs: [],
+      modNames: [],
+      modObjs: [],
       declNames: [],
       declObjs: [],
       callName: null,
@@ -3123,27 +3214,26 @@ const NAV_MODES = {
     const mode = location.hash.substring(0, 3);
     let query = location.hash.substring(3);
 
-    const DEFAULT_HASH = NAV_MODES.API + zigAnalysis.packages[zigAnalysis.rootPkg].name;
+    let qpos = query.indexOf("?");
+    let nonSearchPart;
+    if (qpos === -1) {
+      nonSearchPart = query;
+    } else {
+      nonSearchPart = query.substring(0, qpos);
+      curNavSearch = decodeURIComponent(query.substring(qpos + 1));
+    }
+
+    const DEFAULT_HASH = NAV_MODES.API + zigAnalysis.modules[zigAnalysis.rootMod].name;
     switch (mode) {
       case NAV_MODES.API:
-      case NAV_MODES.API_INTERNAL:
-        // #A;PACKAGE:decl.decl.decl?search-term
+        // #A;MODULE:decl.decl.decl?search-term
         curNav.mode = mode;
-
-        let qpos = query.indexOf("?");
-        let nonSearchPart;
-        if (qpos === -1) {
-          nonSearchPart = query;
-        } else {
-          nonSearchPart = query.substring(0, qpos);
-          curNavSearch = decodeURIComponent(query.substring(qpos + 1));
-        }
 
         let parts = nonSearchPart.split(":");
         if (parts[0] == "") {
           location.hash = DEFAULT_HASH;
         } else {
-          curNav.pkgNames = decodeURIComponent(parts[0]).split(".");
+          curNav.modNames = decodeURIComponent(parts[0]).split(".");
         }
 
         if (parts[1] != null) {
@@ -3152,14 +3242,18 @@ const NAV_MODES = {
 
         return;
       case NAV_MODES.GUIDES:
+        
         const sections = zigAnalysis.guide_sections;
-        if (sections.length != 0 && sections[0].guides.length != 0 && query == "") {
+        if (sections.length != 0 && sections[0].guides.length != 0 && nonSearchPart == "") {
           location.hash = NAV_MODES.GUIDES + sections[0].guides[0].name;
+          if (qpos != -1) {
+            location.hash += query.substring(qpos);
+          }
           return;
         }
 
         curNav.mode = mode;
-        curNav.activeGuide = query;
+        curNav.activeGuide = nonSearchPart;
 
         return;
       default:
@@ -3236,45 +3330,54 @@ const NAV_MODES = {
         let childDecl = getDecl(declIndex);
         if (childDecl.name === childName) {
           childDecl.find_subdecl_idx = declIndex;
+          childDecl.is_private = true;
           return childDecl;
         } else if (childDecl.is_uns) {
           let declValue = resolveValue(childDecl.value);
           if (!("type" in declValue.expr)) continue;
           let uns_container = getType(declValue.expr.type);
           let uns_res = findSubDecl(uns_container, childName);
+          uns_res.is_private = true;
           if (uns_res !== null) return uns_res;
         }
       }
     }
+
     return null;
   }
 
-  function computeCanonicalPackagePaths() {
-    let list = new Array(zigAnalysis.packages.length);
-    // Now we try to find all the packages from root.
-    let rootPkg = zigAnalysis.packages[zigAnalysis.rootPkg];
+  function computeCanonicalModulePaths() {
+    let list = new Array(zigAnalysis.modules.length);
+    // Now we try to find all the modules from root.
+    let rootMod = zigAnalysis.modules[zigAnalysis.rootMod];
     // Breadth-first to keep the path shortest possible.
     let stack = [
       {
         path: [],
-        pkg: rootPkg,
+        mod: rootMod,
       },
     ];
     while (stack.length !== 0) {
       let item = stack.shift();
-      for (let key in item.pkg.table) {
-        let childPkgIndex = item.pkg.table[key];
-        if (list[childPkgIndex] != null) continue;
-        let childPkg = zigAnalysis.packages[childPkgIndex];
-        if (childPkg == null) continue;
+      for (let key in item.mod.table) {
+        let childModIndex = item.mod.table[key];
+        if (list[childModIndex] != null) continue;
+        let childMod = zigAnalysis.modules[childModIndex];
+        if (childMod == null) continue;
 
         let newPath = item.path.concat([key]);
-        list[childPkgIndex] = newPath;
+        list[childModIndex] = newPath;
         stack.push({
           path: newPath,
-          pkg: childPkg,
+          mod: childMod,
         });
       }
+    }
+
+    for (let i = 0; i < zigAnalysis.modules.length; i += 1) {
+      const p = zigAnalysis.modules[i];
+      // TODO
+      // declSearchIndex.add(p.name, {moduleId: i});
     }
     return list;
   }
@@ -3283,15 +3386,16 @@ const NAV_MODES = {
     let list = new Array(zigAnalysis.decls.length);
     canonTypeDecls = new Array(zigAnalysis.types.length);
 
-    for (let pkgI = 0; pkgI < zigAnalysis.packages.length; pkgI += 1) {
-      let pkg = zigAnalysis.packages[pkgI];
-      let pkgNames = canonPkgPaths[pkgI];
-      if (pkgNames === undefined) continue;
+    for (let modI = 0; modI < zigAnalysis.modules.length; modI += 1) {
+      let mod = zigAnalysis.modules[modI];
+      let modNames = canonModPaths[modI];
+      if (modNames === undefined) continue;
 
       let stack = [
         {
           declNames: [],
-          type: getType(pkg.main),
+          declIndexes: [],
+          type: getType(mod.main),
         },
       ];
       while (stack.length !== 0) {
@@ -3323,29 +3427,38 @@ const NAV_MODES = {
                   if (childDecl.is_uns) {
                     unsDeclList.push(childDecl);
                   } else {
-                    addDeclToSearchResults(childDecl, childDeclIndex, pkgNames, item, list, stack);
+                    addDeclToSearchResults(childDecl, childDeclIndex, modNames, item, list, stack);
                   }
                 }
               }
             } else {
-              addDeclToSearchResults(decl, declIndex, pkgNames, item, list, stack);
+              addDeclToSearchResults(decl, declIndex, modNames, item, list, stack);
             }
           }
         }
       }
     }
+    window.cdp = list;
     return list;
   }
 
-function addDeclToSearchResults(decl, declIndex, pkgNames, item, list, stack) {
+function addDeclToSearchResults(decl, declIndex, modNames, item, list, stack) {
   let declVal = resolveValue(decl.value);
   let declNames = item.declNames.concat([decl.name]);
+  let declIndexes = item.declIndexes.concat([declIndex]);
 
   if (list[declIndex] != null) return;
   list[declIndex] = {
-    pkgNames: pkgNames,
+    modNames: modNames,
     declNames: declNames,
+    declIndexes: declIndexes,
   };
+
+  // add to search index
+  {
+    declSearchIndex.add(decl.name, {declIndex});
+  }
+  
   
   if ("type" in declVal.expr) {
     let value = getType(declVal.expr.type);
@@ -3356,18 +3469,20 @@ function addDeclToSearchResults(decl, declIndex, pkgNames, item, list, stack) {
     if (isContainerType(value)) {
       stack.push({
         declNames: declNames,
+        declIndexes: declIndexes,
         type: value,
       });
     }
 
     // Generic function
-    if (value.kind == typeKinds.Fn && value.generic_ret != null) {
-      let resolvedVal = resolveValue({ expr: value.generic_ret });
-      if ("type" in resolvedVal.expr) {
-        let generic_type = getType(resolvedVal.expr.type);
+    if (typeIsGenericFn(declVal.expr.type)) {
+      let ret = resolveGenericRet(value);
+      if (ret != null && "type" in ret.expr) {
+        let generic_type = getType(ret.expr.type);
         if (isContainerType(generic_type)) {
           stack.push({
             declNames: declNames,
+            declIndexes: declIndexes,
             type: generic_type,
           });
         }
@@ -3418,6 +3533,53 @@ function addDeclToSearchResults(decl, declIndex, pkgNames, item, list, stack) {
   function shortDescMarkdown(docs) {
     return markdown(shortDesc(docs));
   }
+
+  function parseGuides() {
+    for (let j = 0; j < zigAnalysis.guide_sections.length; j+=1){
+      const section = zigAnalysis.guide_sections[j];
+      for (let i = 0; i < section.guides.length; i+=1){
+        let reader = new commonmark.Parser({smart: true});
+        const guide = section.guides[i];
+        const ast = reader.parse(guide.body);        
+        
+        // Find the first text thing to use as a sidebar title
+        guide.title = "[empty guide]";
+        {
+          let walker = ast.walker();
+          let event, node;
+          while ((event = walker.next())) {
+            node = event.node;
+            if (node.type === 'text') {
+              guide.title = node.literal;
+              break;
+            }
+          }        
+        }
+        // Index this guide
+        {
+          let walker = ast.walker();
+          let event, node;
+          while ((event = walker.next())) {
+            node = event.node;
+            if (event.entering == true && node.type === 'text') {
+                indexTextForGuide(j, i, node);          
+            }
+          }        
+        }
+      }  
+    }
+  }
+
+  function indexTextForGuide(section_idx, guide_idx, node){
+    const terms = node.literal.split(" ");
+    for (let i = 0; i < terms.length; i += 1){
+      const t = terms[i];
+      if (!guidesSearchIndex[t]) guidesSearchIndex[t] = new Set();
+      node.guide = {section_idx, guide_idx};
+      guidesSearchIndex[t].add(node);
+    }  
+  }
+  
 
   function markdown(input, contextType) {
     const raw_lines = input.split("\n"); // zig allows no '\r', so we don't need to split on CR
@@ -3677,8 +3839,8 @@ function addDeclToSearchResults(decl, declIndex, pkgNames, item, list, stack) {
           const canonPath = getCanonDeclPath(curDeclOrType.find_subdecl_idx);
           if (!canonPath) return;
           
-          let lastPkgName = canonPath.pkgNames[canonPath.pkgNames.length - 1];
-          let fullPath = lastPkgName + ":" + canonPath.declNames.join(".");
+          let lastModName = canonPath.modNames[canonPath.modNames.length - 1];
+          let fullPath = lastModName + ":" + canonPath.declNames.join(".");
         
           separator = '.';
           result = "#A;" + fullPath;
@@ -3688,8 +3850,8 @@ function addDeclToSearchResults(decl, declIndex, pkgNames, item, list, stack) {
       } 
 
       if (!curDeclOrType) {
-        for (let i = 0; i < zigAnalysis.packages.length; i += 1){
-          const p = zigAnalysis.packages[i];
+        for (let i = 0; i < zigAnalysis.modules.length; i += 1){
+          const p = zigAnalysis.modules[i];
           if (p.name == components[0]) {
             curDeclOrType = getType(p.main);
             result += "#A;" + components[0];
@@ -3841,6 +4003,7 @@ function addDeclToSearchResults(decl, declIndex, pkgNames, item, list, stack) {
       startSearch();
     }
   }
+  
 
   function onSearchKeyDown(ev) {
     switch (getKeyString(ev)) {
@@ -3872,13 +4035,15 @@ function addDeclToSearchResults(decl, declIndex, pkgNames, item, list, stack) {
         ev.stopPropagation();
         return;
       default:
-        if (ev.shiftKey || ev.ctrlKey || ev.altKey) return;
-
-        curSearchIndex = -1;
+        // Search is triggered via an `input` event handler, not on arbitrary `keydown` events.
         ev.stopPropagation();
-        startAsyncSearch();
         return;
     }
+  }
+
+  function onSearchInput(ev) {
+    curSearchIndex = -1;
+    startAsyncSearch();
   }
 
   function moveSearchCursor(dir) {
@@ -3950,9 +4115,16 @@ function addDeclToSearchResults(decl, declIndex, pkgNames, item, list, stack) {
         }
         break;
       case "?":
-        ev.preventDefault();
-        ev.stopPropagation();
-        showHelpModal();
+        if (!canToggleHelpModal) break;
+
+        // toggle the help modal
+        if (!domHelpModal.classList.contains("hidden")) {
+            onEscape(ev);
+        } else {
+            ev.preventDefault();
+            ev.stopPropagation();
+            showHelpModal();
+        }
         break;
     }
   }
@@ -3982,16 +4154,207 @@ function addDeclToSearchResults(decl, declIndex, pkgNames, item, list, stack) {
     clearAsyncSearch();
     let oldHash = location.hash;
     let parts = oldHash.split("?");
-    let newPart2 = domSearch.value === "" ? "" : "?" + domSearch.value;
+    // TODO: make a tooltip that shows the user that we've replaced their dots
+    let box_text = domSearch.value.replaceAll(".", " ");
+    let newPart2 = box_text === "" ? "" : "?" + box_text;
     location.replace(parts.length === 1 ? oldHash + newPart2 : parts[0] + newPart2);
   }
   function getSearchTerms() {
     let list = curNavSearch.trim().split(/[ \r\n\t]+/);
-    list.sort();
     return list;
   }
 
-  function renderSearch() {
+  function renderSearchGuides() {
+    const searchTrimmed = false;
+    let ignoreCase = curNavSearch.toLowerCase() === curNavSearch;
+    
+    let terms = getSearchTerms();
+    let matchedItems = new Set();
+
+    for (let i = 0; i < terms.length; i += 1) {
+      const nodes = guidesSearchIndex[terms[i]];
+      if (nodes) {
+        for (const n of nodes) {      
+          matchedItems.add(n);
+        }
+      }
+    }
+
+    
+    
+    if (matchedItems.size !== 0) {
+      // Build up the list of search results
+      let matchedItemsHTML = "";
+
+      for (const node of matchedItems) {
+        const text = node.literal;
+        const href = "";
+
+        matchedItemsHTML += "<li><a href=\"" + href + "\">" + text + "</a></li>";
+      }
+
+      // Replace the search results using our newly constructed HTML string
+      domListSearchResults.innerHTML = matchedItemsHTML;
+      if (searchTrimmed) {
+        domSectSearchAllResultsLink.classList.remove("hidden");
+      }
+      renderSearchCursor();
+
+      domSectSearchResults.classList.remove("hidden");
+    } else {
+      domSectSearchNoResults.classList.remove("hidden");
+    }
+  }
+
+  function renderSearchAPI(){
+    if (canonDeclPaths == null) {
+      canonDeclPaths = computeCanonDeclPaths();
+    }
+    let declSet = new Set();
+    let otherDeclSet = new Set(); // for low quality results
+    let declScores = {};
+    
+    let ignoreCase = curNavSearch.toLowerCase() === curNavSearch;
+    let term_list = getSearchTerms();
+    for (let i = 0; i < term_list.length; i += 1) {
+      let term = term_list[i];
+      let result = declSearchIndex.search(term.toLowerCase());
+      if (result == null) {
+        domSectSearchNoResults.classList.remove("hidden");
+        domSectSearchResults.classList.add("hidden");
+        return;
+      }
+
+      let termSet = new Set();
+      let termOtherSet = new Set();
+
+      for (let list of [result.full, result.partial]) {
+        for (let r of list) {
+          const d = r.declIndex;
+          const decl = getDecl(d);
+          const canonPath = getCanonDeclPath(d);
+
+          // collect unconditionally for the first term
+          if (i == 0) {
+            declSet.add(d);
+          } else {
+            // path intersection for subsequent terms
+            let found = false;
+            for (let p of canonPath.declIndexes) {
+              if (declSet.has(p)) {
+                found = true;
+                break;
+              }   
+            }
+            if (!found) {
+              otherDeclSet.add(d);
+            } else {
+              termSet.add(d);
+            }
+          }
+          
+          if (declScores[d] == undefined) declScores[d] = 0;
+        
+          // scores (lower is better)
+          let decl_name = decl.name;
+          if (ignoreCase) decl_name = decl_name.toLowerCase();
+
+          // shallow path are preferable
+          const path_depth = canonPath.declNames.length * 50;
+          // matching the start of a decl name is good
+          const match_from_start = decl_name.startsWith(term) ? -term.length * (1 -ignoreCase) : (decl_name.length - term.length) + 1; 
+          // being a perfect match is good
+          const is_full_match = (list == result.full) ? -decl_name.length * (2 - ignoreCase) : decl_name.length - term.length;
+          // matching the end of a decl name is good
+          const matches_the_end = decl_name.endsWith(term) ? -term.length * (1 - ignoreCase) : (decl_name.length - term.length) + 1;
+          // explicitly penalizing scream case decls
+          const decl_is_scream_case = decl.name.toUpperCase() != decl.name ? 0 : decl.name.length;  
+        
+          const score =  path_depth 
+            + match_from_start 
+            + is_full_match 
+            + matches_the_end 
+            + decl_is_scream_case;
+
+          declScores[d] += score;        
+        }
+      }
+      if (i != 0) {
+        for (let d of declSet) {
+          if (termSet.has(d)) continue;
+          let found = false;
+          for (let p of getCanonDeclPath(d).declIndexes) {
+            if (termSet.has(p) || otherDeclSet.has(p)) {
+              found = true;
+              break;
+            }   
+          }
+          if (found) {
+            declScores[d] = declScores[d] / term_list.length;
+          }
+          
+          termOtherSet.add(d);
+        }
+        declSet = termSet;
+        for (let d of termOtherSet) {
+          otherDeclSet.add(d);
+        }
+        
+      }
+    }
+
+    let matchedItems = {
+      high_quality: [],
+      low_quality: [],
+    };
+    for (let idx of declSet) {
+      matchedItems.high_quality.push({points: declScores[idx], declIndex: idx})
+    }
+    for (let idx of otherDeclSet) {
+      matchedItems.low_quality.push({points: declScores[idx], declIndex: idx})
+    }
+    
+    matchedItems.high_quality.sort(function (a, b) {
+      let cmp = operatorCompare(a.points, b.points);
+      return cmp;
+    });
+    matchedItems.low_quality.sort(function (a, b) {
+      let cmp = operatorCompare(a.points, b.points);
+      return cmp;
+    });
+    
+    // Build up the list of search results
+    let matchedItemsHTML = "";
+
+    for (let list of [matchedItems.high_quality, matchedItems.low_quality]) {
+      if (list == matchedItems.low_quality && list.length > 0) {
+        matchedItemsHTML += "<hr class='other-results'>"
+      }
+      for (let result of list) {
+        const points = result.points;
+        const match = result.declIndex;
+
+        let canonPath = getCanonDeclPath(match);
+        if (canonPath == null) continue;
+
+        let lastModName = canonPath.modNames[canonPath.modNames.length - 1];
+        let text = lastModName + "." + canonPath.declNames.join(".");
+      
+
+        const href = navLink(canonPath.modNames, canonPath.declNames);
+
+        matchedItemsHTML += "<li><a href=\"" + href + "\">" +  text + "</a></li>";
+      }
+    }
+
+    // Replace the search results using our newly constructed HTML string
+    domListSearchResults.innerHTML = matchedItemsHTML;
+    renderSearchCursor();
+
+    domSectSearchResults.classList.remove("hidden");
+  }
+   
+  function renderSearchAPIOld() {
     let matchedItems = [];
     let ignoreCase = curNavSearch.toLowerCase() === curNavSearch;
     let terms = getSearchTerms();
@@ -4005,9 +4368,9 @@ function addDeclToSearchResults(decl, declIndex, pkgNames, item, list, stack) {
       if (canonPath == null) continue;
 
       let decl = getDecl(declIndex);
-      let lastPkgName = canonPath.pkgNames[canonPath.pkgNames.length - 1];
+      let lastModName = canonPath.modNames[canonPath.modNames.length - 1];
       let fullPathSearchText =
-        lastPkgName + "." + canonPath.declNames.join(".");
+        lastModName + "." + canonPath.declNames.join(".");
       let astNode = getAstNode(decl.src);
       let fileAndDocs = ""; //zigAnalysis.files[astNode.file];
       // TODO: understand what this piece of code is trying to achieve
@@ -4063,7 +4426,7 @@ function addDeclToSearchResults(decl, declIndex, pkgNames, item, list, stack) {
       });
 
       let searchTrimmed = false;
-      const searchTrimResultsMaxItems = 200;
+      const searchTrimResultsMaxItems = 60;
       if (searchTrimResults && matchedItems.length > searchTrimResultsMaxItems) {
         matchedItems = matchedItems.slice(0, searchTrimResultsMaxItems);
         searchTrimmed = true;
@@ -4074,10 +4437,10 @@ function addDeclToSearchResults(decl, declIndex, pkgNames, item, list, stack) {
 
       for (let i = 0; i < matchedItems.length; i += 1) {
         const match = matchedItems[i];
-        const lastPkgName = match.path.pkgNames[match.path.pkgNames.length - 1];
+        const lastModName = match.path.modNames[match.path.modNames.length - 1];
 
-        const text = lastPkgName + "." + match.path.declNames.join(".");
-        const href = navLink(match.path.pkgNames, match.path.declNames);
+        const text = lastModName + "." + match.path.declNames.join(".");
+        const href = navLink(match.path.modNames, match.path.declNames);
 
         matchedItemsHTML += "<li><a href=\"" + href + "\">" + text + "</a></li>";
       }
@@ -4156,7 +4519,7 @@ function addDeclToSearchResults(decl, declIndex, pkgNames, item, list, stack) {
     const file = zigAnalysis.files[idx];
     return {
       name: file[0],
-      pkgIndex: file[1],
+      modIndex: file[1],
     };
   }
 
@@ -4209,9 +4572,11 @@ function addDeclToSearchResults(decl, declIndex, pkgNames, item, list, stack) {
           pubDecls: ty[4],
           field_types: ty[5],
           field_defaults: ty[6],
-          is_tuple: ty[7],
-          line_number: ty[8],
-          parent_container: ty[9],
+          backing_int: ty[7],
+          is_tuple: ty[8],
+          line_number: ty[9],
+          parent_container: ty[10],
+          layout: ty[11],
         };
       case 10: // ComptimeExpr
       case 11: // ComptimeFloat
@@ -4265,6 +4630,7 @@ function addDeclToSearchResults(decl, declIndex, pkgNames, item, list, stack) {
           tag: ty[6],
           auto_tag: ty[7],
           parent_container: ty[8],
+          layout: ty[9],
         };
       case 21: // Fn
         return {
@@ -4314,3 +4680,255 @@ function toggleExpand(event) {
     parent.parentElement.parentElement.scrollIntoView(true);
   }
 }
+
+function RadixTree() {
+  this.root = null;
+
+  RadixTree.prototype.search = function (query) {
+    return this.root.search(query);
+    
+  }
+
+  RadixTree.prototype.add = function (declName, value) {
+    if (this.root == null) {
+      this.root = new Node(declName.toLowerCase(), null, [value]);
+    } else {
+      this.root.add(declName.toLowerCase(), value);
+    }
+
+    const not_scream_case = declName.toUpperCase() != declName;
+    let found_separator = false;
+    for (let i = 1; i < declName.length; i +=1) {
+      if (declName[i] == '_' || declName[i] == '.') {
+        found_separator = true;
+        continue;
+      }
+
+
+      if (found_separator || (declName[i].toLowerCase() !== declName[i])) {
+        if (declName.length > i+1 
+          && declName[i+1].toLowerCase() != declName[i+1]) continue;
+        let suffix = declName.slice(i);
+        this.root.add(suffix.toLowerCase(), value);
+        found_separator = false;
+      }
+    }
+  }
+  
+  function Node(labels, next, values) {
+    this.labels = labels; 
+    this.next = next;
+    this.values = values;
+  }
+
+  Node.prototype.isCompressed = function () {
+    return !Array.isArray(this.next);
+  }
+
+  Node.prototype.search = function (word) {
+    let full_matches = [];
+    let partial_matches = [];
+    let subtree_root = null;
+    
+    let cn = this;
+    char_loop: for (let i = 0; i < word.length;) {
+      if (cn.isCompressed()) {
+        for (let j = 0; j < cn.labels.length; j += 1) {
+          let current_idx = i+j;
+
+          if (current_idx == word.length) {
+            partial_matches = cn.values;
+            subtree_root = cn.next;
+            break char_loop; 
+          }
+          
+          if (word[current_idx] != cn.labels[j]) return null;
+        }
+
+        // the full label matched
+        let new_idx = i + cn.labels.length;
+        if (new_idx == word.length) {
+          full_matches = cn.values;
+          subtree_root = cn.next;
+          break char_loop;
+        }
+        
+        
+        i = new_idx;
+        cn = cn.next;
+        continue;
+      } else {
+        for (let j = 0; j < cn.labels.length; j += 1) {
+          if (word[i] == cn.labels[j]) {
+            if (i == word.length - 1) { 
+              full_matches = cn.values[j];
+              subtree_root = cn.next[j];
+              break char_loop;
+            }
+              
+            let next = cn.next[j];
+            if (next == null) return null;
+            cn = next;
+            i += 1;
+            continue char_loop; 
+          } 
+        }
+        
+        // didn't find a match
+        return null;
+      }
+    }
+    
+    // Match was found, let's collect all other 
+    // partial matches from the subtree
+    let stack = [subtree_root];
+    let node;
+    while (node = stack.pop()) {
+      if (node.isCompressed()) {
+        partial_matches = partial_matches.concat(node.values);
+        if (node.next != null) {
+          stack.push(node.next);
+        }
+      } else {
+        for (let v of node.values) {
+          partial_matches = partial_matches.concat(v);
+        }
+        
+        for (let n of node.next) {
+          if (n != null) stack.push(n);
+        }
+      }
+    }
+
+    return {full: full_matches, partial: partial_matches};
+  }
+
+  Node.prototype.add = function (word, value) {
+    let cn = this;
+    char_loop: for (let i = 0; i < word.length;) {
+      if (cn.isCompressed()) {
+        for(let j = 0; j < cn.labels.length; j += 1) {
+          let current_idx = i+j;
+
+          if (current_idx == word.length) {
+            if (j < cn.labels.length - 1) {
+              let node = new Node(cn.labels.slice(j), cn.next, cn.values);
+              cn.labels = cn.labels.slice(0, j);
+              cn.next = node;
+              cn.values = [];
+            }
+            cn.values.push(value);
+            return;
+          }
+          
+          if (word[current_idx] == cn.labels[j]) continue;
+          
+          // if we're here, a mismatch was found
+          if (j != cn.labels.length - 1) {
+            // create a suffix node
+            const label_suffix = cn.labels.slice(j+1);
+            let node = new Node(label_suffix, cn.next, [...cn.values]);
+            cn.next = node;
+            cn.values = [];
+          }
+
+          // turn current node into a split node
+          let node = null;
+          let word_values = [];
+          if (current_idx == word.length - 1) {
+            // mismatch happened in the last character of word
+            // meaning that the current node should hold its value
+            word_values.push(value);
+          } else {
+             node = new Node(word.slice(current_idx+1), null, [value]);
+          }
+        
+          cn.labels = cn.labels[j] + word[current_idx];
+          cn.next = [cn.next, node];          
+          cn.values = [cn.values, word_values];
+
+          if (j != 0) {
+            // current node must be turned into a prefix node
+            let splitNode = new Node(cn.labels, cn.next, cn.values);
+            cn.labels = word.slice(i, current_idx);
+            cn.next = splitNode;
+            cn.values = [];
+          }
+
+          return;
+        }        
+        // label matched fully with word, are there any more chars?
+        const new_idx = i + cn.labels.length;
+        if (new_idx == word.length) {
+          cn.values.push(value);
+          return;
+        } else {
+          if (cn.next == null) {
+            let node = new Node(word.slice(new_idx), null, [value]);
+            cn.next = node;
+            return;
+          } else {
+            cn = cn.next;
+            i = new_idx;
+            continue;
+          }
+        } 
+      } else { // node is not compressed
+        let letter = word[i];
+        for (let j = 0; j < cn.labels.length; j += 1) {
+          if (letter == cn.labels[j]) {
+            if (i == word.length - 1) {
+              cn.values[j].push(value);
+              return;
+            }
+            if (cn.next[j] == null) {
+              let node = new Node(word.slice(i+1), null, [value]);
+              cn.next[j] = node;
+              return;
+            } else {
+              cn = cn.next[j];
+              i += 1;
+              continue char_loop;
+            }
+          }
+        }
+
+        // if we're here we didn't find a match
+        cn.labels += letter;
+        if (i == word.length - 1) {
+          cn.next.push(null);
+          cn.values.push([value]);
+        } else {
+          let node = new Node(word.slice(i+1), null, [value]);
+          cn.next.push(node);
+          cn.values.push([]);
+        }
+        return;
+      }
+    }
+  }
+}
+
+// RADIX TREE:
+
+// apple 
+// appliance
+
+// "appl" => [
+//   'e', => $
+//   'i' => "ance" => $
+// ]
+
+// OUR STUFF:
+
+// AutoHashMap
+// AutoArrayHashMap
+
+// "Auto" => [
+//   'A', => "rrayHashMap" => $
+//   'H'  => "ashMap" => $
+// ]
+
+// BUT!
+
+// We want to be able to search "Hash", for example!

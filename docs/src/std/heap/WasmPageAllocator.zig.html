@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>heap/WasmPageAllocator.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -275,7 +275,7 @@
 <span class="line" id="L154">            extended.data = <span class="tok-builtin">@intToPtr</span>([*]<span class="tok-type">u128</span>, new_end * mem.page_size)[<span class="tok-number">0</span> .. mem.page_size / <span class="tok-builtin">@sizeOf</span>(<span class="tok-type">u128</span>)];</span>
 <span class="line" id="L155">            <span class="tok-comment">// Since this is the first page being freed and we consume it, assume *nothing* is free.</span>
 </span>
-<span class="line" id="L156">            mem.set(<span class="tok-type">u128</span>, extended.data, PageStatus.none_free);</span>
+<span class="line" id="L156">            <span class="tok-builtin">@memset</span>(extended.data, PageStatus.none_free);</span>
 <span class="line" id="L157">        }</span>
 <span class="line" id="L158">        <span class="tok-kw">const</span> clamped_start = <span class="tok-builtin">@max</span>(extendedOffset(), start);</span>
 <span class="line" id="L159">        extended.recycle(clamped_start - extendedOffset(), new_end - clamped_start);</span>

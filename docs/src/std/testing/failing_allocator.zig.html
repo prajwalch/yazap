@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>testing/failing_allocator.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -179,7 +179,7 @@
 <span class="line" id="L66">        <span class="tok-kw">const</span> self = <span class="tok-builtin">@ptrCast</span>(*FailingAllocator, <span class="tok-builtin">@alignCast</span>(<span class="tok-builtin">@alignOf</span>(FailingAllocator), ctx));</span>
 <span class="line" id="L67">        <span class="tok-kw">if</span> (self.index == self.fail_index) {</span>
 <span class="line" id="L68">            <span class="tok-kw">if</span> (!self.has_induced_failure) {</span>
-<span class="line" id="L69">                mem.set(<span class="tok-type">usize</span>, &amp;self.stack_addresses, <span class="tok-number">0</span>);</span>
+<span class="line" id="L69">                <span class="tok-builtin">@memset</span>(&amp;self.stack_addresses, <span class="tok-number">0</span>);</span>
 <span class="line" id="L70">                <span class="tok-kw">var</span> stack_trace = std.builtin.StackTrace{</span>
 <span class="line" id="L71">                    .instruction_addresses = &amp;self.stack_addresses,</span>
 <span class="line" id="L72">                    .index = <span class="tok-number">0</span>,</span>

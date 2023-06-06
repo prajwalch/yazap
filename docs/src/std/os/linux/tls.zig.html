@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>os/linux/tls.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -456,7 +456,7 @@
 <span class="line" id="L276"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">prepareTLS</span>(area: []<span class="tok-type">u8</span>) <span class="tok-type">usize</span> {</span>
 <span class="line" id="L277">    <span class="tok-comment">// Clear the area we're going to use, just to be safe</span>
 </span>
-<span class="line" id="L278">    mem.set(<span class="tok-type">u8</span>, area, <span class="tok-number">0</span>);</span>
+<span class="line" id="L278">    <span class="tok-builtin">@memset</span>(area, <span class="tok-number">0</span>);</span>
 <span class="line" id="L279">    <span class="tok-comment">// Prepare the DTV</span>
 </span>
 <span class="line" id="L280">    <span class="tok-kw">const</span> dtv = alignPtrCast(DTV, area.ptr + tls_image.dtv_offset);</span>
@@ -471,7 +471,7 @@
 <span class="line" id="L288">    };</span>
 <span class="line" id="L289">    <span class="tok-comment">// Copy the data</span>
 </span>
-<span class="line" id="L290">    mem.copy(<span class="tok-type">u8</span>, area[tls_image.data_offset..], tls_image.init_data);</span>
+<span class="line" id="L290">    <span class="tok-builtin">@memcpy</span>(area[tls_image.data_offset..][<span class="tok-number">0</span>..tls_image.init_data.len], tls_image.init_data);</span>
 <span class="line" id="L291"></span>
 <span class="line" id="L292">    <span class="tok-comment">// Return the corrected value (if needed) for the tp register.</span>
 </span>

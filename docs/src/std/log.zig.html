@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>log.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -259,89 +259,81 @@
 <span class="line" id="L146">    <span class="tok-kw">comptime</span> format: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>,</span>
 <span class="line" id="L147">    args: <span class="tok-kw">anytype</span>,</span>
 <span class="line" id="L148">) <span class="tok-type">void</span> {</span>
-<span class="line" id="L149">    <span class="tok-kw">if</span> (builtin.os.tag == .freestanding)</span>
-<span class="line" id="L150">        <span class="tok-builtin">@compileError</span>(</span>
-<span class="line" id="L151">            <span class="tok-str">\\freestanding targets do not have I/O configured;</span></span>
-
-<span class="line" id="L152">            <span class="tok-str">\\please provide at least an empty `log` function declaration</span></span>
-
-<span class="line" id="L153">        );</span>
-<span class="line" id="L154"></span>
-<span class="line" id="L155">    <span class="tok-kw">const</span> level_txt = <span class="tok-kw">comptime</span> message_level.asText();</span>
-<span class="line" id="L156">    <span class="tok-kw">const</span> prefix2 = <span class="tok-kw">if</span> (scope == .default) <span class="tok-str">&quot;: &quot;</span> <span class="tok-kw">else</span> <span class="tok-str">&quot;(&quot;</span> ++ <span class="tok-builtin">@tagName</span>(scope) ++ <span class="tok-str">&quot;): &quot;</span>;</span>
-<span class="line" id="L157">    <span class="tok-kw">const</span> stderr = std.io.getStdErr().writer();</span>
-<span class="line" id="L158">    std.debug.getStderrMutex().lock();</span>
-<span class="line" id="L159">    <span class="tok-kw">defer</span> std.debug.getStderrMutex().unlock();</span>
-<span class="line" id="L160">    <span class="tok-kw">nosuspend</span> stderr.print(level_txt ++ prefix2 ++ format ++ <span class="tok-str">&quot;\n&quot;</span>, args) <span class="tok-kw">catch</span> <span class="tok-kw">return</span>;</span>
-<span class="line" id="L161">}</span>
-<span class="line" id="L162"></span>
-<span class="line" id="L163"><span class="tok-comment">/// Returns a scoped logging namespace that logs all messages using the scope</span></span>
-<span class="line" id="L164"><span class="tok-comment">/// provided here.</span></span>
-<span class="line" id="L165"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">scoped</span>(<span class="tok-kw">comptime</span> scope: <span class="tok-builtin">@Type</span>(.EnumLiteral)) <span class="tok-type">type</span> {</span>
-<span class="line" id="L166">    <span class="tok-kw">return</span> <span class="tok-kw">struct</span> {</span>
-<span class="line" id="L167">        <span class="tok-comment">/// Log an error message. This log level is intended to be used</span></span>
-<span class="line" id="L168">        <span class="tok-comment">/// when something has gone wrong. This might be recoverable or might</span></span>
-<span class="line" id="L169">        <span class="tok-comment">/// be followed by the program exiting.</span></span>
-<span class="line" id="L170">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">err</span>(</span>
-<span class="line" id="L171">            <span class="tok-kw">comptime</span> format: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>,</span>
-<span class="line" id="L172">            args: <span class="tok-kw">anytype</span>,</span>
-<span class="line" id="L173">        ) <span class="tok-type">void</span> {</span>
-<span class="line" id="L174">            <span class="tok-builtin">@setCold</span>(<span class="tok-null">true</span>);</span>
-<span class="line" id="L175">            log(.err, scope, format, args);</span>
-<span class="line" id="L176">        }</span>
-<span class="line" id="L177"></span>
-<span class="line" id="L178">        <span class="tok-comment">/// Log a warning message. This log level is intended to be used if</span></span>
-<span class="line" id="L179">        <span class="tok-comment">/// it is uncertain whether something has gone wrong or not, but the</span></span>
-<span class="line" id="L180">        <span class="tok-comment">/// circumstances would be worth investigating.</span></span>
-<span class="line" id="L181">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">warn</span>(</span>
-<span class="line" id="L182">            <span class="tok-kw">comptime</span> format: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>,</span>
-<span class="line" id="L183">            args: <span class="tok-kw">anytype</span>,</span>
-<span class="line" id="L184">        ) <span class="tok-type">void</span> {</span>
-<span class="line" id="L185">            log(.warn, scope, format, args);</span>
-<span class="line" id="L186">        }</span>
-<span class="line" id="L187"></span>
-<span class="line" id="L188">        <span class="tok-comment">/// Log an info message. This log level is intended to be used for</span></span>
-<span class="line" id="L189">        <span class="tok-comment">/// general messages about the state of the program.</span></span>
-<span class="line" id="L190">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">info</span>(</span>
-<span class="line" id="L191">            <span class="tok-kw">comptime</span> format: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>,</span>
-<span class="line" id="L192">            args: <span class="tok-kw">anytype</span>,</span>
-<span class="line" id="L193">        ) <span class="tok-type">void</span> {</span>
-<span class="line" id="L194">            log(.info, scope, format, args);</span>
-<span class="line" id="L195">        }</span>
-<span class="line" id="L196"></span>
-<span class="line" id="L197">        <span class="tok-comment">/// Log a debug message. This log level is intended to be used for</span></span>
-<span class="line" id="L198">        <span class="tok-comment">/// messages which are only useful for debugging.</span></span>
-<span class="line" id="L199">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">debug</span>(</span>
-<span class="line" id="L200">            <span class="tok-kw">comptime</span> format: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>,</span>
-<span class="line" id="L201">            args: <span class="tok-kw">anytype</span>,</span>
-<span class="line" id="L202">        ) <span class="tok-type">void</span> {</span>
-<span class="line" id="L203">            log(.debug, scope, format, args);</span>
-<span class="line" id="L204">        }</span>
-<span class="line" id="L205">    };</span>
-<span class="line" id="L206">}</span>
-<span class="line" id="L207"></span>
-<span class="line" id="L208"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> default_log_scope = .default;</span>
-<span class="line" id="L209"></span>
-<span class="line" id="L210"><span class="tok-comment">/// The default scoped logging namespace.</span></span>
-<span class="line" id="L211"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> default = scoped(default_log_scope);</span>
-<span class="line" id="L212"></span>
-<span class="line" id="L213"><span class="tok-comment">/// Log an error message using the default scope. This log level is intended to</span></span>
-<span class="line" id="L214"><span class="tok-comment">/// be used when something has gone wrong. This might be recoverable or might</span></span>
-<span class="line" id="L215"><span class="tok-comment">/// be followed by the program exiting.</span></span>
-<span class="line" id="L216"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> err = default.err;</span>
-<span class="line" id="L217"></span>
-<span class="line" id="L218"><span class="tok-comment">/// Log a warning message using the default scope. This log level is intended</span></span>
-<span class="line" id="L219"><span class="tok-comment">/// to be used if it is uncertain whether something has gone wrong or not, but</span></span>
-<span class="line" id="L220"><span class="tok-comment">/// the circumstances would be worth investigating.</span></span>
-<span class="line" id="L221"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> warn = default.warn;</span>
-<span class="line" id="L222"></span>
-<span class="line" id="L223"><span class="tok-comment">/// Log an info message using the default scope. This log level is intended to</span></span>
-<span class="line" id="L224"><span class="tok-comment">/// be used for general messages about the state of the program.</span></span>
-<span class="line" id="L225"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> info = default.info;</span>
-<span class="line" id="L226"></span>
-<span class="line" id="L227"><span class="tok-comment">/// Log a debug message using the default scope. This log level is intended to</span></span>
-<span class="line" id="L228"><span class="tok-comment">/// be used for messages which are only useful for debugging.</span></span>
-<span class="line" id="L229"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> debug = default.debug;</span>
-<span class="line" id="L230"></span>
+<span class="line" id="L149">    <span class="tok-kw">const</span> level_txt = <span class="tok-kw">comptime</span> message_level.asText();</span>
+<span class="line" id="L150">    <span class="tok-kw">const</span> prefix2 = <span class="tok-kw">if</span> (scope == .default) <span class="tok-str">&quot;: &quot;</span> <span class="tok-kw">else</span> <span class="tok-str">&quot;(&quot;</span> ++ <span class="tok-builtin">@tagName</span>(scope) ++ <span class="tok-str">&quot;): &quot;</span>;</span>
+<span class="line" id="L151">    <span class="tok-kw">const</span> stderr = std.io.getStdErr().writer();</span>
+<span class="line" id="L152">    std.debug.getStderrMutex().lock();</span>
+<span class="line" id="L153">    <span class="tok-kw">defer</span> std.debug.getStderrMutex().unlock();</span>
+<span class="line" id="L154">    <span class="tok-kw">nosuspend</span> stderr.print(level_txt ++ prefix2 ++ format ++ <span class="tok-str">&quot;\n&quot;</span>, args) <span class="tok-kw">catch</span> <span class="tok-kw">return</span>;</span>
+<span class="line" id="L155">}</span>
+<span class="line" id="L156"></span>
+<span class="line" id="L157"><span class="tok-comment">/// Returns a scoped logging namespace that logs all messages using the scope</span></span>
+<span class="line" id="L158"><span class="tok-comment">/// provided here.</span></span>
+<span class="line" id="L159"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">scoped</span>(<span class="tok-kw">comptime</span> scope: <span class="tok-builtin">@Type</span>(.EnumLiteral)) <span class="tok-type">type</span> {</span>
+<span class="line" id="L160">    <span class="tok-kw">return</span> <span class="tok-kw">struct</span> {</span>
+<span class="line" id="L161">        <span class="tok-comment">/// Log an error message. This log level is intended to be used</span></span>
+<span class="line" id="L162">        <span class="tok-comment">/// when something has gone wrong. This might be recoverable or might</span></span>
+<span class="line" id="L163">        <span class="tok-comment">/// be followed by the program exiting.</span></span>
+<span class="line" id="L164">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">err</span>(</span>
+<span class="line" id="L165">            <span class="tok-kw">comptime</span> format: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>,</span>
+<span class="line" id="L166">            args: <span class="tok-kw">anytype</span>,</span>
+<span class="line" id="L167">        ) <span class="tok-type">void</span> {</span>
+<span class="line" id="L168">            <span class="tok-builtin">@setCold</span>(<span class="tok-null">true</span>);</span>
+<span class="line" id="L169">            log(.err, scope, format, args);</span>
+<span class="line" id="L170">        }</span>
+<span class="line" id="L171"></span>
+<span class="line" id="L172">        <span class="tok-comment">/// Log a warning message. This log level is intended to be used if</span></span>
+<span class="line" id="L173">        <span class="tok-comment">/// it is uncertain whether something has gone wrong or not, but the</span></span>
+<span class="line" id="L174">        <span class="tok-comment">/// circumstances would be worth investigating.</span></span>
+<span class="line" id="L175">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">warn</span>(</span>
+<span class="line" id="L176">            <span class="tok-kw">comptime</span> format: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>,</span>
+<span class="line" id="L177">            args: <span class="tok-kw">anytype</span>,</span>
+<span class="line" id="L178">        ) <span class="tok-type">void</span> {</span>
+<span class="line" id="L179">            log(.warn, scope, format, args);</span>
+<span class="line" id="L180">        }</span>
+<span class="line" id="L181"></span>
+<span class="line" id="L182">        <span class="tok-comment">/// Log an info message. This log level is intended to be used for</span></span>
+<span class="line" id="L183">        <span class="tok-comment">/// general messages about the state of the program.</span></span>
+<span class="line" id="L184">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">info</span>(</span>
+<span class="line" id="L185">            <span class="tok-kw">comptime</span> format: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>,</span>
+<span class="line" id="L186">            args: <span class="tok-kw">anytype</span>,</span>
+<span class="line" id="L187">        ) <span class="tok-type">void</span> {</span>
+<span class="line" id="L188">            log(.info, scope, format, args);</span>
+<span class="line" id="L189">        }</span>
+<span class="line" id="L190"></span>
+<span class="line" id="L191">        <span class="tok-comment">/// Log a debug message. This log level is intended to be used for</span></span>
+<span class="line" id="L192">        <span class="tok-comment">/// messages which are only useful for debugging.</span></span>
+<span class="line" id="L193">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">debug</span>(</span>
+<span class="line" id="L194">            <span class="tok-kw">comptime</span> format: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>,</span>
+<span class="line" id="L195">            args: <span class="tok-kw">anytype</span>,</span>
+<span class="line" id="L196">        ) <span class="tok-type">void</span> {</span>
+<span class="line" id="L197">            log(.debug, scope, format, args);</span>
+<span class="line" id="L198">        }</span>
+<span class="line" id="L199">    };</span>
+<span class="line" id="L200">}</span>
+<span class="line" id="L201"></span>
+<span class="line" id="L202"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> default_log_scope = .default;</span>
+<span class="line" id="L203"></span>
+<span class="line" id="L204"><span class="tok-comment">/// The default scoped logging namespace.</span></span>
+<span class="line" id="L205"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> default = scoped(default_log_scope);</span>
+<span class="line" id="L206"></span>
+<span class="line" id="L207"><span class="tok-comment">/// Log an error message using the default scope. This log level is intended to</span></span>
+<span class="line" id="L208"><span class="tok-comment">/// be used when something has gone wrong. This might be recoverable or might</span></span>
+<span class="line" id="L209"><span class="tok-comment">/// be followed by the program exiting.</span></span>
+<span class="line" id="L210"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> err = default.err;</span>
+<span class="line" id="L211"></span>
+<span class="line" id="L212"><span class="tok-comment">/// Log a warning message using the default scope. This log level is intended</span></span>
+<span class="line" id="L213"><span class="tok-comment">/// to be used if it is uncertain whether something has gone wrong or not, but</span></span>
+<span class="line" id="L214"><span class="tok-comment">/// the circumstances would be worth investigating.</span></span>
+<span class="line" id="L215"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> warn = default.warn;</span>
+<span class="line" id="L216"></span>
+<span class="line" id="L217"><span class="tok-comment">/// Log an info message using the default scope. This log level is intended to</span></span>
+<span class="line" id="L218"><span class="tok-comment">/// be used for general messages about the state of the program.</span></span>
+<span class="line" id="L219"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> info = default.info;</span>
+<span class="line" id="L220"></span>
+<span class="line" id="L221"><span class="tok-comment">/// Log a debug message using the default scope. This log level is intended to</span></span>
+<span class="line" id="L222"><span class="tok-comment">/// be used for messages which are only useful for debugging.</span></span>
+<span class="line" id="L223"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> debug = default.debug;</span>
+<span class="line" id="L224"></span>
 </code></pre></body>
 </html>

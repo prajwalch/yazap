@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>crypto/modes.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -152,11 +152,13 @@
 <span class="line" id="L38">    <span class="tok-kw">if</span> (i &lt; src.len) {</span>
 <span class="line" id="L39">        mem.writeInt(<span class="tok-type">u128</span>, &amp;counter, counterInt, endian);</span>
 <span class="line" id="L40">        <span class="tok-kw">var</span> pad = [_]<span class="tok-type">u8</span>{<span class="tok-number">0</span>} ** block_length;</span>
-<span class="line" id="L41">        mem.copy(<span class="tok-type">u8</span>, &amp;pad, src[i..]);</span>
-<span class="line" id="L42">        block_cipher.xor(&amp;pad, &amp;pad, counter);</span>
-<span class="line" id="L43">        mem.copy(<span class="tok-type">u8</span>, dst[i..], pad[<span class="tok-number">0</span> .. src.len - i]);</span>
-<span class="line" id="L44">    }</span>
-<span class="line" id="L45">}</span>
-<span class="line" id="L46"></span>
+<span class="line" id="L41">        <span class="tok-kw">const</span> src_slice = src[i..];</span>
+<span class="line" id="L42">        <span class="tok-builtin">@memcpy</span>(pad[<span class="tok-number">0</span>..src_slice.len], src_slice);</span>
+<span class="line" id="L43">        block_cipher.xor(&amp;pad, &amp;pad, counter);</span>
+<span class="line" id="L44">        <span class="tok-kw">const</span> pad_slice = pad[<span class="tok-number">0</span> .. src.len - i];</span>
+<span class="line" id="L45">        <span class="tok-builtin">@memcpy</span>(dst[i..][<span class="tok-number">0</span>..pad_slice.len], pad_slice);</span>
+<span class="line" id="L46">    }</span>
+<span class="line" id="L47">}</span>
+<span class="line" id="L48"></span>
 </code></pre></body>
 </html>

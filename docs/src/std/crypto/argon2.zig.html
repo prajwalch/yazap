@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>crypto/argon2.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -265,7 +265,7 @@
 <span class="line" id="L149">        h.update(&amp;outlen_bytes);</span>
 <span class="line" id="L150">        h.update(in);</span>
 <span class="line" id="L151">        h.final(&amp;out_buf);</span>
-<span class="line" id="L152">        mem.copy(<span class="tok-type">u8</span>, out, out_buf[<span class="tok-number">0</span>..out.len]);</span>
+<span class="line" id="L152">        <span class="tok-builtin">@memcpy</span>(out, out_buf[<span class="tok-number">0</span>..out.len]);</span>
 <span class="line" id="L153">        <span class="tok-kw">return</span>;</span>
 <span class="line" id="L154">    }</span>
 <span class="line" id="L155"></span>
@@ -274,19 +274,19 @@
 <span class="line" id="L158">    h.update(in);</span>
 <span class="line" id="L159">    h.final(&amp;out_buf);</span>
 <span class="line" id="L160">    <span class="tok-kw">var</span> out_slice = out;</span>
-<span class="line" id="L161">    mem.copy(<span class="tok-type">u8</span>, out_slice, out_buf[<span class="tok-number">0</span> .. H.digest_length / <span class="tok-number">2</span>]);</span>
+<span class="line" id="L161">    out_slice[<span class="tok-number">0</span> .. H.digest_length / <span class="tok-number">2</span>].* = out_buf[<span class="tok-number">0</span> .. H.digest_length / <span class="tok-number">2</span>].*;</span>
 <span class="line" id="L162">    out_slice = out_slice[H.digest_length / <span class="tok-number">2</span> ..];</span>
 <span class="line" id="L163"></span>
 <span class="line" id="L164">    <span class="tok-kw">var</span> in_buf: [H.digest_length]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
 <span class="line" id="L165">    <span class="tok-kw">while</span> (out_slice.len &gt; H.digest_length) {</span>
-<span class="line" id="L166">        mem.copy(<span class="tok-type">u8</span>, &amp;in_buf, &amp;out_buf);</span>
+<span class="line" id="L166">        in_buf = out_buf;</span>
 <span class="line" id="L167">        H.hash(&amp;in_buf, &amp;out_buf, .{});</span>
-<span class="line" id="L168">        mem.copy(<span class="tok-type">u8</span>, out_slice, out_buf[<span class="tok-number">0</span> .. H.digest_length / <span class="tok-number">2</span>]);</span>
+<span class="line" id="L168">        out_slice[<span class="tok-number">0</span> .. H.digest_length / <span class="tok-number">2</span>].* = out_buf[<span class="tok-number">0</span> .. H.digest_length / <span class="tok-number">2</span>].*;</span>
 <span class="line" id="L169">        out_slice = out_slice[H.digest_length / <span class="tok-number">2</span> ..];</span>
 <span class="line" id="L170">    }</span>
-<span class="line" id="L171">    mem.copy(<span class="tok-type">u8</span>, &amp;in_buf, &amp;out_buf);</span>
+<span class="line" id="L171">    in_buf = out_buf;</span>
 <span class="line" id="L172">    H.hash(&amp;in_buf, &amp;out_buf, .{ .expected_out_bits = out_slice.len * <span class="tok-number">8</span> });</span>
-<span class="line" id="L173">    mem.copy(<span class="tok-type">u8</span>, out_slice, out_buf[<span class="tok-number">0</span>..out_slice.len]);</span>
+<span class="line" id="L173">    <span class="tok-builtin">@memcpy</span>(out_slice, out_buf[<span class="tok-number">0</span>..out_slice.len]);</span>
 <span class="line" id="L174">}</span>
 <span class="line" id="L175"></span>
 <span class="line" id="L176"><span class="tok-kw">fn</span> <span class="tok-fn">initBlocks</span>(</span>
@@ -610,7 +610,7 @@
 <span class="line" id="L494">    <span class="tok-kw">if</span> (params.t &lt; <span class="tok-number">1</span> <span class="tok-kw">or</span> params.p &lt; <span class="tok-number">1</span>) <span class="tok-kw">return</span> KdfError.WeakParameters;</span>
 <span class="line" id="L495"></span>
 <span class="line" id="L496">    <span class="tok-kw">var</span> h0 = initHash(password, salt, params, derived_key.len, mode);</span>
-<span class="line" id="L497">    <span class="tok-kw">const</span> memory = math.max(</span>
+<span class="line" id="L497">    <span class="tok-kw">const</span> memory = <span class="tok-builtin">@max</span>(</span>
 <span class="line" id="L498">        params.m / (sync_points * params.p) * (sync_points * params.p),</span>
 <span class="line" id="L499">        <span class="tok-number">2</span> * sync_points * params.p,</span>
 <span class="line" id="L500">    );</span>
@@ -993,7 +993,7 @@
 <span class="line" id="L877">            .hash = <span class="tok-str">&quot;1640b932f4b60e272f5d2207b9a9c626ffa1bd88d2349016&quot;</span>,</span>
 <span class="line" id="L878">        },</span>
 <span class="line" id="L879">    };</span>
-<span class="line" id="L880">    <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (test_vectors) |v| {</span>
+<span class="line" id="L880">    <span class="tok-kw">for</span> (test_vectors) |v| {</span>
 <span class="line" id="L881">        <span class="tok-kw">var</span> want: [<span class="tok-number">24</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
 <span class="line" id="L882">        _ = <span class="tok-kw">try</span> std.fmt.hexToBytes(&amp;want, v.hash);</span>
 <span class="line" id="L883"></span>

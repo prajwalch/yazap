@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>crypto/25519/edwards25519.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -251,7 +251,7 @@
 <span class="line" id="L137">        };</span>
 <span class="line" id="L138">    }</span>
 <span class="line" id="L139"></span>
-<span class="line" id="L140">    <span class="tok-comment">/// Substract two Edwards25519 points.</span></span>
+<span class="line" id="L140">    <span class="tok-comment">/// Subtract two Edwards25519 points.</span></span>
 <span class="line" id="L141">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">sub</span>(p: Edwards25519, q: Edwards25519) Edwards25519 {</span>
 <span class="line" id="L142">        <span class="tok-kw">return</span> p.add(q.neg());</span>
 <span class="line" id="L143">    }</span>
@@ -428,7 +428,7 @@
 <span class="line" id="L306">        <span class="tok-kw">var</span> pcs: [count][<span class="tok-number">9</span>]Edwards25519 = <span class="tok-null">undefined</span>;</span>
 <span class="line" id="L307"></span>
 <span class="line" id="L308">        <span class="tok-kw">var</span> bpc: [<span class="tok-number">9</span>]Edwards25519 = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L309">        mem.copy(Edwards25519, bpc[<span class="tok-number">0</span>..], basePointPc[<span class="tok-number">0</span>..bpc.len]);</span>
+<span class="line" id="L309">        <span class="tok-builtin">@memcpy</span>(&amp;bpc, basePointPc[<span class="tok-number">0</span>..bpc.len]);</span>
 <span class="line" id="L310"></span>
 <span class="line" id="L311">        <span class="tok-kw">for</span> (ps, <span class="tok-number">0</span>..) |p, i| {</span>
 <span class="line" id="L312">            <span class="tok-kw">if</span> (p.is_base) {</span>
@@ -572,7 +572,7 @@
 <span class="line" id="L439">        <span class="tok-kw">var</span> u: [n * H.digest_length]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
 <span class="line" id="L440">        <span class="tok-kw">var</span> i: <span class="tok-type">usize</span> = <span class="tok-number">0</span>;</span>
 <span class="line" id="L441">        <span class="tok-kw">while</span> (i &lt; n * H.digest_length) : (i += H.digest_length) {</span>
-<span class="line" id="L442">            mem.copy(<span class="tok-type">u8</span>, u[i..][<span class="tok-number">0</span>..H.digest_length], u_0[<span class="tok-number">0</span>..]);</span>
+<span class="line" id="L442">            u[i..][<span class="tok-number">0</span>..H.digest_length].* = u_0;</span>
 <span class="line" id="L443">            <span class="tok-kw">var</span> j: <span class="tok-type">usize</span> = <span class="tok-number">0</span>;</span>
 <span class="line" id="L444">            <span class="tok-kw">while</span> (i &gt; <span class="tok-number">0</span> <span class="tok-kw">and</span> j &lt; H.digest_length) : (j += <span class="tok-number">1</span>) {</span>
 <span class="line" id="L445">                u[i + j] ^= u[i + j - H.digest_length];</span>
@@ -588,8 +588,8 @@
 <span class="line" id="L455">        <span class="tok-kw">var</span> px: [n]Edwards25519 = <span class="tok-null">undefined</span>;</span>
 <span class="line" id="L456">        i = <span class="tok-number">0</span>;</span>
 <span class="line" id="L457">        <span class="tok-kw">while</span> (i &lt; n) : (i += <span class="tok-number">1</span>) {</span>
-<span class="line" id="L458">            mem.set(<span class="tok-type">u8</span>, u_0[<span class="tok-number">0</span> .. H.digest_length - h_l], <span class="tok-number">0</span>);</span>
-<span class="line" id="L459">            mem.copy(<span class="tok-type">u8</span>, u_0[H.digest_length - h_l ..][<span class="tok-number">0</span>..h_l], u[i * h_l ..][<span class="tok-number">0</span>..h_l]);</span>
+<span class="line" id="L458">            <span class="tok-builtin">@memset</span>(u_0[<span class="tok-number">0</span> .. H.digest_length - h_l], <span class="tok-number">0</span>);</span>
+<span class="line" id="L459">            u_0[H.digest_length - h_l ..][<span class="tok-number">0</span>..h_l].* = u[i * h_l ..][<span class="tok-number">0</span>..h_l].*;</span>
 <span class="line" id="L460">            px[i] = fromHash(u_0);</span>
 <span class="line" id="L461">        }</span>
 <span class="line" id="L462">        <span class="tok-kw">return</span> px;</span>
@@ -669,7 +669,7 @@
 <span class="line" id="L529">    }</span>
 <span class="line" id="L530">}</span>
 <span class="line" id="L531"></span>
-<span class="line" id="L532"><span class="tok-kw">test</span> <span class="tok-str">&quot;edwards25519 point addition/substraction&quot;</span> {</span>
+<span class="line" id="L532"><span class="tok-kw">test</span> <span class="tok-str">&quot;edwards25519 point addition/subtraction&quot;</span> {</span>
 <span class="line" id="L533">    <span class="tok-kw">var</span> s1: [<span class="tok-number">32</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
 <span class="line" id="L534">    <span class="tok-kw">var</span> s2: [<span class="tok-number">32</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
 <span class="line" id="L535">    crypto.random.bytes(&amp;s1);</span>

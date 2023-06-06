@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>base64.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -422,11 +422,11 @@
 <span class="line" id="L309">    <span class="tok-kw">const</span> input = <span class="tok-str">&quot;foo&quot;</span>;</span>
 <span class="line" id="L310"></span>
 <span class="line" id="L311">    <span class="tok-kw">var</span> expect: [<span class="tok-number">128</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L312">    std.mem.set(<span class="tok-type">u8</span>, &amp;expect, <span class="tok-number">0</span>);</span>
+<span class="line" id="L312">    <span class="tok-builtin">@memset</span>(&amp;expect, <span class="tok-number">0</span>);</span>
 <span class="line" id="L313">    _ = url_safe.Encoder.encode(expect[<span class="tok-number">0</span>..url_safe.Encoder.calcSize(input.len)], input);</span>
 <span class="line" id="L314"></span>
 <span class="line" id="L315">    <span class="tok-kw">var</span> got: [<span class="tok-number">128</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L316">    std.mem.set(<span class="tok-type">u8</span>, &amp;got, <span class="tok-number">0</span>);</span>
+<span class="line" id="L316">    <span class="tok-builtin">@memset</span>(&amp;got, <span class="tok-number">0</span>);</span>
 <span class="line" id="L317">    _ = url_safe.Encoder.encode(&amp;got, input);</span>
 <span class="line" id="L318"></span>
 <span class="line" id="L319">    <span class="tok-kw">try</span> std.testing.expectEqualSlices(<span class="tok-type">u8</span>, &amp;expect, &amp;got);</span>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>compress/deflate.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -125,22 +125,36 @@
 <span class="line" id="L12"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> compressor = deflate.compressor;</span>
 <span class="line" id="L13"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> decompressor = inflate.decompressor;</span>
 <span class="line" id="L14"></span>
-<span class="line" id="L15"><span class="tok-kw">test</span> {</span>
-<span class="line" id="L16">    _ = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;deflate/token.zig&quot;</span>);</span>
-<span class="line" id="L17">    _ = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;deflate/bits_utils.zig&quot;</span>);</span>
-<span class="line" id="L18">    _ = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;deflate/dict_decoder.zig&quot;</span>);</span>
-<span class="line" id="L19"></span>
-<span class="line" id="L20">    _ = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;deflate/huffman_code.zig&quot;</span>);</span>
-<span class="line" id="L21">    _ = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;deflate/huffman_bit_writer.zig&quot;</span>);</span>
-<span class="line" id="L22"></span>
-<span class="line" id="L23">    _ = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;deflate/compressor.zig&quot;</span>);</span>
-<span class="line" id="L24">    _ = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;deflate/compressor_test.zig&quot;</span>);</span>
-<span class="line" id="L25"></span>
-<span class="line" id="L26">    _ = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;deflate/deflate_fast.zig&quot;</span>);</span>
-<span class="line" id="L27">    _ = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;deflate/deflate_fast_test.zig&quot;</span>);</span>
+<span class="line" id="L15"><span class="tok-comment">/// Copies elements from a source `src` slice into a destination `dst` slice.</span></span>
+<span class="line" id="L16"><span class="tok-comment">/// The copy never returns an error but might not be complete if the destination is too small.</span></span>
+<span class="line" id="L17"><span class="tok-comment">/// Returns the number of elements copied, which will be the minimum of `src.len` and `dst.len`.</span></span>
+<span class="line" id="L18"><span class="tok-comment">/// TODO: remove this smelly function</span></span>
+<span class="line" id="L19"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">copy</span>(dst: []<span class="tok-type">u8</span>, src: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) <span class="tok-type">usize</span> {</span>
+<span class="line" id="L20">    <span class="tok-kw">if</span> (dst.len &lt;= src.len) {</span>
+<span class="line" id="L21">        <span class="tok-builtin">@memcpy</span>(dst, src[<span class="tok-number">0</span>..dst.len]);</span>
+<span class="line" id="L22">        <span class="tok-kw">return</span> dst.len;</span>
+<span class="line" id="L23">    } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L24">        <span class="tok-builtin">@memcpy</span>(dst[<span class="tok-number">0</span>..src.len], src);</span>
+<span class="line" id="L25">        <span class="tok-kw">return</span> src.len;</span>
+<span class="line" id="L26">    }</span>
+<span class="line" id="L27">}</span>
 <span class="line" id="L28"></span>
-<span class="line" id="L29">    _ = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;deflate/decompressor.zig&quot;</span>);</span>
-<span class="line" id="L30">}</span>
-<span class="line" id="L31"></span>
+<span class="line" id="L29"><span class="tok-kw">test</span> {</span>
+<span class="line" id="L30">    _ = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;deflate/token.zig&quot;</span>);</span>
+<span class="line" id="L31">    _ = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;deflate/bits_utils.zig&quot;</span>);</span>
+<span class="line" id="L32">    _ = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;deflate/dict_decoder.zig&quot;</span>);</span>
+<span class="line" id="L33"></span>
+<span class="line" id="L34">    _ = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;deflate/huffman_code.zig&quot;</span>);</span>
+<span class="line" id="L35">    _ = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;deflate/huffman_bit_writer.zig&quot;</span>);</span>
+<span class="line" id="L36"></span>
+<span class="line" id="L37">    _ = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;deflate/compressor.zig&quot;</span>);</span>
+<span class="line" id="L38">    _ = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;deflate/compressor_test.zig&quot;</span>);</span>
+<span class="line" id="L39"></span>
+<span class="line" id="L40">    _ = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;deflate/deflate_fast.zig&quot;</span>);</span>
+<span class="line" id="L41">    _ = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;deflate/deflate_fast_test.zig&quot;</span>);</span>
+<span class="line" id="L42"></span>
+<span class="line" id="L43">    _ = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;deflate/decompressor.zig&quot;</span>);</span>
+<span class="line" id="L44">}</span>
+<span class="line" id="L45"></span>
 </code></pre></body>
 </html>

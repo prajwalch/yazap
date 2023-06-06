@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>http.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -125,7 +125,7 @@
 <span class="line" id="L12">};</span>
 <span class="line" id="L13"></span>
 <span class="line" id="L14"><span class="tok-comment">/// https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods</span></span>
-<span class="line" id="L15"><span class="tok-comment">/// https://datatracker.ietf.org/doc/html/rfc7231#section-4 Initial definiton</span></span>
+<span class="line" id="L15"><span class="tok-comment">/// https://datatracker.ietf.org/doc/html/rfc7231#section-4 Initial definition</span></span>
 <span class="line" id="L16"><span class="tok-comment">/// https://datatracker.ietf.org/doc/html/rfc5789#section-2 PATCH</span></span>
 <span class="line" id="L17"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Method = <span class="tok-kw">enum</span> {</span>
 <span class="line" id="L18">    GET,</span>
@@ -290,7 +290,7 @@
 </span>
 <span class="line" id="L130">    too_many_requests = <span class="tok-number">429</span>, <span class="tok-comment">// RFC6585</span>
 </span>
-<span class="line" id="L131">    header_fields_too_large = <span class="tok-number">431</span>, <span class="tok-comment">// RFC6585</span>
+<span class="line" id="L131">    request_header_fields_too_large = <span class="tok-number">431</span>, <span class="tok-comment">// RFC6585</span>
 </span>
 <span class="line" id="L132">    unavailable_for_legal_reasons = <span class="tok-number">451</span>, <span class="tok-comment">// RFC7725</span>
 </span>
@@ -382,7 +382,7 @@
 <span class="line" id="L203">            .upgrade_required =&gt; <span class="tok-str">&quot;Upgrade Required&quot;</span>,</span>
 <span class="line" id="L204">            .precondition_required =&gt; <span class="tok-str">&quot;Precondition Required&quot;</span>,</span>
 <span class="line" id="L205">            .too_many_requests =&gt; <span class="tok-str">&quot;Too Many Requests&quot;</span>,</span>
-<span class="line" id="L206">            .header_fields_too_large =&gt; <span class="tok-str">&quot;Request Header Fields Too Large&quot;</span>,</span>
+<span class="line" id="L206">            .request_header_fields_too_large =&gt; <span class="tok-str">&quot;Request Header Fields Too Large&quot;</span>,</span>
 <span class="line" id="L207">            .unavailable_for_legal_reasons =&gt; <span class="tok-str">&quot;Unavailable For Legal Reasons&quot;</span>,</span>
 <span class="line" id="L208"></span>
 <span class="line" id="L209">            <span class="tok-comment">// 5xx statuses</span>

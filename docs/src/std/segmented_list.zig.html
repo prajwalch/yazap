@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>segmented_list.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -407,7 +407,7 @@
 <span class="line" id="L231">            } <span class="tok-kw">else</span> {</span>
 <span class="line" id="L232">                <span class="tok-comment">// Good thing we allocated that new memory slice.</span>
 </span>
-<span class="line" id="L233">                mem.copy([*]T, new_dynamic_segments, self.dynamic_segments[<span class="tok-number">0</span>..new_cap_shelf_count]);</span>
+<span class="line" id="L233">                <span class="tok-builtin">@memcpy</span>(new_dynamic_segments, self.dynamic_segments[<span class="tok-number">0</span>..new_cap_shelf_count]);</span>
 <span class="line" id="L234">                allocator.free(self.dynamic_segments);</span>
 <span class="line" id="L235">                self.dynamic_segments = new_dynamic_segments;</span>
 <span class="line" id="L236">            }</span>
@@ -426,290 +426,287 @@
 <span class="line" id="L248"></span>
 <span class="line" id="L249">            <span class="tok-kw">var</span> i = start;</span>
 <span class="line" id="L250">            <span class="tok-kw">if</span> (end &lt;= prealloc_item_count) {</span>
-<span class="line" id="L251">                mem.copy(T, dest[i - start ..], self.prealloc_segment[i..end]);</span>
-<span class="line" id="L252">                <span class="tok-kw">return</span>;</span>
-<span class="line" id="L253">            } <span class="tok-kw">else</span> <span class="tok-kw">if</span> (i &lt; prealloc_item_count) {</span>
-<span class="line" id="L254">                mem.copy(T, dest[i - start ..], self.prealloc_segment[i..]);</span>
-<span class="line" id="L255">                i = prealloc_item_count;</span>
-<span class="line" id="L256">            }</span>
-<span class="line" id="L257"></span>
-<span class="line" id="L258">            <span class="tok-kw">while</span> (i &lt; end) {</span>
-<span class="line" id="L259">                <span class="tok-kw">const</span> shelf_index = shelfIndex(i);</span>
-<span class="line" id="L260">                <span class="tok-kw">const</span> copy_start = boxIndex(i, shelf_index);</span>
-<span class="line" id="L261">                <span class="tok-kw">const</span> copy_end = std.math.min(shelfSize(shelf_index), copy_start + end - i);</span>
-<span class="line" id="L262"></span>
-<span class="line" id="L263">                mem.copy(</span>
-<span class="line" id="L264">                    T,</span>
-<span class="line" id="L265">                    dest[i - start ..],</span>
-<span class="line" id="L266">                    self.dynamic_segments[shelf_index][copy_start..copy_end],</span>
-<span class="line" id="L267">                );</span>
-<span class="line" id="L268"></span>
-<span class="line" id="L269">                i += (copy_end - copy_start);</span>
-<span class="line" id="L270">            }</span>
-<span class="line" id="L271">        }</span>
-<span class="line" id="L272"></span>
-<span class="line" id="L273">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">uncheckedAt</span>(self: <span class="tok-kw">anytype</span>, index: <span class="tok-type">usize</span>) AtType(<span class="tok-builtin">@TypeOf</span>(self)) {</span>
-<span class="line" id="L274">            <span class="tok-kw">if</span> (index &lt; prealloc_item_count) {</span>
-<span class="line" id="L275">                <span class="tok-kw">return</span> &amp;self.prealloc_segment[index];</span>
-<span class="line" id="L276">            }</span>
-<span class="line" id="L277">            <span class="tok-kw">const</span> shelf_index = shelfIndex(index);</span>
-<span class="line" id="L278">            <span class="tok-kw">const</span> box_index = boxIndex(index, shelf_index);</span>
-<span class="line" id="L279">            <span class="tok-kw">return</span> &amp;self.dynamic_segments[shelf_index][box_index];</span>
-<span class="line" id="L280">        }</span>
-<span class="line" id="L281"></span>
-<span class="line" id="L282">        <span class="tok-kw">fn</span> <span class="tok-fn">shelfCount</span>(box_count: <span class="tok-type">usize</span>) ShelfIndex {</span>
-<span class="line" id="L283">            <span class="tok-kw">if</span> (prealloc_item_count == <span class="tok-number">0</span>) {</span>
-<span class="line" id="L284">                <span class="tok-kw">return</span> log2_int_ceil(<span class="tok-type">usize</span>, box_count + <span class="tok-number">1</span>);</span>
-<span class="line" id="L285">            }</span>
-<span class="line" id="L286">            <span class="tok-kw">return</span> log2_int_ceil(<span class="tok-type">usize</span>, box_count + prealloc_item_count) - prealloc_exp - <span class="tok-number">1</span>;</span>
-<span class="line" id="L287">        }</span>
-<span class="line" id="L288"></span>
-<span class="line" id="L289">        <span class="tok-kw">fn</span> <span class="tok-fn">shelfSize</span>(shelf_index: ShelfIndex) <span class="tok-type">usize</span> {</span>
-<span class="line" id="L290">            <span class="tok-kw">if</span> (prealloc_item_count == <span class="tok-number">0</span>) {</span>
-<span class="line" id="L291">                <span class="tok-kw">return</span> <span class="tok-builtin">@as</span>(<span class="tok-type">usize</span>, <span class="tok-number">1</span>) &lt;&lt; shelf_index;</span>
-<span class="line" id="L292">            }</span>
-<span class="line" id="L293">            <span class="tok-kw">return</span> <span class="tok-builtin">@as</span>(<span class="tok-type">usize</span>, <span class="tok-number">1</span>) &lt;&lt; (shelf_index + (prealloc_exp + <span class="tok-number">1</span>));</span>
-<span class="line" id="L294">        }</span>
-<span class="line" id="L295"></span>
-<span class="line" id="L296">        <span class="tok-kw">fn</span> <span class="tok-fn">shelfIndex</span>(list_index: <span class="tok-type">usize</span>) ShelfIndex {</span>
-<span class="line" id="L297">            <span class="tok-kw">if</span> (prealloc_item_count == <span class="tok-number">0</span>) {</span>
-<span class="line" id="L298">                <span class="tok-kw">return</span> std.math.log2_int(<span class="tok-type">usize</span>, list_index + <span class="tok-number">1</span>);</span>
-<span class="line" id="L299">            }</span>
-<span class="line" id="L300">            <span class="tok-kw">return</span> std.math.log2_int(<span class="tok-type">usize</span>, list_index + prealloc_item_count) - prealloc_exp - <span class="tok-number">1</span>;</span>
-<span class="line" id="L301">        }</span>
-<span class="line" id="L302"></span>
-<span class="line" id="L303">        <span class="tok-kw">fn</span> <span class="tok-fn">boxIndex</span>(list_index: <span class="tok-type">usize</span>, shelf_index: ShelfIndex) <span class="tok-type">usize</span> {</span>
-<span class="line" id="L304">            <span class="tok-kw">if</span> (prealloc_item_count == <span class="tok-number">0</span>) {</span>
-<span class="line" id="L305">                <span class="tok-kw">return</span> (list_index + <span class="tok-number">1</span>) - (<span class="tok-builtin">@as</span>(<span class="tok-type">usize</span>, <span class="tok-number">1</span>) &lt;&lt; shelf_index);</span>
-<span class="line" id="L306">            }</span>
-<span class="line" id="L307">            <span class="tok-kw">return</span> list_index + prealloc_item_count - (<span class="tok-builtin">@as</span>(<span class="tok-type">usize</span>, <span class="tok-number">1</span>) &lt;&lt; ((prealloc_exp + <span class="tok-number">1</span>) + shelf_index));</span>
-<span class="line" id="L308">        }</span>
-<span class="line" id="L309"></span>
-<span class="line" id="L310">        <span class="tok-kw">fn</span> <span class="tok-fn">freeShelves</span>(self: *Self, allocator: Allocator, from_count: ShelfIndex, to_count: ShelfIndex) <span class="tok-type">void</span> {</span>
-<span class="line" id="L311">            <span class="tok-kw">var</span> i = from_count;</span>
-<span class="line" id="L312">            <span class="tok-kw">while</span> (i != to_count) {</span>
-<span class="line" id="L313">                i -= <span class="tok-number">1</span>;</span>
-<span class="line" id="L314">                allocator.free(self.dynamic_segments[i][<span class="tok-number">0</span>..shelfSize(i)]);</span>
-<span class="line" id="L315">            }</span>
-<span class="line" id="L316">        }</span>
-<span class="line" id="L317"></span>
-<span class="line" id="L318">        <span class="tok-kw">pub</span> <span class="tok-kw">const</span> Iterator = BaseIterator(*Self, *T);</span>
-<span class="line" id="L319">        <span class="tok-kw">pub</span> <span class="tok-kw">const</span> ConstIterator = BaseIterator(*<span class="tok-kw">const</span> Self, *<span class="tok-kw">const</span> T);</span>
-<span class="line" id="L320">        <span class="tok-kw">fn</span> <span class="tok-fn">BaseIterator</span>(<span class="tok-kw">comptime</span> SelfType: <span class="tok-type">type</span>, <span class="tok-kw">comptime</span> ElementPtr: <span class="tok-type">type</span>) <span class="tok-type">type</span> {</span>
-<span class="line" id="L321">            <span class="tok-kw">return</span> <span class="tok-kw">struct</span> {</span>
-<span class="line" id="L322">                list: SelfType,</span>
-<span class="line" id="L323">                index: <span class="tok-type">usize</span>,</span>
-<span class="line" id="L324">                box_index: <span class="tok-type">usize</span>,</span>
-<span class="line" id="L325">                shelf_index: ShelfIndex,</span>
-<span class="line" id="L326">                shelf_size: <span class="tok-type">usize</span>,</span>
-<span class="line" id="L327"></span>
-<span class="line" id="L328">                <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">next</span>(it: *<span class="tok-builtin">@This</span>()) ?ElementPtr {</span>
-<span class="line" id="L329">                    <span class="tok-kw">if</span> (it.index &gt;= it.list.len) <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
-<span class="line" id="L330">                    <span class="tok-kw">if</span> (it.index &lt; prealloc_item_count) {</span>
-<span class="line" id="L331">                        <span class="tok-kw">const</span> ptr = &amp;it.list.prealloc_segment[it.index];</span>
-<span class="line" id="L332">                        it.index += <span class="tok-number">1</span>;</span>
-<span class="line" id="L333">                        <span class="tok-kw">if</span> (it.index == prealloc_item_count) {</span>
-<span class="line" id="L334">                            it.box_index = <span class="tok-number">0</span>;</span>
-<span class="line" id="L335">                            it.shelf_index = <span class="tok-number">0</span>;</span>
-<span class="line" id="L336">                            it.shelf_size = prealloc_item_count * <span class="tok-number">2</span>;</span>
-<span class="line" id="L337">                        }</span>
-<span class="line" id="L338">                        <span class="tok-kw">return</span> ptr;</span>
-<span class="line" id="L339">                    }</span>
-<span class="line" id="L340"></span>
-<span class="line" id="L341">                    <span class="tok-kw">const</span> ptr = &amp;it.list.dynamic_segments[it.shelf_index][it.box_index];</span>
-<span class="line" id="L342">                    it.index += <span class="tok-number">1</span>;</span>
-<span class="line" id="L343">                    it.box_index += <span class="tok-number">1</span>;</span>
-<span class="line" id="L344">                    <span class="tok-kw">if</span> (it.box_index == it.shelf_size) {</span>
-<span class="line" id="L345">                        it.shelf_index += <span class="tok-number">1</span>;</span>
-<span class="line" id="L346">                        it.box_index = <span class="tok-number">0</span>;</span>
-<span class="line" id="L347">                        it.shelf_size *= <span class="tok-number">2</span>;</span>
-<span class="line" id="L348">                    }</span>
-<span class="line" id="L349">                    <span class="tok-kw">return</span> ptr;</span>
-<span class="line" id="L350">                }</span>
+<span class="line" id="L251">                <span class="tok-kw">const</span> src = self.prealloc_segment[i..end];</span>
+<span class="line" id="L252">                <span class="tok-builtin">@memcpy</span>(dest[i - start ..][<span class="tok-number">0</span>..src.len], src);</span>
+<span class="line" id="L253">                <span class="tok-kw">return</span>;</span>
+<span class="line" id="L254">            } <span class="tok-kw">else</span> <span class="tok-kw">if</span> (i &lt; prealloc_item_count) {</span>
+<span class="line" id="L255">                <span class="tok-kw">const</span> src = self.prealloc_segment[i..];</span>
+<span class="line" id="L256">                <span class="tok-builtin">@memcpy</span>(dest[i - start ..][<span class="tok-number">0</span>..src.len], src);</span>
+<span class="line" id="L257">                i = prealloc_item_count;</span>
+<span class="line" id="L258">            }</span>
+<span class="line" id="L259"></span>
+<span class="line" id="L260">            <span class="tok-kw">while</span> (i &lt; end) {</span>
+<span class="line" id="L261">                <span class="tok-kw">const</span> shelf_index = shelfIndex(i);</span>
+<span class="line" id="L262">                <span class="tok-kw">const</span> copy_start = boxIndex(i, shelf_index);</span>
+<span class="line" id="L263">                <span class="tok-kw">const</span> copy_end = <span class="tok-builtin">@min</span>(shelfSize(shelf_index), copy_start + end - i);</span>
+<span class="line" id="L264">                <span class="tok-kw">const</span> src = self.dynamic_segments[shelf_index][copy_start..copy_end];</span>
+<span class="line" id="L265">                <span class="tok-builtin">@memcpy</span>(dest[i - start ..][<span class="tok-number">0</span>..src.len], src);</span>
+<span class="line" id="L266">                i += (copy_end - copy_start);</span>
+<span class="line" id="L267">            }</span>
+<span class="line" id="L268">        }</span>
+<span class="line" id="L269"></span>
+<span class="line" id="L270">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">uncheckedAt</span>(self: <span class="tok-kw">anytype</span>, index: <span class="tok-type">usize</span>) AtType(<span class="tok-builtin">@TypeOf</span>(self)) {</span>
+<span class="line" id="L271">            <span class="tok-kw">if</span> (index &lt; prealloc_item_count) {</span>
+<span class="line" id="L272">                <span class="tok-kw">return</span> &amp;self.prealloc_segment[index];</span>
+<span class="line" id="L273">            }</span>
+<span class="line" id="L274">            <span class="tok-kw">const</span> shelf_index = shelfIndex(index);</span>
+<span class="line" id="L275">            <span class="tok-kw">const</span> box_index = boxIndex(index, shelf_index);</span>
+<span class="line" id="L276">            <span class="tok-kw">return</span> &amp;self.dynamic_segments[shelf_index][box_index];</span>
+<span class="line" id="L277">        }</span>
+<span class="line" id="L278"></span>
+<span class="line" id="L279">        <span class="tok-kw">fn</span> <span class="tok-fn">shelfCount</span>(box_count: <span class="tok-type">usize</span>) ShelfIndex {</span>
+<span class="line" id="L280">            <span class="tok-kw">if</span> (prealloc_item_count == <span class="tok-number">0</span>) {</span>
+<span class="line" id="L281">                <span class="tok-kw">return</span> log2_int_ceil(<span class="tok-type">usize</span>, box_count + <span class="tok-number">1</span>);</span>
+<span class="line" id="L282">            }</span>
+<span class="line" id="L283">            <span class="tok-kw">return</span> log2_int_ceil(<span class="tok-type">usize</span>, box_count + prealloc_item_count) - prealloc_exp - <span class="tok-number">1</span>;</span>
+<span class="line" id="L284">        }</span>
+<span class="line" id="L285"></span>
+<span class="line" id="L286">        <span class="tok-kw">fn</span> <span class="tok-fn">shelfSize</span>(shelf_index: ShelfIndex) <span class="tok-type">usize</span> {</span>
+<span class="line" id="L287">            <span class="tok-kw">if</span> (prealloc_item_count == <span class="tok-number">0</span>) {</span>
+<span class="line" id="L288">                <span class="tok-kw">return</span> <span class="tok-builtin">@as</span>(<span class="tok-type">usize</span>, <span class="tok-number">1</span>) &lt;&lt; shelf_index;</span>
+<span class="line" id="L289">            }</span>
+<span class="line" id="L290">            <span class="tok-kw">return</span> <span class="tok-builtin">@as</span>(<span class="tok-type">usize</span>, <span class="tok-number">1</span>) &lt;&lt; (shelf_index + (prealloc_exp + <span class="tok-number">1</span>));</span>
+<span class="line" id="L291">        }</span>
+<span class="line" id="L292"></span>
+<span class="line" id="L293">        <span class="tok-kw">fn</span> <span class="tok-fn">shelfIndex</span>(list_index: <span class="tok-type">usize</span>) ShelfIndex {</span>
+<span class="line" id="L294">            <span class="tok-kw">if</span> (prealloc_item_count == <span class="tok-number">0</span>) {</span>
+<span class="line" id="L295">                <span class="tok-kw">return</span> std.math.log2_int(<span class="tok-type">usize</span>, list_index + <span class="tok-number">1</span>);</span>
+<span class="line" id="L296">            }</span>
+<span class="line" id="L297">            <span class="tok-kw">return</span> std.math.log2_int(<span class="tok-type">usize</span>, list_index + prealloc_item_count) - prealloc_exp - <span class="tok-number">1</span>;</span>
+<span class="line" id="L298">        }</span>
+<span class="line" id="L299"></span>
+<span class="line" id="L300">        <span class="tok-kw">fn</span> <span class="tok-fn">boxIndex</span>(list_index: <span class="tok-type">usize</span>, shelf_index: ShelfIndex) <span class="tok-type">usize</span> {</span>
+<span class="line" id="L301">            <span class="tok-kw">if</span> (prealloc_item_count == <span class="tok-number">0</span>) {</span>
+<span class="line" id="L302">                <span class="tok-kw">return</span> (list_index + <span class="tok-number">1</span>) - (<span class="tok-builtin">@as</span>(<span class="tok-type">usize</span>, <span class="tok-number">1</span>) &lt;&lt; shelf_index);</span>
+<span class="line" id="L303">            }</span>
+<span class="line" id="L304">            <span class="tok-kw">return</span> list_index + prealloc_item_count - (<span class="tok-builtin">@as</span>(<span class="tok-type">usize</span>, <span class="tok-number">1</span>) &lt;&lt; ((prealloc_exp + <span class="tok-number">1</span>) + shelf_index));</span>
+<span class="line" id="L305">        }</span>
+<span class="line" id="L306"></span>
+<span class="line" id="L307">        <span class="tok-kw">fn</span> <span class="tok-fn">freeShelves</span>(self: *Self, allocator: Allocator, from_count: ShelfIndex, to_count: ShelfIndex) <span class="tok-type">void</span> {</span>
+<span class="line" id="L308">            <span class="tok-kw">var</span> i = from_count;</span>
+<span class="line" id="L309">            <span class="tok-kw">while</span> (i != to_count) {</span>
+<span class="line" id="L310">                i -= <span class="tok-number">1</span>;</span>
+<span class="line" id="L311">                allocator.free(self.dynamic_segments[i][<span class="tok-number">0</span>..shelfSize(i)]);</span>
+<span class="line" id="L312">            }</span>
+<span class="line" id="L313">        }</span>
+<span class="line" id="L314"></span>
+<span class="line" id="L315">        <span class="tok-kw">pub</span> <span class="tok-kw">const</span> Iterator = BaseIterator(*Self, *T);</span>
+<span class="line" id="L316">        <span class="tok-kw">pub</span> <span class="tok-kw">const</span> ConstIterator = BaseIterator(*<span class="tok-kw">const</span> Self, *<span class="tok-kw">const</span> T);</span>
+<span class="line" id="L317">        <span class="tok-kw">fn</span> <span class="tok-fn">BaseIterator</span>(<span class="tok-kw">comptime</span> SelfType: <span class="tok-type">type</span>, <span class="tok-kw">comptime</span> ElementPtr: <span class="tok-type">type</span>) <span class="tok-type">type</span> {</span>
+<span class="line" id="L318">            <span class="tok-kw">return</span> <span class="tok-kw">struct</span> {</span>
+<span class="line" id="L319">                list: SelfType,</span>
+<span class="line" id="L320">                index: <span class="tok-type">usize</span>,</span>
+<span class="line" id="L321">                box_index: <span class="tok-type">usize</span>,</span>
+<span class="line" id="L322">                shelf_index: ShelfIndex,</span>
+<span class="line" id="L323">                shelf_size: <span class="tok-type">usize</span>,</span>
+<span class="line" id="L324"></span>
+<span class="line" id="L325">                <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">next</span>(it: *<span class="tok-builtin">@This</span>()) ?ElementPtr {</span>
+<span class="line" id="L326">                    <span class="tok-kw">if</span> (it.index &gt;= it.list.len) <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
+<span class="line" id="L327">                    <span class="tok-kw">if</span> (it.index &lt; prealloc_item_count) {</span>
+<span class="line" id="L328">                        <span class="tok-kw">const</span> ptr = &amp;it.list.prealloc_segment[it.index];</span>
+<span class="line" id="L329">                        it.index += <span class="tok-number">1</span>;</span>
+<span class="line" id="L330">                        <span class="tok-kw">if</span> (it.index == prealloc_item_count) {</span>
+<span class="line" id="L331">                            it.box_index = <span class="tok-number">0</span>;</span>
+<span class="line" id="L332">                            it.shelf_index = <span class="tok-number">0</span>;</span>
+<span class="line" id="L333">                            it.shelf_size = prealloc_item_count * <span class="tok-number">2</span>;</span>
+<span class="line" id="L334">                        }</span>
+<span class="line" id="L335">                        <span class="tok-kw">return</span> ptr;</span>
+<span class="line" id="L336">                    }</span>
+<span class="line" id="L337"></span>
+<span class="line" id="L338">                    <span class="tok-kw">const</span> ptr = &amp;it.list.dynamic_segments[it.shelf_index][it.box_index];</span>
+<span class="line" id="L339">                    it.index += <span class="tok-number">1</span>;</span>
+<span class="line" id="L340">                    it.box_index += <span class="tok-number">1</span>;</span>
+<span class="line" id="L341">                    <span class="tok-kw">if</span> (it.box_index == it.shelf_size) {</span>
+<span class="line" id="L342">                        it.shelf_index += <span class="tok-number">1</span>;</span>
+<span class="line" id="L343">                        it.box_index = <span class="tok-number">0</span>;</span>
+<span class="line" id="L344">                        it.shelf_size *= <span class="tok-number">2</span>;</span>
+<span class="line" id="L345">                    }</span>
+<span class="line" id="L346">                    <span class="tok-kw">return</span> ptr;</span>
+<span class="line" id="L347">                }</span>
+<span class="line" id="L348"></span>
+<span class="line" id="L349">                <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">prev</span>(it: *<span class="tok-builtin">@This</span>()) ?ElementPtr {</span>
+<span class="line" id="L350">                    <span class="tok-kw">if</span> (it.index == <span class="tok-number">0</span>) <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
 <span class="line" id="L351"></span>
-<span class="line" id="L352">                <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">prev</span>(it: *<span class="tok-builtin">@This</span>()) ?ElementPtr {</span>
-<span class="line" id="L353">                    <span class="tok-kw">if</span> (it.index == <span class="tok-number">0</span>) <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
+<span class="line" id="L352">                    it.index -= <span class="tok-number">1</span>;</span>
+<span class="line" id="L353">                    <span class="tok-kw">if</span> (it.index &lt; prealloc_item_count) <span class="tok-kw">return</span> &amp;it.list.prealloc_segment[it.index];</span>
 <span class="line" id="L354"></span>
-<span class="line" id="L355">                    it.index -= <span class="tok-number">1</span>;</span>
-<span class="line" id="L356">                    <span class="tok-kw">if</span> (it.index &lt; prealloc_item_count) <span class="tok-kw">return</span> &amp;it.list.prealloc_segment[it.index];</span>
-<span class="line" id="L357"></span>
-<span class="line" id="L358">                    <span class="tok-kw">if</span> (it.box_index == <span class="tok-number">0</span>) {</span>
-<span class="line" id="L359">                        it.shelf_index -= <span class="tok-number">1</span>;</span>
-<span class="line" id="L360">                        it.shelf_size /= <span class="tok-number">2</span>;</span>
-<span class="line" id="L361">                        it.box_index = it.shelf_size - <span class="tok-number">1</span>;</span>
-<span class="line" id="L362">                    } <span class="tok-kw">else</span> {</span>
-<span class="line" id="L363">                        it.box_index -= <span class="tok-number">1</span>;</span>
-<span class="line" id="L364">                    }</span>
+<span class="line" id="L355">                    <span class="tok-kw">if</span> (it.box_index == <span class="tok-number">0</span>) {</span>
+<span class="line" id="L356">                        it.shelf_index -= <span class="tok-number">1</span>;</span>
+<span class="line" id="L357">                        it.shelf_size /= <span class="tok-number">2</span>;</span>
+<span class="line" id="L358">                        it.box_index = it.shelf_size - <span class="tok-number">1</span>;</span>
+<span class="line" id="L359">                    } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L360">                        it.box_index -= <span class="tok-number">1</span>;</span>
+<span class="line" id="L361">                    }</span>
+<span class="line" id="L362"></span>
+<span class="line" id="L363">                    <span class="tok-kw">return</span> &amp;it.list.dynamic_segments[it.shelf_index][it.box_index];</span>
+<span class="line" id="L364">                }</span>
 <span class="line" id="L365"></span>
-<span class="line" id="L366">                    <span class="tok-kw">return</span> &amp;it.list.dynamic_segments[it.shelf_index][it.box_index];</span>
-<span class="line" id="L367">                }</span>
-<span class="line" id="L368"></span>
-<span class="line" id="L369">                <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">peek</span>(it: *<span class="tok-builtin">@This</span>()) ?ElementPtr {</span>
-<span class="line" id="L370">                    <span class="tok-kw">if</span> (it.index &gt;= it.list.len)</span>
-<span class="line" id="L371">                        <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
-<span class="line" id="L372">                    <span class="tok-kw">if</span> (it.index &lt; prealloc_item_count)</span>
-<span class="line" id="L373">                        <span class="tok-kw">return</span> &amp;it.list.prealloc_segment[it.index];</span>
+<span class="line" id="L366">                <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">peek</span>(it: *<span class="tok-builtin">@This</span>()) ?ElementPtr {</span>
+<span class="line" id="L367">                    <span class="tok-kw">if</span> (it.index &gt;= it.list.len)</span>
+<span class="line" id="L368">                        <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
+<span class="line" id="L369">                    <span class="tok-kw">if</span> (it.index &lt; prealloc_item_count)</span>
+<span class="line" id="L370">                        <span class="tok-kw">return</span> &amp;it.list.prealloc_segment[it.index];</span>
+<span class="line" id="L371"></span>
+<span class="line" id="L372">                    <span class="tok-kw">return</span> &amp;it.list.dynamic_segments[it.shelf_index][it.box_index];</span>
+<span class="line" id="L373">                }</span>
 <span class="line" id="L374"></span>
-<span class="line" id="L375">                    <span class="tok-kw">return</span> &amp;it.list.dynamic_segments[it.shelf_index][it.box_index];</span>
-<span class="line" id="L376">                }</span>
-<span class="line" id="L377"></span>
-<span class="line" id="L378">                <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">set</span>(it: *<span class="tok-builtin">@This</span>(), index: <span class="tok-type">usize</span>) <span class="tok-type">void</span> {</span>
-<span class="line" id="L379">                    it.index = index;</span>
-<span class="line" id="L380">                    <span class="tok-kw">if</span> (index &lt; prealloc_item_count) <span class="tok-kw">return</span>;</span>
-<span class="line" id="L381">                    it.shelf_index = shelfIndex(index);</span>
-<span class="line" id="L382">                    it.box_index = boxIndex(index, it.shelf_index);</span>
-<span class="line" id="L383">                    it.shelf_size = shelfSize(it.shelf_index);</span>
-<span class="line" id="L384">                }</span>
-<span class="line" id="L385">            };</span>
-<span class="line" id="L386">        }</span>
-<span class="line" id="L387"></span>
-<span class="line" id="L388">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">iterator</span>(self: *Self, start_index: <span class="tok-type">usize</span>) Iterator {</span>
-<span class="line" id="L389">            <span class="tok-kw">var</span> it = Iterator{</span>
-<span class="line" id="L390">                .list = self,</span>
-<span class="line" id="L391">                .index = <span class="tok-null">undefined</span>,</span>
-<span class="line" id="L392">                .shelf_index = <span class="tok-null">undefined</span>,</span>
-<span class="line" id="L393">                .box_index = <span class="tok-null">undefined</span>,</span>
-<span class="line" id="L394">                .shelf_size = <span class="tok-null">undefined</span>,</span>
-<span class="line" id="L395">            };</span>
-<span class="line" id="L396">            it.set(start_index);</span>
-<span class="line" id="L397">            <span class="tok-kw">return</span> it;</span>
-<span class="line" id="L398">        }</span>
-<span class="line" id="L399"></span>
-<span class="line" id="L400">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">constIterator</span>(self: *<span class="tok-kw">const</span> Self, start_index: <span class="tok-type">usize</span>) ConstIterator {</span>
-<span class="line" id="L401">            <span class="tok-kw">var</span> it = ConstIterator{</span>
-<span class="line" id="L402">                .list = self,</span>
-<span class="line" id="L403">                .index = <span class="tok-null">undefined</span>,</span>
-<span class="line" id="L404">                .shelf_index = <span class="tok-null">undefined</span>,</span>
-<span class="line" id="L405">                .box_index = <span class="tok-null">undefined</span>,</span>
-<span class="line" id="L406">                .shelf_size = <span class="tok-null">undefined</span>,</span>
-<span class="line" id="L407">            };</span>
-<span class="line" id="L408">            it.set(start_index);</span>
-<span class="line" id="L409">            <span class="tok-kw">return</span> it;</span>
-<span class="line" id="L410">        }</span>
-<span class="line" id="L411">    };</span>
-<span class="line" id="L412">}</span>
-<span class="line" id="L413"></span>
-<span class="line" id="L414"><span class="tok-kw">test</span> <span class="tok-str">&quot;SegmentedList basic usage&quot;</span> {</span>
-<span class="line" id="L415">    <span class="tok-kw">try</span> testSegmentedList(<span class="tok-number">0</span>);</span>
-<span class="line" id="L416">    <span class="tok-kw">try</span> testSegmentedList(<span class="tok-number">1</span>);</span>
-<span class="line" id="L417">    <span class="tok-kw">try</span> testSegmentedList(<span class="tok-number">2</span>);</span>
-<span class="line" id="L418">    <span class="tok-kw">try</span> testSegmentedList(<span class="tok-number">4</span>);</span>
-<span class="line" id="L419">    <span class="tok-kw">try</span> testSegmentedList(<span class="tok-number">8</span>);</span>
-<span class="line" id="L420">    <span class="tok-kw">try</span> testSegmentedList(<span class="tok-number">16</span>);</span>
-<span class="line" id="L421">}</span>
-<span class="line" id="L422"></span>
-<span class="line" id="L423"><span class="tok-kw">fn</span> <span class="tok-fn">testSegmentedList</span>(<span class="tok-kw">comptime</span> prealloc: <span class="tok-type">usize</span>) !<span class="tok-type">void</span> {</span>
-<span class="line" id="L424">    <span class="tok-kw">var</span> list = SegmentedList(<span class="tok-type">i32</span>, prealloc){};</span>
-<span class="line" id="L425">    <span class="tok-kw">defer</span> list.deinit(testing.allocator);</span>
-<span class="line" id="L426"></span>
-<span class="line" id="L427">    {</span>
-<span class="line" id="L428">        <span class="tok-kw">var</span> i: <span class="tok-type">usize</span> = <span class="tok-number">0</span>;</span>
-<span class="line" id="L429">        <span class="tok-kw">while</span> (i &lt; <span class="tok-number">100</span>) : (i += <span class="tok-number">1</span>) {</span>
-<span class="line" id="L430">            <span class="tok-kw">try</span> list.append(testing.allocator, <span class="tok-builtin">@intCast</span>(<span class="tok-type">i32</span>, i + <span class="tok-number">1</span>));</span>
-<span class="line" id="L431">            <span class="tok-kw">try</span> testing.expect(list.len == i + <span class="tok-number">1</span>);</span>
-<span class="line" id="L432">        }</span>
-<span class="line" id="L433">    }</span>
-<span class="line" id="L434"></span>
-<span class="line" id="L435">    {</span>
-<span class="line" id="L436">        <span class="tok-kw">var</span> i: <span class="tok-type">usize</span> = <span class="tok-number">0</span>;</span>
-<span class="line" id="L437">        <span class="tok-kw">while</span> (i &lt; <span class="tok-number">100</span>) : (i += <span class="tok-number">1</span>) {</span>
-<span class="line" id="L438">            <span class="tok-kw">try</span> testing.expect(list.at(i).* == <span class="tok-builtin">@intCast</span>(<span class="tok-type">i32</span>, i + <span class="tok-number">1</span>));</span>
-<span class="line" id="L439">        }</span>
-<span class="line" id="L440">    }</span>
-<span class="line" id="L441"></span>
-<span class="line" id="L442">    {</span>
-<span class="line" id="L443">        <span class="tok-kw">var</span> it = list.iterator(<span class="tok-number">0</span>);</span>
-<span class="line" id="L444">        <span class="tok-kw">var</span> x: <span class="tok-type">i32</span> = <span class="tok-number">0</span>;</span>
-<span class="line" id="L445">        <span class="tok-kw">while</span> (it.next()) |item| {</span>
-<span class="line" id="L446">            x += <span class="tok-number">1</span>;</span>
-<span class="line" id="L447">            <span class="tok-kw">try</span> testing.expect(item.* == x);</span>
-<span class="line" id="L448">        }</span>
-<span class="line" id="L449">        <span class="tok-kw">try</span> testing.expect(x == <span class="tok-number">100</span>);</span>
-<span class="line" id="L450">        <span class="tok-kw">while</span> (it.prev()) |item| : (x -= <span class="tok-number">1</span>) {</span>
-<span class="line" id="L451">            <span class="tok-kw">try</span> testing.expect(item.* == x);</span>
-<span class="line" id="L452">        }</span>
-<span class="line" id="L453">        <span class="tok-kw">try</span> testing.expect(x == <span class="tok-number">0</span>);</span>
-<span class="line" id="L454">    }</span>
-<span class="line" id="L455"></span>
-<span class="line" id="L456">    {</span>
-<span class="line" id="L457">        <span class="tok-kw">var</span> it = list.constIterator(<span class="tok-number">0</span>);</span>
-<span class="line" id="L458">        <span class="tok-kw">var</span> x: <span class="tok-type">i32</span> = <span class="tok-number">0</span>;</span>
-<span class="line" id="L459">        <span class="tok-kw">while</span> (it.next()) |item| {</span>
-<span class="line" id="L460">            x += <span class="tok-number">1</span>;</span>
-<span class="line" id="L461">            <span class="tok-kw">try</span> testing.expect(item.* == x);</span>
-<span class="line" id="L462">        }</span>
-<span class="line" id="L463">        <span class="tok-kw">try</span> testing.expect(x == <span class="tok-number">100</span>);</span>
-<span class="line" id="L464">        <span class="tok-kw">while</span> (it.prev()) |item| : (x -= <span class="tok-number">1</span>) {</span>
-<span class="line" id="L465">            <span class="tok-kw">try</span> testing.expect(item.* == x);</span>
-<span class="line" id="L466">        }</span>
-<span class="line" id="L467">        <span class="tok-kw">try</span> testing.expect(x == <span class="tok-number">0</span>);</span>
-<span class="line" id="L468">    }</span>
+<span class="line" id="L375">                <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">set</span>(it: *<span class="tok-builtin">@This</span>(), index: <span class="tok-type">usize</span>) <span class="tok-type">void</span> {</span>
+<span class="line" id="L376">                    it.index = index;</span>
+<span class="line" id="L377">                    <span class="tok-kw">if</span> (index &lt; prealloc_item_count) <span class="tok-kw">return</span>;</span>
+<span class="line" id="L378">                    it.shelf_index = shelfIndex(index);</span>
+<span class="line" id="L379">                    it.box_index = boxIndex(index, it.shelf_index);</span>
+<span class="line" id="L380">                    it.shelf_size = shelfSize(it.shelf_index);</span>
+<span class="line" id="L381">                }</span>
+<span class="line" id="L382">            };</span>
+<span class="line" id="L383">        }</span>
+<span class="line" id="L384"></span>
+<span class="line" id="L385">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">iterator</span>(self: *Self, start_index: <span class="tok-type">usize</span>) Iterator {</span>
+<span class="line" id="L386">            <span class="tok-kw">var</span> it = Iterator{</span>
+<span class="line" id="L387">                .list = self,</span>
+<span class="line" id="L388">                .index = <span class="tok-null">undefined</span>,</span>
+<span class="line" id="L389">                .shelf_index = <span class="tok-null">undefined</span>,</span>
+<span class="line" id="L390">                .box_index = <span class="tok-null">undefined</span>,</span>
+<span class="line" id="L391">                .shelf_size = <span class="tok-null">undefined</span>,</span>
+<span class="line" id="L392">            };</span>
+<span class="line" id="L393">            it.set(start_index);</span>
+<span class="line" id="L394">            <span class="tok-kw">return</span> it;</span>
+<span class="line" id="L395">        }</span>
+<span class="line" id="L396"></span>
+<span class="line" id="L397">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">constIterator</span>(self: *<span class="tok-kw">const</span> Self, start_index: <span class="tok-type">usize</span>) ConstIterator {</span>
+<span class="line" id="L398">            <span class="tok-kw">var</span> it = ConstIterator{</span>
+<span class="line" id="L399">                .list = self,</span>
+<span class="line" id="L400">                .index = <span class="tok-null">undefined</span>,</span>
+<span class="line" id="L401">                .shelf_index = <span class="tok-null">undefined</span>,</span>
+<span class="line" id="L402">                .box_index = <span class="tok-null">undefined</span>,</span>
+<span class="line" id="L403">                .shelf_size = <span class="tok-null">undefined</span>,</span>
+<span class="line" id="L404">            };</span>
+<span class="line" id="L405">            it.set(start_index);</span>
+<span class="line" id="L406">            <span class="tok-kw">return</span> it;</span>
+<span class="line" id="L407">        }</span>
+<span class="line" id="L408">    };</span>
+<span class="line" id="L409">}</span>
+<span class="line" id="L410"></span>
+<span class="line" id="L411"><span class="tok-kw">test</span> <span class="tok-str">&quot;SegmentedList basic usage&quot;</span> {</span>
+<span class="line" id="L412">    <span class="tok-kw">try</span> testSegmentedList(<span class="tok-number">0</span>);</span>
+<span class="line" id="L413">    <span class="tok-kw">try</span> testSegmentedList(<span class="tok-number">1</span>);</span>
+<span class="line" id="L414">    <span class="tok-kw">try</span> testSegmentedList(<span class="tok-number">2</span>);</span>
+<span class="line" id="L415">    <span class="tok-kw">try</span> testSegmentedList(<span class="tok-number">4</span>);</span>
+<span class="line" id="L416">    <span class="tok-kw">try</span> testSegmentedList(<span class="tok-number">8</span>);</span>
+<span class="line" id="L417">    <span class="tok-kw">try</span> testSegmentedList(<span class="tok-number">16</span>);</span>
+<span class="line" id="L418">}</span>
+<span class="line" id="L419"></span>
+<span class="line" id="L420"><span class="tok-kw">fn</span> <span class="tok-fn">testSegmentedList</span>(<span class="tok-kw">comptime</span> prealloc: <span class="tok-type">usize</span>) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L421">    <span class="tok-kw">var</span> list = SegmentedList(<span class="tok-type">i32</span>, prealloc){};</span>
+<span class="line" id="L422">    <span class="tok-kw">defer</span> list.deinit(testing.allocator);</span>
+<span class="line" id="L423"></span>
+<span class="line" id="L424">    {</span>
+<span class="line" id="L425">        <span class="tok-kw">var</span> i: <span class="tok-type">usize</span> = <span class="tok-number">0</span>;</span>
+<span class="line" id="L426">        <span class="tok-kw">while</span> (i &lt; <span class="tok-number">100</span>) : (i += <span class="tok-number">1</span>) {</span>
+<span class="line" id="L427">            <span class="tok-kw">try</span> list.append(testing.allocator, <span class="tok-builtin">@intCast</span>(<span class="tok-type">i32</span>, i + <span class="tok-number">1</span>));</span>
+<span class="line" id="L428">            <span class="tok-kw">try</span> testing.expect(list.len == i + <span class="tok-number">1</span>);</span>
+<span class="line" id="L429">        }</span>
+<span class="line" id="L430">    }</span>
+<span class="line" id="L431"></span>
+<span class="line" id="L432">    {</span>
+<span class="line" id="L433">        <span class="tok-kw">var</span> i: <span class="tok-type">usize</span> = <span class="tok-number">0</span>;</span>
+<span class="line" id="L434">        <span class="tok-kw">while</span> (i &lt; <span class="tok-number">100</span>) : (i += <span class="tok-number">1</span>) {</span>
+<span class="line" id="L435">            <span class="tok-kw">try</span> testing.expect(list.at(i).* == <span class="tok-builtin">@intCast</span>(<span class="tok-type">i32</span>, i + <span class="tok-number">1</span>));</span>
+<span class="line" id="L436">        }</span>
+<span class="line" id="L437">    }</span>
+<span class="line" id="L438"></span>
+<span class="line" id="L439">    {</span>
+<span class="line" id="L440">        <span class="tok-kw">var</span> it = list.iterator(<span class="tok-number">0</span>);</span>
+<span class="line" id="L441">        <span class="tok-kw">var</span> x: <span class="tok-type">i32</span> = <span class="tok-number">0</span>;</span>
+<span class="line" id="L442">        <span class="tok-kw">while</span> (it.next()) |item| {</span>
+<span class="line" id="L443">            x += <span class="tok-number">1</span>;</span>
+<span class="line" id="L444">            <span class="tok-kw">try</span> testing.expect(item.* == x);</span>
+<span class="line" id="L445">        }</span>
+<span class="line" id="L446">        <span class="tok-kw">try</span> testing.expect(x == <span class="tok-number">100</span>);</span>
+<span class="line" id="L447">        <span class="tok-kw">while</span> (it.prev()) |item| : (x -= <span class="tok-number">1</span>) {</span>
+<span class="line" id="L448">            <span class="tok-kw">try</span> testing.expect(item.* == x);</span>
+<span class="line" id="L449">        }</span>
+<span class="line" id="L450">        <span class="tok-kw">try</span> testing.expect(x == <span class="tok-number">0</span>);</span>
+<span class="line" id="L451">    }</span>
+<span class="line" id="L452"></span>
+<span class="line" id="L453">    {</span>
+<span class="line" id="L454">        <span class="tok-kw">var</span> it = list.constIterator(<span class="tok-number">0</span>);</span>
+<span class="line" id="L455">        <span class="tok-kw">var</span> x: <span class="tok-type">i32</span> = <span class="tok-number">0</span>;</span>
+<span class="line" id="L456">        <span class="tok-kw">while</span> (it.next()) |item| {</span>
+<span class="line" id="L457">            x += <span class="tok-number">1</span>;</span>
+<span class="line" id="L458">            <span class="tok-kw">try</span> testing.expect(item.* == x);</span>
+<span class="line" id="L459">        }</span>
+<span class="line" id="L460">        <span class="tok-kw">try</span> testing.expect(x == <span class="tok-number">100</span>);</span>
+<span class="line" id="L461">        <span class="tok-kw">while</span> (it.prev()) |item| : (x -= <span class="tok-number">1</span>) {</span>
+<span class="line" id="L462">            <span class="tok-kw">try</span> testing.expect(item.* == x);</span>
+<span class="line" id="L463">        }</span>
+<span class="line" id="L464">        <span class="tok-kw">try</span> testing.expect(x == <span class="tok-number">0</span>);</span>
+<span class="line" id="L465">    }</span>
+<span class="line" id="L466"></span>
+<span class="line" id="L467">    <span class="tok-kw">try</span> testing.expect(list.pop().? == <span class="tok-number">100</span>);</span>
+<span class="line" id="L468">    <span class="tok-kw">try</span> testing.expect(list.len == <span class="tok-number">99</span>);</span>
 <span class="line" id="L469"></span>
-<span class="line" id="L470">    <span class="tok-kw">try</span> testing.expect(list.pop().? == <span class="tok-number">100</span>);</span>
-<span class="line" id="L471">    <span class="tok-kw">try</span> testing.expect(list.len == <span class="tok-number">99</span>);</span>
-<span class="line" id="L472"></span>
-<span class="line" id="L473">    <span class="tok-kw">try</span> list.appendSlice(testing.allocator, &amp;[_]<span class="tok-type">i32</span>{ <span class="tok-number">1</span>, <span class="tok-number">2</span>, <span class="tok-number">3</span> });</span>
-<span class="line" id="L474">    <span class="tok-kw">try</span> testing.expect(list.len == <span class="tok-number">102</span>);</span>
-<span class="line" id="L475">    <span class="tok-kw">try</span> testing.expect(list.pop().? == <span class="tok-number">3</span>);</span>
-<span class="line" id="L476">    <span class="tok-kw">try</span> testing.expect(list.pop().? == <span class="tok-number">2</span>);</span>
-<span class="line" id="L477">    <span class="tok-kw">try</span> testing.expect(list.pop().? == <span class="tok-number">1</span>);</span>
+<span class="line" id="L470">    <span class="tok-kw">try</span> list.appendSlice(testing.allocator, &amp;[_]<span class="tok-type">i32</span>{ <span class="tok-number">1</span>, <span class="tok-number">2</span>, <span class="tok-number">3</span> });</span>
+<span class="line" id="L471">    <span class="tok-kw">try</span> testing.expect(list.len == <span class="tok-number">102</span>);</span>
+<span class="line" id="L472">    <span class="tok-kw">try</span> testing.expect(list.pop().? == <span class="tok-number">3</span>);</span>
+<span class="line" id="L473">    <span class="tok-kw">try</span> testing.expect(list.pop().? == <span class="tok-number">2</span>);</span>
+<span class="line" id="L474">    <span class="tok-kw">try</span> testing.expect(list.pop().? == <span class="tok-number">1</span>);</span>
+<span class="line" id="L475">    <span class="tok-kw">try</span> testing.expect(list.len == <span class="tok-number">99</span>);</span>
+<span class="line" id="L476"></span>
+<span class="line" id="L477">    <span class="tok-kw">try</span> list.appendSlice(testing.allocator, &amp;[_]<span class="tok-type">i32</span>{});</span>
 <span class="line" id="L478">    <span class="tok-kw">try</span> testing.expect(list.len == <span class="tok-number">99</span>);</span>
 <span class="line" id="L479"></span>
-<span class="line" id="L480">    <span class="tok-kw">try</span> list.appendSlice(testing.allocator, &amp;[_]<span class="tok-type">i32</span>{});</span>
-<span class="line" id="L481">    <span class="tok-kw">try</span> testing.expect(list.len == <span class="tok-number">99</span>);</span>
-<span class="line" id="L482"></span>
-<span class="line" id="L483">    {</span>
-<span class="line" id="L484">        <span class="tok-kw">var</span> i: <span class="tok-type">i32</span> = <span class="tok-number">99</span>;</span>
-<span class="line" id="L485">        <span class="tok-kw">while</span> (list.pop()) |item| : (i -= <span class="tok-number">1</span>) {</span>
-<span class="line" id="L486">            <span class="tok-kw">try</span> testing.expect(item == i);</span>
-<span class="line" id="L487">            list.shrinkCapacity(testing.allocator, list.len);</span>
-<span class="line" id="L488">        }</span>
-<span class="line" id="L489">    }</span>
-<span class="line" id="L490"></span>
-<span class="line" id="L491">    {</span>
-<span class="line" id="L492">        <span class="tok-kw">var</span> control: [<span class="tok-number">100</span>]<span class="tok-type">i32</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L493">        <span class="tok-kw">var</span> dest: [<span class="tok-number">100</span>]<span class="tok-type">i32</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L494"></span>
-<span class="line" id="L495">        <span class="tok-kw">var</span> i: <span class="tok-type">i32</span> = <span class="tok-number">0</span>;</span>
-<span class="line" id="L496">        <span class="tok-kw">while</span> (i &lt; <span class="tok-number">100</span>) : (i += <span class="tok-number">1</span>) {</span>
-<span class="line" id="L497">            <span class="tok-kw">try</span> list.append(testing.allocator, i + <span class="tok-number">1</span>);</span>
-<span class="line" id="L498">            control[<span class="tok-builtin">@intCast</span>(<span class="tok-type">usize</span>, i)] = i + <span class="tok-number">1</span>;</span>
-<span class="line" id="L499">        }</span>
-<span class="line" id="L500"></span>
-<span class="line" id="L501">        mem.set(<span class="tok-type">i32</span>, dest[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
-<span class="line" id="L502">        list.writeToSlice(dest[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
-<span class="line" id="L503">        <span class="tok-kw">try</span> testing.expect(mem.eql(<span class="tok-type">i32</span>, control[<span class="tok-number">0</span>..], dest[<span class="tok-number">0</span>..]));</span>
-<span class="line" id="L504"></span>
-<span class="line" id="L505">        mem.set(<span class="tok-type">i32</span>, dest[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
-<span class="line" id="L506">        list.writeToSlice(dest[<span class="tok-number">50</span>..], <span class="tok-number">50</span>);</span>
-<span class="line" id="L507">        <span class="tok-kw">try</span> testing.expect(mem.eql(<span class="tok-type">i32</span>, control[<span class="tok-number">50</span>..], dest[<span class="tok-number">50</span>..]));</span>
-<span class="line" id="L508">    }</span>
+<span class="line" id="L480">    {</span>
+<span class="line" id="L481">        <span class="tok-kw">var</span> i: <span class="tok-type">i32</span> = <span class="tok-number">99</span>;</span>
+<span class="line" id="L482">        <span class="tok-kw">while</span> (list.pop()) |item| : (i -= <span class="tok-number">1</span>) {</span>
+<span class="line" id="L483">            <span class="tok-kw">try</span> testing.expect(item == i);</span>
+<span class="line" id="L484">            list.shrinkCapacity(testing.allocator, list.len);</span>
+<span class="line" id="L485">        }</span>
+<span class="line" id="L486">    }</span>
+<span class="line" id="L487"></span>
+<span class="line" id="L488">    {</span>
+<span class="line" id="L489">        <span class="tok-kw">var</span> control: [<span class="tok-number">100</span>]<span class="tok-type">i32</span> = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L490">        <span class="tok-kw">var</span> dest: [<span class="tok-number">100</span>]<span class="tok-type">i32</span> = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L491"></span>
+<span class="line" id="L492">        <span class="tok-kw">var</span> i: <span class="tok-type">i32</span> = <span class="tok-number">0</span>;</span>
+<span class="line" id="L493">        <span class="tok-kw">while</span> (i &lt; <span class="tok-number">100</span>) : (i += <span class="tok-number">1</span>) {</span>
+<span class="line" id="L494">            <span class="tok-kw">try</span> list.append(testing.allocator, i + <span class="tok-number">1</span>);</span>
+<span class="line" id="L495">            control[<span class="tok-builtin">@intCast</span>(<span class="tok-type">usize</span>, i)] = i + <span class="tok-number">1</span>;</span>
+<span class="line" id="L496">        }</span>
+<span class="line" id="L497"></span>
+<span class="line" id="L498">        <span class="tok-builtin">@memset</span>(dest[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
+<span class="line" id="L499">        list.writeToSlice(dest[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
+<span class="line" id="L500">        <span class="tok-kw">try</span> testing.expect(mem.eql(<span class="tok-type">i32</span>, control[<span class="tok-number">0</span>..], dest[<span class="tok-number">0</span>..]));</span>
+<span class="line" id="L501"></span>
+<span class="line" id="L502">        <span class="tok-builtin">@memset</span>(dest[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
+<span class="line" id="L503">        list.writeToSlice(dest[<span class="tok-number">50</span>..], <span class="tok-number">50</span>);</span>
+<span class="line" id="L504">        <span class="tok-kw">try</span> testing.expect(mem.eql(<span class="tok-type">i32</span>, control[<span class="tok-number">50</span>..], dest[<span class="tok-number">50</span>..]));</span>
+<span class="line" id="L505">    }</span>
+<span class="line" id="L506"></span>
+<span class="line" id="L507">    <span class="tok-kw">try</span> list.setCapacity(testing.allocator, <span class="tok-number">0</span>);</span>
+<span class="line" id="L508">}</span>
 <span class="line" id="L509"></span>
-<span class="line" id="L510">    <span class="tok-kw">try</span> list.setCapacity(testing.allocator, <span class="tok-number">0</span>);</span>
-<span class="line" id="L511">}</span>
-<span class="line" id="L512"></span>
-<span class="line" id="L513"><span class="tok-kw">test</span> <span class="tok-str">&quot;std.segmented_list clearRetainingCapacity&quot;</span> {</span>
-<span class="line" id="L514">    <span class="tok-kw">var</span> list = SegmentedList(<span class="tok-type">i32</span>, <span class="tok-number">1</span>){};</span>
-<span class="line" id="L515">    <span class="tok-kw">defer</span> list.deinit(testing.allocator);</span>
-<span class="line" id="L516"></span>
-<span class="line" id="L517">    <span class="tok-kw">try</span> list.appendSlice(testing.allocator, &amp;[_]<span class="tok-type">i32</span>{ <span class="tok-number">4</span>, <span class="tok-number">5</span> });</span>
-<span class="line" id="L518">    list.clearRetainingCapacity();</span>
-<span class="line" id="L519">    <span class="tok-kw">try</span> list.append(testing.allocator, <span class="tok-number">6</span>);</span>
-<span class="line" id="L520">    <span class="tok-kw">try</span> testing.expect(list.at(<span class="tok-number">0</span>).* == <span class="tok-number">6</span>);</span>
-<span class="line" id="L521">    <span class="tok-kw">try</span> testing.expect(list.len == <span class="tok-number">1</span>);</span>
-<span class="line" id="L522">    list.clearRetainingCapacity();</span>
-<span class="line" id="L523">    <span class="tok-kw">try</span> testing.expect(list.len == <span class="tok-number">0</span>);</span>
-<span class="line" id="L524">}</span>
-<span class="line" id="L525"></span>
-<span class="line" id="L526"><span class="tok-comment">/// TODO look into why this std.math function was changed in</span></span>
-<span class="line" id="L527"><span class="tok-comment">/// fc9430f56798a53f9393a697f4ccd6bf9981b970.</span></span>
-<span class="line" id="L528"><span class="tok-kw">fn</span> <span class="tok-fn">log2_int_ceil</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>, x: T) std.math.Log2Int(T) {</span>
-<span class="line" id="L529">    assert(x != <span class="tok-number">0</span>);</span>
-<span class="line" id="L530">    <span class="tok-kw">const</span> log2_val = std.math.log2_int(T, x);</span>
-<span class="line" id="L531">    <span class="tok-kw">if</span> (<span class="tok-builtin">@as</span>(T, <span class="tok-number">1</span>) &lt;&lt; log2_val == x)</span>
-<span class="line" id="L532">        <span class="tok-kw">return</span> log2_val;</span>
-<span class="line" id="L533">    <span class="tok-kw">return</span> log2_val + <span class="tok-number">1</span>;</span>
-<span class="line" id="L534">}</span>
-<span class="line" id="L535"></span>
+<span class="line" id="L510"><span class="tok-kw">test</span> <span class="tok-str">&quot;std.segmented_list clearRetainingCapacity&quot;</span> {</span>
+<span class="line" id="L511">    <span class="tok-kw">var</span> list = SegmentedList(<span class="tok-type">i32</span>, <span class="tok-number">1</span>){};</span>
+<span class="line" id="L512">    <span class="tok-kw">defer</span> list.deinit(testing.allocator);</span>
+<span class="line" id="L513"></span>
+<span class="line" id="L514">    <span class="tok-kw">try</span> list.appendSlice(testing.allocator, &amp;[_]<span class="tok-type">i32</span>{ <span class="tok-number">4</span>, <span class="tok-number">5</span> });</span>
+<span class="line" id="L515">    list.clearRetainingCapacity();</span>
+<span class="line" id="L516">    <span class="tok-kw">try</span> list.append(testing.allocator, <span class="tok-number">6</span>);</span>
+<span class="line" id="L517">    <span class="tok-kw">try</span> testing.expect(list.at(<span class="tok-number">0</span>).* == <span class="tok-number">6</span>);</span>
+<span class="line" id="L518">    <span class="tok-kw">try</span> testing.expect(list.len == <span class="tok-number">1</span>);</span>
+<span class="line" id="L519">    list.clearRetainingCapacity();</span>
+<span class="line" id="L520">    <span class="tok-kw">try</span> testing.expect(list.len == <span class="tok-number">0</span>);</span>
+<span class="line" id="L521">}</span>
+<span class="line" id="L522"></span>
+<span class="line" id="L523"><span class="tok-comment">/// TODO look into why this std.math function was changed in</span></span>
+<span class="line" id="L524"><span class="tok-comment">/// fc9430f56798a53f9393a697f4ccd6bf9981b970.</span></span>
+<span class="line" id="L525"><span class="tok-kw">fn</span> <span class="tok-fn">log2_int_ceil</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>, x: T) std.math.Log2Int(T) {</span>
+<span class="line" id="L526">    assert(x != <span class="tok-number">0</span>);</span>
+<span class="line" id="L527">    <span class="tok-kw">const</span> log2_val = std.math.log2_int(T, x);</span>
+<span class="line" id="L528">    <span class="tok-kw">if</span> (<span class="tok-builtin">@as</span>(T, <span class="tok-number">1</span>) &lt;&lt; log2_val == x)</span>
+<span class="line" id="L529">        <span class="tok-kw">return</span> log2_val;</span>
+<span class="line" id="L530">    <span class="tok-kw">return</span> log2_val + <span class="tok-number">1</span>;</span>
+<span class="line" id="L531">}</span>
+<span class="line" id="L532"></span>
 </code></pre></body>
 </html>

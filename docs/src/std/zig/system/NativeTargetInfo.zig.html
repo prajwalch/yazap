@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>zig/system/NativeTargetInfo.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -522,7 +522,7 @@
 <span class="line" id="L354">            <span class="tok-kw">const</span> newline = mem.indexOfScalar(<span class="tok-type">u8</span>, buffer[<span class="tok-number">0</span>..len], <span class="tok-str">'\n'</span>) <span class="tok-kw">orelse</span> <span class="tok-kw">break</span> :blk file;</span>
 <span class="line" id="L355">            <span class="tok-kw">const</span> line = buffer[<span class="tok-number">0</span>..newline];</span>
 <span class="line" id="L356">            <span class="tok-kw">if</span> (!mem.startsWith(<span class="tok-type">u8</span>, line, <span class="tok-str">&quot;#!&quot;</span>)) <span class="tok-kw">break</span> :blk file;</span>
-<span class="line" id="L357">            <span class="tok-kw">var</span> it = mem.tokenize(<span class="tok-type">u8</span>, line[<span class="tok-number">2</span>..], <span class="tok-str">&quot; &quot;</span>);</span>
+<span class="line" id="L357">            <span class="tok-kw">var</span> it = mem.tokenizeScalar(<span class="tok-type">u8</span>, line[<span class="tok-number">2</span>..], <span class="tok-str">' '</span>);</span>
 <span class="line" id="L358">            file_name = it.next() <span class="tok-kw">orelse</span> <span class="tok-kw">return</span> defaultAbiAndDynamicLinker(cpu, os, cross_target);</span>
 <span class="line" id="L359">            file.close();</span>
 <span class="line" id="L360">        }</span>
@@ -756,7 +756,7 @@
 <span class="line" id="L556">    <span class="tok-kw">const</span> dynstr_size = <span class="tok-builtin">@intCast</span>(<span class="tok-type">usize</span>, dynstr.size);</span>
 <span class="line" id="L557">    <span class="tok-kw">const</span> dynstr_bytes = buf[<span class="tok-number">0</span>..dynstr_size];</span>
 <span class="line" id="L558">    _ = <span class="tok-kw">try</span> preadMin(file, dynstr_bytes, dynstr.offset, dynstr_bytes.len);</span>
-<span class="line" id="L559">    <span class="tok-kw">var</span> it = mem.split(<span class="tok-type">u8</span>, dynstr_bytes, &amp;.{<span class="tok-number">0</span>});</span>
+<span class="line" id="L559">    <span class="tok-kw">var</span> it = mem.splitScalar(<span class="tok-type">u8</span>, dynstr_bytes, <span class="tok-number">0</span>);</span>
 <span class="line" id="L560">    <span class="tok-kw">var</span> max_ver: std.builtin.Version = .{ .major = <span class="tok-number">2</span>, .minor = <span class="tok-number">2</span>, .patch = <span class="tok-number">5</span> };</span>
 <span class="line" id="L561">    <span class="tok-kw">while</span> (it.next()) |s| {</span>
 <span class="line" id="L562">        <span class="tok-kw">if</span> (mem.startsWith(<span class="tok-type">u8</span>, s, <span class="tok-str">&quot;GLIBC_2.&quot;</span>)) {</span>
@@ -1028,7 +1028,7 @@
 <span class="line" id="L811">                <span class="tok-kw">const</span> strtab = strtab_buf[<span class="tok-number">0</span>..strtab_read_len];</span>
 <span class="line" id="L812"></span>
 <span class="line" id="L813">                <span class="tok-kw">const</span> rpath_list = mem.sliceTo(strtab, <span class="tok-number">0</span>);</span>
-<span class="line" id="L814">                <span class="tok-kw">var</span> it = mem.tokenize(<span class="tok-type">u8</span>, rpath_list, <span class="tok-str">&quot;:&quot;</span>);</span>
+<span class="line" id="L814">                <span class="tok-kw">var</span> it = mem.tokenizeScalar(<span class="tok-type">u8</span>, rpath_list, <span class="tok-str">':'</span>);</span>
 <span class="line" id="L815">                <span class="tok-kw">while</span> (it.next()) |rpath| {</span>
 <span class="line" id="L816">                    <span class="tok-kw">if</span> (glibcVerFromRPath(rpath)) |ver| {</span>
 <span class="line" id="L817">                        result.target.os.version_range.linux.glibc = ver;</span>
@@ -1103,17 +1103,17 @@
 <span class="line" id="L877">        <span class="tok-kw">const</span> cpu_arch = <span class="tok-builtin">@tagName</span>(result.target.cpu.arch);</span>
 <span class="line" id="L878">        <span class="tok-kw">const</span> os_tag = <span class="tok-builtin">@tagName</span>(result.target.os.tag);</span>
 <span class="line" id="L879">        <span class="tok-kw">const</span> abi = <span class="tok-builtin">@tagName</span>(result.target.abi);</span>
-<span class="line" id="L880">        mem.copy(<span class="tok-type">u8</span>, path_buf[index..], prefix);</span>
+<span class="line" id="L880">        <span class="tok-builtin">@memcpy</span>(path_buf[index..][<span class="tok-number">0</span>..prefix.len], prefix);</span>
 <span class="line" id="L881">        index += prefix.len;</span>
-<span class="line" id="L882">        mem.copy(<span class="tok-type">u8</span>, path_buf[index..], cpu_arch);</span>
+<span class="line" id="L882">        <span class="tok-builtin">@memcpy</span>(path_buf[index..][<span class="tok-number">0</span>..cpu_arch.len], cpu_arch);</span>
 <span class="line" id="L883">        index += cpu_arch.len;</span>
 <span class="line" id="L884">        path_buf[index] = <span class="tok-str">'-'</span>;</span>
 <span class="line" id="L885">        index += <span class="tok-number">1</span>;</span>
-<span class="line" id="L886">        mem.copy(<span class="tok-type">u8</span>, path_buf[index..], os_tag);</span>
+<span class="line" id="L886">        <span class="tok-builtin">@memcpy</span>(path_buf[index..][<span class="tok-number">0</span>..os_tag.len], os_tag);</span>
 <span class="line" id="L887">        index += os_tag.len;</span>
 <span class="line" id="L888">        path_buf[index] = <span class="tok-str">'-'</span>;</span>
 <span class="line" id="L889">        index += <span class="tok-number">1</span>;</span>
-<span class="line" id="L890">        mem.copy(<span class="tok-type">u8</span>, path_buf[index..], abi);</span>
+<span class="line" id="L890">        <span class="tok-builtin">@memcpy</span>(path_buf[index..][<span class="tok-number">0</span>..abi.len], abi);</span>
 <span class="line" id="L891">        index += abi.len;</span>
 <span class="line" id="L892">        <span class="tok-kw">const</span> rpath = path_buf[<span class="tok-number">0</span>..index];</span>
 <span class="line" id="L893">        <span class="tok-kw">if</span> (glibcVerFromRPath(rpath)) |ver| {</span>
@@ -1336,7 +1336,7 @@
 <span class="line" id="L1095">                <span class="tok-kw">if</span> (candidate.target.cpu.arch != builtin.cpu.arch) {</span>
 <span class="line" id="L1096">                    <span class="tok-kw">return</span> bad_result;</span>
 <span class="line" id="L1097">                }</span>
-<span class="line" id="L1098">                <span class="tok-kw">switch</span> (candidate.target.cpu.arch.ptrBitWidth()) {</span>
+<span class="line" id="L1098">                <span class="tok-kw">switch</span> (candidate.target.ptrBitWidth()) {</span>
 <span class="line" id="L1099">                    <span class="tok-number">32</span> =&gt; <span class="tok-kw">return</span> Executor{ .wine = <span class="tok-str">&quot;wine&quot;</span> },</span>
 <span class="line" id="L1100">                    <span class="tok-number">64</span> =&gt; <span class="tok-kw">return</span> Executor{ .wine = <span class="tok-str">&quot;wine64&quot;</span> },</span>
 <span class="line" id="L1101">                    <span class="tok-kw">else</span> =&gt; <span class="tok-kw">return</span> bad_result,</span>
@@ -1346,7 +1346,7 @@
 <span class="line" id="L1105">        },</span>
 <span class="line" id="L1106">        .wasi =&gt; {</span>
 <span class="line" id="L1107">            <span class="tok-kw">if</span> (options.allow_wasmtime) {</span>
-<span class="line" id="L1108">                <span class="tok-kw">switch</span> (candidate.target.cpu.arch.ptrBitWidth()) {</span>
+<span class="line" id="L1108">                <span class="tok-kw">switch</span> (candidate.target.ptrBitWidth()) {</span>
 <span class="line" id="L1109">                    <span class="tok-number">32</span> =&gt; <span class="tok-kw">return</span> Executor{ .wasmtime = <span class="tok-str">&quot;wasmtime&quot;</span> },</span>
 <span class="line" id="L1110">                    <span class="tok-kw">else</span> =&gt; <span class="tok-kw">return</span> bad_result,</span>
 <span class="line" id="L1111">                }</span>

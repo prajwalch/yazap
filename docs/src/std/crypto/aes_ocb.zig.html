@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>crypto/aes_ocb.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -188,7 +188,7 @@
 <span class="line" id="L75">            <span class="tok-kw">if</span> (leftover &gt; <span class="tok-number">0</span>) {</span>
 <span class="line" id="L76">                xorWith(&amp;offset, lx.star);</span>
 <span class="line" id="L77">                <span class="tok-kw">var</span> padded = [_]<span class="tok-type">u8</span>{<span class="tok-number">0</span>} ** <span class="tok-number">16</span>;</span>
-<span class="line" id="L78">                mem.copy(<span class="tok-type">u8</span>, padded[<span class="tok-number">0</span>..leftover], a[i * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..leftover]);</span>
+<span class="line" id="L78">                <span class="tok-builtin">@memcpy</span>(padded[<span class="tok-number">0</span>..leftover], a[i * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..leftover]);</span>
 <span class="line" id="L79">                padded[leftover] = <span class="tok-number">1</span>;</span>
 <span class="line" id="L80">                <span class="tok-kw">var</span> e = xorBlocks(offset, padded);</span>
 <span class="line" id="L81">                aes_enc_ctx.encrypt(&amp;e, &amp;e);</span>
@@ -201,7 +201,7 @@
 <span class="line" id="L88">            <span class="tok-kw">var</span> nx = [_]<span class="tok-type">u8</span>{<span class="tok-number">0</span>} ** <span class="tok-number">16</span>;</span>
 <span class="line" id="L89">            nx[<span class="tok-number">0</span>] = <span class="tok-builtin">@intCast</span>(<span class="tok-type">u8</span>, <span class="tok-builtin">@truncate</span>(<span class="tok-type">u7</span>, tag_length * <span class="tok-number">8</span>) &lt;&lt; <span class="tok-number">1</span>);</span>
 <span class="line" id="L90">            nx[<span class="tok-number">16</span> - nonce_length - <span class="tok-number">1</span>] = <span class="tok-number">1</span>;</span>
-<span class="line" id="L91">            mem.copy(<span class="tok-type">u8</span>, nx[<span class="tok-number">16</span> - nonce_length ..], &amp;npub);</span>
+<span class="line" id="L91">            nx[nx.len - nonce_length ..].* = npub;</span>
 <span class="line" id="L92"></span>
 <span class="line" id="L93">            <span class="tok-kw">const</span> bottom = <span class="tok-builtin">@truncate</span>(<span class="tok-type">u6</span>, nx[<span class="tok-number">15</span>]);</span>
 <span class="line" id="L94">            nx[<span class="tok-number">15</span>] &amp;= <span class="tok-number">0xc0</span>;</span>
@@ -245,14 +245,14 @@
 <span class="line" id="L132">                    xorWith(&amp;offset, lt[<span class="tok-builtin">@ctz</span>(i + <span class="tok-number">1</span> + j)]);</span>
 <span class="line" id="L133">                    offsets[j] = offset;</span>
 <span class="line" id="L134">                    <span class="tok-kw">const</span> p = m[(i + j) * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..<span class="tok-number">16</span>].*;</span>
-<span class="line" id="L135">                    mem.copy(<span class="tok-type">u8</span>, es[j * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..<span class="tok-number">16</span>], &amp;xorBlocks(p, offsets[j]));</span>
+<span class="line" id="L135">                    es[j * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..<span class="tok-number">16</span>].* = xorBlocks(p, offsets[j]);</span>
 <span class="line" id="L136">                    xorWith(&amp;sum, p);</span>
 <span class="line" id="L137">                }</span>
 <span class="line" id="L138">                aes_enc_ctx.encryptWide(wb, &amp;es, &amp;es);</span>
 <span class="line" id="L139">                j = <span class="tok-number">0</span>;</span>
 <span class="line" id="L140">                <span class="tok-kw">while</span> (j &lt; wb) : (j += <span class="tok-number">1</span>) {</span>
 <span class="line" id="L141">                    <span class="tok-kw">const</span> e = es[j * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..<span class="tok-number">16</span>].*;</span>
-<span class="line" id="L142">                    mem.copy(<span class="tok-type">u8</span>, c[(i + j) * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..<span class="tok-number">16</span>], &amp;xorBlocks(e, offsets[j]));</span>
+<span class="line" id="L142">                    c[(i + j) * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..<span class="tok-number">16</span>].* = xorBlocks(e, offsets[j]);</span>
 <span class="line" id="L143">                }</span>
 <span class="line" id="L144">            }</span>
 <span class="line" id="L145">            <span class="tok-kw">while</span> (i &lt; full_blocks) : (i += <span class="tok-number">1</span>) {</span>
@@ -260,7 +260,7 @@
 <span class="line" id="L147">                <span class="tok-kw">const</span> p = m[i * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..<span class="tok-number">16</span>].*;</span>
 <span class="line" id="L148">                <span class="tok-kw">var</span> e = xorBlocks(p, offset);</span>
 <span class="line" id="L149">                aes_enc_ctx.encrypt(&amp;e, &amp;e);</span>
-<span class="line" id="L150">                mem.copy(<span class="tok-type">u8</span>, c[i * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..<span class="tok-number">16</span>], &amp;xorBlocks(e, offset));</span>
+<span class="line" id="L150">                c[i * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..<span class="tok-number">16</span>].* = xorBlocks(e, offset);</span>
 <span class="line" id="L151">                xorWith(&amp;sum, p);</span>
 <span class="line" id="L152">            }</span>
 <span class="line" id="L153">            <span class="tok-kw">const</span> leftover = m.len % <span class="tok-number">16</span>;</span>
@@ -272,7 +272,7 @@
 <span class="line" id="L159">                    c[i * <span class="tok-number">16</span> + j] = pad[j] ^ x;</span>
 <span class="line" id="L160">                }</span>
 <span class="line" id="L161">                <span class="tok-kw">var</span> e = [_]<span class="tok-type">u8</span>{<span class="tok-number">0</span>} ** <span class="tok-number">16</span>;</span>
-<span class="line" id="L162">                mem.copy(<span class="tok-type">u8</span>, e[<span class="tok-number">0</span>..leftover], m[i * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..leftover]);</span>
+<span class="line" id="L162">                <span class="tok-builtin">@memcpy</span>(e[<span class="tok-number">0</span>..leftover], m[i * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..leftover]);</span>
 <span class="line" id="L163">                e[leftover] = <span class="tok-number">0x80</span>;</span>
 <span class="line" id="L164">                xorWith(&amp;sum, e);</span>
 <span class="line" id="L165">            }</span>
@@ -309,13 +309,13 @@
 <span class="line" id="L196">                    xorWith(&amp;offset, lt[<span class="tok-builtin">@ctz</span>(i + <span class="tok-number">1</span> + j)]);</span>
 <span class="line" id="L197">                    offsets[j] = offset;</span>
 <span class="line" id="L198">                    <span class="tok-kw">const</span> q = c[(i + j) * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..<span class="tok-number">16</span>].*;</span>
-<span class="line" id="L199">                    mem.copy(<span class="tok-type">u8</span>, es[j * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..<span class="tok-number">16</span>], &amp;xorBlocks(q, offsets[j]));</span>
+<span class="line" id="L199">                    es[j * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..<span class="tok-number">16</span>].* = xorBlocks(q, offsets[j]);</span>
 <span class="line" id="L200">                }</span>
 <span class="line" id="L201">                aes_dec_ctx.decryptWide(wb, &amp;es, &amp;es);</span>
 <span class="line" id="L202">                j = <span class="tok-number">0</span>;</span>
 <span class="line" id="L203">                <span class="tok-kw">while</span> (j &lt; wb) : (j += <span class="tok-number">1</span>) {</span>
 <span class="line" id="L204">                    <span class="tok-kw">const</span> p = xorBlocks(es[j * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..<span class="tok-number">16</span>].*, offsets[j]);</span>
-<span class="line" id="L205">                    mem.copy(<span class="tok-type">u8</span>, m[(i + j) * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..<span class="tok-number">16</span>], &amp;p);</span>
+<span class="line" id="L205">                    m[(i + j) * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..<span class="tok-number">16</span>].* = p;</span>
 <span class="line" id="L206">                    xorWith(&amp;sum, p);</span>
 <span class="line" id="L207">                }</span>
 <span class="line" id="L208">            }</span>
@@ -325,7 +325,7 @@
 <span class="line" id="L212">                <span class="tok-kw">var</span> e = xorBlocks(q, offset);</span>
 <span class="line" id="L213">                aes_dec_ctx.decrypt(&amp;e, &amp;e);</span>
 <span class="line" id="L214">                <span class="tok-kw">const</span> p = xorBlocks(e, offset);</span>
-<span class="line" id="L215">                mem.copy(<span class="tok-type">u8</span>, m[i * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..<span class="tok-number">16</span>], &amp;p);</span>
+<span class="line" id="L215">                m[i * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..<span class="tok-number">16</span>].* = p;</span>
 <span class="line" id="L216">                xorWith(&amp;sum, p);</span>
 <span class="line" id="L217">            }</span>
 <span class="line" id="L218">            <span class="tok-kw">const</span> leftover = m.len % <span class="tok-number">16</span>;</span>
@@ -337,7 +337,7 @@
 <span class="line" id="L224">                    m[i * <span class="tok-number">16</span> + j] = pad[j] ^ x;</span>
 <span class="line" id="L225">                }</span>
 <span class="line" id="L226">                <span class="tok-kw">var</span> e = [_]<span class="tok-type">u8</span>{<span class="tok-number">0</span>} ** <span class="tok-number">16</span>;</span>
-<span class="line" id="L227">                mem.copy(<span class="tok-type">u8</span>, e[<span class="tok-number">0</span>..leftover], m[i * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..leftover]);</span>
+<span class="line" id="L227">                <span class="tok-builtin">@memcpy</span>(e[<span class="tok-number">0</span>..leftover], m[i * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..leftover]);</span>
 <span class="line" id="L228">                e[leftover] = <span class="tok-number">0x80</span>;</span>
 <span class="line" id="L229">                xorWith(&amp;sum, e);</span>
 <span class="line" id="L230">            }</span>

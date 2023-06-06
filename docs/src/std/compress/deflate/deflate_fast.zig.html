@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>compress/deflate/deflate_fast.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -417,7 +417,7 @@
 <span class="line" id="L237">        }</span>
 <span class="line" id="L238">        self.cur += <span class="tok-builtin">@intCast</span>(<span class="tok-type">i32</span>, src.len);</span>
 <span class="line" id="L239">        self.prev_len = <span class="tok-builtin">@intCast</span>(<span class="tok-type">u32</span>, src.len);</span>
-<span class="line" id="L240">        mem.copy(<span class="tok-type">u8</span>, self.prev[<span class="tok-number">0</span>..self.prev_len], src);</span>
+<span class="line" id="L240">        <span class="tok-builtin">@memcpy</span>(self.prev[<span class="tok-number">0</span>..self.prev_len], src);</span>
 <span class="line" id="L241">        <span class="tok-kw">return</span>;</span>
 <span class="line" id="L242">    }</span>
 <span class="line" id="L243"></span>
@@ -771,11 +771,11 @@
 <span class="line" id="L566">    <span class="tok-kw">for</span> (cases) |c| {</span>
 <span class="line" id="L567">        <span class="tok-kw">var</span> previous = <span class="tok-kw">try</span> testing.allocator.alloc(<span class="tok-type">u8</span>, c.previous);</span>
 <span class="line" id="L568">        <span class="tok-kw">defer</span> testing.allocator.free(previous);</span>
-<span class="line" id="L569">        mem.set(<span class="tok-type">u8</span>, previous, <span class="tok-number">0</span>);</span>
+<span class="line" id="L569">        <span class="tok-builtin">@memset</span>(previous, <span class="tok-number">0</span>);</span>
 <span class="line" id="L570"></span>
 <span class="line" id="L571">        <span class="tok-kw">var</span> current = <span class="tok-kw">try</span> testing.allocator.alloc(<span class="tok-type">u8</span>, c.current);</span>
 <span class="line" id="L572">        <span class="tok-kw">defer</span> testing.allocator.free(current);</span>
-<span class="line" id="L573">        mem.set(<span class="tok-type">u8</span>, current, <span class="tok-number">0</span>);</span>
+<span class="line" id="L573">        <span class="tok-builtin">@memset</span>(current, <span class="tok-number">0</span>);</span>
 <span class="line" id="L574"></span>
 <span class="line" id="L575">        <span class="tok-kw">var</span> e = DeflateFast{</span>
 <span class="line" id="L576">            .prev = previous,</span>

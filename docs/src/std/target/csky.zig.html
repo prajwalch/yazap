@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>target/csky.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -327,7 +327,7 @@
 <span class="line" id="L214">    };</span>
 <span class="line" id="L215">    result[<span class="tok-builtin">@enumToInt</span>(Feature.dsp_silan)] = .{</span>
 <span class="line" id="L216">        .llvm_name = <span class="tok-str">&quot;dsp_silan&quot;</span>,</span>
-<span class="line" id="L217">        .description = <span class="tok-str">&quot;Enable DSP Silan instrutions&quot;</span>,</span>
+<span class="line" id="L217">        .description = <span class="tok-str">&quot;Enable DSP Silan instructions&quot;</span>,</span>
 <span class="line" id="L218">        .dependencies = featureSet(&amp;[_]Feature{}),</span>
 <span class="line" id="L219">    };</span>
 <span class="line" id="L220">    result[<span class="tok-builtin">@enumToInt</span>(Feature.dspe60)] = .{</span>
@@ -337,7 +337,7 @@
 <span class="line" id="L224">    };</span>
 <span class="line" id="L225">    result[<span class="tok-builtin">@enumToInt</span>(Feature.dspv2)] = .{</span>
 <span class="line" id="L226">        .llvm_name = <span class="tok-str">&quot;dspv2&quot;</span>,</span>
-<span class="line" id="L227">        .description = <span class="tok-str">&quot;Enable DSP V2.0 instrutions&quot;</span>,</span>
+<span class="line" id="L227">        .description = <span class="tok-str">&quot;Enable DSP V2.0 instructions&quot;</span>,</span>
 <span class="line" id="L228">        .dependencies = featureSet(&amp;[_]Feature{}),</span>
 <span class="line" id="L229">    };</span>
 <span class="line" id="L230">    result[<span class="tok-builtin">@enumToInt</span>(Feature.e1)] = .{</span>
@@ -356,7 +356,7 @@
 <span class="line" id="L243">    };</span>
 <span class="line" id="L244">    result[<span class="tok-builtin">@enumToInt</span>(Feature.edsp)] = .{</span>
 <span class="line" id="L245">        .llvm_name = <span class="tok-str">&quot;edsp&quot;</span>,</span>
-<span class="line" id="L246">        .description = <span class="tok-str">&quot;Enable DSP instrutions&quot;</span>,</span>
+<span class="line" id="L246">        .description = <span class="tok-str">&quot;Enable DSP instructions&quot;</span>,</span>
 <span class="line" id="L247">        .dependencies = featureSet(&amp;[_]Feature{}),</span>
 <span class="line" id="L248">    };</span>
 <span class="line" id="L249">    result[<span class="tok-builtin">@enumToInt</span>(Feature.elrw)] = .{</span>
@@ -446,12 +446,12 @@
 <span class="line" id="L333">    };</span>
 <span class="line" id="L334">    result[<span class="tok-builtin">@enumToInt</span>(Feature.hwdiv)] = .{</span>
 <span class="line" id="L335">        .llvm_name = <span class="tok-str">&quot;hwdiv&quot;</span>,</span>
-<span class="line" id="L336">        .description = <span class="tok-str">&quot;Enable divide instrutions&quot;</span>,</span>
+<span class="line" id="L336">        .description = <span class="tok-str">&quot;Enable divide instructions&quot;</span>,</span>
 <span class="line" id="L337">        .dependencies = featureSet(&amp;[_]Feature{}),</span>
 <span class="line" id="L338">    };</span>
 <span class="line" id="L339">    result[<span class="tok-builtin">@enumToInt</span>(Feature.istack)] = .{</span>
 <span class="line" id="L340">        .llvm_name = <span class="tok-str">&quot;istack&quot;</span>,</span>
-<span class="line" id="L341">        .description = <span class="tok-str">&quot;Enable interrput attribute&quot;</span>,</span>
+<span class="line" id="L341">        .description = <span class="tok-str">&quot;Enable interrupt attribute&quot;</span>,</span>
 <span class="line" id="L342">        .dependencies = featureSet(&amp;[_]Feature{}),</span>
 <span class="line" id="L343">    };</span>
 <span class="line" id="L344">    result[<span class="tok-builtin">@enumToInt</span>(Feature.java)] = .{</span>
@@ -475,7 +475,7 @@
 <span class="line" id="L362">    };</span>
 <span class="line" id="L363">    result[<span class="tok-builtin">@enumToInt</span>(Feature.multiple_stld)] = .{</span>
 <span class="line" id="L364">        .llvm_name = <span class="tok-str">&quot;multiple_stld&quot;</span>,</span>
-<span class="line" id="L365">        .description = <span class="tok-str">&quot;Enable multiple load/store instrutions&quot;</span>,</span>
+<span class="line" id="L365">        .description = <span class="tok-str">&quot;Enable multiple load/store instructions&quot;</span>,</span>
 <span class="line" id="L366">        .dependencies = featureSet(&amp;[_]Feature{}),</span>
 <span class="line" id="L367">    };</span>
 <span class="line" id="L368">    result[<span class="tok-builtin">@enumToInt</span>(Feature.nvic)] = .{</span>
@@ -485,7 +485,7 @@
 <span class="line" id="L372">    };</span>
 <span class="line" id="L373">    result[<span class="tok-builtin">@enumToInt</span>(Feature.pushpop)] = .{</span>
 <span class="line" id="L374">        .llvm_name = <span class="tok-str">&quot;pushpop&quot;</span>,</span>
-<span class="line" id="L375">        .description = <span class="tok-str">&quot;Enable push/pop instrutions&quot;</span>,</span>
+<span class="line" id="L375">        .description = <span class="tok-str">&quot;Enable push/pop instructions&quot;</span>,</span>
 <span class="line" id="L376">        .dependencies = featureSet(&amp;[_]Feature{}),</span>
 <span class="line" id="L377">    };</span>
 <span class="line" id="L378">    result[<span class="tok-builtin">@enumToInt</span>(Feature.smart)] = .{</span>

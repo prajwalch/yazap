@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>fmt/parse_float/decimal.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -164,13 +164,13 @@
 <span class="line" id="L34">        <span class="tok-comment">/// For a double-precision IEEE-754 float, this required 767 digits,</span></span>
 <span class="line" id="L35">        <span class="tok-comment">/// so we store the max digits + 1.</span></span>
 <span class="line" id="L36">        <span class="tok-comment">///</span></span>
-<span class="line" id="L37">        <span class="tok-comment">/// We can exactly represent a float in radix `b` from radix 2 if</span></span>
+<span class="line" id="L37">        <span class="tok-comment">/// We can exactly represent a float in base `b` from base 2 if</span></span>
 <span class="line" id="L38">        <span class="tok-comment">/// `b` is divisible by 2. This function calculates the exact number of</span></span>
 <span class="line" id="L39">        <span class="tok-comment">/// digits required to exactly represent that float.</span></span>
 <span class="line" id="L40">        <span class="tok-comment">///</span></span>
 <span class="line" id="L41">        <span class="tok-comment">/// According to the &quot;Handbook of Floating Point Arithmetic&quot;,</span></span>
 <span class="line" id="L42">        <span class="tok-comment">/// for IEEE754, with emin being the min exponent, p2 being the</span></span>
-<span class="line" id="L43">        <span class="tok-comment">/// precision, and b being the radix, the number of digits follows as:</span></span>
+<span class="line" id="L43">        <span class="tok-comment">/// precision, and b being the base, the number of digits follows as:</span></span>
 <span class="line" id="L44">        <span class="tok-comment">///</span></span>
 <span class="line" id="L45">        <span class="tok-comment">/// `−emin + p2 + ⌊(emin + 1) log(2, b) − log(1 − 2^(−p2), b)⌋`</span></span>
 <span class="line" id="L46">        <span class="tok-comment">///</span></span>

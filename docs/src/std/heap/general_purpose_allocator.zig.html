@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>heap/general_purpose_allocator.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -243,7 +243,7 @@
 <span class="line" id="L130">    thread_safe: <span class="tok-type">bool</span> = !builtin.single_threaded,</span>
 <span class="line" id="L131"></span>
 <span class="line" id="L132">    <span class="tok-comment">/// What type of mutex you'd like to use, for thread safety.</span></span>
-<span class="line" id="L133">    <span class="tok-comment">/// when specfied, the mutex type must have the same shape as `std.Thread.Mutex` and</span></span>
+<span class="line" id="L133">    <span class="tok-comment">/// when specified, the mutex type must have the same shape as `std.Thread.Mutex` and</span></span>
 <span class="line" id="L134">    <span class="tok-comment">/// `DummyMutex`, and have no required fields. Specifying this field causes</span></span>
 <span class="line" id="L135">    <span class="tok-comment">/// the `thread_safe` field to be ignored.</span></span>
 <span class="line" id="L136">    <span class="tok-comment">///</span></span>
@@ -572,7 +572,7 @@
 <span class="line" id="L448"></span>
 <span class="line" id="L449">        <span class="tok-kw">fn</span> <span class="tok-fn">collectStackTrace</span>(first_trace_addr: <span class="tok-type">usize</span>, addresses: *[stack_n]<span class="tok-type">usize</span>) <span class="tok-type">void</span> {</span>
 <span class="line" id="L450">            <span class="tok-kw">if</span> (stack_n == <span class="tok-number">0</span>) <span class="tok-kw">return</span>;</span>
-<span class="line" id="L451">            mem.set(<span class="tok-type">usize</span>, addresses, <span class="tok-number">0</span>);</span>
+<span class="line" id="L451">            <span class="tok-builtin">@memset</span>(addresses, <span class="tok-number">0</span>);</span>
 <span class="line" id="L452">            <span class="tok-kw">var</span> stack_trace = StackTrace{</span>
 <span class="line" id="L453">                .instruction_addresses = addresses,</span>
 <span class="line" id="L454">                .index = <span class="tok-number">0</span>,</span>
@@ -895,7 +895,7 @@
 <span class="line" id="L759">            <span class="tok-kw">const</span> new_size_class = math.ceilPowerOfTwoAssert(<span class="tok-type">usize</span>, new_aligned_size);</span>
 <span class="line" id="L760">            <span class="tok-kw">if</span> (new_size_class &lt;= size_class) {</span>
 <span class="line" id="L761">                <span class="tok-kw">if</span> (old_mem.len &gt; new_size) {</span>
-<span class="line" id="L762">                    <span class="tok-builtin">@memset</span>(old_mem.ptr + new_size, <span class="tok-null">undefined</span>, old_mem.len - new_size);</span>
+<span class="line" id="L762">                    <span class="tok-builtin">@memset</span>(old_mem[new_size..], <span class="tok-null">undefined</span>);</span>
 <span class="line" id="L763">                }</span>
 <span class="line" id="L764">                <span class="tok-kw">if</span> (config.verbose_log) {</span>
 <span class="line" id="L765">                    log.info(<span class="tok-str">&quot;small resize {d} bytes at {*} to {d}&quot;</span>, .{</span>
@@ -1058,7 +1058,7 @@
 <span class="line" id="L911">                    self.empty_buckets = bucket;</span>
 <span class="line" id="L912">                }</span>
 <span class="line" id="L913">            } <span class="tok-kw">else</span> {</span>
-<span class="line" id="L914">                <span class="tok-builtin">@memset</span>(old_mem.ptr, <span class="tok-null">undefined</span>, old_mem.len);</span>
+<span class="line" id="L914">                <span class="tok-builtin">@memset</span>(old_mem, <span class="tok-null">undefined</span>);</span>
 <span class="line" id="L915">            }</span>
 <span class="line" id="L916">            <span class="tok-kw">if</span> (config.safety) {</span>
 <span class="line" id="L917">                assert(self.small_allocations.remove(<span class="tok-builtin">@ptrToInt</span>(old_mem.ptr)));</span>
@@ -1163,7 +1163,7 @@
 <span class="line" id="L1012">            self.buckets[bucket_index] = ptr;</span>
 <span class="line" id="L1013">            <span class="tok-comment">// Set the used bits to all zeroes</span>
 </span>
-<span class="line" id="L1014">            <span class="tok-builtin">@memset</span>(<span class="tok-builtin">@as</span>(*[<span class="tok-number">1</span>]<span class="tok-type">u8</span>, ptr.usedBits(<span class="tok-number">0</span>)), <span class="tok-number">0</span>, usedBitsCount(size_class));</span>
+<span class="line" id="L1014">            <span class="tok-builtin">@memset</span>(<span class="tok-builtin">@as</span>([*]<span class="tok-type">u8</span>, <span class="tok-builtin">@as</span>(*[<span class="tok-number">1</span>]<span class="tok-type">u8</span>, ptr.usedBits(<span class="tok-number">0</span>)))[<span class="tok-number">0</span>..usedBitsCount(size_class)], <span class="tok-number">0</span>);</span>
 <span class="line" id="L1015">            <span class="tok-kw">return</span> ptr;</span>
 <span class="line" id="L1016">        }</span>
 <span class="line" id="L1017">    };</span>
@@ -1267,7 +1267,7 @@
 <span class="line" id="L1113">    <span class="tok-kw">var</span> slice = <span class="tok-kw">try</span> allocator.alloc(<span class="tok-type">u8</span>, <span class="tok-number">20</span>);</span>
 <span class="line" id="L1114">    <span class="tok-kw">defer</span> allocator.free(slice);</span>
 <span class="line" id="L1115"></span>
-<span class="line" id="L1116">    mem.set(<span class="tok-type">u8</span>, slice, <span class="tok-number">0x11</span>);</span>
+<span class="line" id="L1116">    <span class="tok-builtin">@memset</span>(slice, <span class="tok-number">0x11</span>);</span>
 <span class="line" id="L1117"></span>
 <span class="line" id="L1118">    <span class="tok-kw">try</span> std.testing.expect(allocator.resize(slice, <span class="tok-number">17</span>));</span>
 <span class="line" id="L1119">    slice = slice[<span class="tok-number">0</span>..<span class="tok-number">17</span>];</span>
@@ -1400,7 +1400,7 @@
 <span class="line" id="L1241">    <span class="tok-kw">try</span> std.testing.expect(slice[<span class="tok-number">16</span>] == <span class="tok-number">0x34</span>);</span>
 <span class="line" id="L1242">}</span>
 <span class="line" id="L1243"></span>
-<span class="line" id="L1244"><span class="tok-kw">test</span> <span class="tok-str">&quot;overrideable mutexes&quot;</span> {</span>
+<span class="line" id="L1244"><span class="tok-kw">test</span> <span class="tok-str">&quot;overridable mutexes&quot;</span> {</span>
 <span class="line" id="L1245">    <span class="tok-kw">var</span> gpa = GeneralPurposeAllocator(.{ .MutexType = std.Thread.Mutex }){</span>
 <span class="line" id="L1246">        .backing_allocator = std.testing.allocator,</span>
 <span class="line" id="L1247">        .mutex = std.Thread.Mutex{},</span>

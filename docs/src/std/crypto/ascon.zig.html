@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>crypto/ascon.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -147,7 +147,7 @@
 <span class="line" id="L34">        <span class="tok-comment">/// Initialize the state from a slice of bytes.</span></span>
 <span class="line" id="L35">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">init</span>(initial_state: [block_bytes]<span class="tok-type">u8</span>) Self {</span>
 <span class="line" id="L36">            <span class="tok-kw">var</span> state = Self{ .st = <span class="tok-null">undefined</span> };</span>
-<span class="line" id="L37">            mem.copy(<span class="tok-type">u8</span>, state.asBytes(), &amp;initial_state);</span>
+<span class="line" id="L37">            <span class="tok-builtin">@memcpy</span>(state.asBytes(), &amp;initial_state);</span>
 <span class="line" id="L38">            state.endianSwap();</span>
 <span class="line" id="L39">            <span class="tok-kw">return</span> state;</span>
 <span class="line" id="L40">        }</span>
@@ -200,7 +200,7 @@
 <span class="line" id="L87">            }</span>
 <span class="line" id="L88">            <span class="tok-kw">if</span> (i &lt; bytes.len) {</span>
 <span class="line" id="L89">                <span class="tok-kw">var</span> padded = [_]<span class="tok-type">u8</span>{<span class="tok-number">0</span>} ** <span class="tok-number">8</span>;</span>
-<span class="line" id="L90">                mem.copy(<span class="tok-type">u8</span>, padded[<span class="tok-number">0</span> .. bytes.len - i], bytes[i..]);</span>
+<span class="line" id="L90">                <span class="tok-builtin">@memcpy</span>(padded[<span class="tok-number">0</span> .. bytes.len - i], bytes[i..]);</span>
 <span class="line" id="L91">                self.st[i / <span class="tok-number">8</span>] = mem.readInt(<span class="tok-type">u64</span>, padded[<span class="tok-number">0</span>..], endian);</span>
 <span class="line" id="L92">            }</span>
 <span class="line" id="L93">        }</span>
@@ -222,7 +222,7 @@
 <span class="line" id="L109">            }</span>
 <span class="line" id="L110">            <span class="tok-kw">if</span> (i &lt; bytes.len) {</span>
 <span class="line" id="L111">                <span class="tok-kw">var</span> padded = [_]<span class="tok-type">u8</span>{<span class="tok-number">0</span>} ** <span class="tok-number">8</span>;</span>
-<span class="line" id="L112">                mem.copy(<span class="tok-type">u8</span>, padded[<span class="tok-number">0</span> .. bytes.len - i], bytes[i..]);</span>
+<span class="line" id="L112">                <span class="tok-builtin">@memcpy</span>(padded[<span class="tok-number">0</span> .. bytes.len - i], bytes[i..]);</span>
 <span class="line" id="L113">                self.st[i / <span class="tok-number">8</span>] ^= mem.readInt(<span class="tok-type">u64</span>, padded[<span class="tok-number">0</span>..], endian);</span>
 <span class="line" id="L114">            }</span>
 <span class="line" id="L115">        }</span>
@@ -236,7 +236,7 @@
 <span class="line" id="L123">            <span class="tok-kw">if</span> (i &lt; out.len) {</span>
 <span class="line" id="L124">                <span class="tok-kw">var</span> padded = [_]<span class="tok-type">u8</span>{<span class="tok-number">0</span>} ** <span class="tok-number">8</span>;</span>
 <span class="line" id="L125">                mem.writeInt(<span class="tok-type">u64</span>, padded[<span class="tok-number">0</span>..], self.st[i / <span class="tok-number">8</span>], endian);</span>
-<span class="line" id="L126">                mem.copy(<span class="tok-type">u8</span>, out[i..], padded[<span class="tok-number">0</span> .. out.len - i]);</span>
+<span class="line" id="L126">                <span class="tok-builtin">@memcpy</span>(out[i..], padded[<span class="tok-number">0</span> .. out.len - i]);</span>
 <span class="line" id="L127">            }</span>
 <span class="line" id="L128">        }</span>
 <span class="line" id="L129"></span>
@@ -251,16 +251,16 @@
 <span class="line" id="L138">            }</span>
 <span class="line" id="L139">            <span class="tok-kw">if</span> (i &lt; in.len) {</span>
 <span class="line" id="L140">                <span class="tok-kw">var</span> padded = [_]<span class="tok-type">u8</span>{<span class="tok-number">0</span>} ** <span class="tok-number">8</span>;</span>
-<span class="line" id="L141">                mem.copy(<span class="tok-type">u8</span>, padded[<span class="tok-number">0</span> .. in.len - i], in[i..]);</span>
+<span class="line" id="L141">                <span class="tok-builtin">@memcpy</span>(padded[<span class="tok-number">0</span> .. in.len - i], in[i..]);</span>
 <span class="line" id="L142">                <span class="tok-kw">const</span> x = mem.readIntNative(<span class="tok-type">u64</span>, &amp;padded) ^ mem.nativeTo(<span class="tok-type">u64</span>, self.st[i / <span class="tok-number">8</span>], endian);</span>
 <span class="line" id="L143">                mem.writeIntNative(<span class="tok-type">u64</span>, &amp;padded, x);</span>
-<span class="line" id="L144">                mem.copy(<span class="tok-type">u8</span>, out[i..], padded[<span class="tok-number">0</span> .. in.len - i]);</span>
+<span class="line" id="L144">                <span class="tok-builtin">@memcpy</span>(out[i..], padded[<span class="tok-number">0</span> .. in.len - i]);</span>
 <span class="line" id="L145">            }</span>
 <span class="line" id="L146">        }</span>
 <span class="line" id="L147"></span>
 <span class="line" id="L148">        <span class="tok-comment">/// Set the words storing the bytes of a given range to zero.</span></span>
 <span class="line" id="L149">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">clear</span>(self: *Self, from: <span class="tok-type">usize</span>, to: <span class="tok-type">usize</span>) <span class="tok-type">void</span> {</span>
-<span class="line" id="L150">            mem.set(<span class="tok-type">u64</span>, self.st[from / <span class="tok-number">8</span> .. (to + <span class="tok-number">7</span>) / <span class="tok-number">8</span>], <span class="tok-number">0</span>);</span>
+<span class="line" id="L150">            <span class="tok-builtin">@memset</span>(self.st[from / <span class="tok-number">8</span> .. (to + <span class="tok-number">7</span>) / <span class="tok-number">8</span>], <span class="tok-number">0</span>);</span>
 <span class="line" id="L151">        }</span>
 <span class="line" id="L152"></span>
 <span class="line" id="L153">        <span class="tok-comment">/// Clear the entire state, disabling compiler optimizations.</span></span>

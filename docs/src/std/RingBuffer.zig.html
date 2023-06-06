@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>RingBuffer.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -114,7 +114,7 @@
 <pre><code><span class="line" id="L1"><span class="tok-comment">//! This ring buffer stores read and write indices while being able to utilise</span></span>
 <span class="line" id="L2"><span class="tok-comment">//! the full backing slice by incrementing the indices modulo twice the slice's</span></span>
 <span class="line" id="L3"><span class="tok-comment">//! length and reducing indices modulo the slice's length on slice access. This</span></span>
-<span class="line" id="L4"><span class="tok-comment">//! means that whether the ring buffer if full or empty can be distinguished by</span></span>
+<span class="line" id="L4"><span class="tok-comment">//! means that whether the ring buffer is full or empty can be distinguished by</span></span>
 <span class="line" id="L5"><span class="tok-comment">//! looking at the difference between the read and write indices without adding</span></span>
 <span class="line" id="L6"><span class="tok-comment">//! an extra boolean flag or having to reserve a slot in the buffer.</span></span>
 <span class="line" id="L7"><span class="tok-comment">//!</span></span>

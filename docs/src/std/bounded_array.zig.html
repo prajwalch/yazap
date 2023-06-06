@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>bounded_array.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -191,7 +191,7 @@
 <span class="line" id="L73">        <span class="tok-comment">/// Copy the content of an existing slice.</span></span>
 <span class="line" id="L74">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">fromSlice</span>(m: []<span class="tok-kw">const</span> T) <span class="tok-kw">error</span>{Overflow}!Self {</span>
 <span class="line" id="L75">            <span class="tok-kw">var</span> list = <span class="tok-kw">try</span> init(m.len);</span>
-<span class="line" id="L76">            std.mem.copy(T, list.slice(), m);</span>
+<span class="line" id="L76">            <span class="tok-builtin">@memcpy</span>(list.slice(), m);</span>
 <span class="line" id="L77">            <span class="tok-kw">return</span> list;</span>
 <span class="line" id="L78">        }</span>
 <span class="line" id="L79"></span>
@@ -283,10 +283,10 @@
 <span class="line" id="L165">            <span class="tok-kw">try</span> self.ensureUnusedCapacity(items.len);</span>
 <span class="line" id="L166">            self.len += items.len;</span>
 <span class="line" id="L167">            mem.copyBackwards(T, self.slice()[i + items.len .. self.len], self.constSlice()[i .. self.len - items.len]);</span>
-<span class="line" id="L168">            mem.copy(T, self.slice()[i .. i + items.len], items);</span>
+<span class="line" id="L168">            <span class="tok-builtin">@memcpy</span>(self.slice()[i..][<span class="tok-number">0</span>..items.len], items);</span>
 <span class="line" id="L169">        }</span>
 <span class="line" id="L170"></span>
-<span class="line" id="L171">        <span class="tok-comment">/// Replace range of elements `slice[start..start+len]` with `new_items`.</span></span>
+<span class="line" id="L171">        <span class="tok-comment">/// Replace range of elements `slice[start..][0..len]` with `new_items`.</span></span>
 <span class="line" id="L172">        <span class="tok-comment">/// Grows slice if `len &lt; new_items.len`.</span></span>
 <span class="line" id="L173">        <span class="tok-comment">/// Shrinks slice if `len &gt; new_items.len`.</span></span>
 <span class="line" id="L174">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">replaceRange</span>(</span>
@@ -299,14 +299,14 @@
 <span class="line" id="L181">            <span class="tok-kw">var</span> range = self.slice()[start..after_range];</span>
 <span class="line" id="L182"></span>
 <span class="line" id="L183">            <span class="tok-kw">if</span> (range.len == new_items.len) {</span>
-<span class="line" id="L184">                mem.copy(T, range, new_items);</span>
+<span class="line" id="L184">                <span class="tok-builtin">@memcpy</span>(range[<span class="tok-number">0</span>..new_items.len], new_items);</span>
 <span class="line" id="L185">            } <span class="tok-kw">else</span> <span class="tok-kw">if</span> (range.len &lt; new_items.len) {</span>
 <span class="line" id="L186">                <span class="tok-kw">const</span> first = new_items[<span class="tok-number">0</span>..range.len];</span>
 <span class="line" id="L187">                <span class="tok-kw">const</span> rest = new_items[range.len..];</span>
-<span class="line" id="L188">                mem.copy(T, range, first);</span>
+<span class="line" id="L188">                <span class="tok-builtin">@memcpy</span>(range[<span class="tok-number">0</span>..first.len], first);</span>
 <span class="line" id="L189">                <span class="tok-kw">try</span> self.insertSlice(after_range, rest);</span>
 <span class="line" id="L190">            } <span class="tok-kw">else</span> {</span>
-<span class="line" id="L191">                mem.copy(T, range, new_items);</span>
+<span class="line" id="L191">                <span class="tok-builtin">@memcpy</span>(range[<span class="tok-number">0</span>..new_items.len], new_items);</span>
 <span class="line" id="L192">                <span class="tok-kw">const</span> after_subrange = start + new_items.len;</span>
 <span class="line" id="L193">                <span class="tok-kw">for</span> (self.constSlice()[after_range..], <span class="tok-number">0</span>..) |item, i| {</span>
 <span class="line" id="L194">                    self.slice()[after_subrange..][i] = item;</span>
@@ -361,9 +361,9 @@
 <span class="line" id="L243">        <span class="tok-comment">/// Append the slice of items to the slice, asserting the capacity is already</span></span>
 <span class="line" id="L244">        <span class="tok-comment">/// enough to store the new items.</span></span>
 <span class="line" id="L245">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">appendSliceAssumeCapacity</span>(self: *Self, items: []<span class="tok-kw">const</span> T) <span class="tok-type">void</span> {</span>
-<span class="line" id="L246">            <span class="tok-kw">const</span> oldlen = self.len;</span>
+<span class="line" id="L246">            <span class="tok-kw">const</span> old_len = self.len;</span>
 <span class="line" id="L247">            self.len += items.len;</span>
-<span class="line" id="L248">            mem.copy(T, self.slice()[oldlen..], items);</span>
+<span class="line" id="L248">            <span class="tok-builtin">@memcpy</span>(self.slice()[old_len..][<span class="tok-number">0</span>..items.len], items);</span>
 <span class="line" id="L249">        }</span>
 <span class="line" id="L250"></span>
 <span class="line" id="L251">        <span class="tok-comment">/// Append a value to the slice `n` times.</span></span>
@@ -371,7 +371,7 @@
 <span class="line" id="L253">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">appendNTimes</span>(self: *Self, value: T, n: <span class="tok-type">usize</span>) <span class="tok-kw">error</span>{Overflow}!<span class="tok-type">void</span> {</span>
 <span class="line" id="L254">            <span class="tok-kw">const</span> old_len = self.len;</span>
 <span class="line" id="L255">            <span class="tok-kw">try</span> self.resize(old_len + n);</span>
-<span class="line" id="L256">            mem.set(T, self.slice()[old_len..self.len], value);</span>
+<span class="line" id="L256">            <span class="tok-builtin">@memset</span>(self.slice()[old_len..self.len], value);</span>
 <span class="line" id="L257">        }</span>
 <span class="line" id="L258"></span>
 <span class="line" id="L259">        <span class="tok-comment">/// Append a value to the slice `n` times.</span></span>
@@ -380,7 +380,7 @@
 <span class="line" id="L262">            <span class="tok-kw">const</span> old_len = self.len;</span>
 <span class="line" id="L263">            self.len += n;</span>
 <span class="line" id="L264">            assert(self.len &lt;= buffer_capacity);</span>
-<span class="line" id="L265">            mem.set(T, self.slice()[old_len..self.len], value);</span>
+<span class="line" id="L265">            <span class="tok-builtin">@memset</span>(self.slice()[old_len..self.len], value);</span>
 <span class="line" id="L266">        }</span>
 <span class="line" id="L267"></span>
 <span class="line" id="L268">        <span class="tok-kw">pub</span> <span class="tok-kw">const</span> Writer = <span class="tok-kw">if</span> (T != <span class="tok-type">u8</span>)</span>
@@ -447,7 +447,7 @@
 <span class="line" id="L329">    <span class="tok-kw">try</span> testing.expectEqual(a.popOrNull(), <span class="tok-number">0</span>);</span>
 <span class="line" id="L330">    <span class="tok-kw">try</span> testing.expectEqual(a.popOrNull(), <span class="tok-null">null</span>);</span>
 <span class="line" id="L331">    <span class="tok-kw">var</span> unused = a.unusedCapacitySlice();</span>
-<span class="line" id="L332">    mem.set(<span class="tok-type">u8</span>, unused[<span class="tok-number">0</span>..<span class="tok-number">8</span>], <span class="tok-number">2</span>);</span>
+<span class="line" id="L332">    <span class="tok-builtin">@memset</span>(unused[<span class="tok-number">0</span>..<span class="tok-number">8</span>], <span class="tok-number">2</span>);</span>
 <span class="line" id="L333">    unused[<span class="tok-number">8</span>] = <span class="tok-number">3</span>;</span>
 <span class="line" id="L334">    unused[<span class="tok-number">9</span>] = <span class="tok-number">4</span>;</span>
 <span class="line" id="L335">    <span class="tok-kw">try</span> testing.expectEqual(unused.len, a.capacity());</span>

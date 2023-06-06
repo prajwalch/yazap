@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>math/scalbn.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -116,11 +116,11 @@
 <span class="line" id="L3"></span>
 <span class="line" id="L4"><span class="tok-comment">/// Returns a * FLT_RADIX ^ exp.</span></span>
 <span class="line" id="L5"><span class="tok-comment">///</span></span>
-<span class="line" id="L6"><span class="tok-comment">/// Zig only supports binary radix IEEE-754 floats. Hence FLT_RADIX=2, and this is an alias for ldexp.</span></span>
+<span class="line" id="L6"><span class="tok-comment">/// Zig only supports binary base IEEE-754 floats. Hence FLT_RADIX=2, and this is an alias for ldexp.</span></span>
 <span class="line" id="L7"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> scalbn = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;ldexp.zig&quot;</span>).ldexp;</span>
 <span class="line" id="L8"></span>
 <span class="line" id="L9"><span class="tok-kw">test</span> <span class="tok-str">&quot;math.scalbn&quot;</span> {</span>
-<span class="line" id="L10">    <span class="tok-comment">// Verify we are using radix 2.</span>
+<span class="line" id="L10">    <span class="tok-comment">// Verify we are using base 2.</span>
 </span>
 <span class="line" id="L11">    <span class="tok-kw">try</span> expect(scalbn(<span class="tok-builtin">@as</span>(<span class="tok-type">f16</span>, <span class="tok-number">1.5</span>), <span class="tok-number">4</span>) == <span class="tok-number">24.0</span>);</span>
 <span class="line" id="L12">    <span class="tok-kw">try</span> expect(scalbn(<span class="tok-builtin">@as</span>(<span class="tok-type">f32</span>, <span class="tok-number">1.5</span>), <span class="tok-number">4</span>) == <span class="tok-number">24.0</span>);</span>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>os/linux/io_uring.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -2044,8 +2044,8 @@
 <span class="line" id="L1856">    <span class="tok-kw">var</span> raw_buffers: [<span class="tok-number">2</span>][<span class="tok-number">11</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
 <span class="line" id="L1857">    <span class="tok-comment">// First buffer will be written to the file.</span>
 </span>
-<span class="line" id="L1858">    std.mem.set(<span class="tok-type">u8</span>, &amp;raw_buffers[<span class="tok-number">0</span>], <span class="tok-str">'z'</span>);</span>
-<span class="line" id="L1859">    std.mem.copy(<span class="tok-type">u8</span>, &amp;raw_buffers[<span class="tok-number">0</span>], <span class="tok-str">&quot;foobar&quot;</span>);</span>
+<span class="line" id="L1858">    <span class="tok-builtin">@memset</span>(&amp;raw_buffers[<span class="tok-number">0</span>], <span class="tok-str">'z'</span>);</span>
+<span class="line" id="L1859">    raw_buffers[<span class="tok-number">0</span>][<span class="tok-number">0</span>..<span class="tok-str">&quot;foobar&quot;</span>.len].* = <span class="tok-str">&quot;foobar&quot;</span>.*;</span>
 <span class="line" id="L1860"></span>
 <span class="line" id="L1861">    <span class="tok-kw">var</span> buffers = [<span class="tok-number">2</span>]os.iovec{</span>
 <span class="line" id="L1862">        .{ .iov_base = &amp;raw_buffers[<span class="tok-number">0</span>], .iov_len = raw_buffers[<span class="tok-number">0</span>].len },</span>
@@ -3218,7 +3218,7 @@
 <span class="line" id="L2967"></span>
 <span class="line" id="L2968">    <span class="tok-comment">// Deliberately put something we don't expect in the buffers</span>
 </span>
-<span class="line" id="L2969">    mem.set(<span class="tok-type">u8</span>, mem.sliceAsBytes(&amp;buffers), <span class="tok-number">42</span>);</span>
+<span class="line" id="L2969">    <span class="tok-builtin">@memset</span>(mem.sliceAsBytes(&amp;buffers), <span class="tok-number">42</span>);</span>
 <span class="line" id="L2970"></span>
 <span class="line" id="L2971">    <span class="tok-kw">const</span> reprovided_buffer_id = <span class="tok-number">2</span>;</span>
 <span class="line" id="L2972"></span>
@@ -3419,7 +3419,7 @@
 <span class="line" id="L3156"></span>
 <span class="line" id="L3157">    <span class="tok-comment">// Deliberately put something we don't expect in the buffers</span>
 </span>
-<span class="line" id="L3158">    mem.set(<span class="tok-type">u8</span>, mem.sliceAsBytes(&amp;buffers), <span class="tok-number">1</span>);</span>
+<span class="line" id="L3158">    <span class="tok-builtin">@memset</span>(mem.sliceAsBytes(&amp;buffers), <span class="tok-number">1</span>);</span>
 <span class="line" id="L3159"></span>
 <span class="line" id="L3160">    <span class="tok-kw">var</span> i: <span class="tok-type">usize</span> = <span class="tok-number">0</span>;</span>
 <span class="line" id="L3161">    <span class="tok-kw">while</span> (i &lt; buffers.len) : (i += <span class="tok-number">1</span>) {</span>
@@ -3505,7 +3505,7 @@
 <span class="line" id="L3236"></span>
 <span class="line" id="L3237">    <span class="tok-comment">// Deliberately put something we don't expect in the buffers</span>
 </span>
-<span class="line" id="L3238">    mem.set(<span class="tok-type">u8</span>, mem.sliceAsBytes(&amp;buffers), <span class="tok-number">1</span>);</span>
+<span class="line" id="L3238">    <span class="tok-builtin">@memset</span>(mem.sliceAsBytes(&amp;buffers), <span class="tok-number">1</span>);</span>
 <span class="line" id="L3239"></span>
 <span class="line" id="L3240">    {</span>
 <span class="line" id="L3241">        <span class="tok-kw">var</span> sqe = <span class="tok-kw">try</span> ring.recv(<span class="tok-number">0xdfdfdfdf</span>, socket_test_harness.client, .{ .buffer_selection = .{ .group_id = group_id, .len = buffer_len } }, <span class="tok-number">0</span>);</span>

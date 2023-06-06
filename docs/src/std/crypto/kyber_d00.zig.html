@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>crypto/kyber_d00.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -193,7 +193,7 @@
 <span class="line" id="L80"><span class="tok-comment">//! m = Compress(Decompress(c_2, d_v) - s^T Decompress(c_1, d_u), 1).</span></span>
 <span class="line" id="L81"><span class="tok-comment">//!</span></span>
 <span class="line" id="L82"><span class="tok-comment">//! It it not straight-forward to see that this formula is correct.  In</span></span>
-<span class="line" id="L83"><span class="tok-comment">//! fact, there is negligable but non-zero probability that a ciphertext</span></span>
+<span class="line" id="L83"><span class="tok-comment">//! fact, there is negligible but non-zero probability that a ciphertext</span></span>
 <span class="line" id="L84"><span class="tok-comment">//! does not decrypt correctly given by the DFP column in Table 4.  This</span></span>
 <span class="line" id="L85"><span class="tok-comment">//! failure probability can be computed by a careful automated analysis</span></span>
 <span class="line" id="L86"><span class="tok-comment">//! of the probabilities involved, see kyber_failure.py of [SecEst].</span></span>
@@ -473,9 +473,9 @@
 <span class="line" id="L323">                s += InnerSk.bytes_length;</span>
 <span class="line" id="L324">                ret.pk = InnerPk.fromBytes(buf[s .. s + InnerPk.bytes_length]);</span>
 <span class="line" id="L325">                s += InnerPk.bytes_length;</span>
-<span class="line" id="L326">                mem.copy(<span class="tok-type">u8</span>, &amp;ret.hpk, buf[s .. s + h_length]);</span>
+<span class="line" id="L326">                ret.hpk = buf[s..][<span class="tok-number">0</span>..h_length].*;</span>
 <span class="line" id="L327">                s += h_length;</span>
-<span class="line" id="L328">                mem.copy(<span class="tok-type">u8</span>, &amp;ret.z, buf[s .. s + shared_length]);</span>
+<span class="line" id="L328">                ret.z = buf[s..][<span class="tok-number">0</span>..shared_length].*;</span>
 <span class="line" id="L329">                <span class="tok-kw">return</span> ret;</span>
 <span class="line" id="L330">            }</span>
 <span class="line" id="L331">        };</span>
@@ -495,7 +495,7 @@
 <span class="line" id="L345">                    <span class="tok-kw">break</span> :sk random_seed;</span>
 <span class="line" id="L346">                };</span>
 <span class="line" id="L347">                <span class="tok-kw">var</span> ret: KeyPair = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L348">                mem.copy(<span class="tok-type">u8</span>, &amp;ret.secret_key.z, seed[inner_seed_length..seed_length]);</span>
+<span class="line" id="L348">                ret.secret_key.z = seed[inner_seed_length..seed_length].*;</span>
 <span class="line" id="L349"></span>
 <span class="line" id="L350">                <span class="tok-comment">// Generate inner key</span>
 </span>
@@ -508,7 +508,7 @@
 <span class="line" id="L357"></span>
 <span class="line" id="L358">                <span class="tok-comment">// Copy over z from seed.</span>
 </span>
-<span class="line" id="L359">                mem.copy(<span class="tok-type">u8</span>, &amp;ret.secret_key.z, seed[inner_seed_length..seed_length]);</span>
+<span class="line" id="L359">                ret.secret_key.z = seed[inner_seed_length..seed_length].*;</span>
 <span class="line" id="L360"></span>
 <span class="line" id="L361">                <span class="tok-comment">// Compute H(pk)</span>
 </span>
@@ -584,7 +584,7 @@
 <span class="line" id="L418">            <span class="tok-kw">fn</span> <span class="tok-fn">fromBytes</span>(buf: *<span class="tok-kw">const</span> [bytes_length]<span class="tok-type">u8</span>) InnerPk {</span>
 <span class="line" id="L419">                <span class="tok-kw">var</span> ret: InnerPk = <span class="tok-null">undefined</span>;</span>
 <span class="line" id="L420">                ret.th = V.fromBytes(buf[<span class="tok-number">0</span>..V.bytes_length]).normalize();</span>
-<span class="line" id="L421">                mem.copy(<span class="tok-type">u8</span>, &amp;ret.rho, buf[V.bytes_length..bytes_length]);</span>
+<span class="line" id="L421">                ret.rho = buf[V.bytes_length..bytes_length].*;</span>
 <span class="line" id="L422">                ret.aT = M.uniform(ret.rho, <span class="tok-null">true</span>);</span>
 <span class="line" id="L423">                <span class="tok-kw">return</span> ret;</span>
 <span class="line" id="L424">            }</span>
@@ -629,7 +629,7 @@
 <span class="line" id="L459">            <span class="tok-kw">var</span> h = sha3.Sha3_512.init(.{});</span>
 <span class="line" id="L460">            h.update(&amp;seed);</span>
 <span class="line" id="L461">            h.final(&amp;expanded_seed);</span>
-<span class="line" id="L462">            mem.copy(<span class="tok-type">u8</span>, &amp;pk.rho, expanded_seed[<span class="tok-number">0</span>..<span class="tok-number">32</span>]);</span>
+<span class="line" id="L462">            pk.rho = expanded_seed[<span class="tok-number">0</span>..<span class="tok-number">32</span>].*;</span>
 <span class="line" id="L463">            <span class="tok-kw">const</span> sigma = expanded_seed[<span class="tok-number">32</span>..<span class="tok-number">64</span>];</span>
 <span class="line" id="L464">            pk.aT = M.uniform(pk.rho, <span class="tok-null">false</span>); <span class="tok-comment">// Expand ρ to A; we'll transpose later on</span>
 </span>
@@ -873,7 +873,7 @@
 </span>
 <span class="line" id="L641">    <span class="tok-kw">const</span> m = <span class="tok-builtin">@truncate</span>(<span class="tok-type">i16</span>, <span class="tok-builtin">@truncate</span>(<span class="tok-type">i32</span>, x *% qInv));</span>
 <span class="line" id="L642"></span>
-<span class="line" id="L643">    <span class="tok-comment">// Note that x - m q is divisable by R; indeed modulo R we have</span>
+<span class="line" id="L643">    <span class="tok-comment">// Note that x - m q is divisible by R; indeed modulo R we have</span>
 </span>
 <span class="line" id="L644">    <span class="tok-comment">//</span>
 </span>
@@ -1823,7 +1823,7 @@
 <span class="line" id="L1381">            <span class="tok-kw">const</span> cs = <span class="tok-kw">comptime</span> Poly.compressedSize(d);</span>
 <span class="line" id="L1382">            <span class="tok-kw">var</span> ret: [compressedSize(d)]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
 <span class="line" id="L1383">            <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (<span class="tok-number">0</span>..K) |i| {</span>
-<span class="line" id="L1384">                mem.copy(<span class="tok-type">u8</span>, ret[i * cs .. (i + <span class="tok-number">1</span>) * cs], &amp;v.ps[i].compress(d));</span>
+<span class="line" id="L1384">                ret[i * cs .. (i + <span class="tok-number">1</span>) * cs].* = v.ps[i].compress(d);</span>
 <span class="line" id="L1385">            }</span>
 <span class="line" id="L1386">            <span class="tok-kw">return</span> ret;</span>
 <span class="line" id="L1387">        }</span>
@@ -1841,396 +1841,392 @@
 <span class="line" id="L1399">        <span class="tok-kw">fn</span> <span class="tok-fn">toBytes</span>(v: Self) [bytes_length]<span class="tok-type">u8</span> {</span>
 <span class="line" id="L1400">            <span class="tok-kw">var</span> ret: [bytes_length]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
 <span class="line" id="L1401">            <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (<span class="tok-number">0</span>..K) |i| {</span>
-<span class="line" id="L1402">                mem.copy(</span>
-<span class="line" id="L1403">                    <span class="tok-type">u8</span>,</span>
-<span class="line" id="L1404">                    ret[i * Poly.bytes_length .. (i + <span class="tok-number">1</span>) * Poly.bytes_length],</span>
-<span class="line" id="L1405">                    &amp;v.ps[i].toBytes(),</span>
-<span class="line" id="L1406">                );</span>
-<span class="line" id="L1407">            }</span>
-<span class="line" id="L1408">            <span class="tok-kw">return</span> ret;</span>
-<span class="line" id="L1409">        }</span>
-<span class="line" id="L1410"></span>
-<span class="line" id="L1411">        <span class="tok-comment">/// Deserializes the key from a byte array.</span></span>
-<span class="line" id="L1412">        <span class="tok-kw">fn</span> <span class="tok-fn">fromBytes</span>(buf: *<span class="tok-kw">const</span> [bytes_length]<span class="tok-type">u8</span>) Self {</span>
-<span class="line" id="L1413">            <span class="tok-kw">var</span> ret: Self = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L1414">            <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (<span class="tok-number">0</span>..K) |i| {</span>
-<span class="line" id="L1415">                ret.ps[i] = Poly.fromBytes(</span>
-<span class="line" id="L1416">                    buf[i * Poly.bytes_length .. (i + <span class="tok-number">1</span>) * Poly.bytes_length],</span>
-<span class="line" id="L1417">                );</span>
-<span class="line" id="L1418">            }</span>
-<span class="line" id="L1419">            <span class="tok-kw">return</span> ret;</span>
-<span class="line" id="L1420">        }</span>
-<span class="line" id="L1421">    };</span>
-<span class="line" id="L1422">}</span>
-<span class="line" id="L1423"></span>
-<span class="line" id="L1424"><span class="tok-comment">// A matrix of K vectors</span>
+<span class="line" id="L1402">                ret[i * Poly.bytes_length .. (i + <span class="tok-number">1</span>) * Poly.bytes_length].* = v.ps[i].toBytes();</span>
+<span class="line" id="L1403">            }</span>
+<span class="line" id="L1404">            <span class="tok-kw">return</span> ret;</span>
+<span class="line" id="L1405">        }</span>
+<span class="line" id="L1406"></span>
+<span class="line" id="L1407">        <span class="tok-comment">/// Deserializes the key from a byte array.</span></span>
+<span class="line" id="L1408">        <span class="tok-kw">fn</span> <span class="tok-fn">fromBytes</span>(buf: *<span class="tok-kw">const</span> [bytes_length]<span class="tok-type">u8</span>) Self {</span>
+<span class="line" id="L1409">            <span class="tok-kw">var</span> ret: Self = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L1410">            <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (<span class="tok-number">0</span>..K) |i| {</span>
+<span class="line" id="L1411">                ret.ps[i] = Poly.fromBytes(</span>
+<span class="line" id="L1412">                    buf[i * Poly.bytes_length .. (i + <span class="tok-number">1</span>) * Poly.bytes_length],</span>
+<span class="line" id="L1413">                );</span>
+<span class="line" id="L1414">            }</span>
+<span class="line" id="L1415">            <span class="tok-kw">return</span> ret;</span>
+<span class="line" id="L1416">        }</span>
+<span class="line" id="L1417">    };</span>
+<span class="line" id="L1418">}</span>
+<span class="line" id="L1419"></span>
+<span class="line" id="L1420"><span class="tok-comment">// A matrix of K vectors</span>
 </span>
-<span class="line" id="L1425"><span class="tok-kw">fn</span> <span class="tok-fn">Mat</span>(<span class="tok-kw">comptime</span> K: <span class="tok-type">u8</span>) <span class="tok-type">type</span> {</span>
-<span class="line" id="L1426">    <span class="tok-kw">return</span> <span class="tok-kw">struct</span> {</span>
-<span class="line" id="L1427">        <span class="tok-kw">const</span> Self = <span class="tok-builtin">@This</span>();</span>
-<span class="line" id="L1428">        vs: [K]Vec(K),</span>
-<span class="line" id="L1429"></span>
-<span class="line" id="L1430">        <span class="tok-kw">fn</span> <span class="tok-fn">uniform</span>(seed: [<span class="tok-number">32</span>]<span class="tok-type">u8</span>, <span class="tok-kw">comptime</span> transposed: <span class="tok-type">bool</span>) Self {</span>
-<span class="line" id="L1431">            <span class="tok-kw">var</span> ret: Self = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L1432">            <span class="tok-kw">var</span> i: <span class="tok-type">u8</span> = <span class="tok-number">0</span>;</span>
-<span class="line" id="L1433">            <span class="tok-kw">while</span> (i &lt; K) : (i += <span class="tok-number">1</span>) {</span>
-<span class="line" id="L1434">                <span class="tok-kw">var</span> j: <span class="tok-type">u8</span> = <span class="tok-number">0</span>;</span>
-<span class="line" id="L1435">                <span class="tok-kw">while</span> (j &lt; K) : (j += <span class="tok-number">1</span>) {</span>
-<span class="line" id="L1436">                    ret.vs[i].ps[j] = Poly.uniform(</span>
-<span class="line" id="L1437">                        seed,</span>
-<span class="line" id="L1438">                        <span class="tok-kw">if</span> (transposed) i <span class="tok-kw">else</span> j,</span>
-<span class="line" id="L1439">                        <span class="tok-kw">if</span> (transposed) j <span class="tok-kw">else</span> i,</span>
-<span class="line" id="L1440">                    );</span>
-<span class="line" id="L1441">                }</span>
-<span class="line" id="L1442">            }</span>
-<span class="line" id="L1443">            <span class="tok-kw">return</span> ret;</span>
-<span class="line" id="L1444">        }</span>
-<span class="line" id="L1445"></span>
-<span class="line" id="L1446">        <span class="tok-comment">// Returns transpose of A</span>
+<span class="line" id="L1421"><span class="tok-kw">fn</span> <span class="tok-fn">Mat</span>(<span class="tok-kw">comptime</span> K: <span class="tok-type">u8</span>) <span class="tok-type">type</span> {</span>
+<span class="line" id="L1422">    <span class="tok-kw">return</span> <span class="tok-kw">struct</span> {</span>
+<span class="line" id="L1423">        <span class="tok-kw">const</span> Self = <span class="tok-builtin">@This</span>();</span>
+<span class="line" id="L1424">        vs: [K]Vec(K),</span>
+<span class="line" id="L1425"></span>
+<span class="line" id="L1426">        <span class="tok-kw">fn</span> <span class="tok-fn">uniform</span>(seed: [<span class="tok-number">32</span>]<span class="tok-type">u8</span>, <span class="tok-kw">comptime</span> transposed: <span class="tok-type">bool</span>) Self {</span>
+<span class="line" id="L1427">            <span class="tok-kw">var</span> ret: Self = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L1428">            <span class="tok-kw">var</span> i: <span class="tok-type">u8</span> = <span class="tok-number">0</span>;</span>
+<span class="line" id="L1429">            <span class="tok-kw">while</span> (i &lt; K) : (i += <span class="tok-number">1</span>) {</span>
+<span class="line" id="L1430">                <span class="tok-kw">var</span> j: <span class="tok-type">u8</span> = <span class="tok-number">0</span>;</span>
+<span class="line" id="L1431">                <span class="tok-kw">while</span> (j &lt; K) : (j += <span class="tok-number">1</span>) {</span>
+<span class="line" id="L1432">                    ret.vs[i].ps[j] = Poly.uniform(</span>
+<span class="line" id="L1433">                        seed,</span>
+<span class="line" id="L1434">                        <span class="tok-kw">if</span> (transposed) i <span class="tok-kw">else</span> j,</span>
+<span class="line" id="L1435">                        <span class="tok-kw">if</span> (transposed) j <span class="tok-kw">else</span> i,</span>
+<span class="line" id="L1436">                    );</span>
+<span class="line" id="L1437">                }</span>
+<span class="line" id="L1438">            }</span>
+<span class="line" id="L1439">            <span class="tok-kw">return</span> ret;</span>
+<span class="line" id="L1440">        }</span>
+<span class="line" id="L1441"></span>
+<span class="line" id="L1442">        <span class="tok-comment">// Returns transpose of A</span>
 </span>
-<span class="line" id="L1447">        <span class="tok-kw">fn</span> <span class="tok-fn">transpose</span>(m: Self) Self {</span>
-<span class="line" id="L1448">            <span class="tok-kw">var</span> ret: Self = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L1449">            <span class="tok-kw">for</span> (<span class="tok-number">0</span>..K) |i| {</span>
-<span class="line" id="L1450">                <span class="tok-kw">for</span> (<span class="tok-number">0</span>..K) |j| {</span>
-<span class="line" id="L1451">                    ret.vs[i].ps[j] = m.vs[j].ps[i];</span>
-<span class="line" id="L1452">                }</span>
-<span class="line" id="L1453">            }</span>
-<span class="line" id="L1454">            <span class="tok-kw">return</span> ret;</span>
-<span class="line" id="L1455">        }</span>
-<span class="line" id="L1456">    };</span>
-<span class="line" id="L1457">}</span>
-<span class="line" id="L1458"></span>
-<span class="line" id="L1459"><span class="tok-comment">// Returns `true` if a ≠ b.</span>
+<span class="line" id="L1443">        <span class="tok-kw">fn</span> <span class="tok-fn">transpose</span>(m: Self) Self {</span>
+<span class="line" id="L1444">            <span class="tok-kw">var</span> ret: Self = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L1445">            <span class="tok-kw">for</span> (<span class="tok-number">0</span>..K) |i| {</span>
+<span class="line" id="L1446">                <span class="tok-kw">for</span> (<span class="tok-number">0</span>..K) |j| {</span>
+<span class="line" id="L1447">                    ret.vs[i].ps[j] = m.vs[j].ps[i];</span>
+<span class="line" id="L1448">                }</span>
+<span class="line" id="L1449">            }</span>
+<span class="line" id="L1450">            <span class="tok-kw">return</span> ret;</span>
+<span class="line" id="L1451">        }</span>
+<span class="line" id="L1452">    };</span>
+<span class="line" id="L1453">}</span>
+<span class="line" id="L1454"></span>
+<span class="line" id="L1455"><span class="tok-comment">// Returns `true` if a ≠ b.</span>
 </span>
-<span class="line" id="L1460"><span class="tok-kw">fn</span> <span class="tok-fn">ctneq</span>(<span class="tok-kw">comptime</span> len: <span class="tok-type">usize</span>, a: [len]<span class="tok-type">u8</span>, b: [len]<span class="tok-type">u8</span>) <span class="tok-type">u1</span> {</span>
-<span class="line" id="L1461">    <span class="tok-kw">return</span> <span class="tok-number">1</span> - <span class="tok-builtin">@boolToInt</span>(crypto.utils.timingSafeEql([len]<span class="tok-type">u8</span>, a, b));</span>
-<span class="line" id="L1462">}</span>
-<span class="line" id="L1463"></span>
-<span class="line" id="L1464"><span class="tok-comment">// Copy src into dst given b = 1.</span>
+<span class="line" id="L1456"><span class="tok-kw">fn</span> <span class="tok-fn">ctneq</span>(<span class="tok-kw">comptime</span> len: <span class="tok-type">usize</span>, a: [len]<span class="tok-type">u8</span>, b: [len]<span class="tok-type">u8</span>) <span class="tok-type">u1</span> {</span>
+<span class="line" id="L1457">    <span class="tok-kw">return</span> <span class="tok-number">1</span> - <span class="tok-builtin">@boolToInt</span>(crypto.utils.timingSafeEql([len]<span class="tok-type">u8</span>, a, b));</span>
+<span class="line" id="L1458">}</span>
+<span class="line" id="L1459"></span>
+<span class="line" id="L1460"><span class="tok-comment">// Copy src into dst given b = 1.</span>
 </span>
-<span class="line" id="L1465"><span class="tok-kw">fn</span> <span class="tok-fn">cmov</span>(<span class="tok-kw">comptime</span> len: <span class="tok-type">usize</span>, dst: *[len]<span class="tok-type">u8</span>, src: [len]<span class="tok-type">u8</span>, b: <span class="tok-type">u1</span>) <span class="tok-type">void</span> {</span>
-<span class="line" id="L1466">    <span class="tok-kw">const</span> mask = <span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">0</span>) -% b;</span>
-<span class="line" id="L1467">    <span class="tok-kw">for</span> (<span class="tok-number">0</span>..len) |i| {</span>
-<span class="line" id="L1468">        dst[i] ^= mask &amp; (dst[i] ^ src[i]);</span>
-<span class="line" id="L1469">    }</span>
-<span class="line" id="L1470">}</span>
-<span class="line" id="L1471"></span>
-<span class="line" id="L1472"><span class="tok-kw">test</span> <span class="tok-str">&quot;MulHat&quot;</span> {</span>
-<span class="line" id="L1473">    <span class="tok-kw">var</span> rnd = RndGen.init(<span class="tok-number">0</span>);</span>
+<span class="line" id="L1461"><span class="tok-kw">fn</span> <span class="tok-fn">cmov</span>(<span class="tok-kw">comptime</span> len: <span class="tok-type">usize</span>, dst: *[len]<span class="tok-type">u8</span>, src: [len]<span class="tok-type">u8</span>, b: <span class="tok-type">u1</span>) <span class="tok-type">void</span> {</span>
+<span class="line" id="L1462">    <span class="tok-kw">const</span> mask = <span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">0</span>) -% b;</span>
+<span class="line" id="L1463">    <span class="tok-kw">for</span> (<span class="tok-number">0</span>..len) |i| {</span>
+<span class="line" id="L1464">        dst[i] ^= mask &amp; (dst[i] ^ src[i]);</span>
+<span class="line" id="L1465">    }</span>
+<span class="line" id="L1466">}</span>
+<span class="line" id="L1467"></span>
+<span class="line" id="L1468"><span class="tok-kw">test</span> <span class="tok-str">&quot;MulHat&quot;</span> {</span>
+<span class="line" id="L1469">    <span class="tok-kw">var</span> rnd = RndGen.init(<span class="tok-number">0</span>);</span>
+<span class="line" id="L1470"></span>
+<span class="line" id="L1471">    <span class="tok-kw">for</span> (<span class="tok-number">0</span>..<span class="tok-number">100</span>) |_| {</span>
+<span class="line" id="L1472">        <span class="tok-kw">const</span> a = Poly.randAbsLeqQ(&amp;rnd);</span>
+<span class="line" id="L1473">        <span class="tok-kw">const</span> b = Poly.randAbsLeqQ(&amp;rnd);</span>
 <span class="line" id="L1474"></span>
-<span class="line" id="L1475">    <span class="tok-kw">for</span> (<span class="tok-number">0</span>..<span class="tok-number">100</span>) |_| {</span>
-<span class="line" id="L1476">        <span class="tok-kw">const</span> a = Poly.randAbsLeqQ(&amp;rnd);</span>
-<span class="line" id="L1477">        <span class="tok-kw">const</span> b = Poly.randAbsLeqQ(&amp;rnd);</span>
-<span class="line" id="L1478"></span>
-<span class="line" id="L1479">        <span class="tok-kw">const</span> p2 = a.ntt().mulHat(b.ntt()).barrettReduce().invNTT().normalize();</span>
-<span class="line" id="L1480">        <span class="tok-kw">var</span> p: Poly = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L1481"></span>
-<span class="line" id="L1482">        mem.set(<span class="tok-type">i16</span>, &amp;p.cs, <span class="tok-number">0</span>);</span>
-<span class="line" id="L1483"></span>
-<span class="line" id="L1484">        <span class="tok-kw">for</span> (<span class="tok-number">0</span>..N) |i| {</span>
-<span class="line" id="L1485">            <span class="tok-kw">for</span> (<span class="tok-number">0</span>..N) |j| {</span>
-<span class="line" id="L1486">                <span class="tok-kw">var</span> v = montReduce(<span class="tok-builtin">@as</span>(<span class="tok-type">i32</span>, a.cs[i]) * <span class="tok-builtin">@as</span>(<span class="tok-type">i32</span>, b.cs[j]));</span>
-<span class="line" id="L1487">                <span class="tok-kw">var</span> k = i + j;</span>
-<span class="line" id="L1488">                <span class="tok-kw">if</span> (k &gt;= N) {</span>
-<span class="line" id="L1489">                    <span class="tok-comment">// Recall Xᴺ = -1.</span>
+<span class="line" id="L1475">        <span class="tok-kw">const</span> p2 = a.ntt().mulHat(b.ntt()).barrettReduce().invNTT().normalize();</span>
+<span class="line" id="L1476">        <span class="tok-kw">var</span> p: Poly = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L1477"></span>
+<span class="line" id="L1478">        <span class="tok-builtin">@memset</span>(&amp;p.cs, <span class="tok-number">0</span>);</span>
+<span class="line" id="L1479"></span>
+<span class="line" id="L1480">        <span class="tok-kw">for</span> (<span class="tok-number">0</span>..N) |i| {</span>
+<span class="line" id="L1481">            <span class="tok-kw">for</span> (<span class="tok-number">0</span>..N) |j| {</span>
+<span class="line" id="L1482">                <span class="tok-kw">var</span> v = montReduce(<span class="tok-builtin">@as</span>(<span class="tok-type">i32</span>, a.cs[i]) * <span class="tok-builtin">@as</span>(<span class="tok-type">i32</span>, b.cs[j]));</span>
+<span class="line" id="L1483">                <span class="tok-kw">var</span> k = i + j;</span>
+<span class="line" id="L1484">                <span class="tok-kw">if</span> (k &gt;= N) {</span>
+<span class="line" id="L1485">                    <span class="tok-comment">// Recall Xᴺ = -1.</span>
 </span>
-<span class="line" id="L1490">                    k -= N;</span>
-<span class="line" id="L1491">                    v = -v;</span>
-<span class="line" id="L1492">                }</span>
-<span class="line" id="L1493">                p.cs[k] = feBarrettReduce(v + p.cs[k]);</span>
-<span class="line" id="L1494">            }</span>
-<span class="line" id="L1495">        }</span>
-<span class="line" id="L1496"></span>
-<span class="line" id="L1497">        p = p.toMont().normalize();</span>
+<span class="line" id="L1486">                    k -= N;</span>
+<span class="line" id="L1487">                    v = -v;</span>
+<span class="line" id="L1488">                }</span>
+<span class="line" id="L1489">                p.cs[k] = feBarrettReduce(v + p.cs[k]);</span>
+<span class="line" id="L1490">            }</span>
+<span class="line" id="L1491">        }</span>
+<span class="line" id="L1492"></span>
+<span class="line" id="L1493">        p = p.toMont().normalize();</span>
+<span class="line" id="L1494"></span>
+<span class="line" id="L1495">        <span class="tok-kw">try</span> testing.expectEqual(p, p2);</span>
+<span class="line" id="L1496">    }</span>
+<span class="line" id="L1497">}</span>
 <span class="line" id="L1498"></span>
-<span class="line" id="L1499">        <span class="tok-kw">try</span> testing.expectEqual(p, p2);</span>
-<span class="line" id="L1500">    }</span>
-<span class="line" id="L1501">}</span>
-<span class="line" id="L1502"></span>
-<span class="line" id="L1503"><span class="tok-kw">test</span> <span class="tok-str">&quot;NTT&quot;</span> {</span>
-<span class="line" id="L1504">    <span class="tok-kw">var</span> rnd = RndGen.init(<span class="tok-number">0</span>);</span>
-<span class="line" id="L1505"></span>
-<span class="line" id="L1506">    <span class="tok-kw">for</span> (<span class="tok-number">0</span>..<span class="tok-number">1000</span>) |_| {</span>
-<span class="line" id="L1507">        <span class="tok-kw">var</span> p = Poly.randAbsLeqQ(&amp;rnd);</span>
-<span class="line" id="L1508">        <span class="tok-kw">const</span> q = p.toMont().normalize();</span>
-<span class="line" id="L1509">        p = p.ntt();</span>
+<span class="line" id="L1499"><span class="tok-kw">test</span> <span class="tok-str">&quot;NTT&quot;</span> {</span>
+<span class="line" id="L1500">    <span class="tok-kw">var</span> rnd = RndGen.init(<span class="tok-number">0</span>);</span>
+<span class="line" id="L1501"></span>
+<span class="line" id="L1502">    <span class="tok-kw">for</span> (<span class="tok-number">0</span>..<span class="tok-number">1000</span>) |_| {</span>
+<span class="line" id="L1503">        <span class="tok-kw">var</span> p = Poly.randAbsLeqQ(&amp;rnd);</span>
+<span class="line" id="L1504">        <span class="tok-kw">const</span> q = p.toMont().normalize();</span>
+<span class="line" id="L1505">        p = p.ntt();</span>
+<span class="line" id="L1506"></span>
+<span class="line" id="L1507">        <span class="tok-kw">for</span> (<span class="tok-number">0</span>..N) |i| {</span>
+<span class="line" id="L1508">            <span class="tok-kw">try</span> testing.expect(p.cs[i] &lt;= <span class="tok-number">7</span> * Q <span class="tok-kw">and</span> -<span class="tok-number">7</span> * Q &lt;= p.cs[i]);</span>
+<span class="line" id="L1509">        }</span>
 <span class="line" id="L1510"></span>
-<span class="line" id="L1511">        <span class="tok-kw">for</span> (<span class="tok-number">0</span>..N) |i| {</span>
-<span class="line" id="L1512">            <span class="tok-kw">try</span> testing.expect(p.cs[i] &lt;= <span class="tok-number">7</span> * Q <span class="tok-kw">and</span> -<span class="tok-number">7</span> * Q &lt;= p.cs[i]);</span>
-<span class="line" id="L1513">        }</span>
-<span class="line" id="L1514"></span>
-<span class="line" id="L1515">        p = p.normalize().invNTT();</span>
-<span class="line" id="L1516">        <span class="tok-kw">for</span> (<span class="tok-number">0</span>..N) |i| {</span>
-<span class="line" id="L1517">            <span class="tok-kw">try</span> testing.expect(p.cs[i] &lt;= Q <span class="tok-kw">and</span> -Q &lt;= p.cs[i]);</span>
-<span class="line" id="L1518">        }</span>
-<span class="line" id="L1519"></span>
-<span class="line" id="L1520">        p = p.normalize();</span>
+<span class="line" id="L1511">        p = p.normalize().invNTT();</span>
+<span class="line" id="L1512">        <span class="tok-kw">for</span> (<span class="tok-number">0</span>..N) |i| {</span>
+<span class="line" id="L1513">            <span class="tok-kw">try</span> testing.expect(p.cs[i] &lt;= Q <span class="tok-kw">and</span> -Q &lt;= p.cs[i]);</span>
+<span class="line" id="L1514">        }</span>
+<span class="line" id="L1515"></span>
+<span class="line" id="L1516">        p = p.normalize();</span>
+<span class="line" id="L1517"></span>
+<span class="line" id="L1518">        <span class="tok-kw">try</span> testing.expectEqual(p, q);</span>
+<span class="line" id="L1519">    }</span>
+<span class="line" id="L1520">}</span>
 <span class="line" id="L1521"></span>
-<span class="line" id="L1522">        <span class="tok-kw">try</span> testing.expectEqual(p, q);</span>
-<span class="line" id="L1523">    }</span>
-<span class="line" id="L1524">}</span>
-<span class="line" id="L1525"></span>
-<span class="line" id="L1526"><span class="tok-kw">test</span> <span class="tok-str">&quot;Compression&quot;</span> {</span>
-<span class="line" id="L1527">    <span class="tok-kw">var</span> rnd = RndGen.init(<span class="tok-number">0</span>);</span>
-<span class="line" id="L1528">    <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (.{ <span class="tok-number">1</span>, <span class="tok-number">4</span>, <span class="tok-number">5</span>, <span class="tok-number">10</span>, <span class="tok-number">11</span> }) |d| {</span>
-<span class="line" id="L1529">        <span class="tok-kw">for</span> (<span class="tok-number">0</span>..<span class="tok-number">1000</span>) |_| {</span>
-<span class="line" id="L1530">            <span class="tok-kw">const</span> p = Poly.randNormalized(&amp;rnd);</span>
-<span class="line" id="L1531">            <span class="tok-kw">const</span> pp = p.compress(d);</span>
-<span class="line" id="L1532">            <span class="tok-kw">const</span> pq = Poly.decompress(d, &amp;pp).compress(d);</span>
-<span class="line" id="L1533">            <span class="tok-kw">try</span> testing.expectEqual(pp, pq);</span>
-<span class="line" id="L1534">        }</span>
-<span class="line" id="L1535">    }</span>
-<span class="line" id="L1536">}</span>
-<span class="line" id="L1537"></span>
-<span class="line" id="L1538"><span class="tok-kw">test</span> <span class="tok-str">&quot;noise&quot;</span> {</span>
-<span class="line" id="L1539">    <span class="tok-kw">var</span> seed: [<span class="tok-number">32</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L1540">    <span class="tok-kw">for</span> (&amp;seed, <span class="tok-number">0</span>..) |*s, i| {</span>
-<span class="line" id="L1541">        s.* = <span class="tok-builtin">@intCast</span>(<span class="tok-type">u8</span>, i);</span>
-<span class="line" id="L1542">    }</span>
-<span class="line" id="L1543">    <span class="tok-kw">try</span> testing.expectEqual(Poly.noise(<span class="tok-number">3</span>, <span class="tok-number">37</span>, &amp;seed).cs, .{</span>
-<span class="line" id="L1544">        <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">3</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">2</span>, -<span class="tok-number">2</span>, <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">2</span>,</span>
-<span class="line" id="L1545">        <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">2</span>, <span class="tok-number">3</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">3</span>,  <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span>,</span>
-<span class="line" id="L1546">        <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">2</span>, <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, -<span class="tok-number">2</span>, <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  -<span class="tok-number">1</span>,</span>
-<span class="line" id="L1547">        <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  -<span class="tok-number">3</span>, -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">2</span>, -<span class="tok-number">2</span>, <span class="tok-number">0</span>,  -<span class="tok-number">2</span>, <span class="tok-number">0</span>,</span>
-<span class="line" id="L1548">        <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  -<span class="tok-number">2</span>, <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  -<span class="tok-number">2</span>, <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,</span>
-<span class="line" id="L1549">        <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">2</span>, -<span class="tok-number">1</span>, -<span class="tok-number">2</span>, -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>,</span>
-<span class="line" id="L1550">        -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  -<span class="tok-number">2</span>, <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">2</span>, <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,</span>
-<span class="line" id="L1551">        <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">2</span>, -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">3</span>,  <span class="tok-number">1</span>,</span>
-<span class="line" id="L1552">        <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, -<span class="tok-number">1</span>,</span>
-<span class="line" id="L1553">        <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">3</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">2</span>, -<span class="tok-number">1</span>, -<span class="tok-number">1</span>,</span>
-<span class="line" id="L1554">        <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  -<span class="tok-number">2</span>, <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">3</span>, -<span class="tok-number">1</span>, -<span class="tok-number">2</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">1</span>,</span>
-<span class="line" id="L1555">        <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">2</span>, <span class="tok-number">2</span>,  <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  <span class="tok-number">1</span>,</span>
-<span class="line" id="L1556">        -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  -<span class="tok-number">2</span>, <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,</span>
-<span class="line" id="L1557">        <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,</span>
-<span class="line" id="L1558">        <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">2</span>, <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">0</span>,</span>
-<span class="line" id="L1559">        <span class="tok-number">1</span>,</span>
-<span class="line" id="L1560">    });</span>
-<span class="line" id="L1561">    <span class="tok-kw">try</span> testing.expectEqual(Poly.noise(<span class="tok-number">2</span>, <span class="tok-number">37</span>, &amp;seed).cs, .{</span>
-<span class="line" id="L1562">        <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, -<span class="tok-number">2</span>, -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>,</span>
-<span class="line" id="L1563">        <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  -<span class="tok-number">2</span>, <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,</span>
-<span class="line" id="L1564">        <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">2</span>, -<span class="tok-number">1</span>,</span>
-<span class="line" id="L1565">        <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">1</span>,</span>
-<span class="line" id="L1566">        <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">2</span>, <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,</span>
-<span class="line" id="L1567">        <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  -<span class="tok-number">1</span>,</span>
-<span class="line" id="L1568">        -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  -<span class="tok-number">2</span>, <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">0</span>,</span>
-<span class="line" id="L1569">        <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">2</span>, <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,</span>
-<span class="line" id="L1570">        <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  <span class="tok-number">0</span>,</span>
-<span class="line" id="L1571">        <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,</span>
-<span class="line" id="L1572">        <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">2</span>,</span>
-<span class="line" id="L1573">        -<span class="tok-number">1</span>, -<span class="tok-number">2</span>, -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">2</span>, -<span class="tok-number">2</span>, -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,</span>
-<span class="line" id="L1574">        <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,</span>
-<span class="line" id="L1575">        -<span class="tok-number">2</span>, <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">2</span>, <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,</span>
-<span class="line" id="L1576">        <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">2</span>, <span class="tok-number">1</span>,  -<span class="tok-number">2</span>, <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,</span>
-<span class="line" id="L1577">        -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">2</span>, <span class="tok-number">1</span>,  -<span class="tok-number">2</span>, -<span class="tok-number">2</span>, <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,</span>
-<span class="line" id="L1578">        -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,</span>
-<span class="line" id="L1579">        <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>,</span>
-<span class="line" id="L1580">        <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,</span>
-<span class="line" id="L1581">    });</span>
-<span class="line" id="L1582">}</span>
-<span class="line" id="L1583"></span>
-<span class="line" id="L1584"><span class="tok-kw">test</span> <span class="tok-str">&quot;uniform sampling&quot;</span> {</span>
-<span class="line" id="L1585">    <span class="tok-kw">var</span> seed: [<span class="tok-number">32</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L1586">    <span class="tok-kw">for</span> (&amp;seed, <span class="tok-number">0</span>..) |*s, i| {</span>
-<span class="line" id="L1587">        s.* = <span class="tok-builtin">@intCast</span>(<span class="tok-type">u8</span>, i);</span>
-<span class="line" id="L1588">    }</span>
-<span class="line" id="L1589">    <span class="tok-kw">try</span> testing.expectEqual(Poly.uniform(seed, <span class="tok-number">1</span>, <span class="tok-number">0</span>).cs, .{</span>
-<span class="line" id="L1590">        <span class="tok-number">797</span>,  <span class="tok-number">993</span>,  <span class="tok-number">161</span>,  <span class="tok-number">6</span>,    <span class="tok-number">2608</span>, <span class="tok-number">2385</span>, <span class="tok-number">2096</span>, <span class="tok-number">2661</span>, <span class="tok-number">1676</span>, <span class="tok-number">247</span>,  <span class="tok-number">2440</span>,</span>
-<span class="line" id="L1591">        <span class="tok-number">342</span>,  <span class="tok-number">634</span>,  <span class="tok-number">194</span>,  <span class="tok-number">1570</span>, <span class="tok-number">2848</span>, <span class="tok-number">986</span>,  <span class="tok-number">684</span>,  <span class="tok-number">3148</span>, <span class="tok-number">3208</span>, <span class="tok-number">2018</span>, <span class="tok-number">351</span>,</span>
-<span class="line" id="L1592">        <span class="tok-number">2288</span>, <span class="tok-number">612</span>,  <span class="tok-number">1394</span>, <span class="tok-number">170</span>,  <span class="tok-number">1521</span>, <span class="tok-number">3119</span>, <span class="tok-number">58</span>,   <span class="tok-number">596</span>,  <span class="tok-number">2093</span>, <span class="tok-number">1549</span>, <span class="tok-number">409</span>,</span>
-<span class="line" id="L1593">        <span class="tok-number">2156</span>, <span class="tok-number">1934</span>, <span class="tok-number">1730</span>, <span class="tok-number">1324</span>, <span class="tok-number">388</span>,  <span class="tok-number">446</span>,  <span class="tok-number">418</span>,  <span class="tok-number">1719</span>, <span class="tok-number">2202</span>, <span class="tok-number">1812</span>, <span class="tok-number">98</span>,</span>
-<span class="line" id="L1594">        <span class="tok-number">1019</span>, <span class="tok-number">2369</span>, <span class="tok-number">214</span>,  <span class="tok-number">2699</span>, <span class="tok-number">28</span>,   <span class="tok-number">1523</span>, <span class="tok-number">2824</span>, <span class="tok-number">273</span>,  <span class="tok-number">402</span>,  <span class="tok-number">2899</span>, <span class="tok-number">246</span>,</span>
-<span class="line" id="L1595">        <span class="tok-number">210</span>,  <span class="tok-number">1288</span>, <span class="tok-number">863</span>,  <span class="tok-number">2708</span>, <span class="tok-number">177</span>,  <span class="tok-number">3076</span>, <span class="tok-number">349</span>,  <span class="tok-number">44</span>,   <span class="tok-number">949</span>,  <span class="tok-number">854</span>,  <span class="tok-number">1371</span>,</span>
-<span class="line" id="L1596">        <span class="tok-number">957</span>,  <span class="tok-number">292</span>,  <span class="tok-number">2502</span>, <span class="tok-number">1617</span>, <span class="tok-number">1501</span>, <span class="tok-number">254</span>,  <span class="tok-number">7</span>,    <span class="tok-number">1761</span>, <span class="tok-number">2581</span>, <span class="tok-number">2206</span>, <span class="tok-number">2655</span>,</span>
-<span class="line" id="L1597">        <span class="tok-number">1211</span>, <span class="tok-number">629</span>,  <span class="tok-number">1274</span>, <span class="tok-number">2358</span>, <span class="tok-number">816</span>,  <span class="tok-number">2766</span>, <span class="tok-number">2115</span>, <span class="tok-number">2985</span>, <span class="tok-number">1006</span>, <span class="tok-number">2433</span>, <span class="tok-number">856</span>,</span>
-<span class="line" id="L1598">        <span class="tok-number">2596</span>, <span class="tok-number">3192</span>, <span class="tok-number">1</span>,    <span class="tok-number">1378</span>, <span class="tok-number">2345</span>, <span class="tok-number">707</span>,  <span class="tok-number">1891</span>, <span class="tok-number">1669</span>, <span class="tok-number">536</span>,  <span class="tok-number">1221</span>, <span class="tok-number">710</span>,</span>
-<span class="line" id="L1599">        <span class="tok-number">2511</span>, <span class="tok-number">120</span>,  <span class="tok-number">1176</span>, <span class="tok-number">322</span>,  <span class="tok-number">1897</span>, <span class="tok-number">2309</span>, <span class="tok-number">595</span>,  <span class="tok-number">2950</span>, <span class="tok-number">1171</span>, <span class="tok-number">801</span>,  <span class="tok-number">1848</span>,</span>
-<span class="line" id="L1600">        <span class="tok-number">695</span>,  <span class="tok-number">2912</span>, <span class="tok-number">1396</span>, <span class="tok-number">1931</span>, <span class="tok-number">1775</span>, <span class="tok-number">2904</span>, <span class="tok-number">893</span>,  <span class="tok-number">2507</span>, <span class="tok-number">1810</span>, <span class="tok-number">2873</span>, <span class="tok-number">253</span>,</span>
-<span class="line" id="L1601">        <span class="tok-number">1529</span>, <span class="tok-number">1047</span>, <span class="tok-number">2615</span>, <span class="tok-number">1687</span>, <span class="tok-number">831</span>,  <span class="tok-number">1414</span>, <span class="tok-number">965</span>,  <span class="tok-number">3169</span>, <span class="tok-number">1887</span>, <span class="tok-number">753</span>,  <span class="tok-number">3246</span>,</span>
-<span class="line" id="L1602">        <span class="tok-number">1937</span>, <span class="tok-number">115</span>,  <span class="tok-number">2953</span>, <span class="tok-number">586</span>,  <span class="tok-number">545</span>,  <span class="tok-number">1621</span>, <span class="tok-number">1667</span>, <span class="tok-number">3187</span>, <span class="tok-number">1654</span>, <span class="tok-number">1988</span>, <span class="tok-number">1857</span>,</span>
-<span class="line" id="L1603">        <span class="tok-number">512</span>,  <span class="tok-number">1239</span>, <span class="tok-number">1219</span>, <span class="tok-number">898</span>,  <span class="tok-number">3106</span>, <span class="tok-number">391</span>,  <span class="tok-number">1331</span>, <span class="tok-number">2228</span>, <span class="tok-number">3169</span>, <span class="tok-number">586</span>,  <span class="tok-number">2412</span>,</span>
-<span class="line" id="L1604">        <span class="tok-number">845</span>,  <span class="tok-number">768</span>,  <span class="tok-number">156</span>,  <span class="tok-number">662</span>,  <span class="tok-number">478</span>,  <span class="tok-number">1693</span>, <span class="tok-number">2632</span>, <span class="tok-number">573</span>,  <span class="tok-number">2434</span>, <span class="tok-number">1671</span>, <span class="tok-number">173</span>,</span>
-<span class="line" id="L1605">        <span class="tok-number">969</span>,  <span class="tok-number">364</span>,  <span class="tok-number">1663</span>, <span class="tok-number">2701</span>, <span class="tok-number">2169</span>, <span class="tok-number">813</span>,  <span class="tok-number">1000</span>, <span class="tok-number">1471</span>, <span class="tok-number">720</span>,  <span class="tok-number">2431</span>, <span class="tok-number">2530</span>,</span>
-<span class="line" id="L1606">        <span class="tok-number">3161</span>, <span class="tok-number">733</span>,  <span class="tok-number">1691</span>, <span class="tok-number">527</span>,  <span class="tok-number">2634</span>, <span class="tok-number">335</span>,  <span class="tok-number">26</span>,   <span class="tok-number">2377</span>, <span class="tok-number">1707</span>, <span class="tok-number">767</span>,  <span class="tok-number">3020</span>,</span>
-<span class="line" id="L1607">        <span class="tok-number">950</span>,  <span class="tok-number">502</span>,  <span class="tok-number">426</span>,  <span class="tok-number">1138</span>, <span class="tok-number">3208</span>, <span class="tok-number">2607</span>, <span class="tok-number">2389</span>, <span class="tok-number">44</span>,   <span class="tok-number">1358</span>, <span class="tok-number">1392</span>, <span class="tok-number">2334</span>,</span>
-<span class="line" id="L1608">        <span class="tok-number">875</span>,  <span class="tok-number">2097</span>, <span class="tok-number">173</span>,  <span class="tok-number">1697</span>, <span class="tok-number">2578</span>, <span class="tok-number">942</span>,  <span class="tok-number">1817</span>, <span class="tok-number">974</span>,  <span class="tok-number">1165</span>, <span class="tok-number">2853</span>, <span class="tok-number">1958</span>,</span>
-<span class="line" id="L1609">        <span class="tok-number">2973</span>, <span class="tok-number">3282</span>, <span class="tok-number">271</span>,  <span class="tok-number">1236</span>, <span class="tok-number">1677</span>, <span class="tok-number">2230</span>, <span class="tok-number">673</span>,  <span class="tok-number">1554</span>, <span class="tok-number">96</span>,   <span class="tok-number">242</span>,  <span class="tok-number">1729</span>,</span>
-<span class="line" id="L1610">        <span class="tok-number">2518</span>, <span class="tok-number">1884</span>, <span class="tok-number">2272</span>, <span class="tok-number">71</span>,   <span class="tok-number">1382</span>, <span class="tok-number">924</span>,  <span class="tok-number">1807</span>, <span class="tok-number">1610</span>, <span class="tok-number">456</span>,  <span class="tok-number">1148</span>, <span class="tok-number">2479</span>,</span>
-<span class="line" id="L1611">        <span class="tok-number">2152</span>, <span class="tok-number">238</span>,  <span class="tok-number">2208</span>, <span class="tok-number">2329</span>, <span class="tok-number">713</span>,  <span class="tok-number">1175</span>, <span class="tok-number">1196</span>, <span class="tok-number">757</span>,  <span class="tok-number">1078</span>, <span class="tok-number">3190</span>, <span class="tok-number">3169</span>,</span>
-<span class="line" id="L1612">        <span class="tok-number">708</span>,  <span class="tok-number">3117</span>, <span class="tok-number">154</span>,  <span class="tok-number">1751</span>, <span class="tok-number">3225</span>, <span class="tok-number">1364</span>, <span class="tok-number">154</span>,  <span class="tok-number">23</span>,   <span class="tok-number">2842</span>, <span class="tok-number">1105</span>, <span class="tok-number">1419</span>,</span>
-<span class="line" id="L1613">        <span class="tok-number">79</span>,   <span class="tok-number">5</span>,    <span class="tok-number">2013</span>,</span>
-<span class="line" id="L1614">    });</span>
-<span class="line" id="L1615">}</span>
-<span class="line" id="L1616"></span>
-<span class="line" id="L1617"><span class="tok-kw">test</span> <span class="tok-str">&quot;Polynomial packing&quot;</span> {</span>
-<span class="line" id="L1618">    <span class="tok-kw">var</span> rnd = RndGen.init(<span class="tok-number">0</span>);</span>
-<span class="line" id="L1619"></span>
-<span class="line" id="L1620">    <span class="tok-kw">for</span> (<span class="tok-number">0</span>..<span class="tok-number">1000</span>) |_| {</span>
-<span class="line" id="L1621">        <span class="tok-kw">const</span> p = Poly.randNormalized(&amp;rnd);</span>
-<span class="line" id="L1622">        <span class="tok-kw">try</span> testing.expectEqual(Poly.fromBytes(&amp;p.toBytes()), p);</span>
-<span class="line" id="L1623">    }</span>
-<span class="line" id="L1624">}</span>
-<span class="line" id="L1625"></span>
-<span class="line" id="L1626"><span class="tok-kw">test</span> <span class="tok-str">&quot;Test inner PKE&quot;</span> {</span>
-<span class="line" id="L1627">    <span class="tok-kw">var</span> seed: [<span class="tok-number">32</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L1628">    <span class="tok-kw">var</span> pt: [<span class="tok-number">32</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L1629">    <span class="tok-kw">for</span> (&amp;seed, &amp;pt, <span class="tok-number">0</span>..) |*s, *p, i| {</span>
-<span class="line" id="L1630">        s.* = <span class="tok-builtin">@intCast</span>(<span class="tok-type">u8</span>, i);</span>
-<span class="line" id="L1631">        p.* = <span class="tok-builtin">@intCast</span>(<span class="tok-type">u8</span>, i + <span class="tok-number">32</span>);</span>
-<span class="line" id="L1632">    }</span>
-<span class="line" id="L1633">    <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (modes) |mode| {</span>
-<span class="line" id="L1634">        <span class="tok-kw">for</span> (<span class="tok-number">0</span>..<span class="tok-number">100</span>) |i| {</span>
-<span class="line" id="L1635">            <span class="tok-kw">var</span> pk: mode.InnerPk = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L1636">            <span class="tok-kw">var</span> sk: mode.InnerSk = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L1637">            seed[<span class="tok-number">0</span>] = <span class="tok-builtin">@intCast</span>(<span class="tok-type">u8</span>, i);</span>
-<span class="line" id="L1638">            mode.innerKeyFromSeed(seed, &amp;pk, &amp;sk);</span>
-<span class="line" id="L1639">            <span class="tok-kw">for</span> (<span class="tok-number">0</span>..<span class="tok-number">10</span>) |j| {</span>
-<span class="line" id="L1640">                seed[<span class="tok-number">1</span>] = <span class="tok-builtin">@intCast</span>(<span class="tok-type">u8</span>, j);</span>
-<span class="line" id="L1641">                <span class="tok-kw">try</span> testing.expectEqual(sk.decrypt(&amp;pk.encrypt(&amp;pt, &amp;seed)), pt);</span>
-<span class="line" id="L1642">            }</span>
-<span class="line" id="L1643">        }</span>
-<span class="line" id="L1644">    }</span>
-<span class="line" id="L1645">}</span>
-<span class="line" id="L1646"></span>
-<span class="line" id="L1647"><span class="tok-kw">test</span> <span class="tok-str">&quot;Test happy flow&quot;</span> {</span>
-<span class="line" id="L1648">    <span class="tok-kw">var</span> seed: [<span class="tok-number">64</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L1649">    <span class="tok-kw">for</span> (&amp;seed, <span class="tok-number">0</span>..) |*s, i| {</span>
-<span class="line" id="L1650">        s.* = <span class="tok-builtin">@intCast</span>(<span class="tok-type">u8</span>, i);</span>
-<span class="line" id="L1651">    }</span>
-<span class="line" id="L1652">    <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (modes) |mode| {</span>
-<span class="line" id="L1653">        <span class="tok-kw">for</span> (<span class="tok-number">0</span>..<span class="tok-number">100</span>) |i| {</span>
-<span class="line" id="L1654">            seed[<span class="tok-number">0</span>] = <span class="tok-builtin">@intCast</span>(<span class="tok-type">u8</span>, i);</span>
-<span class="line" id="L1655">            <span class="tok-kw">const</span> kp = <span class="tok-kw">try</span> mode.KeyPair.create(seed);</span>
-<span class="line" id="L1656">            <span class="tok-kw">const</span> sk = <span class="tok-kw">try</span> mode.SecretKey.fromBytes(&amp;kp.secret_key.toBytes());</span>
-<span class="line" id="L1657">            <span class="tok-kw">try</span> testing.expectEqual(sk, kp.secret_key);</span>
-<span class="line" id="L1658">            <span class="tok-kw">const</span> pk = <span class="tok-kw">try</span> mode.PublicKey.fromBytes(&amp;kp.public_key.toBytes());</span>
-<span class="line" id="L1659">            <span class="tok-kw">try</span> testing.expectEqual(pk, kp.public_key);</span>
-<span class="line" id="L1660">            <span class="tok-kw">for</span> (<span class="tok-number">0</span>..<span class="tok-number">10</span>) |j| {</span>
-<span class="line" id="L1661">                seed[<span class="tok-number">1</span>] = <span class="tok-builtin">@intCast</span>(<span class="tok-type">u8</span>, j);</span>
-<span class="line" id="L1662">                <span class="tok-kw">const</span> e = pk.encaps(seed[<span class="tok-number">0</span>..<span class="tok-number">32</span>].*);</span>
-<span class="line" id="L1663">                <span class="tok-kw">try</span> testing.expectEqual(e.shared_secret, <span class="tok-kw">try</span> sk.decaps(&amp;e.ciphertext));</span>
-<span class="line" id="L1664">            }</span>
-<span class="line" id="L1665">        }</span>
-<span class="line" id="L1666">    }</span>
-<span class="line" id="L1667">}</span>
+<span class="line" id="L1522"><span class="tok-kw">test</span> <span class="tok-str">&quot;Compression&quot;</span> {</span>
+<span class="line" id="L1523">    <span class="tok-kw">var</span> rnd = RndGen.init(<span class="tok-number">0</span>);</span>
+<span class="line" id="L1524">    <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (.{ <span class="tok-number">1</span>, <span class="tok-number">4</span>, <span class="tok-number">5</span>, <span class="tok-number">10</span>, <span class="tok-number">11</span> }) |d| {</span>
+<span class="line" id="L1525">        <span class="tok-kw">for</span> (<span class="tok-number">0</span>..<span class="tok-number">1000</span>) |_| {</span>
+<span class="line" id="L1526">            <span class="tok-kw">const</span> p = Poly.randNormalized(&amp;rnd);</span>
+<span class="line" id="L1527">            <span class="tok-kw">const</span> pp = p.compress(d);</span>
+<span class="line" id="L1528">            <span class="tok-kw">const</span> pq = Poly.decompress(d, &amp;pp).compress(d);</span>
+<span class="line" id="L1529">            <span class="tok-kw">try</span> testing.expectEqual(pp, pq);</span>
+<span class="line" id="L1530">        }</span>
+<span class="line" id="L1531">    }</span>
+<span class="line" id="L1532">}</span>
+<span class="line" id="L1533"></span>
+<span class="line" id="L1534"><span class="tok-kw">test</span> <span class="tok-str">&quot;noise&quot;</span> {</span>
+<span class="line" id="L1535">    <span class="tok-kw">var</span> seed: [<span class="tok-number">32</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L1536">    <span class="tok-kw">for</span> (&amp;seed, <span class="tok-number">0</span>..) |*s, i| {</span>
+<span class="line" id="L1537">        s.* = <span class="tok-builtin">@intCast</span>(<span class="tok-type">u8</span>, i);</span>
+<span class="line" id="L1538">    }</span>
+<span class="line" id="L1539">    <span class="tok-kw">try</span> testing.expectEqual(Poly.noise(<span class="tok-number">3</span>, <span class="tok-number">37</span>, &amp;seed).cs, .{</span>
+<span class="line" id="L1540">        <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">3</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">2</span>, -<span class="tok-number">2</span>, <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">2</span>,</span>
+<span class="line" id="L1541">        <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">2</span>, <span class="tok-number">3</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">3</span>,  <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span>,</span>
+<span class="line" id="L1542">        <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">2</span>, <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, -<span class="tok-number">2</span>, <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  -<span class="tok-number">1</span>,</span>
+<span class="line" id="L1543">        <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  -<span class="tok-number">3</span>, -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">2</span>, -<span class="tok-number">2</span>, <span class="tok-number">0</span>,  -<span class="tok-number">2</span>, <span class="tok-number">0</span>,</span>
+<span class="line" id="L1544">        <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  -<span class="tok-number">2</span>, <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  -<span class="tok-number">2</span>, <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,</span>
+<span class="line" id="L1545">        <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">2</span>, -<span class="tok-number">1</span>, -<span class="tok-number">2</span>, -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>,</span>
+<span class="line" id="L1546">        -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  -<span class="tok-number">2</span>, <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">2</span>, <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,</span>
+<span class="line" id="L1547">        <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">2</span>, -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">3</span>,  <span class="tok-number">1</span>,</span>
+<span class="line" id="L1548">        <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, -<span class="tok-number">1</span>,</span>
+<span class="line" id="L1549">        <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">3</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">2</span>, -<span class="tok-number">1</span>, -<span class="tok-number">1</span>,</span>
+<span class="line" id="L1550">        <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  -<span class="tok-number">2</span>, <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">3</span>, -<span class="tok-number">1</span>, -<span class="tok-number">2</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">1</span>,</span>
+<span class="line" id="L1551">        <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">2</span>, <span class="tok-number">2</span>,  <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  <span class="tok-number">1</span>,</span>
+<span class="line" id="L1552">        -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  -<span class="tok-number">2</span>, <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,</span>
+<span class="line" id="L1553">        <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,</span>
+<span class="line" id="L1554">        <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">2</span>, <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">0</span>,</span>
+<span class="line" id="L1555">        <span class="tok-number">1</span>,</span>
+<span class="line" id="L1556">    });</span>
+<span class="line" id="L1557">    <span class="tok-kw">try</span> testing.expectEqual(Poly.noise(<span class="tok-number">2</span>, <span class="tok-number">37</span>, &amp;seed).cs, .{</span>
+<span class="line" id="L1558">        <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, -<span class="tok-number">2</span>, -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>,</span>
+<span class="line" id="L1559">        <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  -<span class="tok-number">2</span>, <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,</span>
+<span class="line" id="L1560">        <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">2</span>, -<span class="tok-number">1</span>,</span>
+<span class="line" id="L1561">        <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">1</span>,</span>
+<span class="line" id="L1562">        <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">2</span>, <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,</span>
+<span class="line" id="L1563">        <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  -<span class="tok-number">1</span>,</span>
+<span class="line" id="L1564">        -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  -<span class="tok-number">2</span>, <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">0</span>,</span>
+<span class="line" id="L1565">        <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">2</span>, <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,</span>
+<span class="line" id="L1566">        <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  <span class="tok-number">0</span>,</span>
+<span class="line" id="L1567">        <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,</span>
+<span class="line" id="L1568">        <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">2</span>,</span>
+<span class="line" id="L1569">        -<span class="tok-number">1</span>, -<span class="tok-number">2</span>, -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">2</span>, -<span class="tok-number">2</span>, -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,</span>
+<span class="line" id="L1570">        <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,</span>
+<span class="line" id="L1571">        -<span class="tok-number">2</span>, <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">2</span>, <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,</span>
+<span class="line" id="L1572">        <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">2</span>, <span class="tok-number">1</span>,  -<span class="tok-number">2</span>, <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,</span>
+<span class="line" id="L1573">        -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">2</span>, <span class="tok-number">1</span>,  -<span class="tok-number">2</span>, -<span class="tok-number">2</span>, <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,</span>
+<span class="line" id="L1574">        -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  -<span class="tok-number">1</span>, <span class="tok-number">1</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,</span>
+<span class="line" id="L1575">        <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">2</span>,  <span class="tok-number">0</span>,  <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>,</span>
+<span class="line" id="L1576">        <span class="tok-number">0</span>,  <span class="tok-number">1</span>,  -<span class="tok-number">1</span>, <span class="tok-number">0</span>,</span>
+<span class="line" id="L1577">    });</span>
+<span class="line" id="L1578">}</span>
+<span class="line" id="L1579"></span>
+<span class="line" id="L1580"><span class="tok-kw">test</span> <span class="tok-str">&quot;uniform sampling&quot;</span> {</span>
+<span class="line" id="L1581">    <span class="tok-kw">var</span> seed: [<span class="tok-number">32</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L1582">    <span class="tok-kw">for</span> (&amp;seed, <span class="tok-number">0</span>..) |*s, i| {</span>
+<span class="line" id="L1583">        s.* = <span class="tok-builtin">@intCast</span>(<span class="tok-type">u8</span>, i);</span>
+<span class="line" id="L1584">    }</span>
+<span class="line" id="L1585">    <span class="tok-kw">try</span> testing.expectEqual(Poly.uniform(seed, <span class="tok-number">1</span>, <span class="tok-number">0</span>).cs, .{</span>
+<span class="line" id="L1586">        <span class="tok-number">797</span>,  <span class="tok-number">993</span>,  <span class="tok-number">161</span>,  <span class="tok-number">6</span>,    <span class="tok-number">2608</span>, <span class="tok-number">2385</span>, <span class="tok-number">2096</span>, <span class="tok-number">2661</span>, <span class="tok-number">1676</span>, <span class="tok-number">247</span>,  <span class="tok-number">2440</span>,</span>
+<span class="line" id="L1587">        <span class="tok-number">342</span>,  <span class="tok-number">634</span>,  <span class="tok-number">194</span>,  <span class="tok-number">1570</span>, <span class="tok-number">2848</span>, <span class="tok-number">986</span>,  <span class="tok-number">684</span>,  <span class="tok-number">3148</span>, <span class="tok-number">3208</span>, <span class="tok-number">2018</span>, <span class="tok-number">351</span>,</span>
+<span class="line" id="L1588">        <span class="tok-number">2288</span>, <span class="tok-number">612</span>,  <span class="tok-number">1394</span>, <span class="tok-number">170</span>,  <span class="tok-number">1521</span>, <span class="tok-number">3119</span>, <span class="tok-number">58</span>,   <span class="tok-number">596</span>,  <span class="tok-number">2093</span>, <span class="tok-number">1549</span>, <span class="tok-number">409</span>,</span>
+<span class="line" id="L1589">        <span class="tok-number">2156</span>, <span class="tok-number">1934</span>, <span class="tok-number">1730</span>, <span class="tok-number">1324</span>, <span class="tok-number">388</span>,  <span class="tok-number">446</span>,  <span class="tok-number">418</span>,  <span class="tok-number">1719</span>, <span class="tok-number">2202</span>, <span class="tok-number">1812</span>, <span class="tok-number">98</span>,</span>
+<span class="line" id="L1590">        <span class="tok-number">1019</span>, <span class="tok-number">2369</span>, <span class="tok-number">214</span>,  <span class="tok-number">2699</span>, <span class="tok-number">28</span>,   <span class="tok-number">1523</span>, <span class="tok-number">2824</span>, <span class="tok-number">273</span>,  <span class="tok-number">402</span>,  <span class="tok-number">2899</span>, <span class="tok-number">246</span>,</span>
+<span class="line" id="L1591">        <span class="tok-number">210</span>,  <span class="tok-number">1288</span>, <span class="tok-number">863</span>,  <span class="tok-number">2708</span>, <span class="tok-number">177</span>,  <span class="tok-number">3076</span>, <span class="tok-number">349</span>,  <span class="tok-number">44</span>,   <span class="tok-number">949</span>,  <span class="tok-number">854</span>,  <span class="tok-number">1371</span>,</span>
+<span class="line" id="L1592">        <span class="tok-number">957</span>,  <span class="tok-number">292</span>,  <span class="tok-number">2502</span>, <span class="tok-number">1617</span>, <span class="tok-number">1501</span>, <span class="tok-number">254</span>,  <span class="tok-number">7</span>,    <span class="tok-number">1761</span>, <span class="tok-number">2581</span>, <span class="tok-number">2206</span>, <span class="tok-number">2655</span>,</span>
+<span class="line" id="L1593">        <span class="tok-number">1211</span>, <span class="tok-number">629</span>,  <span class="tok-number">1274</span>, <span class="tok-number">2358</span>, <span class="tok-number">816</span>,  <span class="tok-number">2766</span>, <span class="tok-number">2115</span>, <span class="tok-number">2985</span>, <span class="tok-number">1006</span>, <span class="tok-number">2433</span>, <span class="tok-number">856</span>,</span>
+<span class="line" id="L1594">        <span class="tok-number">2596</span>, <span class="tok-number">3192</span>, <span class="tok-number">1</span>,    <span class="tok-number">1378</span>, <span class="tok-number">2345</span>, <span class="tok-number">707</span>,  <span class="tok-number">1891</span>, <span class="tok-number">1669</span>, <span class="tok-number">536</span>,  <span class="tok-number">1221</span>, <span class="tok-number">710</span>,</span>
+<span class="line" id="L1595">        <span class="tok-number">2511</span>, <span class="tok-number">120</span>,  <span class="tok-number">1176</span>, <span class="tok-number">322</span>,  <span class="tok-number">1897</span>, <span class="tok-number">2309</span>, <span class="tok-number">595</span>,  <span class="tok-number">2950</span>, <span class="tok-number">1171</span>, <span class="tok-number">801</span>,  <span class="tok-number">1848</span>,</span>
+<span class="line" id="L1596">        <span class="tok-number">695</span>,  <span class="tok-number">2912</span>, <span class="tok-number">1396</span>, <span class="tok-number">1931</span>, <span class="tok-number">1775</span>, <span class="tok-number">2904</span>, <span class="tok-number">893</span>,  <span class="tok-number">2507</span>, <span class="tok-number">1810</span>, <span class="tok-number">2873</span>, <span class="tok-number">253</span>,</span>
+<span class="line" id="L1597">        <span class="tok-number">1529</span>, <span class="tok-number">1047</span>, <span class="tok-number">2615</span>, <span class="tok-number">1687</span>, <span class="tok-number">831</span>,  <span class="tok-number">1414</span>, <span class="tok-number">965</span>,  <span class="tok-number">3169</span>, <span class="tok-number">1887</span>, <span class="tok-number">753</span>,  <span class="tok-number">3246</span>,</span>
+<span class="line" id="L1598">        <span class="tok-number">1937</span>, <span class="tok-number">115</span>,  <span class="tok-number">2953</span>, <span class="tok-number">586</span>,  <span class="tok-number">545</span>,  <span class="tok-number">1621</span>, <span class="tok-number">1667</span>, <span class="tok-number">3187</span>, <span class="tok-number">1654</span>, <span class="tok-number">1988</span>, <span class="tok-number">1857</span>,</span>
+<span class="line" id="L1599">        <span class="tok-number">512</span>,  <span class="tok-number">1239</span>, <span class="tok-number">1219</span>, <span class="tok-number">898</span>,  <span class="tok-number">3106</span>, <span class="tok-number">391</span>,  <span class="tok-number">1331</span>, <span class="tok-number">2228</span>, <span class="tok-number">3169</span>, <span class="tok-number">586</span>,  <span class="tok-number">2412</span>,</span>
+<span class="line" id="L1600">        <span class="tok-number">845</span>,  <span class="tok-number">768</span>,  <span class="tok-number">156</span>,  <span class="tok-number">662</span>,  <span class="tok-number">478</span>,  <span class="tok-number">1693</span>, <span class="tok-number">2632</span>, <span class="tok-number">573</span>,  <span class="tok-number">2434</span>, <span class="tok-number">1671</span>, <span class="tok-number">173</span>,</span>
+<span class="line" id="L1601">        <span class="tok-number">969</span>,  <span class="tok-number">364</span>,  <span class="tok-number">1663</span>, <span class="tok-number">2701</span>, <span class="tok-number">2169</span>, <span class="tok-number">813</span>,  <span class="tok-number">1000</span>, <span class="tok-number">1471</span>, <span class="tok-number">720</span>,  <span class="tok-number">2431</span>, <span class="tok-number">2530</span>,</span>
+<span class="line" id="L1602">        <span class="tok-number">3161</span>, <span class="tok-number">733</span>,  <span class="tok-number">1691</span>, <span class="tok-number">527</span>,  <span class="tok-number">2634</span>, <span class="tok-number">335</span>,  <span class="tok-number">26</span>,   <span class="tok-number">2377</span>, <span class="tok-number">1707</span>, <span class="tok-number">767</span>,  <span class="tok-number">3020</span>,</span>
+<span class="line" id="L1603">        <span class="tok-number">950</span>,  <span class="tok-number">502</span>,  <span class="tok-number">426</span>,  <span class="tok-number">1138</span>, <span class="tok-number">3208</span>, <span class="tok-number">2607</span>, <span class="tok-number">2389</span>, <span class="tok-number">44</span>,   <span class="tok-number">1358</span>, <span class="tok-number">1392</span>, <span class="tok-number">2334</span>,</span>
+<span class="line" id="L1604">        <span class="tok-number">875</span>,  <span class="tok-number">2097</span>, <span class="tok-number">173</span>,  <span class="tok-number">1697</span>, <span class="tok-number">2578</span>, <span class="tok-number">942</span>,  <span class="tok-number">1817</span>, <span class="tok-number">974</span>,  <span class="tok-number">1165</span>, <span class="tok-number">2853</span>, <span class="tok-number">1958</span>,</span>
+<span class="line" id="L1605">        <span class="tok-number">2973</span>, <span class="tok-number">3282</span>, <span class="tok-number">271</span>,  <span class="tok-number">1236</span>, <span class="tok-number">1677</span>, <span class="tok-number">2230</span>, <span class="tok-number">673</span>,  <span class="tok-number">1554</span>, <span class="tok-number">96</span>,   <span class="tok-number">242</span>,  <span class="tok-number">1729</span>,</span>
+<span class="line" id="L1606">        <span class="tok-number">2518</span>, <span class="tok-number">1884</span>, <span class="tok-number">2272</span>, <span class="tok-number">71</span>,   <span class="tok-number">1382</span>, <span class="tok-number">924</span>,  <span class="tok-number">1807</span>, <span class="tok-number">1610</span>, <span class="tok-number">456</span>,  <span class="tok-number">1148</span>, <span class="tok-number">2479</span>,</span>
+<span class="line" id="L1607">        <span class="tok-number">2152</span>, <span class="tok-number">238</span>,  <span class="tok-number">2208</span>, <span class="tok-number">2329</span>, <span class="tok-number">713</span>,  <span class="tok-number">1175</span>, <span class="tok-number">1196</span>, <span class="tok-number">757</span>,  <span class="tok-number">1078</span>, <span class="tok-number">3190</span>, <span class="tok-number">3169</span>,</span>
+<span class="line" id="L1608">        <span class="tok-number">708</span>,  <span class="tok-number">3117</span>, <span class="tok-number">154</span>,  <span class="tok-number">1751</span>, <span class="tok-number">3225</span>, <span class="tok-number">1364</span>, <span class="tok-number">154</span>,  <span class="tok-number">23</span>,   <span class="tok-number">2842</span>, <span class="tok-number">1105</span>, <span class="tok-number">1419</span>,</span>
+<span class="line" id="L1609">        <span class="tok-number">79</span>,   <span class="tok-number">5</span>,    <span class="tok-number">2013</span>,</span>
+<span class="line" id="L1610">    });</span>
+<span class="line" id="L1611">}</span>
+<span class="line" id="L1612"></span>
+<span class="line" id="L1613"><span class="tok-kw">test</span> <span class="tok-str">&quot;Polynomial packing&quot;</span> {</span>
+<span class="line" id="L1614">    <span class="tok-kw">var</span> rnd = RndGen.init(<span class="tok-number">0</span>);</span>
+<span class="line" id="L1615"></span>
+<span class="line" id="L1616">    <span class="tok-kw">for</span> (<span class="tok-number">0</span>..<span class="tok-number">1000</span>) |_| {</span>
+<span class="line" id="L1617">        <span class="tok-kw">const</span> p = Poly.randNormalized(&amp;rnd);</span>
+<span class="line" id="L1618">        <span class="tok-kw">try</span> testing.expectEqual(Poly.fromBytes(&amp;p.toBytes()), p);</span>
+<span class="line" id="L1619">    }</span>
+<span class="line" id="L1620">}</span>
+<span class="line" id="L1621"></span>
+<span class="line" id="L1622"><span class="tok-kw">test</span> <span class="tok-str">&quot;Test inner PKE&quot;</span> {</span>
+<span class="line" id="L1623">    <span class="tok-kw">var</span> seed: [<span class="tok-number">32</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L1624">    <span class="tok-kw">var</span> pt: [<span class="tok-number">32</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L1625">    <span class="tok-kw">for</span> (&amp;seed, &amp;pt, <span class="tok-number">0</span>..) |*s, *p, i| {</span>
+<span class="line" id="L1626">        s.* = <span class="tok-builtin">@intCast</span>(<span class="tok-type">u8</span>, i);</span>
+<span class="line" id="L1627">        p.* = <span class="tok-builtin">@intCast</span>(<span class="tok-type">u8</span>, i + <span class="tok-number">32</span>);</span>
+<span class="line" id="L1628">    }</span>
+<span class="line" id="L1629">    <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (modes) |mode| {</span>
+<span class="line" id="L1630">        <span class="tok-kw">for</span> (<span class="tok-number">0</span>..<span class="tok-number">100</span>) |i| {</span>
+<span class="line" id="L1631">            <span class="tok-kw">var</span> pk: mode.InnerPk = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L1632">            <span class="tok-kw">var</span> sk: mode.InnerSk = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L1633">            seed[<span class="tok-number">0</span>] = <span class="tok-builtin">@intCast</span>(<span class="tok-type">u8</span>, i);</span>
+<span class="line" id="L1634">            mode.innerKeyFromSeed(seed, &amp;pk, &amp;sk);</span>
+<span class="line" id="L1635">            <span class="tok-kw">for</span> (<span class="tok-number">0</span>..<span class="tok-number">10</span>) |j| {</span>
+<span class="line" id="L1636">                seed[<span class="tok-number">1</span>] = <span class="tok-builtin">@intCast</span>(<span class="tok-type">u8</span>, j);</span>
+<span class="line" id="L1637">                <span class="tok-kw">try</span> testing.expectEqual(sk.decrypt(&amp;pk.encrypt(&amp;pt, &amp;seed)), pt);</span>
+<span class="line" id="L1638">            }</span>
+<span class="line" id="L1639">        }</span>
+<span class="line" id="L1640">    }</span>
+<span class="line" id="L1641">}</span>
+<span class="line" id="L1642"></span>
+<span class="line" id="L1643"><span class="tok-kw">test</span> <span class="tok-str">&quot;Test happy flow&quot;</span> {</span>
+<span class="line" id="L1644">    <span class="tok-kw">var</span> seed: [<span class="tok-number">64</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L1645">    <span class="tok-kw">for</span> (&amp;seed, <span class="tok-number">0</span>..) |*s, i| {</span>
+<span class="line" id="L1646">        s.* = <span class="tok-builtin">@intCast</span>(<span class="tok-type">u8</span>, i);</span>
+<span class="line" id="L1647">    }</span>
+<span class="line" id="L1648">    <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (modes) |mode| {</span>
+<span class="line" id="L1649">        <span class="tok-kw">for</span> (<span class="tok-number">0</span>..<span class="tok-number">100</span>) |i| {</span>
+<span class="line" id="L1650">            seed[<span class="tok-number">0</span>] = <span class="tok-builtin">@intCast</span>(<span class="tok-type">u8</span>, i);</span>
+<span class="line" id="L1651">            <span class="tok-kw">const</span> kp = <span class="tok-kw">try</span> mode.KeyPair.create(seed);</span>
+<span class="line" id="L1652">            <span class="tok-kw">const</span> sk = <span class="tok-kw">try</span> mode.SecretKey.fromBytes(&amp;kp.secret_key.toBytes());</span>
+<span class="line" id="L1653">            <span class="tok-kw">try</span> testing.expectEqual(sk, kp.secret_key);</span>
+<span class="line" id="L1654">            <span class="tok-kw">const</span> pk = <span class="tok-kw">try</span> mode.PublicKey.fromBytes(&amp;kp.public_key.toBytes());</span>
+<span class="line" id="L1655">            <span class="tok-kw">try</span> testing.expectEqual(pk, kp.public_key);</span>
+<span class="line" id="L1656">            <span class="tok-kw">for</span> (<span class="tok-number">0</span>..<span class="tok-number">10</span>) |j| {</span>
+<span class="line" id="L1657">                seed[<span class="tok-number">1</span>] = <span class="tok-builtin">@intCast</span>(<span class="tok-type">u8</span>, j);</span>
+<span class="line" id="L1658">                <span class="tok-kw">const</span> e = pk.encaps(seed[<span class="tok-number">0</span>..<span class="tok-number">32</span>].*);</span>
+<span class="line" id="L1659">                <span class="tok-kw">try</span> testing.expectEqual(e.shared_secret, <span class="tok-kw">try</span> sk.decaps(&amp;e.ciphertext));</span>
+<span class="line" id="L1660">            }</span>
+<span class="line" id="L1661">        }</span>
+<span class="line" id="L1662">    }</span>
+<span class="line" id="L1663">}</span>
+<span class="line" id="L1664"></span>
+<span class="line" id="L1665"><span class="tok-comment">// Code to test NIST Known Answer Tests (KAT), see PQCgenKAT.c.</span>
+</span>
+<span class="line" id="L1666"></span>
+<span class="line" id="L1667"><span class="tok-kw">const</span> sha2 = crypto.hash.sha2;</span>
 <span class="line" id="L1668"></span>
-<span class="line" id="L1669"><span class="tok-comment">// Code to test NIST Known Answer Tests (KAT), see PQCgenKAT.c.</span>
+<span class="line" id="L1669"><span class="tok-kw">test</span> <span class="tok-str">&quot;NIST KAT test&quot;</span> {</span>
+<span class="line" id="L1670">    <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (.{</span>
+<span class="line" id="L1671">        .{ Kyber512, <span class="tok-str">&quot;e9c2bd37133fcb40772f81559f14b1f58dccd1c816701be9ba6214d43baf4547&quot;</span> },</span>
+<span class="line" id="L1672">        .{ Kyber1024, <span class="tok-str">&quot;89248f2f33f7f4f7051729111f3049c409a933ec904aedadf035f30fa5646cd5&quot;</span> },</span>
+<span class="line" id="L1673">        .{ Kyber768, <span class="tok-str">&quot;a1e122cad3c24bc51622e4c242d8b8acbcd3f618fee4220400605ca8f9ea02c2&quot;</span> },</span>
+<span class="line" id="L1674">    }) |modeHash| {</span>
+<span class="line" id="L1675">        <span class="tok-kw">const</span> mode = modeHash[<span class="tok-number">0</span>];</span>
+<span class="line" id="L1676">        <span class="tok-kw">var</span> seed: [<span class="tok-number">48</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L1677">        <span class="tok-kw">for</span> (&amp;seed, <span class="tok-number">0</span>..) |*s, i| {</span>
+<span class="line" id="L1678">            s.* = <span class="tok-builtin">@intCast</span>(<span class="tok-type">u8</span>, i);</span>
+<span class="line" id="L1679">        }</span>
+<span class="line" id="L1680">        <span class="tok-kw">var</span> f = sha2.Sha256.init(.{});</span>
+<span class="line" id="L1681">        <span class="tok-kw">const</span> fw = f.writer();</span>
+<span class="line" id="L1682">        <span class="tok-kw">var</span> g = NistDRBG.init(seed);</span>
+<span class="line" id="L1683">        <span class="tok-kw">try</span> std.fmt.format(fw, <span class="tok-str">&quot;# {s}\n\n&quot;</span>, .{mode.name});</span>
+<span class="line" id="L1684">        <span class="tok-kw">for</span> (<span class="tok-number">0</span>..<span class="tok-number">100</span>) |i| {</span>
+<span class="line" id="L1685">            g.fill(&amp;seed);</span>
+<span class="line" id="L1686">            <span class="tok-kw">try</span> std.fmt.format(fw, <span class="tok-str">&quot;count = {}\n&quot;</span>, .{i});</span>
+<span class="line" id="L1687">            <span class="tok-kw">try</span> std.fmt.format(fw, <span class="tok-str">&quot;seed = {s}\n&quot;</span>, .{std.fmt.fmtSliceHexUpper(&amp;seed)});</span>
+<span class="line" id="L1688">            <span class="tok-kw">var</span> g2 = NistDRBG.init(seed);</span>
+<span class="line" id="L1689"></span>
+<span class="line" id="L1690">            <span class="tok-comment">// This is not equivalent to g2.fill(kseed[:]). As the reference</span>
 </span>
-<span class="line" id="L1670"></span>
-<span class="line" id="L1671"><span class="tok-kw">const</span> sha2 = crypto.hash.sha2;</span>
-<span class="line" id="L1672"></span>
-<span class="line" id="L1673"><span class="tok-kw">test</span> <span class="tok-str">&quot;NIST KAT test&quot;</span> {</span>
-<span class="line" id="L1674">    <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (.{</span>
-<span class="line" id="L1675">        .{ Kyber512, <span class="tok-str">&quot;e9c2bd37133fcb40772f81559f14b1f58dccd1c816701be9ba6214d43baf4547&quot;</span> },</span>
-<span class="line" id="L1676">        .{ Kyber1024, <span class="tok-str">&quot;89248f2f33f7f4f7051729111f3049c409a933ec904aedadf035f30fa5646cd5&quot;</span> },</span>
-<span class="line" id="L1677">        .{ Kyber768, <span class="tok-str">&quot;a1e122cad3c24bc51622e4c242d8b8acbcd3f618fee4220400605ca8f9ea02c2&quot;</span> },</span>
-<span class="line" id="L1678">    }) |modeHash| {</span>
-<span class="line" id="L1679">        <span class="tok-kw">const</span> mode = modeHash[<span class="tok-number">0</span>];</span>
-<span class="line" id="L1680">        <span class="tok-kw">var</span> seed: [<span class="tok-number">48</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L1681">        <span class="tok-kw">for</span> (&amp;seed, <span class="tok-number">0</span>..) |*s, i| {</span>
-<span class="line" id="L1682">            s.* = <span class="tok-builtin">@intCast</span>(<span class="tok-type">u8</span>, i);</span>
-<span class="line" id="L1683">        }</span>
-<span class="line" id="L1684">        <span class="tok-kw">var</span> f = sha2.Sha256.init(.{});</span>
-<span class="line" id="L1685">        <span class="tok-kw">const</span> fw = f.writer();</span>
-<span class="line" id="L1686">        <span class="tok-kw">var</span> g = NistDRBG.init(seed);</span>
-<span class="line" id="L1687">        <span class="tok-kw">try</span> std.fmt.format(fw, <span class="tok-str">&quot;# {s}\n\n&quot;</span>, .{mode.name});</span>
-<span class="line" id="L1688">        <span class="tok-kw">for</span> (<span class="tok-number">0</span>..<span class="tok-number">100</span>) |i| {</span>
-<span class="line" id="L1689">            g.fill(&amp;seed);</span>
-<span class="line" id="L1690">            <span class="tok-kw">try</span> std.fmt.format(fw, <span class="tok-str">&quot;count = {}\n&quot;</span>, .{i});</span>
-<span class="line" id="L1691">            <span class="tok-kw">try</span> std.fmt.format(fw, <span class="tok-str">&quot;seed = {s}\n&quot;</span>, .{std.fmt.fmtSliceHexUpper(&amp;seed)});</span>
-<span class="line" id="L1692">            <span class="tok-kw">var</span> g2 = NistDRBG.init(seed);</span>
-<span class="line" id="L1693"></span>
-<span class="line" id="L1694">            <span class="tok-comment">// This is not equivalent to g2.fill(kseed[:]). As the reference</span>
+<span class="line" id="L1691">            <span class="tok-comment">// implementation calls randombytes twice generating the keypair,</span>
 </span>
-<span class="line" id="L1695">            <span class="tok-comment">// implementation calls randombytes twice generating the keypair,</span>
+<span class="line" id="L1692">            <span class="tok-comment">// we have to do that as well.</span>
 </span>
-<span class="line" id="L1696">            <span class="tok-comment">// we have to do that as well.</span>
-</span>
-<span class="line" id="L1697">            <span class="tok-kw">var</span> kseed: [<span class="tok-number">64</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L1698">            <span class="tok-kw">var</span> eseed: [<span class="tok-number">32</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L1699">            g2.fill(kseed[<span class="tok-number">0</span>..<span class="tok-number">32</span>]);</span>
-<span class="line" id="L1700">            g2.fill(kseed[<span class="tok-number">32</span>..<span class="tok-number">64</span>]);</span>
-<span class="line" id="L1701">            g2.fill(&amp;eseed);</span>
-<span class="line" id="L1702">            <span class="tok-kw">const</span> kp = <span class="tok-kw">try</span> mode.KeyPair.create(kseed);</span>
-<span class="line" id="L1703">            <span class="tok-kw">const</span> e = kp.public_key.encaps(eseed);</span>
-<span class="line" id="L1704">            <span class="tok-kw">const</span> ss2 = <span class="tok-kw">try</span> kp.secret_key.decaps(&amp;e.ciphertext);</span>
-<span class="line" id="L1705">            <span class="tok-kw">try</span> testing.expectEqual(ss2, e.shared_secret);</span>
-<span class="line" id="L1706">            <span class="tok-kw">try</span> std.fmt.format(fw, <span class="tok-str">&quot;pk = {s}\n&quot;</span>, .{std.fmt.fmtSliceHexUpper(&amp;kp.public_key.toBytes())});</span>
-<span class="line" id="L1707">            <span class="tok-kw">try</span> std.fmt.format(fw, <span class="tok-str">&quot;sk = {s}\n&quot;</span>, .{std.fmt.fmtSliceHexUpper(&amp;kp.secret_key.toBytes())});</span>
-<span class="line" id="L1708">            <span class="tok-kw">try</span> std.fmt.format(fw, <span class="tok-str">&quot;ct = {s}\n&quot;</span>, .{std.fmt.fmtSliceHexUpper(&amp;e.ciphertext)});</span>
-<span class="line" id="L1709">            <span class="tok-kw">try</span> std.fmt.format(fw, <span class="tok-str">&quot;ss = {s}\n\n&quot;</span>, .{std.fmt.fmtSliceHexUpper(&amp;e.shared_secret)});</span>
-<span class="line" id="L1710">        }</span>
-<span class="line" id="L1711"></span>
-<span class="line" id="L1712">        <span class="tok-kw">var</span> out: [<span class="tok-number">32</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L1713">        f.final(&amp;out);</span>
-<span class="line" id="L1714">        <span class="tok-kw">var</span> outHex: [<span class="tok-number">64</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L1715">        _ = <span class="tok-kw">try</span> std.fmt.bufPrint(&amp;outHex, <span class="tok-str">&quot;{s}&quot;</span>, .{std.fmt.fmtSliceHexLower(&amp;out)});</span>
-<span class="line" id="L1716">        <span class="tok-kw">try</span> testing.expectEqual(outHex, modeHash[<span class="tok-number">1</span>].*);</span>
-<span class="line" id="L1717">    }</span>
-<span class="line" id="L1718">}</span>
+<span class="line" id="L1693">            <span class="tok-kw">var</span> kseed: [<span class="tok-number">64</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L1694">            <span class="tok-kw">var</span> eseed: [<span class="tok-number">32</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L1695">            g2.fill(kseed[<span class="tok-number">0</span>..<span class="tok-number">32</span>]);</span>
+<span class="line" id="L1696">            g2.fill(kseed[<span class="tok-number">32</span>..<span class="tok-number">64</span>]);</span>
+<span class="line" id="L1697">            g2.fill(&amp;eseed);</span>
+<span class="line" id="L1698">            <span class="tok-kw">const</span> kp = <span class="tok-kw">try</span> mode.KeyPair.create(kseed);</span>
+<span class="line" id="L1699">            <span class="tok-kw">const</span> e = kp.public_key.encaps(eseed);</span>
+<span class="line" id="L1700">            <span class="tok-kw">const</span> ss2 = <span class="tok-kw">try</span> kp.secret_key.decaps(&amp;e.ciphertext);</span>
+<span class="line" id="L1701">            <span class="tok-kw">try</span> testing.expectEqual(ss2, e.shared_secret);</span>
+<span class="line" id="L1702">            <span class="tok-kw">try</span> std.fmt.format(fw, <span class="tok-str">&quot;pk = {s}\n&quot;</span>, .{std.fmt.fmtSliceHexUpper(&amp;kp.public_key.toBytes())});</span>
+<span class="line" id="L1703">            <span class="tok-kw">try</span> std.fmt.format(fw, <span class="tok-str">&quot;sk = {s}\n&quot;</span>, .{std.fmt.fmtSliceHexUpper(&amp;kp.secret_key.toBytes())});</span>
+<span class="line" id="L1704">            <span class="tok-kw">try</span> std.fmt.format(fw, <span class="tok-str">&quot;ct = {s}\n&quot;</span>, .{std.fmt.fmtSliceHexUpper(&amp;e.ciphertext)});</span>
+<span class="line" id="L1705">            <span class="tok-kw">try</span> std.fmt.format(fw, <span class="tok-str">&quot;ss = {s}\n\n&quot;</span>, .{std.fmt.fmtSliceHexUpper(&amp;e.shared_secret)});</span>
+<span class="line" id="L1706">        }</span>
+<span class="line" id="L1707"></span>
+<span class="line" id="L1708">        <span class="tok-kw">var</span> out: [<span class="tok-number">32</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L1709">        f.final(&amp;out);</span>
+<span class="line" id="L1710">        <span class="tok-kw">var</span> outHex: [<span class="tok-number">64</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L1711">        _ = <span class="tok-kw">try</span> std.fmt.bufPrint(&amp;outHex, <span class="tok-str">&quot;{s}&quot;</span>, .{std.fmt.fmtSliceHexLower(&amp;out)});</span>
+<span class="line" id="L1712">        <span class="tok-kw">try</span> testing.expectEqual(outHex, modeHash[<span class="tok-number">1</span>].*);</span>
+<span class="line" id="L1713">    }</span>
+<span class="line" id="L1714">}</span>
+<span class="line" id="L1715"></span>
+<span class="line" id="L1716"><span class="tok-kw">const</span> NistDRBG = <span class="tok-kw">struct</span> {</span>
+<span class="line" id="L1717">    key: [<span class="tok-number">32</span>]<span class="tok-type">u8</span>,</span>
+<span class="line" id="L1718">    v: [<span class="tok-number">16</span>]<span class="tok-type">u8</span>,</span>
 <span class="line" id="L1719"></span>
-<span class="line" id="L1720"><span class="tok-kw">const</span> NistDRBG = <span class="tok-kw">struct</span> {</span>
-<span class="line" id="L1721">    key: [<span class="tok-number">32</span>]<span class="tok-type">u8</span>,</span>
-<span class="line" id="L1722">    v: [<span class="tok-number">16</span>]<span class="tok-type">u8</span>,</span>
-<span class="line" id="L1723"></span>
-<span class="line" id="L1724">    <span class="tok-kw">fn</span> <span class="tok-fn">incV</span>(g: *NistDRBG) <span class="tok-type">void</span> {</span>
-<span class="line" id="L1725">        <span class="tok-kw">var</span> j: <span class="tok-type">usize</span> = <span class="tok-number">15</span>;</span>
-<span class="line" id="L1726">        <span class="tok-kw">while</span> (j &gt;= <span class="tok-number">0</span>) : (j -= <span class="tok-number">1</span>) {</span>
-<span class="line" id="L1727">            <span class="tok-kw">if</span> (g.v[j] == <span class="tok-number">255</span>) {</span>
-<span class="line" id="L1728">                g.v[j] = <span class="tok-number">0</span>;</span>
-<span class="line" id="L1729">            } <span class="tok-kw">else</span> {</span>
-<span class="line" id="L1730">                g.v[j] += <span class="tok-number">1</span>;</span>
-<span class="line" id="L1731">                <span class="tok-kw">break</span>;</span>
-<span class="line" id="L1732">            }</span>
-<span class="line" id="L1733">        }</span>
-<span class="line" id="L1734">    }</span>
-<span class="line" id="L1735"></span>
-<span class="line" id="L1736">    <span class="tok-comment">// AES256_CTR_DRBG_Update(pd, &amp;g.key, &amp;g.v).</span>
+<span class="line" id="L1720">    <span class="tok-kw">fn</span> <span class="tok-fn">incV</span>(g: *NistDRBG) <span class="tok-type">void</span> {</span>
+<span class="line" id="L1721">        <span class="tok-kw">var</span> j: <span class="tok-type">usize</span> = <span class="tok-number">15</span>;</span>
+<span class="line" id="L1722">        <span class="tok-kw">while</span> (j &gt;= <span class="tok-number">0</span>) : (j -= <span class="tok-number">1</span>) {</span>
+<span class="line" id="L1723">            <span class="tok-kw">if</span> (g.v[j] == <span class="tok-number">255</span>) {</span>
+<span class="line" id="L1724">                g.v[j] = <span class="tok-number">0</span>;</span>
+<span class="line" id="L1725">            } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L1726">                g.v[j] += <span class="tok-number">1</span>;</span>
+<span class="line" id="L1727">                <span class="tok-kw">break</span>;</span>
+<span class="line" id="L1728">            }</span>
+<span class="line" id="L1729">        }</span>
+<span class="line" id="L1730">    }</span>
+<span class="line" id="L1731"></span>
+<span class="line" id="L1732">    <span class="tok-comment">// AES256_CTR_DRBG_Update(pd, &amp;g.key, &amp;g.v).</span>
 </span>
-<span class="line" id="L1737">    <span class="tok-kw">fn</span> <span class="tok-fn">update</span>(g: *NistDRBG, pd: ?[<span class="tok-number">48</span>]<span class="tok-type">u8</span>) <span class="tok-type">void</span> {</span>
-<span class="line" id="L1738">        <span class="tok-kw">var</span> buf: [<span class="tok-number">48</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L1739">        <span class="tok-kw">const</span> ctx = crypto.core.aes.Aes256.initEnc(g.key);</span>
-<span class="line" id="L1740">        <span class="tok-kw">var</span> i: <span class="tok-type">usize</span> = <span class="tok-number">0</span>;</span>
-<span class="line" id="L1741">        <span class="tok-kw">while</span> (i &lt; <span class="tok-number">3</span>) : (i += <span class="tok-number">1</span>) {</span>
-<span class="line" id="L1742">            g.incV();</span>
-<span class="line" id="L1743">            <span class="tok-kw">var</span> block: [<span class="tok-number">16</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L1744">            ctx.encrypt(&amp;block, &amp;g.v);</span>
-<span class="line" id="L1745">            mem.copy(<span class="tok-type">u8</span>, buf[i * <span class="tok-number">16</span> .. (i + <span class="tok-number">1</span>) * <span class="tok-number">16</span>], &amp;block);</span>
-<span class="line" id="L1746">        }</span>
-<span class="line" id="L1747">        <span class="tok-kw">if</span> (pd) |p| {</span>
-<span class="line" id="L1748">            <span class="tok-kw">for</span> (&amp;buf, p) |*b, x| {</span>
-<span class="line" id="L1749">                b.* ^= x;</span>
-<span class="line" id="L1750">            }</span>
-<span class="line" id="L1751">        }</span>
-<span class="line" id="L1752">        mem.copy(<span class="tok-type">u8</span>, &amp;g.key, buf[<span class="tok-number">0</span>..<span class="tok-number">32</span>]);</span>
-<span class="line" id="L1753">        mem.copy(<span class="tok-type">u8</span>, &amp;g.v, buf[<span class="tok-number">32</span>..<span class="tok-number">48</span>]);</span>
-<span class="line" id="L1754">    }</span>
-<span class="line" id="L1755"></span>
-<span class="line" id="L1756">    <span class="tok-comment">// randombytes.</span>
+<span class="line" id="L1733">    <span class="tok-kw">fn</span> <span class="tok-fn">update</span>(g: *NistDRBG, pd: ?[<span class="tok-number">48</span>]<span class="tok-type">u8</span>) <span class="tok-type">void</span> {</span>
+<span class="line" id="L1734">        <span class="tok-kw">var</span> buf: [<span class="tok-number">48</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L1735">        <span class="tok-kw">const</span> ctx = crypto.core.aes.Aes256.initEnc(g.key);</span>
+<span class="line" id="L1736">        <span class="tok-kw">var</span> i: <span class="tok-type">usize</span> = <span class="tok-number">0</span>;</span>
+<span class="line" id="L1737">        <span class="tok-kw">while</span> (i &lt; <span class="tok-number">3</span>) : (i += <span class="tok-number">1</span>) {</span>
+<span class="line" id="L1738">            g.incV();</span>
+<span class="line" id="L1739">            <span class="tok-kw">var</span> block: [<span class="tok-number">16</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L1740">            ctx.encrypt(&amp;block, &amp;g.v);</span>
+<span class="line" id="L1741">            buf[i * <span class="tok-number">16</span> ..][<span class="tok-number">0</span>..<span class="tok-number">16</span>].* = block;</span>
+<span class="line" id="L1742">        }</span>
+<span class="line" id="L1743">        <span class="tok-kw">if</span> (pd) |p| {</span>
+<span class="line" id="L1744">            <span class="tok-kw">for</span> (&amp;buf, p) |*b, x| {</span>
+<span class="line" id="L1745">                b.* ^= x;</span>
+<span class="line" id="L1746">            }</span>
+<span class="line" id="L1747">        }</span>
+<span class="line" id="L1748">        g.key = buf[<span class="tok-number">0</span>..<span class="tok-number">32</span>].*;</span>
+<span class="line" id="L1749">        g.v = buf[<span class="tok-number">32</span>..<span class="tok-number">48</span>].*;</span>
+<span class="line" id="L1750">    }</span>
+<span class="line" id="L1751"></span>
+<span class="line" id="L1752">    <span class="tok-comment">// randombytes.</span>
 </span>
-<span class="line" id="L1757">    <span class="tok-kw">fn</span> <span class="tok-fn">fill</span>(g: *NistDRBG, out: []<span class="tok-type">u8</span>) <span class="tok-type">void</span> {</span>
-<span class="line" id="L1758">        <span class="tok-kw">var</span> block: [<span class="tok-number">16</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L1759">        <span class="tok-kw">var</span> dst = out;</span>
-<span class="line" id="L1760"></span>
-<span class="line" id="L1761">        <span class="tok-kw">const</span> ctx = crypto.core.aes.Aes256.initEnc(g.key);</span>
-<span class="line" id="L1762">        <span class="tok-kw">while</span> (dst.len &gt; <span class="tok-number">0</span>) {</span>
-<span class="line" id="L1763">            g.incV();</span>
-<span class="line" id="L1764">            ctx.encrypt(&amp;block, &amp;g.v);</span>
-<span class="line" id="L1765">            <span class="tok-kw">if</span> (dst.len &lt; <span class="tok-number">16</span>) {</span>
-<span class="line" id="L1766">                mem.copy(<span class="tok-type">u8</span>, dst, block[<span class="tok-number">0</span>..dst.len]);</span>
-<span class="line" id="L1767">                <span class="tok-kw">break</span>;</span>
-<span class="line" id="L1768">            }</span>
-<span class="line" id="L1769">            mem.copy(<span class="tok-type">u8</span>, dst, &amp;block);</span>
-<span class="line" id="L1770">            dst = dst[<span class="tok-number">16</span>..dst.len];</span>
-<span class="line" id="L1771">        }</span>
-<span class="line" id="L1772">        g.update(<span class="tok-null">null</span>);</span>
-<span class="line" id="L1773">    }</span>
-<span class="line" id="L1774"></span>
-<span class="line" id="L1775">    <span class="tok-kw">fn</span> <span class="tok-fn">init</span>(seed: [<span class="tok-number">48</span>]<span class="tok-type">u8</span>) NistDRBG {</span>
-<span class="line" id="L1776">        <span class="tok-kw">var</span> ret: NistDRBG = .{ .key = .{<span class="tok-number">0</span>} ** <span class="tok-number">32</span>, .v = .{<span class="tok-number">0</span>} ** <span class="tok-number">16</span> };</span>
-<span class="line" id="L1777">        ret.update(seed);</span>
-<span class="line" id="L1778">        <span class="tok-kw">return</span> ret;</span>
-<span class="line" id="L1779">    }</span>
-<span class="line" id="L1780">};</span>
-<span class="line" id="L1781"></span>
+<span class="line" id="L1753">    <span class="tok-kw">fn</span> <span class="tok-fn">fill</span>(g: *NistDRBG, out: []<span class="tok-type">u8</span>) <span class="tok-type">void</span> {</span>
+<span class="line" id="L1754">        <span class="tok-kw">var</span> block: [<span class="tok-number">16</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L1755">        <span class="tok-kw">var</span> dst = out;</span>
+<span class="line" id="L1756"></span>
+<span class="line" id="L1757">        <span class="tok-kw">const</span> ctx = crypto.core.aes.Aes256.initEnc(g.key);</span>
+<span class="line" id="L1758">        <span class="tok-kw">while</span> (dst.len &gt; <span class="tok-number">0</span>) {</span>
+<span class="line" id="L1759">            g.incV();</span>
+<span class="line" id="L1760">            ctx.encrypt(&amp;block, &amp;g.v);</span>
+<span class="line" id="L1761">            <span class="tok-kw">if</span> (dst.len &lt; <span class="tok-number">16</span>) {</span>
+<span class="line" id="L1762">                <span class="tok-builtin">@memcpy</span>(dst, block[<span class="tok-number">0</span>..dst.len]);</span>
+<span class="line" id="L1763">                <span class="tok-kw">break</span>;</span>
+<span class="line" id="L1764">            }</span>
+<span class="line" id="L1765">            dst[<span class="tok-number">0</span>..block.len].* = block;</span>
+<span class="line" id="L1766">            dst = dst[<span class="tok-number">16</span>..dst.len];</span>
+<span class="line" id="L1767">        }</span>
+<span class="line" id="L1768">        g.update(<span class="tok-null">null</span>);</span>
+<span class="line" id="L1769">    }</span>
+<span class="line" id="L1770"></span>
+<span class="line" id="L1771">    <span class="tok-kw">fn</span> <span class="tok-fn">init</span>(seed: [<span class="tok-number">48</span>]<span class="tok-type">u8</span>) NistDRBG {</span>
+<span class="line" id="L1772">        <span class="tok-kw">var</span> ret: NistDRBG = .{ .key = .{<span class="tok-number">0</span>} ** <span class="tok-number">32</span>, .v = .{<span class="tok-number">0</span>} ** <span class="tok-number">16</span> };</span>
+<span class="line" id="L1773">        ret.update(seed);</span>
+<span class="line" id="L1774">        <span class="tok-kw">return</span> ret;</span>
+<span class="line" id="L1775">    }</span>
+<span class="line" id="L1776">};</span>
+<span class="line" id="L1777"></span>
 </code></pre></body>
 </html>

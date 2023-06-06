@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>crypto/salsa20.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -496,10 +496,10 @@
 <span class="line" id="L383">        debug.assert(c.len == m.len);</span>
 <span class="line" id="L384">        <span class="tok-kw">const</span> extended = extend(rounds, k, npub);</span>
 <span class="line" id="L385">        <span class="tok-kw">var</span> block0 = [_]<span class="tok-type">u8</span>{<span class="tok-number">0</span>} ** <span class="tok-number">64</span>;</span>
-<span class="line" id="L386">        <span class="tok-kw">const</span> mlen0 = math.min(<span class="tok-number">32</span>, m.len);</span>
-<span class="line" id="L387">        mem.copy(<span class="tok-type">u8</span>, block0[<span class="tok-number">32</span>..][<span class="tok-number">0</span>..mlen0], m[<span class="tok-number">0</span>..mlen0]);</span>
+<span class="line" id="L386">        <span class="tok-kw">const</span> mlen0 = <span class="tok-builtin">@min</span>(<span class="tok-number">32</span>, m.len);</span>
+<span class="line" id="L387">        <span class="tok-builtin">@memcpy</span>(block0[<span class="tok-number">32</span>..][<span class="tok-number">0</span>..mlen0], m[<span class="tok-number">0</span>..mlen0]);</span>
 <span class="line" id="L388">        Salsa20.xor(block0[<span class="tok-number">0</span>..], block0[<span class="tok-number">0</span>..], <span class="tok-number">0</span>, extended.key, extended.nonce);</span>
-<span class="line" id="L389">        mem.copy(<span class="tok-type">u8</span>, c[<span class="tok-number">0</span>..mlen0], block0[<span class="tok-number">32</span>..][<span class="tok-number">0</span>..mlen0]);</span>
+<span class="line" id="L389">        <span class="tok-builtin">@memcpy</span>(c[<span class="tok-number">0</span>..mlen0], block0[<span class="tok-number">32</span>..][<span class="tok-number">0</span>..mlen0]);</span>
 <span class="line" id="L390">        Salsa20.xor(c[mlen0..], m[mlen0..], <span class="tok-number">1</span>, extended.key, extended.nonce);</span>
 <span class="line" id="L391">        <span class="tok-kw">var</span> mac = Poly1305.init(block0[<span class="tok-number">0</span>..<span class="tok-number">32</span>]);</span>
 <span class="line" id="L392">        mac.update(ad);</span>
@@ -518,7 +518,7 @@
 <span class="line" id="L405">        <span class="tok-kw">const</span> extended = extend(rounds, k, npub);</span>
 <span class="line" id="L406">        <span class="tok-kw">var</span> block0 = [_]<span class="tok-type">u8</span>{<span class="tok-number">0</span>} ** <span class="tok-number">64</span>;</span>
 <span class="line" id="L407">        <span class="tok-kw">const</span> mlen0 = math.min(<span class="tok-number">32</span>, c.len);</span>
-<span class="line" id="L408">        mem.copy(<span class="tok-type">u8</span>, block0[<span class="tok-number">32</span>..][<span class="tok-number">0</span>..mlen0], c[<span class="tok-number">0</span>..mlen0]);</span>
+<span class="line" id="L408">        <span class="tok-builtin">@memcpy</span>(block0[<span class="tok-number">32</span>..][<span class="tok-number">0</span>..mlen0], c[<span class="tok-number">0</span>..mlen0]);</span>
 <span class="line" id="L409">        Salsa20.xor(block0[<span class="tok-number">0</span>..], block0[<span class="tok-number">0</span>..], <span class="tok-number">0</span>, extended.key, extended.nonce);</span>
 <span class="line" id="L410">        <span class="tok-kw">var</span> mac = Poly1305.init(block0[<span class="tok-number">0</span>..<span class="tok-number">32</span>]);</span>
 <span class="line" id="L411">        mac.update(ad);</span>
@@ -533,7 +533,7 @@
 <span class="line" id="L420">            utils.secureZero(<span class="tok-type">u8</span>, &amp;computedTag);</span>
 <span class="line" id="L421">            <span class="tok-kw">return</span> <span class="tok-kw">error</span>.AuthenticationFailed;</span>
 <span class="line" id="L422">        }</span>
-<span class="line" id="L423">        mem.copy(<span class="tok-type">u8</span>, m[<span class="tok-number">0</span>..mlen0], block0[<span class="tok-number">32</span>..][<span class="tok-number">0</span>..mlen0]);</span>
+<span class="line" id="L423">        <span class="tok-builtin">@memcpy</span>(m[<span class="tok-number">0</span>..mlen0], block0[<span class="tok-number">32</span>..][<span class="tok-number">0</span>..mlen0]);</span>
 <span class="line" id="L424">        Salsa20.xor(m[mlen0..], c[mlen0..], <span class="tok-number">1</span>, extended.key, extended.nonce);</span>
 <span class="line" id="L425">    }</span>
 <span class="line" id="L426">};</span>
@@ -646,7 +646,7 @@
 <span class="line" id="L533">        debug.assert(c.len == m.len + seal_length);</span>
 <span class="line" id="L534">        <span class="tok-kw">var</span> ekp = <span class="tok-kw">try</span> KeyPair.create(<span class="tok-null">null</span>);</span>
 <span class="line" id="L535">        <span class="tok-kw">const</span> nonce = createNonce(ekp.public_key, public_key);</span>
-<span class="line" id="L536">        mem.copy(<span class="tok-type">u8</span>, c[<span class="tok-number">0</span>..public_length], ekp.public_key[<span class="tok-number">0</span>..]);</span>
+<span class="line" id="L536">        c[<span class="tok-number">0</span>..public_length].* = ekp.public_key;</span>
 <span class="line" id="L537">        <span class="tok-kw">try</span> Box.seal(c[Box.public_length..], m, nonce, public_key, ekp.secret_key);</span>
 <span class="line" id="L538">        utils.secureZero(<span class="tok-type">u8</span>, ekp.secret_key[<span class="tok-number">0</span>..]);</span>
 <span class="line" id="L539">    }</span>

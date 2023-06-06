@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>crypto/utils.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -247,83 +247,77 @@
 <span class="line" id="L134"></span>
 <span class="line" id="L135"><span class="tok-comment">/// Sets a slice to zeroes.</span></span>
 <span class="line" id="L136"><span class="tok-comment">/// Prevents the store from being optimized out.</span></span>
-<span class="line" id="L137"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">secureZero</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>, s: []T) <span class="tok-type">void</span> {</span>
-<span class="line" id="L138">    <span class="tok-comment">// NOTE: We do not use a volatile slice cast here since LLVM cannot</span>
+<span class="line" id="L137"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">secureZero</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>, s: []T) <span class="tok-type">void</span> {</span>
+<span class="line" id="L138">    <span class="tok-builtin">@memset</span>(<span class="tok-builtin">@as</span>([]<span class="tok-kw">volatile</span> T, s), <span class="tok-number">0</span>);</span>
+<span class="line" id="L139">}</span>
+<span class="line" id="L140"></span>
+<span class="line" id="L141"><span class="tok-kw">test</span> <span class="tok-str">&quot;crypto.utils.timingSafeEql&quot;</span> {</span>
+<span class="line" id="L142">    <span class="tok-kw">var</span> a: [<span class="tok-number">100</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L143">    <span class="tok-kw">var</span> b: [<span class="tok-number">100</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L144">    random.bytes(a[<span class="tok-number">0</span>..]);</span>
+<span class="line" id="L145">    random.bytes(b[<span class="tok-number">0</span>..]);</span>
+<span class="line" id="L146">    <span class="tok-kw">try</span> testing.expect(!timingSafeEql([<span class="tok-number">100</span>]<span class="tok-type">u8</span>, a, b));</span>
+<span class="line" id="L147">    a = b;</span>
+<span class="line" id="L148">    <span class="tok-kw">try</span> testing.expect(timingSafeEql([<span class="tok-number">100</span>]<span class="tok-type">u8</span>, a, b));</span>
+<span class="line" id="L149">}</span>
+<span class="line" id="L150"></span>
+<span class="line" id="L151"><span class="tok-kw">test</span> <span class="tok-str">&quot;crypto.utils.timingSafeEql (vectors)&quot;</span> {</span>
+<span class="line" id="L152">    <span class="tok-kw">var</span> a: [<span class="tok-number">100</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L153">    <span class="tok-kw">var</span> b: [<span class="tok-number">100</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L154">    random.bytes(a[<span class="tok-number">0</span>..]);</span>
+<span class="line" id="L155">    random.bytes(b[<span class="tok-number">0</span>..]);</span>
+<span class="line" id="L156">    <span class="tok-kw">const</span> v1: <span class="tok-builtin">@Vector</span>(<span class="tok-number">100</span>, <span class="tok-type">u8</span>) = a;</span>
+<span class="line" id="L157">    <span class="tok-kw">const</span> v2: <span class="tok-builtin">@Vector</span>(<span class="tok-number">100</span>, <span class="tok-type">u8</span>) = b;</span>
+<span class="line" id="L158">    <span class="tok-kw">try</span> testing.expect(!timingSafeEql(<span class="tok-builtin">@Vector</span>(<span class="tok-number">100</span>, <span class="tok-type">u8</span>), v1, v2));</span>
+<span class="line" id="L159">    <span class="tok-kw">const</span> v3: <span class="tok-builtin">@Vector</span>(<span class="tok-number">100</span>, <span class="tok-type">u8</span>) = a;</span>
+<span class="line" id="L160">    <span class="tok-kw">try</span> testing.expect(timingSafeEql(<span class="tok-builtin">@Vector</span>(<span class="tok-number">100</span>, <span class="tok-type">u8</span>), v1, v3));</span>
+<span class="line" id="L161">}</span>
+<span class="line" id="L162"></span>
+<span class="line" id="L163"><span class="tok-kw">test</span> <span class="tok-str">&quot;crypto.utils.timingSafeCompare&quot;</span> {</span>
+<span class="line" id="L164">    <span class="tok-kw">var</span> a = [_]<span class="tok-type">u8</span>{<span class="tok-number">10</span>} ** <span class="tok-number">32</span>;</span>
+<span class="line" id="L165">    <span class="tok-kw">var</span> b = [_]<span class="tok-type">u8</span>{<span class="tok-number">10</span>} ** <span class="tok-number">32</span>;</span>
+<span class="line" id="L166">    <span class="tok-kw">try</span> testing.expectEqual(timingSafeCompare(<span class="tok-type">u8</span>, &amp;a, &amp;b, .Big), .eq);</span>
+<span class="line" id="L167">    <span class="tok-kw">try</span> testing.expectEqual(timingSafeCompare(<span class="tok-type">u8</span>, &amp;a, &amp;b, .Little), .eq);</span>
+<span class="line" id="L168">    a[<span class="tok-number">31</span>] = <span class="tok-number">1</span>;</span>
+<span class="line" id="L169">    <span class="tok-kw">try</span> testing.expectEqual(timingSafeCompare(<span class="tok-type">u8</span>, &amp;a, &amp;b, .Big), .lt);</span>
+<span class="line" id="L170">    <span class="tok-kw">try</span> testing.expectEqual(timingSafeCompare(<span class="tok-type">u8</span>, &amp;a, &amp;b, .Little), .lt);</span>
+<span class="line" id="L171">    a[<span class="tok-number">0</span>] = <span class="tok-number">20</span>;</span>
+<span class="line" id="L172">    <span class="tok-kw">try</span> testing.expectEqual(timingSafeCompare(<span class="tok-type">u8</span>, &amp;a, &amp;b, .Big), .gt);</span>
+<span class="line" id="L173">    <span class="tok-kw">try</span> testing.expectEqual(timingSafeCompare(<span class="tok-type">u8</span>, &amp;a, &amp;b, .Little), .lt);</span>
+<span class="line" id="L174">}</span>
+<span class="line" id="L175"></span>
+<span class="line" id="L176"><span class="tok-kw">test</span> <span class="tok-str">&quot;crypto.utils.timingSafe{Add,Sub}&quot;</span> {</span>
+<span class="line" id="L177">    <span class="tok-kw">const</span> len = <span class="tok-number">32</span>;</span>
+<span class="line" id="L178">    <span class="tok-kw">var</span> a: [len]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L179">    <span class="tok-kw">var</span> b: [len]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L180">    <span class="tok-kw">var</span> c: [len]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
+<span class="line" id="L181">    <span class="tok-kw">const</span> zero = [_]<span class="tok-type">u8</span>{<span class="tok-number">0</span>} ** len;</span>
+<span class="line" id="L182">    <span class="tok-kw">var</span> iterations: <span class="tok-type">usize</span> = <span class="tok-number">100</span>;</span>
+<span class="line" id="L183">    <span class="tok-kw">while</span> (iterations != <span class="tok-number">0</span>) : (iterations -= <span class="tok-number">1</span>) {</span>
+<span class="line" id="L184">        random.bytes(&amp;a);</span>
+<span class="line" id="L185">        random.bytes(&amp;b);</span>
+<span class="line" id="L186">        <span class="tok-kw">const</span> endian = <span class="tok-kw">if</span> (iterations % <span class="tok-number">2</span> == <span class="tok-number">0</span>) Endian.Big <span class="tok-kw">else</span> Endian.Little;</span>
+<span class="line" id="L187">        _ = timingSafeSub(<span class="tok-type">u8</span>, &amp;a, &amp;b, &amp;c, endian); <span class="tok-comment">// a-b</span>
 </span>
-<span class="line" id="L139">    <span class="tok-comment">// see that it can be replaced by a memset.</span>
+<span class="line" id="L188">        _ = timingSafeAdd(<span class="tok-type">u8</span>, &amp;c, &amp;b, &amp;c, endian); <span class="tok-comment">// (a-b)+b</span>
 </span>
-<span class="line" id="L140">    <span class="tok-kw">const</span> ptr = <span class="tok-builtin">@ptrCast</span>([*]<span class="tok-kw">volatile</span> <span class="tok-type">u8</span>, s.ptr);</span>
-<span class="line" id="L141">    <span class="tok-kw">const</span> length = s.len * <span class="tok-builtin">@sizeOf</span>(T);</span>
-<span class="line" id="L142">    <span class="tok-builtin">@memset</span>(ptr, <span class="tok-number">0</span>, length);</span>
-<span class="line" id="L143">}</span>
-<span class="line" id="L144"></span>
-<span class="line" id="L145"><span class="tok-kw">test</span> <span class="tok-str">&quot;crypto.utils.timingSafeEql&quot;</span> {</span>
-<span class="line" id="L146">    <span class="tok-kw">var</span> a: [<span class="tok-number">100</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L147">    <span class="tok-kw">var</span> b: [<span class="tok-number">100</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L148">    random.bytes(a[<span class="tok-number">0</span>..]);</span>
-<span class="line" id="L149">    random.bytes(b[<span class="tok-number">0</span>..]);</span>
-<span class="line" id="L150">    <span class="tok-kw">try</span> testing.expect(!timingSafeEql([<span class="tok-number">100</span>]<span class="tok-type">u8</span>, a, b));</span>
-<span class="line" id="L151">    mem.copy(<span class="tok-type">u8</span>, a[<span class="tok-number">0</span>..], b[<span class="tok-number">0</span>..]);</span>
-<span class="line" id="L152">    <span class="tok-kw">try</span> testing.expect(timingSafeEql([<span class="tok-number">100</span>]<span class="tok-type">u8</span>, a, b));</span>
-<span class="line" id="L153">}</span>
-<span class="line" id="L154"></span>
-<span class="line" id="L155"><span class="tok-kw">test</span> <span class="tok-str">&quot;crypto.utils.timingSafeEql (vectors)&quot;</span> {</span>
-<span class="line" id="L156">    <span class="tok-kw">var</span> a: [<span class="tok-number">100</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L157">    <span class="tok-kw">var</span> b: [<span class="tok-number">100</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L158">    random.bytes(a[<span class="tok-number">0</span>..]);</span>
-<span class="line" id="L159">    random.bytes(b[<span class="tok-number">0</span>..]);</span>
-<span class="line" id="L160">    <span class="tok-kw">const</span> v1: <span class="tok-builtin">@Vector</span>(<span class="tok-number">100</span>, <span class="tok-type">u8</span>) = a;</span>
-<span class="line" id="L161">    <span class="tok-kw">const</span> v2: <span class="tok-builtin">@Vector</span>(<span class="tok-number">100</span>, <span class="tok-type">u8</span>) = b;</span>
-<span class="line" id="L162">    <span class="tok-kw">try</span> testing.expect(!timingSafeEql(<span class="tok-builtin">@Vector</span>(<span class="tok-number">100</span>, <span class="tok-type">u8</span>), v1, v2));</span>
-<span class="line" id="L163">    <span class="tok-kw">const</span> v3: <span class="tok-builtin">@Vector</span>(<span class="tok-number">100</span>, <span class="tok-type">u8</span>) = a;</span>
-<span class="line" id="L164">    <span class="tok-kw">try</span> testing.expect(timingSafeEql(<span class="tok-builtin">@Vector</span>(<span class="tok-number">100</span>, <span class="tok-type">u8</span>), v1, v3));</span>
-<span class="line" id="L165">}</span>
-<span class="line" id="L166"></span>
-<span class="line" id="L167"><span class="tok-kw">test</span> <span class="tok-str">&quot;crypto.utils.timingSafeCompare&quot;</span> {</span>
-<span class="line" id="L168">    <span class="tok-kw">var</span> a = [_]<span class="tok-type">u8</span>{<span class="tok-number">10</span>} ** <span class="tok-number">32</span>;</span>
-<span class="line" id="L169">    <span class="tok-kw">var</span> b = [_]<span class="tok-type">u8</span>{<span class="tok-number">10</span>} ** <span class="tok-number">32</span>;</span>
-<span class="line" id="L170">    <span class="tok-kw">try</span> testing.expectEqual(timingSafeCompare(<span class="tok-type">u8</span>, &amp;a, &amp;b, .Big), .eq);</span>
-<span class="line" id="L171">    <span class="tok-kw">try</span> testing.expectEqual(timingSafeCompare(<span class="tok-type">u8</span>, &amp;a, &amp;b, .Little), .eq);</span>
-<span class="line" id="L172">    a[<span class="tok-number">31</span>] = <span class="tok-number">1</span>;</span>
-<span class="line" id="L173">    <span class="tok-kw">try</span> testing.expectEqual(timingSafeCompare(<span class="tok-type">u8</span>, &amp;a, &amp;b, .Big), .lt);</span>
-<span class="line" id="L174">    <span class="tok-kw">try</span> testing.expectEqual(timingSafeCompare(<span class="tok-type">u8</span>, &amp;a, &amp;b, .Little), .lt);</span>
-<span class="line" id="L175">    a[<span class="tok-number">0</span>] = <span class="tok-number">20</span>;</span>
-<span class="line" id="L176">    <span class="tok-kw">try</span> testing.expectEqual(timingSafeCompare(<span class="tok-type">u8</span>, &amp;a, &amp;b, .Big), .gt);</span>
-<span class="line" id="L177">    <span class="tok-kw">try</span> testing.expectEqual(timingSafeCompare(<span class="tok-type">u8</span>, &amp;a, &amp;b, .Little), .lt);</span>
-<span class="line" id="L178">}</span>
-<span class="line" id="L179"></span>
-<span class="line" id="L180"><span class="tok-kw">test</span> <span class="tok-str">&quot;crypto.utils.timingSafe{Add,Sub}&quot;</span> {</span>
-<span class="line" id="L181">    <span class="tok-kw">const</span> len = <span class="tok-number">32</span>;</span>
-<span class="line" id="L182">    <span class="tok-kw">var</span> a: [len]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L183">    <span class="tok-kw">var</span> b: [len]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L184">    <span class="tok-kw">var</span> c: [len]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L185">    <span class="tok-kw">const</span> zero = [_]<span class="tok-type">u8</span>{<span class="tok-number">0</span>} ** len;</span>
-<span class="line" id="L186">    <span class="tok-kw">var</span> iterations: <span class="tok-type">usize</span> = <span class="tok-number">100</span>;</span>
-<span class="line" id="L187">    <span class="tok-kw">while</span> (iterations != <span class="tok-number">0</span>) : (iterations -= <span class="tok-number">1</span>) {</span>
-<span class="line" id="L188">        random.bytes(&amp;a);</span>
-<span class="line" id="L189">        random.bytes(&amp;b);</span>
-<span class="line" id="L190">        <span class="tok-kw">const</span> endian = <span class="tok-kw">if</span> (iterations % <span class="tok-number">2</span> == <span class="tok-number">0</span>) Endian.Big <span class="tok-kw">else</span> Endian.Little;</span>
-<span class="line" id="L191">        _ = timingSafeSub(<span class="tok-type">u8</span>, &amp;a, &amp;b, &amp;c, endian); <span class="tok-comment">// a-b</span>
+<span class="line" id="L189">        <span class="tok-kw">try</span> testing.expectEqualSlices(<span class="tok-type">u8</span>, &amp;c, &amp;a);</span>
+<span class="line" id="L190">        <span class="tok-kw">const</span> borrow = timingSafeSub(<span class="tok-type">u8</span>, &amp;c, &amp;a, &amp;c, endian); <span class="tok-comment">// ((a-b)+b)-a</span>
 </span>
-<span class="line" id="L192">        _ = timingSafeAdd(<span class="tok-type">u8</span>, &amp;c, &amp;b, &amp;c, endian); <span class="tok-comment">// (a-b)+b</span>
-</span>
-<span class="line" id="L193">        <span class="tok-kw">try</span> testing.expectEqualSlices(<span class="tok-type">u8</span>, &amp;c, &amp;a);</span>
-<span class="line" id="L194">        <span class="tok-kw">const</span> borrow = timingSafeSub(<span class="tok-type">u8</span>, &amp;c, &amp;a, &amp;c, endian); <span class="tok-comment">// ((a-b)+b)-a</span>
-</span>
-<span class="line" id="L195">        <span class="tok-kw">try</span> testing.expectEqualSlices(<span class="tok-type">u8</span>, &amp;c, &amp;zero);</span>
-<span class="line" id="L196">        <span class="tok-kw">try</span> testing.expectEqual(borrow, <span class="tok-null">false</span>);</span>
-<span class="line" id="L197">    }</span>
-<span class="line" id="L198">}</span>
+<span class="line" id="L191">        <span class="tok-kw">try</span> testing.expectEqualSlices(<span class="tok-type">u8</span>, &amp;c, &amp;zero);</span>
+<span class="line" id="L192">        <span class="tok-kw">try</span> testing.expectEqual(borrow, <span class="tok-null">false</span>);</span>
+<span class="line" id="L193">    }</span>
+<span class="line" id="L194">}</span>
+<span class="line" id="L195"></span>
+<span class="line" id="L196"><span class="tok-kw">test</span> <span class="tok-str">&quot;crypto.utils.secureZero&quot;</span> {</span>
+<span class="line" id="L197">    <span class="tok-kw">var</span> a = [_]<span class="tok-type">u8</span>{<span class="tok-number">0xfe</span>} ** <span class="tok-number">8</span>;</span>
+<span class="line" id="L198">    <span class="tok-kw">var</span> b = [_]<span class="tok-type">u8</span>{<span class="tok-number">0xfe</span>} ** <span class="tok-number">8</span>;</span>
 <span class="line" id="L199"></span>
-<span class="line" id="L200"><span class="tok-kw">test</span> <span class="tok-str">&quot;crypto.utils.secureZero&quot;</span> {</span>
-<span class="line" id="L201">    <span class="tok-kw">var</span> a = [_]<span class="tok-type">u8</span>{<span class="tok-number">0xfe</span>} ** <span class="tok-number">8</span>;</span>
-<span class="line" id="L202">    <span class="tok-kw">var</span> b = [_]<span class="tok-type">u8</span>{<span class="tok-number">0xfe</span>} ** <span class="tok-number">8</span>;</span>
-<span class="line" id="L203"></span>
-<span class="line" id="L204">    mem.set(<span class="tok-type">u8</span>, a[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
-<span class="line" id="L205">    secureZero(<span class="tok-type">u8</span>, b[<span class="tok-number">0</span>..]);</span>
-<span class="line" id="L206"></span>
-<span class="line" id="L207">    <span class="tok-kw">try</span> testing.expectEqualSlices(<span class="tok-type">u8</span>, a[<span class="tok-number">0</span>..], b[<span class="tok-number">0</span>..]);</span>
-<span class="line" id="L208">}</span>
-<span class="line" id="L209"></span>
+<span class="line" id="L200">    <span class="tok-builtin">@memset</span>(a[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
+<span class="line" id="L201">    secureZero(<span class="tok-type">u8</span>, b[<span class="tok-number">0</span>..]);</span>
+<span class="line" id="L202"></span>
+<span class="line" id="L203">    <span class="tok-kw">try</span> testing.expectEqualSlices(<span class="tok-type">u8</span>, a[<span class="tok-number">0</span>..], b[<span class="tok-number">0</span>..]);</span>
+<span class="line" id="L204">}</span>
+<span class="line" id="L205"></span>
 </code></pre></body>
 </html>

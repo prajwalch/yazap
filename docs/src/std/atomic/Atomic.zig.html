@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>atomic/Atomic.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -144,7 +144,7 @@
 <span class="line" id="L31">        <span class="tok-comment">///         // Release ensures code before unref() happens-before the count is decremented as dropFn could be called by then.</span></span>
 <span class="line" id="L32">        <span class="tok-comment">///         if (self.count.fetchSub(1, .Release)) {</span></span>
 <span class="line" id="L33">        <span class="tok-comment">///             // Acquire ensures count decrement and code before previous unrefs()s happens-before we call dropFn below.</span></span>
-<span class="line" id="L34">        <span class="tok-comment">///             // NOTE: another alterative is to use .AcqRel on the fetchSub count decrement but it's extra barrier in possibly hot path.</span></span>
+<span class="line" id="L34">        <span class="tok-comment">///             // NOTE: another alternative is to use .AcqRel on the fetchSub count decrement but it's extra barrier in possibly hot path.</span></span>
 <span class="line" id="L35">        <span class="tok-comment">///             self.count.fence(.Acquire);</span></span>
 <span class="line" id="L36">        <span class="tok-comment">///             (self.dropFn)(self);</span></span>
 <span class="line" id="L37">        <span class="tok-comment">///         }</span></span>

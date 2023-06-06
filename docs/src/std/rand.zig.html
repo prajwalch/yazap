@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>rand.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -544,99 +544,101 @@
 <span class="line" id="L389"></span>
 <span class="line" id="L390">    <span class="tok-comment">/// Randomly selects an index into `proportions`, where the likelihood of each</span></span>
 <span class="line" id="L391">    <span class="tok-comment">/// index is weighted by that proportion.</span></span>
-<span class="line" id="L392">    <span class="tok-comment">///</span></span>
-<span class="line" id="L393">    <span class="tok-comment">/// This is useful for selecting an item from a slice where weights are not equal.</span></span>
-<span class="line" id="L394">    <span class="tok-comment">/// `T` must be a numeric type capable of holding the sum of `proportions`.</span></span>
-<span class="line" id="L395">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">weightedIndex</span>(r: std.rand.Random, <span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>, proportions: []<span class="tok-kw">const</span> T) <span class="tok-type">usize</span> {</span>
-<span class="line" id="L396">        <span class="tok-comment">// This implementation works by summing the proportions and picking a random</span>
+<span class="line" id="L392">    <span class="tok-comment">/// It is more likely for the index of the last proportion to be returned</span></span>
+<span class="line" id="L393">    <span class="tok-comment">/// than the index of the first proportion in the slice, and vice versa.</span></span>
+<span class="line" id="L394">    <span class="tok-comment">///</span></span>
+<span class="line" id="L395">    <span class="tok-comment">/// This is useful for selecting an item from a slice where weights are not equal.</span></span>
+<span class="line" id="L396">    <span class="tok-comment">/// `T` must be a numeric type capable of holding the sum of `proportions`.</span></span>
+<span class="line" id="L397">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">weightedIndex</span>(r: std.rand.Random, <span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>, proportions: []<span class="tok-kw">const</span> T) <span class="tok-type">usize</span> {</span>
+<span class="line" id="L398">        <span class="tok-comment">// This implementation works by summing the proportions and picking a random</span>
 </span>
-<span class="line" id="L397">        <span class="tok-comment">//  point in [0, sum).  We then loop over the proportions, accumulating</span>
+<span class="line" id="L399">        <span class="tok-comment">//  point in [0, sum).  We then loop over the proportions, accumulating</span>
 </span>
-<span class="line" id="L398">        <span class="tok-comment">//  until our accumulator is greater than the random point.</span>
+<span class="line" id="L400">        <span class="tok-comment">//  until our accumulator is greater than the random point.</span>
 </span>
-<span class="line" id="L399"></span>
-<span class="line" id="L400">        <span class="tok-kw">var</span> sum: T = <span class="tok-number">0</span>;</span>
-<span class="line" id="L401">        <span class="tok-kw">for</span> (proportions) |v| {</span>
-<span class="line" id="L402">            sum += v;</span>
-<span class="line" id="L403">        }</span>
-<span class="line" id="L404"></span>
-<span class="line" id="L405">        <span class="tok-kw">const</span> point = <span class="tok-kw">if</span> (<span class="tok-kw">comptime</span> std.meta.trait.isSignedInt(T))</span>
-<span class="line" id="L406">            r.intRangeLessThan(T, <span class="tok-number">0</span>, sum)</span>
-<span class="line" id="L407">        <span class="tok-kw">else</span> <span class="tok-kw">if</span> (<span class="tok-kw">comptime</span> std.meta.trait.isUnsignedInt(T))</span>
-<span class="line" id="L408">            r.uintLessThan(T, sum)</span>
-<span class="line" id="L409">        <span class="tok-kw">else</span> <span class="tok-kw">if</span> (<span class="tok-kw">comptime</span> std.meta.trait.isFloat(T))</span>
-<span class="line" id="L410">            <span class="tok-comment">// take care that imprecision doesn't lead to a value slightly greater than sum</span>
+<span class="line" id="L401"></span>
+<span class="line" id="L402">        <span class="tok-kw">var</span> sum: T = <span class="tok-number">0</span>;</span>
+<span class="line" id="L403">        <span class="tok-kw">for</span> (proportions) |v| {</span>
+<span class="line" id="L404">            sum += v;</span>
+<span class="line" id="L405">        }</span>
+<span class="line" id="L406"></span>
+<span class="line" id="L407">        <span class="tok-kw">const</span> point = <span class="tok-kw">if</span> (<span class="tok-kw">comptime</span> std.meta.trait.isSignedInt(T))</span>
+<span class="line" id="L408">            r.intRangeLessThan(T, <span class="tok-number">0</span>, sum)</span>
+<span class="line" id="L409">        <span class="tok-kw">else</span> <span class="tok-kw">if</span> (<span class="tok-kw">comptime</span> std.meta.trait.isUnsignedInt(T))</span>
+<span class="line" id="L410">            r.uintLessThan(T, sum)</span>
+<span class="line" id="L411">        <span class="tok-kw">else</span> <span class="tok-kw">if</span> (<span class="tok-kw">comptime</span> std.meta.trait.isFloat(T))</span>
+<span class="line" id="L412">            <span class="tok-comment">// take care that imprecision doesn't lead to a value slightly greater than sum</span>
 </span>
-<span class="line" id="L411">            std.math.min(r.float(T) * sum, sum - std.math.epsilon(T))</span>
-<span class="line" id="L412">        <span class="tok-kw">else</span></span>
-<span class="line" id="L413">            <span class="tok-builtin">@compileError</span>(<span class="tok-str">&quot;weightedIndex does not support proportions of type &quot;</span> ++ <span class="tok-builtin">@typeName</span>(T));</span>
-<span class="line" id="L414"></span>
-<span class="line" id="L415">        std.debug.assert(point &lt; sum);</span>
+<span class="line" id="L413">            std.math.min(r.float(T) * sum, sum - std.math.epsilon(T))</span>
+<span class="line" id="L414">        <span class="tok-kw">else</span></span>
+<span class="line" id="L415">            <span class="tok-builtin">@compileError</span>(<span class="tok-str">&quot;weightedIndex does not support proportions of type &quot;</span> ++ <span class="tok-builtin">@typeName</span>(T));</span>
 <span class="line" id="L416"></span>
-<span class="line" id="L417">        <span class="tok-kw">var</span> accumulator: T = <span class="tok-number">0</span>;</span>
-<span class="line" id="L418">        <span class="tok-kw">for</span> (proportions, <span class="tok-number">0</span>..) |p, index| {</span>
-<span class="line" id="L419">            accumulator += p;</span>
-<span class="line" id="L420">            <span class="tok-kw">if</span> (point &lt; accumulator) <span class="tok-kw">return</span> index;</span>
-<span class="line" id="L421">        }</span>
-<span class="line" id="L422"></span>
-<span class="line" id="L423">        <span class="tok-kw">unreachable</span>;</span>
-<span class="line" id="L424">    }</span>
-<span class="line" id="L425"></span>
-<span class="line" id="L426">    <span class="tok-comment">/// Returns the smallest of `Index` and `usize`.</span></span>
-<span class="line" id="L427">    <span class="tok-kw">fn</span> <span class="tok-fn">MinArrayIndex</span>(<span class="tok-kw">comptime</span> Index: <span class="tok-type">type</span>) <span class="tok-type">type</span> {</span>
-<span class="line" id="L428">        <span class="tok-kw">const</span> index_info = <span class="tok-builtin">@typeInfo</span>(Index).Int;</span>
-<span class="line" id="L429">        assert(index_info.signedness == .unsigned);</span>
-<span class="line" id="L430">        <span class="tok-kw">return</span> <span class="tok-kw">if</span> (index_info.bits &gt;= <span class="tok-builtin">@typeInfo</span>(<span class="tok-type">usize</span>).Int.bits) <span class="tok-type">usize</span> <span class="tok-kw">else</span> Index;</span>
-<span class="line" id="L431">    }</span>
-<span class="line" id="L432">};</span>
-<span class="line" id="L433"></span>
-<span class="line" id="L434"><span class="tok-comment">/// Convert a random integer 0 &lt;= random_int &lt;= maxValue(T),</span></span>
-<span class="line" id="L435"><span class="tok-comment">/// into an integer 0 &lt;= result &lt; less_than.</span></span>
-<span class="line" id="L436"><span class="tok-comment">/// This function introduces a minor bias.</span></span>
-<span class="line" id="L437"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">limitRangeBiased</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>, random_int: T, less_than: T) T {</span>
-<span class="line" id="L438">    <span class="tok-kw">comptime</span> assert(<span class="tok-builtin">@typeInfo</span>(T).Int.signedness == .unsigned);</span>
-<span class="line" id="L439">    <span class="tok-kw">const</span> bits = <span class="tok-builtin">@typeInfo</span>(T).Int.bits;</span>
-<span class="line" id="L440">    <span class="tok-kw">const</span> T2 = std.meta.Int(.unsigned, bits * <span class="tok-number">2</span>);</span>
-<span class="line" id="L441"></span>
-<span class="line" id="L442">    <span class="tok-comment">// adapted from:</span>
+<span class="line" id="L417">        std.debug.assert(point &lt; sum);</span>
+<span class="line" id="L418"></span>
+<span class="line" id="L419">        <span class="tok-kw">var</span> accumulator: T = <span class="tok-number">0</span>;</span>
+<span class="line" id="L420">        <span class="tok-kw">for</span> (proportions, <span class="tok-number">0</span>..) |p, index| {</span>
+<span class="line" id="L421">            accumulator += p;</span>
+<span class="line" id="L422">            <span class="tok-kw">if</span> (point &lt; accumulator) <span class="tok-kw">return</span> index;</span>
+<span class="line" id="L423">        }</span>
+<span class="line" id="L424"></span>
+<span class="line" id="L425">        <span class="tok-kw">unreachable</span>;</span>
+<span class="line" id="L426">    }</span>
+<span class="line" id="L427"></span>
+<span class="line" id="L428">    <span class="tok-comment">/// Returns the smallest of `Index` and `usize`.</span></span>
+<span class="line" id="L429">    <span class="tok-kw">fn</span> <span class="tok-fn">MinArrayIndex</span>(<span class="tok-kw">comptime</span> Index: <span class="tok-type">type</span>) <span class="tok-type">type</span> {</span>
+<span class="line" id="L430">        <span class="tok-kw">const</span> index_info = <span class="tok-builtin">@typeInfo</span>(Index).Int;</span>
+<span class="line" id="L431">        assert(index_info.signedness == .unsigned);</span>
+<span class="line" id="L432">        <span class="tok-kw">return</span> <span class="tok-kw">if</span> (index_info.bits &gt;= <span class="tok-builtin">@typeInfo</span>(<span class="tok-type">usize</span>).Int.bits) <span class="tok-type">usize</span> <span class="tok-kw">else</span> Index;</span>
+<span class="line" id="L433">    }</span>
+<span class="line" id="L434">};</span>
+<span class="line" id="L435"></span>
+<span class="line" id="L436"><span class="tok-comment">/// Convert a random integer 0 &lt;= random_int &lt;= maxValue(T),</span></span>
+<span class="line" id="L437"><span class="tok-comment">/// into an integer 0 &lt;= result &lt; less_than.</span></span>
+<span class="line" id="L438"><span class="tok-comment">/// This function introduces a minor bias.</span></span>
+<span class="line" id="L439"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">limitRangeBiased</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>, random_int: T, less_than: T) T {</span>
+<span class="line" id="L440">    <span class="tok-kw">comptime</span> assert(<span class="tok-builtin">@typeInfo</span>(T).Int.signedness == .unsigned);</span>
+<span class="line" id="L441">    <span class="tok-kw">const</span> bits = <span class="tok-builtin">@typeInfo</span>(T).Int.bits;</span>
+<span class="line" id="L442">    <span class="tok-kw">const</span> T2 = std.meta.Int(.unsigned, bits * <span class="tok-number">2</span>);</span>
+<span class="line" id="L443"></span>
+<span class="line" id="L444">    <span class="tok-comment">// adapted from:</span>
 </span>
-<span class="line" id="L443">    <span class="tok-comment">//   http://www.pcg-random.org/posts/bounded-rands.html</span>
+<span class="line" id="L445">    <span class="tok-comment">//   http://www.pcg-random.org/posts/bounded-rands.html</span>
 </span>
-<span class="line" id="L444">    <span class="tok-comment">//   &quot;Integer Multiplication (Biased)&quot;</span>
+<span class="line" id="L446">    <span class="tok-comment">//   &quot;Integer Multiplication (Biased)&quot;</span>
 </span>
-<span class="line" id="L445">    <span class="tok-kw">var</span> m: T2 = <span class="tok-builtin">@as</span>(T2, random_int) * <span class="tok-builtin">@as</span>(T2, less_than);</span>
-<span class="line" id="L446">    <span class="tok-kw">return</span> <span class="tok-builtin">@intCast</span>(T, m &gt;&gt; bits);</span>
-<span class="line" id="L447">}</span>
-<span class="line" id="L448"></span>
-<span class="line" id="L449"><span class="tok-comment">// Generator to extend 64-bit seed values into longer sequences.</span>
+<span class="line" id="L447">    <span class="tok-kw">var</span> m: T2 = <span class="tok-builtin">@as</span>(T2, random_int) * <span class="tok-builtin">@as</span>(T2, less_than);</span>
+<span class="line" id="L448">    <span class="tok-kw">return</span> <span class="tok-builtin">@intCast</span>(T, m &gt;&gt; bits);</span>
+<span class="line" id="L449">}</span>
+<span class="line" id="L450"></span>
+<span class="line" id="L451"><span class="tok-comment">// Generator to extend 64-bit seed values into longer sequences.</span>
 </span>
-<span class="line" id="L450"><span class="tok-comment">//</span>
+<span class="line" id="L452"><span class="tok-comment">//</span>
 </span>
-<span class="line" id="L451"><span class="tok-comment">// The number of cycles is thus limited to 64-bits regardless of the engine, but this</span>
+<span class="line" id="L453"><span class="tok-comment">// The number of cycles is thus limited to 64-bits regardless of the engine, but this</span>
 </span>
-<span class="line" id="L452"><span class="tok-comment">// is still plenty for practical purposes.</span>
+<span class="line" id="L454"><span class="tok-comment">// is still plenty for practical purposes.</span>
 </span>
-<span class="line" id="L453"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> SplitMix64 = <span class="tok-kw">struct</span> {</span>
-<span class="line" id="L454">    s: <span class="tok-type">u64</span>,</span>
-<span class="line" id="L455"></span>
-<span class="line" id="L456">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">init</span>(seed: <span class="tok-type">u64</span>) SplitMix64 {</span>
-<span class="line" id="L457">        <span class="tok-kw">return</span> SplitMix64{ .s = seed };</span>
-<span class="line" id="L458">    }</span>
-<span class="line" id="L459"></span>
-<span class="line" id="L460">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">next</span>(self: *SplitMix64) <span class="tok-type">u64</span> {</span>
-<span class="line" id="L461">        self.s +%= <span class="tok-number">0x9e3779b97f4a7c15</span>;</span>
-<span class="line" id="L462"></span>
-<span class="line" id="L463">        <span class="tok-kw">var</span> z = self.s;</span>
-<span class="line" id="L464">        z = (z ^ (z &gt;&gt; <span class="tok-number">30</span>)) *% <span class="tok-number">0xbf58476d1ce4e5b9</span>;</span>
-<span class="line" id="L465">        z = (z ^ (z &gt;&gt; <span class="tok-number">27</span>)) *% <span class="tok-number">0x94d049bb133111eb</span>;</span>
-<span class="line" id="L466">        <span class="tok-kw">return</span> z ^ (z &gt;&gt; <span class="tok-number">31</span>);</span>
-<span class="line" id="L467">    }</span>
-<span class="line" id="L468">};</span>
-<span class="line" id="L469"></span>
-<span class="line" id="L470"><span class="tok-kw">test</span> {</span>
-<span class="line" id="L471">    std.testing.refAllDecls(<span class="tok-builtin">@This</span>());</span>
-<span class="line" id="L472">    _ = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;rand/test.zig&quot;</span>);</span>
-<span class="line" id="L473">}</span>
-<span class="line" id="L474"></span>
+<span class="line" id="L455"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> SplitMix64 = <span class="tok-kw">struct</span> {</span>
+<span class="line" id="L456">    s: <span class="tok-type">u64</span>,</span>
+<span class="line" id="L457"></span>
+<span class="line" id="L458">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">init</span>(seed: <span class="tok-type">u64</span>) SplitMix64 {</span>
+<span class="line" id="L459">        <span class="tok-kw">return</span> SplitMix64{ .s = seed };</span>
+<span class="line" id="L460">    }</span>
+<span class="line" id="L461"></span>
+<span class="line" id="L462">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">next</span>(self: *SplitMix64) <span class="tok-type">u64</span> {</span>
+<span class="line" id="L463">        self.s +%= <span class="tok-number">0x9e3779b97f4a7c15</span>;</span>
+<span class="line" id="L464"></span>
+<span class="line" id="L465">        <span class="tok-kw">var</span> z = self.s;</span>
+<span class="line" id="L466">        z = (z ^ (z &gt;&gt; <span class="tok-number">30</span>)) *% <span class="tok-number">0xbf58476d1ce4e5b9</span>;</span>
+<span class="line" id="L467">        z = (z ^ (z &gt;&gt; <span class="tok-number">27</span>)) *% <span class="tok-number">0x94d049bb133111eb</span>;</span>
+<span class="line" id="L468">        <span class="tok-kw">return</span> z ^ (z &gt;&gt; <span class="tok-number">31</span>);</span>
+<span class="line" id="L469">    }</span>
+<span class="line" id="L470">};</span>
+<span class="line" id="L471"></span>
+<span class="line" id="L472"><span class="tok-kw">test</span> {</span>
+<span class="line" id="L473">    std.testing.refAllDecls(<span class="tok-builtin">@This</span>());</span>
+<span class="line" id="L474">    _ = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;rand/test.zig&quot;</span>);</span>
+<span class="line" id="L475">}</span>
+<span class="line" id="L476"></span>
 </code></pre></body>
 </html>

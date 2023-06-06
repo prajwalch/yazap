@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>crypto/keccak_p.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -183,7 +183,7 @@
 <span class="line" id="L68">            }</span>
 <span class="line" id="L69">            <span class="tok-kw">if</span> (i &lt; bytes.len) {</span>
 <span class="line" id="L70">                <span class="tok-kw">var</span> padded = [_]<span class="tok-type">u8</span>{<span class="tok-number">0</span>} ** <span class="tok-builtin">@sizeOf</span>(T);</span>
-<span class="line" id="L71">                mem.copy(<span class="tok-type">u8</span>, padded[<span class="tok-number">0</span> .. bytes.len - i], bytes[i..]);</span>
+<span class="line" id="L71">                <span class="tok-builtin">@memcpy</span>(padded[<span class="tok-number">0</span> .. bytes.len - i], bytes[i..]);</span>
 <span class="line" id="L72">                self.st[i / <span class="tok-builtin">@sizeOf</span>(T)] = mem.readIntLittle(T, padded[<span class="tok-number">0</span>..]);</span>
 <span class="line" id="L73">            }</span>
 <span class="line" id="L74">        }</span>
@@ -202,7 +202,7 @@
 <span class="line" id="L87">            }</span>
 <span class="line" id="L88">            <span class="tok-kw">if</span> (i &lt; bytes.len) {</span>
 <span class="line" id="L89">                <span class="tok-kw">var</span> padded = [_]<span class="tok-type">u8</span>{<span class="tok-number">0</span>} ** <span class="tok-builtin">@sizeOf</span>(T);</span>
-<span class="line" id="L90">                mem.copy(<span class="tok-type">u8</span>, padded[<span class="tok-number">0</span> .. bytes.len - i], bytes[i..]);</span>
+<span class="line" id="L90">                <span class="tok-builtin">@memcpy</span>(padded[<span class="tok-number">0</span> .. bytes.len - i], bytes[i..]);</span>
 <span class="line" id="L91">                self.st[i / <span class="tok-builtin">@sizeOf</span>(T)] ^= mem.readIntLittle(T, padded[<span class="tok-number">0</span>..]);</span>
 <span class="line" id="L92">            }</span>
 <span class="line" id="L93">        }</span>
@@ -216,7 +216,7 @@
 <span class="line" id="L101">            <span class="tok-kw">if</span> (i &lt; out.len) {</span>
 <span class="line" id="L102">                <span class="tok-kw">var</span> padded = [_]<span class="tok-type">u8</span>{<span class="tok-number">0</span>} ** <span class="tok-builtin">@sizeOf</span>(T);</span>
 <span class="line" id="L103">                mem.writeIntLittle(T, padded[<span class="tok-number">0</span>..], self.st[i / <span class="tok-builtin">@sizeOf</span>(T)]);</span>
-<span class="line" id="L104">                mem.copy(<span class="tok-type">u8</span>, out[i..], padded[<span class="tok-number">0</span> .. out.len - i]);</span>
+<span class="line" id="L104">                <span class="tok-builtin">@memcpy</span>(out[i..], padded[<span class="tok-number">0</span> .. out.len - i]);</span>
 <span class="line" id="L105">            }</span>
 <span class="line" id="L106">        }</span>
 <span class="line" id="L107"></span>
@@ -231,16 +231,16 @@
 <span class="line" id="L116">            }</span>
 <span class="line" id="L117">            <span class="tok-kw">if</span> (i &lt; in.len) {</span>
 <span class="line" id="L118">                <span class="tok-kw">var</span> padded = [_]<span class="tok-type">u8</span>{<span class="tok-number">0</span>} ** <span class="tok-builtin">@sizeOf</span>(T);</span>
-<span class="line" id="L119">                mem.copy(<span class="tok-type">u8</span>, padded[<span class="tok-number">0</span> .. in.len - i], in[i..]);</span>
+<span class="line" id="L119">                <span class="tok-builtin">@memcpy</span>(padded[<span class="tok-number">0</span> .. in.len - i], in[i..]);</span>
 <span class="line" id="L120">                <span class="tok-kw">const</span> x = mem.readIntNative(T, &amp;padded) ^ mem.nativeToLittle(T, self.st[i / <span class="tok-builtin">@sizeOf</span>(T)]);</span>
 <span class="line" id="L121">                mem.writeIntNative(T, &amp;padded, x);</span>
-<span class="line" id="L122">                mem.copy(<span class="tok-type">u8</span>, out[i..], padded[<span class="tok-number">0</span> .. in.len - i]);</span>
+<span class="line" id="L122">                <span class="tok-builtin">@memcpy</span>(out[i..], padded[<span class="tok-number">0</span> .. in.len - i]);</span>
 <span class="line" id="L123">            }</span>
 <span class="line" id="L124">        }</span>
 <span class="line" id="L125"></span>
 <span class="line" id="L126">        <span class="tok-comment">/// Set the words storing the bytes of a given range to zero.</span></span>
 <span class="line" id="L127">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">clear</span>(self: *Self, from: <span class="tok-type">usize</span>, to: <span class="tok-type">usize</span>) <span class="tok-type">void</span> {</span>
-<span class="line" id="L128">            mem.set(T, self.st[from / <span class="tok-builtin">@sizeOf</span>(T) .. (to + <span class="tok-builtin">@sizeOf</span>(T) - <span class="tok-number">1</span>) / <span class="tok-builtin">@sizeOf</span>(T)], <span class="tok-number">0</span>);</span>
+<span class="line" id="L128">            <span class="tok-builtin">@memset</span>(self.st[from / <span class="tok-builtin">@sizeOf</span>(T) .. (to + <span class="tok-builtin">@sizeOf</span>(T) - <span class="tok-number">1</span>) / <span class="tok-builtin">@sizeOf</span>(T)], <span class="tok-number">0</span>);</span>
 <span class="line" id="L129">        }</span>
 <span class="line" id="L130"></span>
 <span class="line" id="L131">        <span class="tok-comment">/// Clear the entire state, disabling compiler optimizations.</span></span>
@@ -335,7 +335,7 @@
 <span class="line" id="L215">            <span class="tok-kw">var</span> bytes = bytes_;</span>
 <span class="line" id="L216">            <span class="tok-kw">if</span> (self.offset &gt; <span class="tok-number">0</span>) {</span>
 <span class="line" id="L217">                <span class="tok-kw">const</span> left = math.min(rate - self.offset, bytes.len);</span>
-<span class="line" id="L218">                mem.copy(<span class="tok-type">u8</span>, self.buf[self.offset..], bytes[<span class="tok-number">0</span>..left]);</span>
+<span class="line" id="L218">                <span class="tok-builtin">@memcpy</span>(self.buf[self.offset..][<span class="tok-number">0</span>..left], bytes[<span class="tok-number">0</span>..left]);</span>
 <span class="line" id="L219">                self.offset += left;</span>
 <span class="line" id="L220">                <span class="tok-kw">if</span> (self.offset == rate) {</span>
 <span class="line" id="L221">                    self.offset = <span class="tok-number">0</span>;</span>
@@ -351,7 +351,7 @@
 <span class="line" id="L231">                bytes = bytes[rate..];</span>
 <span class="line" id="L232">            }</span>
 <span class="line" id="L233">            <span class="tok-kw">if</span> (bytes.len &gt; <span class="tok-number">0</span>) {</span>
-<span class="line" id="L234">                mem.copy(<span class="tok-type">u8</span>, &amp;self.buf, bytes);</span>
+<span class="line" id="L234">                <span class="tok-builtin">@memcpy</span>(self.buf[<span class="tok-number">0</span>..bytes.len], bytes);</span>
 <span class="line" id="L235">                self.offset = bytes.len;</span>
 <span class="line" id="L236">            }</span>
 <span class="line" id="L237">        }</span>

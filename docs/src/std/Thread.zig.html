@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>Thread.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -169,7 +169,7 @@
 <span class="line" id="L56"></span>
 <span class="line" id="L57">    <span class="tok-kw">const</span> name_with_terminator = blk: {</span>
 <span class="line" id="L58">        <span class="tok-kw">var</span> name_buf: [max_name_len:<span class="tok-number">0</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
-<span class="line" id="L59">        std.mem.copy(<span class="tok-type">u8</span>, &amp;name_buf, name);</span>
+<span class="line" id="L59">        <span class="tok-builtin">@memcpy</span>(name_buf[<span class="tok-number">0</span>..name.len], name);</span>
 <span class="line" id="L60">        name_buf[name.len] = <span class="tok-number">0</span>;</span>
 <span class="line" id="L61">        <span class="tok-kw">break</span> :blk name_buf[<span class="tok-number">0</span>..name.len :<span class="tok-number">0</span>];</span>
 <span class="line" id="L62">    };</span>
@@ -598,8 +598,8 @@
 <span class="line" id="L469">        <span class="tok-kw">return</span> unsupported(self);</span>
 <span class="line" id="L470">    }</span>
 <span class="line" id="L471"></span>
-<span class="line" id="L472">    <span class="tok-kw">fn</span> <span class="tok-fn">unsupported</span>(unusued: <span class="tok-kw">anytype</span>) <span class="tok-type">noreturn</span> {</span>
-<span class="line" id="L473">        _ = unusued;</span>
+<span class="line" id="L472">    <span class="tok-kw">fn</span> <span class="tok-fn">unsupported</span>(unused: <span class="tok-kw">anytype</span>) <span class="tok-type">noreturn</span> {</span>
+<span class="line" id="L473">        _ = unused;</span>
 <span class="line" id="L474">        <span class="tok-builtin">@compileError</span>(<span class="tok-str">&quot;Unsupported operating system &quot;</span> ++ <span class="tok-builtin">@tagName</span>(target.os.tag));</span>
 <span class="line" id="L475">    }</span>
 <span class="line" id="L476">};</span>
@@ -830,7 +830,7 @@
 <span class="line" id="L691"></span>
 <span class="line" id="L692">        <span class="tok-comment">// Use the same set of parameters used by the libc-less impl.</span>
 </span>
-<span class="line" id="L693">        <span class="tok-kw">const</span> stack_size = std.math.max(config.stack_size, <span class="tok-number">16</span> * <span class="tok-number">1024</span>);</span>
+<span class="line" id="L693">        <span class="tok-kw">const</span> stack_size = std.math.max(config.stack_size, c.PTHREAD_STACK_MIN);</span>
 <span class="line" id="L694">        assert(c.pthread_attr_setstacksize(&amp;attr, stack_size) == .SUCCESS);</span>
 <span class="line" id="L695">        assert(c.pthread_attr_setguardsize(&amp;attr, std.mem.page_size) == .SUCCESS);</span>
 <span class="line" id="L696"></span>

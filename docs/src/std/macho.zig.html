@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>macho.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -539,7 +539,7 @@
 </span>
 <span class="line" id="L358">    <span class="tok-comment">// grouped by their module since they are only used if the object is moved</span>
 </span>
-<span class="line" id="L359">    <span class="tok-comment">// from it staticly link edited address).</span>
+<span class="line" id="L359">    <span class="tok-comment">// from its statically link edited address).</span>
 </span>
 <span class="line" id="L360"></span>
 <span class="line" id="L361">    <span class="tok-comment">/// offset to local relocation entries</span></span>
@@ -619,7 +619,7 @@
 </span>
 <span class="line" id="L420">    <span class="tok-comment">// encoding when a column changes.  In addition simple patterns</span>
 </span>
-<span class="line" id="L421">    <span class="tok-comment">// like for runs of pointers initialzed to the same value can be</span>
+<span class="line" id="L421">    <span class="tok-comment">// like for runs of pointers initialized to the same value can be</span>
 </span>
 <span class="line" id="L422">    <span class="tok-comment">// encoded in a few bytes.</span>
 </span>
@@ -796,13 +796,13 @@
 <span class="line" id="L540">    dylib: dylib,</span>
 <span class="line" id="L541">};</span>
 <span class="line" id="L542"></span>
-<span class="line" id="L543"><span class="tok-comment">/// Dynamicaly linked shared libraries are identified by two things.  The</span></span>
+<span class="line" id="L543"><span class="tok-comment">/// Dynamically linked shared libraries are identified by two things.  The</span></span>
 <span class="line" id="L544"><span class="tok-comment">/// pathname (the name of the library as found for execution), and the</span></span>
 <span class="line" id="L545"><span class="tok-comment">/// compatibility version number.  The pathname must match and the compatibility</span></span>
 <span class="line" id="L546"><span class="tok-comment">/// number in the user of the library must be greater than or equal to the</span></span>
 <span class="line" id="L547"><span class="tok-comment">/// library being used.  The time stamp is used to record the time a library was</span></span>
 <span class="line" id="L548"><span class="tok-comment">/// built and copied into user so it can be use to determined if the library used</span></span>
-<span class="line" id="L549"><span class="tok-comment">/// at runtime is exactly the same as used to built the program.</span></span>
+<span class="line" id="L549"><span class="tok-comment">/// at runtime is exactly the same as used to build the program.</span></span>
 <span class="line" id="L550"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> dylib = <span class="tok-kw">extern</span> <span class="tok-kw">struct</span> {</span>
 <span class="line" id="L551">    <span class="tok-comment">/// library's pathname (offset pointing at the end of dylib_command)</span></span>
 <span class="line" id="L552">    name: <span class="tok-type">u32</span>,</span>
@@ -1400,7 +1400,7 @@
 <span class="line" id="L1141"><span class="tok-comment">/// the object file is the output of an incremental link against a base file and can't be link edited again</span></span>
 <span class="line" id="L1142"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> MH_INCRLINK = <span class="tok-number">0x2</span>;</span>
 <span class="line" id="L1143"></span>
-<span class="line" id="L1144"><span class="tok-comment">/// the object file is input for the dynamic linker and can't be staticly link edited again</span></span>
+<span class="line" id="L1144"><span class="tok-comment">/// the object file is input for the dynamic linker and can't be statically link edited again</span></span>
 <span class="line" id="L1145"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> MH_DYLDLINK = <span class="tok-number">0x4</span>;</span>
 <span class="line" id="L1146"></span>
 <span class="line" id="L1147"><span class="tok-comment">/// the object file's undefined references are bound by the dynamic linker when loaded.</span></span>
@@ -1421,7 +1421,7 @@
 <span class="line" id="L1162"><span class="tok-comment">/// the executable is forcing all images to use flat name space bindings</span></span>
 <span class="line" id="L1163"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> MH_FORCE_FLAT = <span class="tok-number">0x100</span>;</span>
 <span class="line" id="L1164"></span>
-<span class="line" id="L1165"><span class="tok-comment">/// this umbrella guarantees no multiple defintions of symbols in its sub-images so the two-level namespace hints can always be used.</span></span>
+<span class="line" id="L1165"><span class="tok-comment">/// this umbrella guarantees no multiple definitions of symbols in its sub-images so the two-level namespace hints can always be used.</span></span>
 <span class="line" id="L1166"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> MH_NOMULTIDEFS = <span class="tok-number">0x200</span>;</span>
 <span class="line" id="L1167"></span>
 <span class="line" id="L1168"><span class="tok-comment">/// do not have dyld notify the prebinding agent about this executable</span></span>
@@ -1939,7 +1939,7 @@
 <span class="line" id="L1659"></span>
 <span class="line" id="L1660"><span class="tok-comment">// An indirect symbol table entry is simply a 32bit index into the symbol table</span>
 </span>
-<span class="line" id="L1661"><span class="tok-comment">// to the symbol that the pointer or stub is refering to.  Unless it is for a</span>
+<span class="line" id="L1661"><span class="tok-comment">// to the symbol that the pointer or stub is referring to.  Unless it is for a</span>
 </span>
 <span class="line" id="L1662"><span class="tok-comment">// non-lazy symbol pointer section for a defined symbol which strip(1) as</span>
 </span>
@@ -2028,7 +2028,7 @@
 <span class="line" id="L1741"></span>
 <span class="line" id="L1742"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> CS_EXECSEG_MAIN_BINARY: <span class="tok-type">u32</span> = <span class="tok-number">0x1</span>;</span>
 <span class="line" id="L1743"></span>
-<span class="line" id="L1744"><span class="tok-comment">/// This CodeDirectory is tailored specfically at version 0x20400.</span></span>
+<span class="line" id="L1744"><span class="tok-comment">/// This CodeDirectory is tailored specifically at version 0x20400.</span></span>
 <span class="line" id="L1745"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> CodeDirectory = <span class="tok-kw">extern</span> <span class="tok-kw">struct</span> {</span>
 <span class="line" id="L1746">    <span class="tok-comment">/// Magic number (CSMAGIC_CODEDIRECTORY)</span></span>
 <span class="line" id="L1747">    magic: <span class="tok-type">u32</span>,</span>

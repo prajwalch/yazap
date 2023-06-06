@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>zig/c_builtins.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -275,7 +275,7 @@
 <span class="line" id="L152"></span>
 <span class="line" id="L153"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">__builtin_memset</span>(dst: ?*<span class="tok-type">anyopaque</span>, val: <span class="tok-type">c_int</span>, len: <span class="tok-type">usize</span>) ?*<span class="tok-type">anyopaque</span> {</span>
 <span class="line" id="L154">    <span class="tok-kw">const</span> dst_cast = <span class="tok-builtin">@ptrCast</span>([*c]<span class="tok-type">u8</span>, dst);</span>
-<span class="line" id="L155">    <span class="tok-builtin">@memset</span>(dst_cast, <span class="tok-builtin">@bitCast</span>(<span class="tok-type">u8</span>, <span class="tok-builtin">@truncate</span>(<span class="tok-type">i8</span>, val)), len);</span>
+<span class="line" id="L155">    <span class="tok-builtin">@memset</span>(dst_cast[<span class="tok-number">0</span>..len], <span class="tok-builtin">@bitCast</span>(<span class="tok-type">u8</span>, <span class="tok-builtin">@truncate</span>(<span class="tok-type">i8</span>, val)));</span>
 <span class="line" id="L156">    <span class="tok-kw">return</span> dst;</span>
 <span class="line" id="L157">}</span>
 <span class="line" id="L158"></span>
@@ -294,10 +294,10 @@
 <span class="line" id="L171">    <span class="tok-kw">noalias</span> src: ?*<span class="tok-kw">const</span> <span class="tok-type">anyopaque</span>,</span>
 <span class="line" id="L172">    len: <span class="tok-type">usize</span>,</span>
 <span class="line" id="L173">) ?*<span class="tok-type">anyopaque</span> {</span>
-<span class="line" id="L174">    <span class="tok-kw">const</span> dst_cast = <span class="tok-builtin">@ptrCast</span>([*c]<span class="tok-type">u8</span>, dst);</span>
-<span class="line" id="L175">    <span class="tok-kw">const</span> src_cast = <span class="tok-builtin">@ptrCast</span>([*c]<span class="tok-kw">const</span> <span class="tok-type">u8</span>, src);</span>
-<span class="line" id="L176"></span>
-<span class="line" id="L177">    <span class="tok-builtin">@memcpy</span>(dst_cast, src_cast, len);</span>
+<span class="line" id="L174">    <span class="tok-kw">if</span> (len &gt; <span class="tok-number">0</span>) <span class="tok-builtin">@memcpy</span>(</span>
+<span class="line" id="L175">        <span class="tok-builtin">@ptrCast</span>([*]<span class="tok-type">u8</span>, dst.?)[<span class="tok-number">0</span>..len],</span>
+<span class="line" id="L176">        <span class="tok-builtin">@ptrCast</span>([*]<span class="tok-kw">const</span> <span class="tok-type">u8</span>, src.?),</span>
+<span class="line" id="L177">    );</span>
 <span class="line" id="L178">    <span class="tok-kw">return</span> dst;</span>
 <span class="line" id="L179">}</span>
 <span class="line" id="L180"></span>

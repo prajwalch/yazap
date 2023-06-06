@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>hash/xxhash.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -154,7 +154,7 @@
 <span class="line" id="L36"></span>
 <span class="line" id="L37">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">update</span>(self: *XxHash64, input: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) <span class="tok-type">void</span> {</span>
 <span class="line" id="L38">        <span class="tok-kw">if</span> (input.len &lt; <span class="tok-number">32</span> - self.buf_len) {</span>
-<span class="line" id="L39">            mem.copy(<span class="tok-type">u8</span>, self.buf[self.buf_len..], input);</span>
+<span class="line" id="L39">            <span class="tok-builtin">@memcpy</span>(self.buf[self.buf_len..][<span class="tok-number">0</span>..input.len], input);</span>
 <span class="line" id="L40">            self.buf_len += input.len;</span>
 <span class="line" id="L41">            <span class="tok-kw">return</span>;</span>
 <span class="line" id="L42">        }</span>
@@ -163,7 +163,7 @@
 <span class="line" id="L45"></span>
 <span class="line" id="L46">        <span class="tok-kw">if</span> (self.buf_len &gt; <span class="tok-number">0</span>) {</span>
 <span class="line" id="L47">            i = <span class="tok-number">32</span> - self.buf_len;</span>
-<span class="line" id="L48">            mem.copy(<span class="tok-type">u8</span>, self.buf[self.buf_len..], input[<span class="tok-number">0</span>..i]);</span>
+<span class="line" id="L48">            <span class="tok-builtin">@memcpy</span>(self.buf[self.buf_len..][<span class="tok-number">0</span>..i], input[<span class="tok-number">0</span>..i]);</span>
 <span class="line" id="L49">            self.processStripe(&amp;self.buf);</span>
 <span class="line" id="L50">            self.buf_len = <span class="tok-number">0</span>;</span>
 <span class="line" id="L51">        }</span>
@@ -173,7 +173,7 @@
 <span class="line" id="L55">        }</span>
 <span class="line" id="L56"></span>
 <span class="line" id="L57">        <span class="tok-kw">const</span> remaining_bytes = input[i..];</span>
-<span class="line" id="L58">        mem.copy(<span class="tok-type">u8</span>, &amp;self.buf, remaining_bytes);</span>
+<span class="line" id="L58">        <span class="tok-builtin">@memcpy</span>(self.buf[<span class="tok-number">0</span>..remaining_bytes.len], remaining_bytes);</span>
 <span class="line" id="L59">        self.buf_len = remaining_bytes.len;</span>
 <span class="line" id="L60">    }</span>
 <span class="line" id="L61"></span>
@@ -244,8 +244,8 @@
 <span class="line" id="L126">        <span class="tok-kw">return</span> b +% prime_4;</span>
 <span class="line" id="L127">    }</span>
 <span class="line" id="L128"></span>
-<span class="line" id="L129">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">hash</span>(input: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) <span class="tok-type">u64</span> {</span>
-<span class="line" id="L130">        <span class="tok-kw">var</span> hasher = XxHash64.init(<span class="tok-number">0</span>);</span>
+<span class="line" id="L129">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">hash</span>(seed: <span class="tok-type">u64</span>, input: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) <span class="tok-type">u64</span> {</span>
+<span class="line" id="L130">        <span class="tok-kw">var</span> hasher = XxHash64.init(seed);</span>
 <span class="line" id="L131">        hasher.update(input);</span>
 <span class="line" id="L132">        <span class="tok-kw">return</span> hasher.final();</span>
 <span class="line" id="L133">    }</span>
@@ -288,7 +288,7 @@
 <span class="line" id="L165"></span>
 <span class="line" id="L166">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">update</span>(self: *XxHash32, input: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) <span class="tok-type">void</span> {</span>
 <span class="line" id="L167">        <span class="tok-kw">if</span> (input.len &lt; <span class="tok-number">16</span> - self.buf_len) {</span>
-<span class="line" id="L168">            mem.copy(<span class="tok-type">u8</span>, self.buf[self.buf_len..], input);</span>
+<span class="line" id="L168">            <span class="tok-builtin">@memcpy</span>(self.buf[self.buf_len..][<span class="tok-number">0</span>..input.len], input);</span>
 <span class="line" id="L169">            self.buf_len += input.len;</span>
 <span class="line" id="L170">            <span class="tok-kw">return</span>;</span>
 <span class="line" id="L171">        }</span>
@@ -297,7 +297,7 @@
 <span class="line" id="L174"></span>
 <span class="line" id="L175">        <span class="tok-kw">if</span> (self.buf_len &gt; <span class="tok-number">0</span>) {</span>
 <span class="line" id="L176">            i = <span class="tok-number">16</span> - self.buf_len;</span>
-<span class="line" id="L177">            mem.copy(<span class="tok-type">u8</span>, self.buf[self.buf_len..], input[<span class="tok-number">0</span>..i]);</span>
+<span class="line" id="L177">            <span class="tok-builtin">@memcpy</span>(self.buf[self.buf_len..][<span class="tok-number">0</span>..i], input[<span class="tok-number">0</span>..i]);</span>
 <span class="line" id="L178">            self.processStripe(&amp;self.buf);</span>
 <span class="line" id="L179">            self.buf_len = <span class="tok-number">0</span>;</span>
 <span class="line" id="L180">        }</span>
@@ -307,7 +307,7 @@
 <span class="line" id="L184">        }</span>
 <span class="line" id="L185"></span>
 <span class="line" id="L186">        <span class="tok-kw">const</span> remaining_bytes = input[i..];</span>
-<span class="line" id="L187">        mem.copy(<span class="tok-type">u8</span>, &amp;self.buf, remaining_bytes);</span>
+<span class="line" id="L187">        <span class="tok-builtin">@memcpy</span>(self.buf[<span class="tok-number">0</span>..remaining_bytes.len], remaining_bytes);</span>
 <span class="line" id="L188">        self.buf_len = remaining_bytes.len;</span>
 <span class="line" id="L189">    }</span>
 <span class="line" id="L190"></span>
@@ -359,8 +359,8 @@
 <span class="line" id="L236">        <span class="tok-kw">return</span> acc;</span>
 <span class="line" id="L237">    }</span>
 <span class="line" id="L238"></span>
-<span class="line" id="L239">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">hash</span>(input: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) <span class="tok-type">u32</span> {</span>
-<span class="line" id="L240">        <span class="tok-kw">var</span> hasher = XxHash32.init(<span class="tok-number">0</span>);</span>
+<span class="line" id="L239">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">hash</span>(seed: <span class="tok-type">u32</span>, input: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) <span class="tok-type">u32</span> {</span>
+<span class="line" id="L240">        <span class="tok-kw">var</span> hasher = XxHash32.init(seed);</span>
 <span class="line" id="L241">        hasher.update(input);</span>
 <span class="line" id="L242">        <span class="tok-kw">return</span> hasher.final();</span>
 <span class="line" id="L243">    }</span>
@@ -369,25 +369,25 @@
 <span class="line" id="L246"><span class="tok-kw">test</span> <span class="tok-str">&quot;xxhash64&quot;</span> {</span>
 <span class="line" id="L247">    <span class="tok-kw">const</span> hash = XxHash64.hash;</span>
 <span class="line" id="L248"></span>
-<span class="line" id="L249">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-str">&quot;&quot;</span>), <span class="tok-number">0xef46db3751d8e999</span>);</span>
-<span class="line" id="L250">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-str">&quot;a&quot;</span>), <span class="tok-number">0xd24ec4f1a98c6e5b</span>);</span>
-<span class="line" id="L251">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-str">&quot;abc&quot;</span>), <span class="tok-number">0x44bc2cf5ad770999</span>);</span>
-<span class="line" id="L252">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-str">&quot;message digest&quot;</span>), <span class="tok-number">0x066ed728fceeb3be</span>);</span>
-<span class="line" id="L253">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-str">&quot;abcdefghijklmnopqrstuvwxyz&quot;</span>), <span class="tok-number">0xcfe1f278fa89835c</span>);</span>
-<span class="line" id="L254">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-str">&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789&quot;</span>), <span class="tok-number">0xaaa46907d3047814</span>);</span>
-<span class="line" id="L255">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-str">&quot;12345678901234567890123456789012345678901234567890123456789012345678901234567890&quot;</span>), <span class="tok-number">0xe04a477f19ee145d</span>);</span>
+<span class="line" id="L249">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-number">0</span>, <span class="tok-str">&quot;&quot;</span>), <span class="tok-number">0xef46db3751d8e999</span>);</span>
+<span class="line" id="L250">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-number">0</span>, <span class="tok-str">&quot;a&quot;</span>), <span class="tok-number">0xd24ec4f1a98c6e5b</span>);</span>
+<span class="line" id="L251">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-number">0</span>, <span class="tok-str">&quot;abc&quot;</span>), <span class="tok-number">0x44bc2cf5ad770999</span>);</span>
+<span class="line" id="L252">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-number">0</span>, <span class="tok-str">&quot;message digest&quot;</span>), <span class="tok-number">0x066ed728fceeb3be</span>);</span>
+<span class="line" id="L253">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-number">0</span>, <span class="tok-str">&quot;abcdefghijklmnopqrstuvwxyz&quot;</span>), <span class="tok-number">0xcfe1f278fa89835c</span>);</span>
+<span class="line" id="L254">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-number">0</span>, <span class="tok-str">&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789&quot;</span>), <span class="tok-number">0xaaa46907d3047814</span>);</span>
+<span class="line" id="L255">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-number">0</span>, <span class="tok-str">&quot;12345678901234567890123456789012345678901234567890123456789012345678901234567890&quot;</span>), <span class="tok-number">0xe04a477f19ee145d</span>);</span>
 <span class="line" id="L256">}</span>
 <span class="line" id="L257"></span>
 <span class="line" id="L258"><span class="tok-kw">test</span> <span class="tok-str">&quot;xxhash32&quot;</span> {</span>
 <span class="line" id="L259">    <span class="tok-kw">const</span> hash = XxHash32.hash;</span>
 <span class="line" id="L260"></span>
-<span class="line" id="L261">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-str">&quot;&quot;</span>), <span class="tok-number">0x02cc5d05</span>);</span>
-<span class="line" id="L262">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-str">&quot;a&quot;</span>), <span class="tok-number">0x550d7456</span>);</span>
-<span class="line" id="L263">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-str">&quot;abc&quot;</span>), <span class="tok-number">0x32d153ff</span>);</span>
-<span class="line" id="L264">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-str">&quot;message digest&quot;</span>), <span class="tok-number">0x7c948494</span>);</span>
-<span class="line" id="L265">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-str">&quot;abcdefghijklmnopqrstuvwxyz&quot;</span>), <span class="tok-number">0x63a14d5f</span>);</span>
-<span class="line" id="L266">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-str">&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789&quot;</span>), <span class="tok-number">0x9c285e64</span>);</span>
-<span class="line" id="L267">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-str">&quot;12345678901234567890123456789012345678901234567890123456789012345678901234567890&quot;</span>), <span class="tok-number">0x9c05f475</span>);</span>
+<span class="line" id="L261">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-number">0</span>, <span class="tok-str">&quot;&quot;</span>), <span class="tok-number">0x02cc5d05</span>);</span>
+<span class="line" id="L262">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-number">0</span>, <span class="tok-str">&quot;a&quot;</span>), <span class="tok-number">0x550d7456</span>);</span>
+<span class="line" id="L263">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-number">0</span>, <span class="tok-str">&quot;abc&quot;</span>), <span class="tok-number">0x32d153ff</span>);</span>
+<span class="line" id="L264">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-number">0</span>, <span class="tok-str">&quot;message digest&quot;</span>), <span class="tok-number">0x7c948494</span>);</span>
+<span class="line" id="L265">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-number">0</span>, <span class="tok-str">&quot;abcdefghijklmnopqrstuvwxyz&quot;</span>), <span class="tok-number">0x63a14d5f</span>);</span>
+<span class="line" id="L266">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-number">0</span>, <span class="tok-str">&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789&quot;</span>), <span class="tok-number">0x9c285e64</span>);</span>
+<span class="line" id="L267">    <span class="tok-kw">try</span> expectEqual(hash(<span class="tok-number">0</span>, <span class="tok-str">&quot;12345678901234567890123456789012345678901234567890123456789012345678901234567890&quot;</span>), <span class="tok-number">0x9c05f475</span>);</span>
 <span class="line" id="L268">}</span>
 <span class="line" id="L269"></span>
 </code></pre></body>

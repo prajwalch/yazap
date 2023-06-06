@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>crypto/pcurves/p256.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -218,7 +218,7 @@
 <span class="line" id="L105">        <span class="tok-kw">var</span> out: [<span class="tok-number">33</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
 <span class="line" id="L106">        <span class="tok-kw">const</span> xy = p.affineCoordinates();</span>
 <span class="line" id="L107">        out[<span class="tok-number">0</span>] = <span class="tok-kw">if</span> (xy.y.isOdd()) <span class="tok-number">3</span> <span class="tok-kw">else</span> <span class="tok-number">2</span>;</span>
-<span class="line" id="L108">        mem.copy(<span class="tok-type">u8</span>, out[<span class="tok-number">1</span>..], &amp;xy.x.toBytes(.Big));</span>
+<span class="line" id="L108">        out[<span class="tok-number">1</span>..].* = xy.x.toBytes(.Big);</span>
 <span class="line" id="L109">        <span class="tok-kw">return</span> out;</span>
 <span class="line" id="L110">    }</span>
 <span class="line" id="L111"></span>
@@ -227,8 +227,8 @@
 <span class="line" id="L114">        <span class="tok-kw">var</span> out: [<span class="tok-number">65</span>]<span class="tok-type">u8</span> = <span class="tok-null">undefined</span>;</span>
 <span class="line" id="L115">        out[<span class="tok-number">0</span>] = <span class="tok-number">4</span>;</span>
 <span class="line" id="L116">        <span class="tok-kw">const</span> xy = p.affineCoordinates();</span>
-<span class="line" id="L117">        mem.copy(<span class="tok-type">u8</span>, out[<span class="tok-number">1</span>..<span class="tok-number">33</span>], &amp;xy.x.toBytes(.Big));</span>
-<span class="line" id="L118">        mem.copy(<span class="tok-type">u8</span>, out[<span class="tok-number">33</span>..<span class="tok-number">65</span>], &amp;xy.y.toBytes(.Big));</span>
+<span class="line" id="L117">        out[<span class="tok-number">1</span>..<span class="tok-number">33</span>].* = xy.x.toBytes(.Big);</span>
+<span class="line" id="L118">        out[<span class="tok-number">33</span>..<span class="tok-number">65</span>].* = xy.y.toBytes(.Big);</span>
 <span class="line" id="L119">        <span class="tok-kw">return</span> out;</span>
 <span class="line" id="L120">    }</span>
 <span class="line" id="L121"></span>

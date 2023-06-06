@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>crypto/aegis.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -266,8 +266,8 @@
 <span class="line" id="L152">                state.absorb(ad[i..][<span class="tok-number">0</span>..<span class="tok-number">32</span>]);</span>
 <span class="line" id="L153">            }</span>
 <span class="line" id="L154">            <span class="tok-kw">if</span> (ad.len % <span class="tok-number">32</span> != <span class="tok-number">0</span>) {</span>
-<span class="line" id="L155">                mem.set(<span class="tok-type">u8</span>, src[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
-<span class="line" id="L156">                mem.copy(<span class="tok-type">u8</span>, src[<span class="tok-number">0</span> .. ad.len % <span class="tok-number">32</span>], ad[i .. i + ad.len % <span class="tok-number">32</span>]);</span>
+<span class="line" id="L155">                <span class="tok-builtin">@memset</span>(src[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
+<span class="line" id="L156">                <span class="tok-builtin">@memcpy</span>(src[<span class="tok-number">0</span> .. ad.len % <span class="tok-number">32</span>], ad[i..][<span class="tok-number">0</span> .. ad.len % <span class="tok-number">32</span>]);</span>
 <span class="line" id="L157">                state.absorb(&amp;src);</span>
 <span class="line" id="L158">            }</span>
 <span class="line" id="L159">            i = <span class="tok-number">0</span>;</span>
@@ -275,10 +275,10 @@
 <span class="line" id="L161">                state.enc(c[i..][<span class="tok-number">0</span>..<span class="tok-number">32</span>], m[i..][<span class="tok-number">0</span>..<span class="tok-number">32</span>]);</span>
 <span class="line" id="L162">            }</span>
 <span class="line" id="L163">            <span class="tok-kw">if</span> (m.len % <span class="tok-number">32</span> != <span class="tok-number">0</span>) {</span>
-<span class="line" id="L164">                mem.set(<span class="tok-type">u8</span>, src[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
-<span class="line" id="L165">                mem.copy(<span class="tok-type">u8</span>, src[<span class="tok-number">0</span> .. m.len % <span class="tok-number">32</span>], m[i .. i + m.len % <span class="tok-number">32</span>]);</span>
+<span class="line" id="L164">                <span class="tok-builtin">@memset</span>(src[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
+<span class="line" id="L165">                <span class="tok-builtin">@memcpy</span>(src[<span class="tok-number">0</span> .. m.len % <span class="tok-number">32</span>], m[i..][<span class="tok-number">0</span> .. m.len % <span class="tok-number">32</span>]);</span>
 <span class="line" id="L166">                state.enc(&amp;dst, &amp;src);</span>
-<span class="line" id="L167">                mem.copy(<span class="tok-type">u8</span>, c[i .. i + m.len % <span class="tok-number">32</span>], dst[<span class="tok-number">0</span> .. m.len % <span class="tok-number">32</span>]);</span>
+<span class="line" id="L167">                <span class="tok-builtin">@memcpy</span>(c[i..][<span class="tok-number">0</span> .. m.len % <span class="tok-number">32</span>], dst[<span class="tok-number">0</span> .. m.len % <span class="tok-number">32</span>]);</span>
 <span class="line" id="L168">            }</span>
 <span class="line" id="L169">            tag.* = state.mac(tag_bits, ad.len, m.len);</span>
 <span class="line" id="L170">        }</span>
@@ -299,8 +299,8 @@
 <span class="line" id="L185">                state.absorb(ad[i..][<span class="tok-number">0</span>..<span class="tok-number">32</span>]);</span>
 <span class="line" id="L186">            }</span>
 <span class="line" id="L187">            <span class="tok-kw">if</span> (ad.len % <span class="tok-number">32</span> != <span class="tok-number">0</span>) {</span>
-<span class="line" id="L188">                mem.set(<span class="tok-type">u8</span>, src[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
-<span class="line" id="L189">                mem.copy(<span class="tok-type">u8</span>, src[<span class="tok-number">0</span> .. ad.len % <span class="tok-number">32</span>], ad[i .. i + ad.len % <span class="tok-number">32</span>]);</span>
+<span class="line" id="L188">                <span class="tok-builtin">@memset</span>(src[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
+<span class="line" id="L189">                <span class="tok-builtin">@memcpy</span>(src[<span class="tok-number">0</span> .. ad.len % <span class="tok-number">32</span>], ad[i..][<span class="tok-number">0</span> .. ad.len % <span class="tok-number">32</span>]);</span>
 <span class="line" id="L190">                state.absorb(&amp;src);</span>
 <span class="line" id="L191">            }</span>
 <span class="line" id="L192">            i = <span class="tok-number">0</span>;</span>
@@ -308,11 +308,11 @@
 <span class="line" id="L194">                state.dec(m[i..][<span class="tok-number">0</span>..<span class="tok-number">32</span>], c[i..][<span class="tok-number">0</span>..<span class="tok-number">32</span>]);</span>
 <span class="line" id="L195">            }</span>
 <span class="line" id="L196">            <span class="tok-kw">if</span> (m.len % <span class="tok-number">32</span> != <span class="tok-number">0</span>) {</span>
-<span class="line" id="L197">                mem.set(<span class="tok-type">u8</span>, src[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
-<span class="line" id="L198">                mem.copy(<span class="tok-type">u8</span>, src[<span class="tok-number">0</span> .. m.len % <span class="tok-number">32</span>], c[i .. i + m.len % <span class="tok-number">32</span>]);</span>
+<span class="line" id="L197">                <span class="tok-builtin">@memset</span>(src[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
+<span class="line" id="L198">                <span class="tok-builtin">@memcpy</span>(src[<span class="tok-number">0</span> .. m.len % <span class="tok-number">32</span>], c[i..][<span class="tok-number">0</span> .. m.len % <span class="tok-number">32</span>]);</span>
 <span class="line" id="L199">                state.dec(&amp;dst, &amp;src);</span>
-<span class="line" id="L200">                mem.copy(<span class="tok-type">u8</span>, m[i .. i + m.len % <span class="tok-number">32</span>], dst[<span class="tok-number">0</span> .. m.len % <span class="tok-number">32</span>]);</span>
-<span class="line" id="L201">                mem.set(<span class="tok-type">u8</span>, dst[<span class="tok-number">0</span> .. m.len % <span class="tok-number">32</span>], <span class="tok-number">0</span>);</span>
+<span class="line" id="L200">                <span class="tok-builtin">@memcpy</span>(m[i..][<span class="tok-number">0</span> .. m.len % <span class="tok-number">32</span>], dst[<span class="tok-number">0</span> .. m.len % <span class="tok-number">32</span>]);</span>
+<span class="line" id="L201">                <span class="tok-builtin">@memset</span>(dst[<span class="tok-number">0</span> .. m.len % <span class="tok-number">32</span>], <span class="tok-number">0</span>);</span>
 <span class="line" id="L202">                <span class="tok-kw">const</span> blocks = &amp;state.blocks;</span>
 <span class="line" id="L203">                blocks[<span class="tok-number">0</span>] = blocks[<span class="tok-number">0</span>].xorBlocks(AesBlock.fromBytes(dst[<span class="tok-number">0</span>..<span class="tok-number">16</span>]));</span>
 <span class="line" id="L204">                blocks[<span class="tok-number">4</span>] = blocks[<span class="tok-number">4</span>].xorBlocks(AesBlock.fromBytes(dst[<span class="tok-number">16</span>..<span class="tok-number">32</span>]));</span>
@@ -323,7 +323,7 @@
 <span class="line" id="L209">                acc |= (computed_tag[j] ^ tag[j]);</span>
 <span class="line" id="L210">            }</span>
 <span class="line" id="L211">            <span class="tok-kw">if</span> (acc != <span class="tok-number">0</span>) {</span>
-<span class="line" id="L212">                <span class="tok-builtin">@memset</span>(m.ptr, <span class="tok-null">undefined</span>, m.len);</span>
+<span class="line" id="L212">                <span class="tok-builtin">@memset</span>(m, <span class="tok-null">undefined</span>);</span>
 <span class="line" id="L213">                <span class="tok-kw">return</span> <span class="tok-kw">error</span>.AuthenticationFailed;</span>
 <span class="line" id="L214">            }</span>
 <span class="line" id="L215">        }</span>
@@ -449,8 +449,8 @@
 <span class="line" id="L334">                state.enc(&amp;dst, ad[i..][<span class="tok-number">0</span>..<span class="tok-number">16</span>]);</span>
 <span class="line" id="L335">            }</span>
 <span class="line" id="L336">            <span class="tok-kw">if</span> (ad.len % <span class="tok-number">16</span> != <span class="tok-number">0</span>) {</span>
-<span class="line" id="L337">                mem.set(<span class="tok-type">u8</span>, src[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
-<span class="line" id="L338">                mem.copy(<span class="tok-type">u8</span>, src[<span class="tok-number">0</span> .. ad.len % <span class="tok-number">16</span>], ad[i .. i + ad.len % <span class="tok-number">16</span>]);</span>
+<span class="line" id="L337">                <span class="tok-builtin">@memset</span>(src[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
+<span class="line" id="L338">                <span class="tok-builtin">@memcpy</span>(src[<span class="tok-number">0</span> .. ad.len % <span class="tok-number">16</span>], ad[i..][<span class="tok-number">0</span> .. ad.len % <span class="tok-number">16</span>]);</span>
 <span class="line" id="L339">                state.enc(&amp;dst, &amp;src);</span>
 <span class="line" id="L340">            }</span>
 <span class="line" id="L341">            i = <span class="tok-number">0</span>;</span>
@@ -458,10 +458,10 @@
 <span class="line" id="L343">                state.enc(c[i..][<span class="tok-number">0</span>..<span class="tok-number">16</span>], m[i..][<span class="tok-number">0</span>..<span class="tok-number">16</span>]);</span>
 <span class="line" id="L344">            }</span>
 <span class="line" id="L345">            <span class="tok-kw">if</span> (m.len % <span class="tok-number">16</span> != <span class="tok-number">0</span>) {</span>
-<span class="line" id="L346">                mem.set(<span class="tok-type">u8</span>, src[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
-<span class="line" id="L347">                mem.copy(<span class="tok-type">u8</span>, src[<span class="tok-number">0</span> .. m.len % <span class="tok-number">16</span>], m[i .. i + m.len % <span class="tok-number">16</span>]);</span>
+<span class="line" id="L346">                <span class="tok-builtin">@memset</span>(src[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
+<span class="line" id="L347">                <span class="tok-builtin">@memcpy</span>(src[<span class="tok-number">0</span> .. m.len % <span class="tok-number">16</span>], m[i..][<span class="tok-number">0</span> .. m.len % <span class="tok-number">16</span>]);</span>
 <span class="line" id="L348">                state.enc(&amp;dst, &amp;src);</span>
-<span class="line" id="L349">                mem.copy(<span class="tok-type">u8</span>, c[i .. i + m.len % <span class="tok-number">16</span>], dst[<span class="tok-number">0</span> .. m.len % <span class="tok-number">16</span>]);</span>
+<span class="line" id="L349">                <span class="tok-builtin">@memcpy</span>(c[i..][<span class="tok-number">0</span> .. m.len % <span class="tok-number">16</span>], dst[<span class="tok-number">0</span> .. m.len % <span class="tok-number">16</span>]);</span>
 <span class="line" id="L350">            }</span>
 <span class="line" id="L351">            tag.* = state.mac(tag_bits, ad.len, m.len);</span>
 <span class="line" id="L352">        }</span>
@@ -482,8 +482,8 @@
 <span class="line" id="L367">                state.enc(&amp;dst, ad[i..][<span class="tok-number">0</span>..<span class="tok-number">16</span>]);</span>
 <span class="line" id="L368">            }</span>
 <span class="line" id="L369">            <span class="tok-kw">if</span> (ad.len % <span class="tok-number">16</span> != <span class="tok-number">0</span>) {</span>
-<span class="line" id="L370">                mem.set(<span class="tok-type">u8</span>, src[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
-<span class="line" id="L371">                mem.copy(<span class="tok-type">u8</span>, src[<span class="tok-number">0</span> .. ad.len % <span class="tok-number">16</span>], ad[i .. i + ad.len % <span class="tok-number">16</span>]);</span>
+<span class="line" id="L370">                <span class="tok-builtin">@memset</span>(src[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
+<span class="line" id="L371">                <span class="tok-builtin">@memcpy</span>(src[<span class="tok-number">0</span> .. ad.len % <span class="tok-number">16</span>], ad[i..][<span class="tok-number">0</span> .. ad.len % <span class="tok-number">16</span>]);</span>
 <span class="line" id="L372">                state.enc(&amp;dst, &amp;src);</span>
 <span class="line" id="L373">            }</span>
 <span class="line" id="L374">            i = <span class="tok-number">0</span>;</span>
@@ -491,11 +491,11 @@
 <span class="line" id="L376">                state.dec(m[i..][<span class="tok-number">0</span>..<span class="tok-number">16</span>], c[i..][<span class="tok-number">0</span>..<span class="tok-number">16</span>]);</span>
 <span class="line" id="L377">            }</span>
 <span class="line" id="L378">            <span class="tok-kw">if</span> (m.len % <span class="tok-number">16</span> != <span class="tok-number">0</span>) {</span>
-<span class="line" id="L379">                mem.set(<span class="tok-type">u8</span>, src[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
-<span class="line" id="L380">                mem.copy(<span class="tok-type">u8</span>, src[<span class="tok-number">0</span> .. m.len % <span class="tok-number">16</span>], c[i .. i + m.len % <span class="tok-number">16</span>]);</span>
+<span class="line" id="L379">                <span class="tok-builtin">@memset</span>(src[<span class="tok-number">0</span>..], <span class="tok-number">0</span>);</span>
+<span class="line" id="L380">                <span class="tok-builtin">@memcpy</span>(src[<span class="tok-number">0</span> .. m.len % <span class="tok-number">16</span>], c[i..][<span class="tok-number">0</span> .. m.len % <span class="tok-number">16</span>]);</span>
 <span class="line" id="L381">                state.dec(&amp;dst, &amp;src);</span>
-<span class="line" id="L382">                mem.copy(<span class="tok-type">u8</span>, m[i .. i + m.len % <span class="tok-number">16</span>], dst[<span class="tok-number">0</span> .. m.len % <span class="tok-number">16</span>]);</span>
-<span class="line" id="L383">                mem.set(<span class="tok-type">u8</span>, dst[<span class="tok-number">0</span> .. m.len % <span class="tok-number">16</span>], <span class="tok-number">0</span>);</span>
+<span class="line" id="L382">                <span class="tok-builtin">@memcpy</span>(m[i..][<span class="tok-number">0</span> .. m.len % <span class="tok-number">16</span>], dst[<span class="tok-number">0</span> .. m.len % <span class="tok-number">16</span>]);</span>
+<span class="line" id="L383">                <span class="tok-builtin">@memset</span>(dst[<span class="tok-number">0</span> .. m.len % <span class="tok-number">16</span>], <span class="tok-number">0</span>);</span>
 <span class="line" id="L384">                <span class="tok-kw">const</span> blocks = &amp;state.blocks;</span>
 <span class="line" id="L385">                blocks[<span class="tok-number">0</span>] = blocks[<span class="tok-number">0</span>].xorBlocks(AesBlock.fromBytes(&amp;dst));</span>
 <span class="line" id="L386">            }</span>
@@ -505,7 +505,7 @@
 <span class="line" id="L390">                acc |= (computed_tag[j] ^ tag[j]);</span>
 <span class="line" id="L391">            }</span>
 <span class="line" id="L392">            <span class="tok-kw">if</span> (acc != <span class="tok-number">0</span>) {</span>
-<span class="line" id="L393">                <span class="tok-builtin">@memset</span>(m.ptr, <span class="tok-null">undefined</span>, m.len);</span>
+<span class="line" id="L393">                <span class="tok-builtin">@memset</span>(m, <span class="tok-null">undefined</span>);</span>
 <span class="line" id="L394">                <span class="tok-kw">return</span> <span class="tok-kw">error</span>.AuthenticationFailed;</span>
 <span class="line" id="L395">            }</span>
 <span class="line" id="L396">        }</span>
@@ -572,7 +572,7 @@
 <span class="line" id="L457">            self.msg_len += b.len;</span>
 <span class="line" id="L458"></span>
 <span class="line" id="L459">            <span class="tok-kw">const</span> len_partial = <span class="tok-builtin">@min</span>(b.len, block_length - self.off);</span>
-<span class="line" id="L460">            mem.copy(<span class="tok-type">u8</span>, self.buf[self.off..][<span class="tok-number">0</span>..len_partial], b[<span class="tok-number">0</span>..len_partial]);</span>
+<span class="line" id="L460">            <span class="tok-builtin">@memcpy</span>(self.buf[self.off..][<span class="tok-number">0</span>..len_partial], b[<span class="tok-number">0</span>..len_partial]);</span>
 <span class="line" id="L461">            self.off += len_partial;</span>
 <span class="line" id="L462">            <span class="tok-kw">if</span> (self.off &lt; block_length) {</span>
 <span class="line" id="L463">                <span class="tok-kw">return</span>;</span>
@@ -585,8 +585,8 @@
 <span class="line" id="L470">                self.state.absorb(b[i..][<span class="tok-number">0</span>..block_length]);</span>
 <span class="line" id="L471">            }</span>
 <span class="line" id="L472">            <span class="tok-kw">if</span> (i != b.len) {</span>
-<span class="line" id="L473">                mem.copy(<span class="tok-type">u8</span>, self.buf[<span class="tok-number">0</span>..], b[i..]);</span>
-<span class="line" id="L474">                self.off = b.len - i;</span>
+<span class="line" id="L473">                self.off = b.len - i;</span>
+<span class="line" id="L474">                <span class="tok-builtin">@memcpy</span>(self.buf[<span class="tok-number">0</span>..self.off], b[i..]);</span>
 <span class="line" id="L475">            }</span>
 <span class="line" id="L476">        }</span>
 <span class="line" id="L477"></span>
@@ -594,7 +594,7 @@
 <span class="line" id="L479">        <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">final</span>(self: *Self, out: *[mac_length]<span class="tok-type">u8</span>) <span class="tok-type">void</span> {</span>
 <span class="line" id="L480">            <span class="tok-kw">if</span> (self.off &gt; <span class="tok-number">0</span>) {</span>
 <span class="line" id="L481">                <span class="tok-kw">var</span> pad = [_]<span class="tok-type">u8</span>{<span class="tok-number">0</span>} ** block_length;</span>
-<span class="line" id="L482">                mem.copy(<span class="tok-type">u8</span>, pad[<span class="tok-number">0</span>..], self.buf[<span class="tok-number">0</span>..self.off]);</span>
+<span class="line" id="L482">                <span class="tok-builtin">@memcpy</span>(pad[<span class="tok-number">0</span>..self.off], self.buf[<span class="tok-number">0</span>..self.off]);</span>
 <span class="line" id="L483">                self.state.absorb(&amp;pad);</span>
 <span class="line" id="L484">            }</span>
 <span class="line" id="L485">            out.* = self.state.mac(T.tag_length * <span class="tok-number">8</span>, self.msg_len, <span class="tok-number">0</span>);</span>
@@ -768,7 +768,14 @@
 <span class="line" id="L653">    <span class="tok-kw">const</span> nonce = [_]<span class="tok-type">u8</span>{<span class="tok-number">0x00</span>} ** Aegis128L_256.nonce_length;</span>
 <span class="line" id="L654">    Aegis128L_256.encrypt(&amp;empty, &amp;tag, &amp;empty, &amp;msg, nonce, key);</span>
 <span class="line" id="L655">    <span class="tok-kw">try</span> htest.assertEqual(<span class="tok-str">&quot;f8840849602738d81037cbaa0f584ea95759e2ac60263ce77346bcdc79fe4319&quot;</span>, &amp;tag);</span>
-<span class="line" id="L656">}</span>
-<span class="line" id="L657"></span>
+<span class="line" id="L656"></span>
+<span class="line" id="L657">    <span class="tok-comment">// An update whose size is not a multiple of the block size</span>
+</span>
+<span class="line" id="L658">    st = st_init;</span>
+<span class="line" id="L659">    st.update(msg[<span class="tok-number">0</span>..<span class="tok-number">33</span>]);</span>
+<span class="line" id="L660">    st.final(&amp;tag);</span>
+<span class="line" id="L661">    <span class="tok-kw">try</span> htest.assertEqual(<span class="tok-str">&quot;c7cf649a844c1a6676cf6d91b1658e0aee54a4da330b0a8d3bc7ea4067551d1b&quot;</span>, &amp;tag);</span>
+<span class="line" id="L662">}</span>
+<span class="line" id="L663"></span>
 </code></pre></body>
 </html>

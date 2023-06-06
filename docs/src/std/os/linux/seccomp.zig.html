@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>os/linux/seccomp.zig - source view</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgklEQVR4AWMYWuD7EllJIM4G4g4g5oIJ/odhOJ8wToOxSTXgNxDHoeiBMfA4+wGShjyYOCkG/IGqWQziEzYAoUAeiF9D5U+DxEg14DRU7jWIT5IBIOdCxf+A+CQZAAoopEB7QJwBCBwHiip8UYmRdrAlDpIMgApwQZNnNii5Dq0MBgCxxycBnwEd+wAAAABJRU5ErkJggg=="/>
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPNJREFUeNpi/P//PwMlgOXHUjly9E0G4hwgZmQiQZMqEK8H4v9QzUEgQSaoADK+zhH9iAGL+C0gDoAaNg9mGLoLfgA1awK9hS9gzgJxA9RQBmQDrgMxJzRMGKE4HYj/Ial5A8QmQLwCJoBsgBYW2+TR1ChDaWt4LOBxKsi/VUh8XiD+gq4IVyzwQAMJBoKwacZlAB8Qf0bi96IZhtOAe1D6LpqaEiz6rmEzQAeIzwGxCJpieFqApo/vQKyJboAaEBsAsSEupwI1MwKjGBTVHOhegMX5UajYRqiBjMgYmj400cVh0XgTiKdC0zhJgJHS7AwQYABm9EAdCKrEfAAAAABJRU5ErkJggg=="/>
     <style>
       body{
         font-family: system-ui, -apple-system, Roboto, "Segoe UI", sans-serif;
@@ -133,7 +133,7 @@
 <span class="line" id="L20"><span class="tok-comment">//!</span></span>
 <span class="line" id="L21"><span class="tok-comment">//! 1. Each CPU architecture supported by Linux has its own unique ABI and</span></span>
 <span class="line" id="L22"><span class="tok-comment">//!    syscall API. It is not guaranteed that the syscall numbers and arguments</span></span>
-<span class="line" id="L23"><span class="tok-comment">//!    are the same across architectures, or that they're even implemted. Thus,</span></span>
+<span class="line" id="L23"><span class="tok-comment">//!    are the same across architectures, or that they're even implemented. Thus,</span></span>
 <span class="line" id="L24"><span class="tok-comment">//!    filters cannot be assumed to be portable without consulting documentation</span></span>
 <span class="line" id="L25"><span class="tok-comment">//!    like syscalls(2) and testing on target hardware. This also requires</span></span>
 <span class="line" id="L26"><span class="tok-comment">//!    checking the value of `data.arch` to make sure that a filter was compiled</span></span>
@@ -178,7 +178,7 @@
 <span class="line" id="L65"><span class="tok-comment">//!</span></span>
 <span class="line" id="L66"><span class="tok-comment">//! Unfortunately, there is no easy solution for issue 5. The most reliable</span></span>
 <span class="line" id="L67"><span class="tok-comment">//! strategy is to keep testing; test newer Zig versions, different libcs,</span></span>
-<span class="line" id="L68"><span class="tok-comment">//! different distros, and design your filter to accomidate all of them.</span></span>
+<span class="line" id="L68"><span class="tok-comment">//! different distros, and design your filter to accommodate all of them.</span></span>
 <span class="line" id="L69"><span class="tok-comment">//! Alternatively, you could inject a filter at runtime. Since filters are</span></span>
 <span class="line" id="L70"><span class="tok-comment">//! preserved across execve(2), a filter could be setup before executing your</span></span>
 <span class="line" id="L71"><span class="tok-comment">//! program, without your program having any knowledge of this happening. This</span></span>
