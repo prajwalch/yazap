@@ -1,0 +1,32 @@
+name: v0.9.1-test
+
+on:
+  push:
+    branches: [ "v0.9.x-v0.10.x" ]
+  pull_request:
+    branches: [ "v0.9.x-v0.10.x" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      ZIG_VERSION: 0.9.1
+      ZIG_BIN_TARGET: zig-linux-x86_64
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v3
+      
+      - name: Get zig build
+        shell: bash
+        run: |
+          mkdir zig_bin
+          wget https://ziglang.org/download/$ZIG_VERSION/$ZIG_BIN_TARGET-$ZIG_VERSION.tar.xz
+    
+      - name: Extract zig tarball
+        shell: bash
+        run: tar -xvf $ZIG_BIN_TARGET-$ZIG_VERSION.tar.xz --strip=1 -C zig_bin
+
+      - name: Run a test
+        shell: bash
+        run: ./zig_bin/zig test src/test.zig
