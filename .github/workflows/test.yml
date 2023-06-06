@@ -17,14 +17,13 @@ jobs:
       - name: Checkout branch
         uses: actions/checkout@v3
       
-      - name: Get zig master build and add to path
+      - name: Get zig master build
         shell: bash
         run: |
           mkdir zig
           wget https://ziglang.org/builds/$ZIG_BIN_TARGET-$ZIG_VERSION.tar.xz
           tar -xvf $ZIG_BIN_TARGET-$ZIG_VERSION.tar.xz --strip=1 -C zig
-          export PATH=~/zig:$PATH
 
       - name: Run a test
         shell: bash
-        run: zig build test
+        run: ./zig build test
