@@ -26,4 +26,5 @@ jobs:
           export PATH=~/zig:$PATH
 
       - name: Run a test
+        shell: bash
         run: zig build test
