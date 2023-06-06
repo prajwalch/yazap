@@ -26,4 +26,6 @@ jobs:
 
       - name: Run a test
         shell: bash
-        run: ./zig build test
+        run: |
+          cd zig
+          ./zig build test
