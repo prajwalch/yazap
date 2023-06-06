@@ -17,12 +17,12 @@ jobs:
       - name: Checkout branch
         uses: actions/checkout@v3
       
-      - name: Get zig $ZIG_VERSION build
+      - name: Get zig build
         shell: bash
         run: |
           mkdir zig_bin
-          wget https://ziglang.org/builds/$ZIG_BIN_TARGET-$ZIG_VERSION.tar.xz
-      
+          wget https://ziglang.org/download/$ZIG_VERSION/$ZIG_BIN_TARGET-$ZIG_VERSION.tar.xz
+    
       - name: Extract zig tarball
         shell: bash
         run: tar -xvf $ZIG_BIN_TARGET-$ZIG_VERSION.tar.xz --strip=1 -C zig_bin
