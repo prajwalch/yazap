@@ -1,3 +1,5 @@
+[![v0.9.0-test](https://github.com/PrajwalCH/yazap/actions/workflows/v0.9.0-test.yml/badge.svg?branch=v0.9.x-v0.10.x)](https://github.com/PrajwalCH/yazap/actions/workflows/v0.9.0-test.yml) [![v0.9.1-test](https://github.com/PrajwalCH/yazap/actions/workflows/v0.9.1-test.yml/badge.svg?branch=v0.9.x-v0.10.x)](https://github.com/PrajwalCH/yazap/actions/workflows/v0.9.1-test.yml) [![v0.10.0-test](https://github.com/PrajwalCH/yazap/actions/workflows/v0.10.0-test.yml/badge.svg?branch=v0.9.x-v0.10.x)](https://github.com/PrajwalCH/yazap/actions/workflows/v0.10.0-test.yml) [![v0.10.1-test](https://github.com/PrajwalCH/yazap/actions/workflows/v0.10.1-test.yml/badge.svg?branch=v0.9.x-v0.10.x)](https://github.com/PrajwalCH/yazap/actions/workflows/v0.10.1-test.yml)
+
 # Yazap
 
 **Yazap** is a simple and easy-to-use [zig](https://ziglang.org) library that is designed for parsing not only flags
