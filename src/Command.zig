@@ -66,7 +66,7 @@ pub fn addSubcommands(self: *Command, subcommands: []Command) !void {
     for (subcommands) |subcmd| try self.addSubcommand(subcmd);
 }
 
-/// Create a new [Argument](/#root;Arg) with the given name and specifies that Command will take single value
+/// Create a new [Argument] with the given name and specifies that Command will take single value
 pub fn takesSingleValue(self: *Command, arg_name: []const u8) !void {
     try self.takesNValues(arg_name, 1);
 }
