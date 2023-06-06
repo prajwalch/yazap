@@ -1,0 +1,29 @@
+name: test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      ZIG_VERSION: 0.11.0-dev.3380+7e0a02ee2
+      ZIG_BIN_TARGET: zig-linux-x86_64
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v3
+      
+      - name: Get zig master build and add to path
+        shell: bash
+        run: |
+          mkdir zig
+          wget https://ziglang.org/builds/$ZIG_BIN_TARGET-$ZIG_VERSION.tar.xz
+          tar -xvf $ZIG_BIN_TARGET-$ZIG_VERSION.tar.xz --strip=1 -C zig
+          export PATH=~/zig:$PATH
+
+      - name: Run a test
+        run: zig build test
