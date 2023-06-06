@@ -29,4 +29,4 @@ jobs:
 
       - name: Run a test
         shell: bash
-        run: ./zig_bin/zig build test
+        run: ./zig_bin/zig test src/test.zig
