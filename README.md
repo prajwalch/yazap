@@ -1,3 +1,5 @@
+[![pages-build-deployment](https://github.com/PrajwalCH/yazap/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/PrajwalCH/yazap/actions/workflows/pages/pages-build-deployment)
+
 # Yazap
 > **Note**
 > This branch targets the [master branch of zig](https://github.com/ziglang/zig). Use [v0.9.x-v0.10.x](https://github.com/PrajwalCH/yazap/tree/v0.9.x-v0.10.x) branch if you're using older version of zig
