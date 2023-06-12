@@ -127,26 +127,6 @@ try update_cmd.addArg(flag.option("branch", 'b', &[_][]const u8{ "stable", "nigh
 try myls.addSubcommand(update_cmd);
 ```
 
-### Handling help
-
-Handling `-h` or `--help` and displaying usage is done automatically, but if you want to display help manually, there
-are two functions which you can use i.e. `App.displayHelp` and `App.displaySubcommandHelp`.
-`displayHelp` is simple it just prints the root level help but the `displaySubcommandHelp` is a bit different,
-it queries for the subcommand which was present on the command line and displays its usage.
-
-```zig
-if (!ls_args.hasArgs()) {
-    try app.displayHelp();
-    return;
-}
-
-if (ls_args.subcommandContext("update")) |update_cmd_args| {
-    if (!update_cmd_args.hasArgs()) {
-        try app.displaySubcommandHelp();
-        return;
-    }
-}
-```
 
 ### Parsing arguments
 
@@ -158,22 +138,12 @@ Both functions return a constant pointer to [ArgsContext](https://prajwalch.gith
 ```zig
 const ls_args = try app.parseProcess();
 
-if (!ls_args.hasArgs()) {
-    try app.displayHelp();
-    return;
-}
-
 if (ls_args.isPresent("version")) {
     log.info("v0.1.0", .{});
     return;
 }
 
 if (ls_args.subcommandContext("update")) |update_cmd_args| {
-    if (!update_cmd_args.hasArgs()) {
-        try app.displaySubcommandHelp();
-        return;
-    }
-    
     if (update_cmd_args.isPresent("check-only")) {
         std.log.info("Check and report new update", .{});
         return;
@@ -206,6 +176,27 @@ if (ls_args.isPresent("color")) {
 
     log.info("color={s}", .{when});
     return;
+}
+```
+
+### Handling help
+
+Handling `-h` or `--help` and displaying usage is done automatically, but if you want to display help manually, there
+are two functions which you can use i.e. `App.displayHelp` and `App.displaySubcommandHelp`.
+`displayHelp` is simple it just prints the root level help but the `displaySubcommandHelp` is a bit different,
+it queries for the subcommand which was present on the command line and displays its usage.
+
+```zig
+if (!ls_args.hasArgs()) {
+    try app.displayHelp();
+    return;
+}
+
+if (ls_args.subcommandContext("update")) |update_cmd_args| {
+    if (!update_cmd_args.hasArgs()) {
+        try app.displaySubcommandHelp();
+        return;
+    }
 }
 ```
 
