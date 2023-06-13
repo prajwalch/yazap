@@ -55,8 +55,8 @@ pub fn singleArgumentOption(name: []const u8, short_name: ?u8, description: ?[]c
 pub fn singleArgumentOptionWithValidValues(
     name: []const u8,
     short_name: ?u8,
-    values: []const []const u8,
     description: ?[]const u8,
+    values: []const []const u8,
 ) Arg {
     var arg = Arg.singleArgumentOption(name, short_name, description);
     arg.setAllowedValues(values);

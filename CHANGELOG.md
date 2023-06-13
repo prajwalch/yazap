@@ -3,7 +3,7 @@
 - `flag.boolean` is moved and renamed to `Arg.booleanOption`.
 - `flag.argOne` is moved and renamed to `Arg.singleArgumentOption`.
 - `flag.argN` is moved and renamed to `Arg.multiArgumentsOption`.
-- `flag.option` is moved and renamed to `Arg.singleArgumentOptionWithValidValues`.
+- `flag.option` is moved and renamed to `Arg.singleArgumentOptionWithValidValues`. Also the signature of function is changed to `fn(name: []const u8, short_name: ?u8, description: ?[]const u8, values: []const []const u8)`.
 
     ```zig
     // Old
@@ -16,7 +16,7 @@
     try root.addArg(flag.option("opt", null, &[_][]const u8 {
         "opt1",
         "opt2",
-    }));
+    }, null));
     // -- snip --
     ```
 
@@ -28,7 +28,7 @@
     try root.addArg(Arg.booleanOption("bool", null, null));
     try root.addArg(Arg.singleArgumentOption("one", null, null));
     try root.addArg(Arg.multiArgumentsOption("many", null, 2, null));
-    try root.addArg(Arg.singleArgumentOptionWithValidValues("opt", null, &[_][]const u8 {
+    try root.addArg(Arg.singleArgumentOptionWithValidValues("opt", null, null, &[_][]const u8 {
         "opt1",
         "opt2",
     }));
