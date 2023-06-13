@@ -120,7 +120,7 @@ pub const Help = struct {
     }
 
     fn writeCommands(self: *Help, writer: anytype) !void {
-        if (!(self.include_subcmds)) return;
+        if (!self.include_subcmds) return;
 
         try writer.writeAll("Commands:");
         try writeNewLine(writer);
