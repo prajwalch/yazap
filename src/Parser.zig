@@ -132,7 +132,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
 }
 
 fn parseCommandArg(self: *Parser, token: *const Token, pos_arg_idx: usize) Error!void {
-    const arg = &self.cmd.args.items[pos_arg_idx];
+    const arg = &self.cmd.positional_args.items[pos_arg_idx];
 
     if (arg.values_delimiter) |delimiter| {
         if (try self.splitValue(arg, token.value, delimiter)) |values| {

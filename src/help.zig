@@ -90,7 +90,7 @@ pub const Help = struct {
         if (self.include_args) {
             const braces = getBraces(self.cmd.isSettingSet(.positional_arg_required));
 
-            for (self.cmd.args.items) |arg| {
+            for (self.cmd.positional_args.items) |arg| {
                 try writer.print("{c}{s}", .{ braces[0], arg.name });
                 if (arg.isSettingSet(.takes_multiple_values))
                     try writer.writeAll("...");

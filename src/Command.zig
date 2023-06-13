@@ -18,7 +18,7 @@ const SettingsOption = enum {
 allocator: Allocator,
 name: []const u8,
 description: ?[]const u8 = null,
-args: ArrayList(Arg) = .{},
+positional_args: ArrayList(Arg) = .{},
 options: ArrayList(Arg) = .{},
 subcommands: ArrayList(Command) = .{},
 settings: std.EnumSet(SettingsOption) = .{},
@@ -30,7 +30,7 @@ pub fn init(allocator: Allocator, name: []const u8, description: ?[]const u8) Co
 
 /// Release all allocated memory
 pub fn deinit(self: *Command) void {
-    self.args.deinit(self.allocator);
+    self.positional_args.deinit(self.allocator);
     self.options.deinit(self.allocator);
 
     for (self.subcommands.items) |*subcommand| {
@@ -42,7 +42,7 @@ pub fn deinit(self: *Command) void {
 /// Appends the new arg into the args list
 pub fn addArg(self: *Command, new_arg: Arg) !void {
     if ((new_arg.short_name == null) and (new_arg.long_name == null)) {
-        try self.args.append(self.allocator, new_arg);
+        try self.positional_args.append(self.allocator, new_arg);
     } else {
         try self.options.append(self.allocator, new_arg);
     }
@@ -95,7 +95,7 @@ pub fn isSettingSet(self: *const Command, option: SettingsOption) bool {
 }
 
 pub fn countArgs(self: *const Command) usize {
-    return (self.args.items.len);
+    return (self.positional_args.items.len);
 }
 
 pub fn countOptions(self: *const Command) usize {
