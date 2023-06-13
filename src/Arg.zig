@@ -2,14 +2,14 @@
 
 const Arg = @This();
 const std = @import("std");
-const MakeSettings = @import("settings.zig").MakeSettings;
 
 const DEFAULT_VALUES_DELIMITER = ",";
-const Settings = MakeSettings(enum {
+
+const SettingsOption = enum {
     takes_value,
     takes_multiple_values,
     allow_empty_value,
-});
+};
 
 name: []const u8,
 short_name: ?u8,
@@ -19,7 +19,7 @@ min_values: ?usize = null,
 max_values: ?usize = null,
 allowed_values: ?[]const []const u8,
 values_delimiter: ?[]const u8,
-settings: Settings,
+settings: std.EnumSet(SettingsOption),
 
 // # Constructors
 
@@ -32,7 +32,7 @@ pub fn init(name: []const u8, description: ?[]const u8) Arg {
         .description = description,
         .allowed_values = null,
         .values_delimiter = null,
-        .settings = Settings{},
+        .settings = .{},
     };
 }
 
@@ -120,18 +120,18 @@ pub fn setValuesDelimiter(self: *Arg, delimiter: []const u8) void {
     self.values_delimiter = delimiter;
 }
 
-pub fn setSetting(self: *Arg, option: Settings.Option) void {
-    return self.settings.set(option);
+pub fn setSetting(self: *Arg, option: SettingsOption) void {
+    return self.settings.insert(option);
 }
 
-pub fn unsetSetting(self: *Arg, option: Settings.Option) void {
-    return self.settings.unset(option);
+pub fn unsetSetting(self: *Arg, option: SettingsOption) void {
+    return self.settings.remove(option);
 }
 
 // # Getters
 
-pub fn isSettingSet(self: *const Arg, option: Settings.Option) bool {
-    return self.settings.isSet(option);
+pub fn isSettingSet(self: *const Arg, option: SettingsOption) bool {
+    return self.settings.contains(option);
 }
 
 pub fn isValidValue(self: *const Arg, value_to_check: []const u8) bool {

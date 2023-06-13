@@ -3,17 +3,17 @@ const Command = @This();
 const std = @import("std");
 const help = @import("help.zig");
 const Arg = @import("Arg.zig");
-const MakeSettings = @import("settings.zig").MakeSettings;
 
 const mem = std.mem;
 const ArrayList = std.ArrayListUnmanaged;
 const Allocator = mem.Allocator;
-const Settings = MakeSettings(enum {
+
+const SettingsOption = enum {
     takes_positional_arg,
     positional_arg_required,
     subcommand_required,
     enable_help,
-});
+};
 
 allocator: Allocator,
 name: []const u8,
@@ -21,7 +21,7 @@ description: ?[]const u8 = null,
 args: ArrayList(Arg) = .{},
 options: ArrayList(Arg) = .{},
 subcommands: ArrayList(Command) = .{},
-settings: Settings = .{},
+settings: std.EnumSet(SettingsOption) = .{},
 
 /// Creates a new instance of it
 pub fn init(allocator: Allocator, name: []const u8, description: ?[]const u8) Command {
@@ -82,16 +82,16 @@ pub fn takesNValues(self: *Command, arg_name: []const u8, n: usize) !void {
     self.setSetting(.takes_positional_arg);
 }
 
-pub fn setSetting(self: *Command, option: Settings.Option) void {
-    return self.settings.set(option);
+pub fn setSetting(self: *Command, option: SettingsOption) void {
+    return self.settings.insert(option);
 }
 
-pub fn unsetSetting(self: *Command, option: Settings.Option) void {
-    return self.settings.unset(option);
+pub fn unsetSetting(self: *Command, option: SettingsOption) void {
+    return self.settings.remove(option);
 }
 
-pub fn isSettingSet(self: *const Command, option: Settings.Option) bool {
-    return self.settings.isSet(option);
+pub fn isSettingSet(self: *const Command, option: SettingsOption) bool {
+    return self.settings.contains(option);
 }
 
 pub fn countArgs(self: *const Command) usize {
