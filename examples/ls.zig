@@ -14,11 +14,11 @@ pub fn main() anyerror!void {
 
     var update_cmd = app.createCommand("update", "Update the app or check for new updates");
     try update_cmd.addArg(Arg.booleanOption("check-only", null, "Only check for new update"));
-    try update_cmd.addArg(Arg.singleArgumentOptionWithValidValues("branch", 'b', &[_][]const u8{
+    try update_cmd.addArg(Arg.singleArgumentOptionWithValidValues("branch", 'b', "Branch to update", &[_][]const u8{
         "stable",
         "nightly",
         "beta",
-    }, "Branch to update"));
+    }));
 
     try myls.addSubcommand(update_cmd);
 
@@ -29,11 +29,11 @@ pub fn main() anyerror!void {
     try myls.addArg(Arg.booleanOption("version", null, null));
     try myls.addArg(Arg.singleArgumentOption("ignore", 'I', null));
     try myls.addArg(Arg.singleArgumentOption("hide", null, null));
-    try myls.addArg(Arg.singleArgumentOptionWithValidValues("color", 'C', &[_][]const u8{
+    try myls.addArg(Arg.singleArgumentOptionWithValidValues("color", 'C', null, &[_][]const u8{
         "always",
         "auto",
         "never",
-    }, null));
+    }));
 
     const ls_args = try app.parseProcess();
 
