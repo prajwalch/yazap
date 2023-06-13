@@ -114,7 +114,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
         );
     }
 
-    if (!(self.args_ctx.isPresent("help"))) {
+    if (!self.args_ctx.isPresent("help")) {
         const takes_pos_args_and_is_required =
             (takes_pos_args and (self.command.hasProperty(.positional_arg_required)));
 
@@ -182,7 +182,7 @@ fn parseShortOption(self: *Parser, token: *const Token) Error!void {
             return Error.UnknownFlag;
         };
 
-        if (!(arg.hasProperty(.takes_value))) {
+        if (!arg.hasProperty(.takes_value)) {
             if (short_option.hasValue()) {
                 self.err.setContext(.{ .valid_arg = arg.name });
                 return Error.UnneededAttachedValue;
@@ -213,7 +213,7 @@ fn parseLongOption(self: *Parser, token: *const Token) Error!void {
         return Error.UnknownFlag;
     };
 
-    if (!(arg.hasProperty(.takes_value))) {
+    if (!arg.hasProperty(.takes_value)) {
         if (option_tuple[1] != null) {
             self.err.setContext(.{ .valid_arg = option_tuple[0] });
             return Error.UnneededAttachedValue;
@@ -298,8 +298,8 @@ fn splitValue(
     delimiter: []const u8,
 ) !(?std.ArrayList([]const u8)) {
     // zig fmt: off
-    if (!(takesMorethanOneValue(arg))
-        or !(mem.containsAtLeast(u8, value, 1, delimiter))) return null;
+    if (!takesMorethanOneValue(arg)
+        or !mem.containsAtLeast(u8, value, 1, delimiter)) return null;
     // zig fmt: on
 
     var it = mem.split(u8, value, delimiter);
@@ -348,10 +348,10 @@ fn verifyAndAppendValue(
 fn verifyValue(self: *Parser, arg: *const Arg, value: []const u8) Error!void {
     self.err.setContext(.{ .valid_arg = arg.name });
 
-    if ((value.len == 0) and !(arg.hasProperty(.allow_empty_value)))
+    if (value.len == 0 and !arg.hasProperty(.allow_empty_value))
         return Error.EmptyArgValueNotAllowed;
 
-    if (!(arg.isValidValue(value))) {
+    if (!arg.isValidValue(value)) {
         self.err.setContext(.{ .invalid_value = value, .valid_values = arg.allowed_values.? });
         return Error.ProvidedValueIsNotValidOption;
     }
@@ -369,7 +369,7 @@ fn putMatchedArg(self: *Parser, arg: *const Arg, value: args_context.MatchedArgV
         var new_value = value;
 
         switch (old_value.*) {
-            .none => if (!(new_value.isNone())) {
+            .none => if (!new_value.isNone()) {
                 return ctx.args.put(arg.name, new_value);
             },
             .single => |old_single_value| {
@@ -406,7 +406,7 @@ fn putMatchedArg(self: *Parser, arg: *const Arg, value: args_context.MatchedArgV
 }
 
 fn verifyValuesLength(self: *Parser, arg: *const Arg, len: usize) Error!void {
-    if ((len > 1) and !(takesMorethanOneValue(arg))) {
+    if (len > 1 and !takesMorethanOneValue(arg)) {
         self.err.setContext(.{ .valid_arg = arg.name, .max_num_values = 1 });
         return Error.TooManyArgValue;
     }
