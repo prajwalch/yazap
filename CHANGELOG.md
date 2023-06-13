@@ -39,3 +39,4 @@
 - `Command.countArgs` is renamed to `Command.countPositionalArgs`
 
 ## What's New
+- Added new `Arg.multiArgumentsOptionWithValidValues` API

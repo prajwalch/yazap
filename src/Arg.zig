@@ -82,6 +82,19 @@ pub fn multiArgumentsOption(
     return arg;
 }
 
+/// Creates a multi arguments option with valid values which user can pass.
+pub fn multiArgumentsOptionWithValidValues(
+    name: []const u8,
+    short_name: ?u8,
+    max_values: usize,
+    description: ?[]const u8,
+    values: []const []const u8,
+) void {
+    var arg = Arg.multiArgumentsOption(name, short_name, max_values, description);
+    arg.setAllowedValues(values);
+    return arg;
+}
+
 // # Setters
 
 /// Sets the short name of the argument
