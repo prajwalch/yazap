@@ -8,7 +8,7 @@ const mem = std.mem;
 const ArrayList = std.ArrayListUnmanaged;
 const Allocator = mem.Allocator;
 
-const SettingsOption = enum {
+const Property = enum {
     takes_positional_arg,
     positional_arg_required,
     subcommand_required,
@@ -21,7 +21,7 @@ description: ?[]const u8 = null,
 positional_args: ArrayList(Arg) = .{},
 options: ArrayList(Arg) = .{},
 subcommands: ArrayList(Command) = .{},
-settings: std.EnumSet(SettingsOption) = .{},
+properties: std.EnumSet(Property) = .{},
 
 /// Creates a new instance of it
 pub fn init(allocator: Allocator, name: []const u8, description: ?[]const u8) Command {
@@ -79,19 +79,19 @@ pub fn takesNValues(self: *Command, arg_name: []const u8, n: usize) !void {
     if (n > 1) arg.setDefaultValuesDelimiter();
 
     try self.addArg(arg);
-    self.setSetting(.takes_positional_arg);
+    self.addProperty(.takes_positional_arg);
 }
 
-pub fn setSetting(self: *Command, option: SettingsOption) void {
-    return self.settings.insert(option);
+pub fn addProperty(self: *Command, property: Property) void {
+    return self.properties.insert(property);
 }
 
-pub fn unsetSetting(self: *Command, option: SettingsOption) void {
-    return self.settings.remove(option);
+pub fn removeProperty(self: *Command, property: Property) void {
+    return self.properties.remove(property);
 }
 
-pub fn isSettingSet(self: *const Command, option: SettingsOption) bool {
-    return self.settings.contains(option);
+pub fn hasProperty(self: *const Command, property: Property) bool {
+    return self.properties.contains(property);
 }
 
 pub fn countPositionalArgs(self: *const Command) usize {

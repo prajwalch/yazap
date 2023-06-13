@@ -88,7 +88,7 @@ pub const Help = struct {
         try writer.print("{s} ", .{self.cmd.name});
 
         if (self.include_args) {
-            const braces = getBraces(self.cmd.isSettingSet(.positional_arg_required));
+            const braces = getBraces(self.cmd.hasProperty(.positional_arg_required));
 
             for (self.cmd.positional_args.items) |arg| {
                 try writer.print("{c}{s}", .{ braces[0], arg.name });
@@ -101,7 +101,7 @@ pub const Help = struct {
         if (self.include_flags)
             try writer.writeAll("[OPTIONS] ");
         if (self.include_subcmds) {
-            const braces = getBraces(self.cmd.isSettingSet(.subcommand_required));
+            const braces = getBraces(self.cmd.hasProperty(.subcommand_required));
             try writer.print("{c}COMMAND{c}", .{ braces[0], braces[1] });
         }
         try writeNewLine(writer);
@@ -203,7 +203,7 @@ pub fn enableFor(cmd: *Command) void {
         or cmd.countOptions() >= 1
         or cmd.countSubcommands() >= 1) {
         // zig fmt: on
-        cmd.setSetting(.enable_help);
+        cmd.addProperty(.enable_help);
     }
 }
 

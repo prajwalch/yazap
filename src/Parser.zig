@@ -83,14 +83,14 @@ pub fn parse(self: *Parser) Error!ArgsContext {
     errdefer self.args_ctx.deinit();
 
     const takes_pos_args =
-        (self.cmd.isSettingSet(.takes_positional_arg) and self.cmd.countPositionalArgs() >= 1);
+        (self.cmd.hasProperty(.takes_positional_arg) and self.cmd.countPositionalArgs() >= 1);
     var pos_args_idx: usize = 0;
     var parsed_all_pos_args = false;
 
     while (self.tokenizer.nextToken()) |*token| {
         if (mem.eql(u8, token.value, "help") or mem.eql(u8, token.value, "h")) {
             // Check whether help is enabled for `cmd`
-            if (self.cmd.isSettingSet(.enable_help)) {
+            if (self.cmd.hasProperty(.enable_help)) {
                 try self.putMatchedArg(&Arg.init("help", null), .none);
                 break;
             } else {
@@ -116,14 +116,14 @@ pub fn parse(self: *Parser) Error!ArgsContext {
 
     if (!(self.args_ctx.isPresent("help"))) {
         const takes_pos_args_and_is_required =
-            (takes_pos_args and (self.cmd.isSettingSet(.positional_arg_required)));
+            (takes_pos_args and (self.cmd.hasProperty(.positional_arg_required)));
 
         if (takes_pos_args_and_is_required and !parsed_all_pos_args) {
             self.err.setContext(.{ .valid_cmd = self.cmd.name });
             return Error.CommandArgumentNotProvided;
         }
 
-        if (self.cmd.isSettingSet(.subcommand_required) and self.args_ctx.subcommand == null) {
+        if (self.cmd.hasProperty(.subcommand_required) and self.args_ctx.subcommand == null) {
             self.err.setContext(.{ .valid_cmd = self.cmd.name });
             return Error.CommandSubcommandNotProvided;
         }
@@ -432,7 +432,7 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
         return Error.UnknownCommand;
     };
     // zig fmt: off
-    const takes_value = subcmd.isSettingSet(.takes_positional_arg)
+    const takes_value = subcmd.hasProperty(.takes_positional_arg)
         or (subcmd.countPositionalArgs() >= 1)
         or (subcmd.countOptions() >= 1)
         or (subcmd.countSubcommands() >= 1);
@@ -443,7 +443,7 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
     }
 
     const args = self.tokenizer.restArg() orelse {
-        if (subcmd.isSettingSet(.positional_arg_required)) {
+        if (subcmd.hasProperty(.positional_arg_required)) {
             self.err.setContext(.{ .valid_cmd = provided_subcmd });
             return Error.CommandArgumentNotProvided;
         }

@@ -36,7 +36,10 @@
     ```
 - `Arg.setShortNameFromName` is removed.
 - `Arg.setNameAsLongName` is removed.
-- `Command.countArgs` is renamed to `Command.countPositionalArgs`
+- `Command.countArgs` is renamed to `Command.countPositionalArgs`.
+- `Command.setSetting` is renamed to `Command.addProperty`.
+- `Command.unsetSetting` is renamed to `Command.removeProperty`.
+- `Command.isSettingSet` is renamed to `Command.hasProperty`.
 
 ## What's New
 - Added new `Arg.multiArgumentsOptionWithValidValues` API

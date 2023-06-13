@@ -11,7 +11,7 @@ test "command that takes single value" {
     errdefer app.deinit();
 
     try app.rootCommand().addArg(Arg.init("PATH", null));
-    app.rootCommand().setSetting(.takes_positional_arg);
+    app.rootCommand().addProperty(.takes_positional_arg);
 
     const args = try app.parseFrom(&.{"test.txt"});
     try testing.expectEqualStrings("test.txt", args.valueOf("PATH").?);
@@ -28,7 +28,7 @@ test "command that takes many values" {
     paths.setSetting(.takes_value);
 
     try app.rootCommand().addArg(paths);
-    app.rootCommand().setSetting(.takes_positional_arg);
+    app.rootCommand().addProperty(.takes_positional_arg);
 
     const args = try app.parseFrom(&.{ "a", "b", "c" });
     try testing.expectEqualSlices([]const u8, &.{ "a", "b", "c" }, args.valuesOf("PATHS").?);
@@ -45,7 +45,7 @@ test "command that takes many values using delimiter" {
     paths.setValuesDelimiter(":");
 
     try app.rootCommand().addArg(paths);
-    app.rootCommand().setSetting(.takes_positional_arg);
+    app.rootCommand().addProperty(.takes_positional_arg);
 
     const args = try app.parseFrom(&.{"a:b:c"});
 
@@ -68,8 +68,8 @@ test "command that takes required value" {
     errdefer app.deinit();
 
     try app.rootCommand().addArg(Arg.init("PATH", null));
-    app.rootCommand().setSetting(.takes_positional_arg);
-    app.rootCommand().setSetting(.positional_arg_required);
+    app.rootCommand().addProperty(.takes_positional_arg);
+    app.rootCommand().addProperty(.positional_arg_required);
     try testing.expectError(error.CommandArgumentNotProvided, app.parseFrom(&.{}));
 
     app.deinit();
@@ -80,7 +80,7 @@ test "command requires subcommand" {
     errdefer app.deinit();
 
     try app.rootCommand().addSubcommand(app.createCommand("init", null));
-    app.rootCommand().setSetting(.subcommand_required);
+    app.rootCommand().addProperty(.subcommand_required);
     try testing.expectError(error.CommandSubcommandNotProvided, app.parseFrom(&.{}));
 
     app.deinit();
@@ -188,7 +188,7 @@ test "passing positional argument before options" {
 
     try app.rootCommand().takesSingleValue("PATH");
     try app.rootCommand().addArg(Arg.booleanOption("all", 'a', null));
-    app.rootCommand().setSetting(.positional_arg_required);
+    app.rootCommand().addProperty(.positional_arg_required);
 
     const args = try app.parseFrom(&.{ ".", "-a" });
     try testing.expectEqualStrings(".", args.valueOf("PATH").?);
