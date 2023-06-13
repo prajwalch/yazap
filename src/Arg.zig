@@ -94,10 +94,6 @@ pub fn setLongName(self: *Arg, long_name: []const u8) void {
     self.long_name = long_name;
 }
 
-pub fn setNameAsLongName(self: *Arg) void {
-    self.setLongName(self.name);
-}
-
 /// Sets the minimum number of values required to provide for an argument.
 pub fn setMinValues(self: *Arg, num: usize) void {
     self.min_values = if (num >= 1) num else null;

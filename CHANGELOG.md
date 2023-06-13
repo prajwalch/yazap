@@ -1,9 +1,9 @@
 # Upcoming version
 ## Breaking Changes
-- `flag.boolean` is moved and renamed to `Arg.booleanOption`
-- `flag.argOne` is moved and renamed to `Arg.singleArgumentOption`
-- `flag.argN` is moved and renamed to `Arg.multiArgumentsOption`
-- `flag.option` is moved and renamed to `Arg.singleArgumentOptionWithValidValues`
+- `flag.boolean` is moved and renamed to `Arg.booleanOption`.
+- `flag.argOne` is moved and renamed to `Arg.singleArgumentOption`.
+- `flag.argN` is moved and renamed to `Arg.multiArgumentsOption`.
+- `flag.option` is moved and renamed to `Arg.singleArgumentOptionWithValidValues`.
 
     ```zig
     // Old
@@ -34,6 +34,7 @@
     }));
     // -- snip --
     ```
-- `Arg.setShortNameFromName` is removed
+- `Arg.setShortNameFromName` is removed.
+- `Arg.setNameAsLongName` is removed.
 
 ## What's New
