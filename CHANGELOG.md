@@ -34,5 +34,6 @@
     }));
     // -- snip --
     ```
+- `Arg.setShortNameFromName` is removed
 
 ## What's New

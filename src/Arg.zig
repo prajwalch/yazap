@@ -89,11 +89,6 @@ pub fn setShortName(self: *Arg, short_name: u8) void {
     self.short_name = short_name;
 }
 
-/// Sets the short name of the argument from the name
-pub fn setShortNameFromName(self: *Arg) void {
-    self.setShortName(self.name[0]);
-}
-
 /// Sets the long name of the argument
 pub fn setLongName(self: *Arg, long_name: []const u8) void {
     self.long_name = long_name;
