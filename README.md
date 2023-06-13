@@ -90,29 +90,25 @@ var myls = app.rootCommand();
 
 ### Adding arguments
 
-After you get the root command, you can start to add arguments by using an appropriate methods provided by `Command`.
+After you get the root command, you can start adding [Argument](https://prajwalch.github.io/yazap/#A;lib:Arg)s using the appropriate methods provided by the `Command`.
 See [Command](https://prajwalch.github.io/yazap/#root;Command) to see all the available API.
 
 ```zig
-try myls.addArg(flag.boolean("all", 'a', "Don't ignore the hidden directories"));
-try myls.addArg(flag.boolean("recursive", 'R', "List subdirectories recursively"));
-try myls.addArg(flag.boolean("one-line", '1', null));
-try myls.addArg(flag.boolean("size", 's', null));
-try myls.addArg(flag.boolean("version", null, null));
+try myls.addArg(Arg.booleanOption("all", 'a', "Don't ignore the hidden directories"));
+try myls.addArg(Arg.booleanOption("recursive", 'R', "List subdirectories recursively"));
+try myls.addArg(Arg.booleanOption("one-line", '1', null));
+try myls.addArg(Arg.booleanOption("size", 's', null));
+try myls.addArg(Arg.booleanOption("version", null, null));
 
-try myls.addArg(flag.argOne("ignore", 'I', null));
-try myls.addArg(flag.argOne("hide", null, null));
+try myls.addArg(Arg.singleArgumentOption("ignore", 'I', null));
+try myls.addArg(Arg.singleArgumentOption("hide", null, null));
 
-try myls.addArg(flag.option("color", 'C', &[_][]const u8{
+try myls.addArg(Arg.singleArgumentOptionWithValidValues("color", 'C', &[_][]const u8{
     "always",
     "auto",
     "never",
 }, null));
 ```
-
-In the above example, we use the [flag](https://prajwalch.github.io/yazap/#root;flag) module which is a wrapper around
-[Arg](https://prajwalch.github.io/yazap/#root;Arg) that provides different functions for defining different kinds
-of flags quickly and easily.
 
 ### Adding subcommands
 
@@ -121,8 +117,12 @@ Once you create a subcommand, you can add its own arguments and subcommands just
 
 ```zig
 var update_cmd = app.createCommand("update", "Update the app or check for new updates");
-try update_cmd.addArg(flag.boolean("check-only", null, "Only check for new update"));
-try update_cmd.addArg(flag.option("branch", 'b', &[_][]const u8{ "stable", "nightly", "beta" }, "Branch to update"));
+try update_cmd.addArg(Arg.booleanOption("check-only", null, "Only check for new update"));
+try update_cmd.addArg(Arg.singleArgumentOptionWithValidValues("branch", 'b', &[_][]const u8{ 
+    "stable",
+    "nightly",
+    "beta"
+}, "Branch to update"));
 
 try myls.addSubcommand(update_cmd);
 ```
@@ -208,8 +208,8 @@ const yazap = @import("yazap");
 
 const allocator = std.heap.page_allocator;
 const log = std.log;
-const flag = yazap.flag;
 const App = yazap.App;
+const Arg = yazap.Arg;
 
 pub fn main() anyerror!void {
     var app = App.init(allocator, "myls", "My custom ls");
@@ -218,20 +218,24 @@ pub fn main() anyerror!void {
     var myls = app.rootCommand();
 
     var update_cmd = app.createCommand("update", "Update the app or check for new updates");
-    try update_cmd.addArg(flag.boolean("check-only", null, "Only check for new update"));
-    try update_cmd.addArg(flag.option("branch", 'b', &[_][]const u8{ "stable", "nightly", "beta" }, "Branch to update"));
+    try update_cmd.addArg(Arg.booleanOption("check-only", null, "Only check for new update"));
+    try update_cmd.addArg(Arg.singleArgumentOptionWithValidValues("branch", 'b', &[_][]const u8{
+        "stable",
+        "nightly",
+        "beta"
+    }, "Branch to update"));
 
     try myls.addSubcommand(update_cmd);
 
-    try myls.addArg(flag.boolean("all", 'a', "Don't ignore the hidden directories"));
-    try myls.addArg(flag.boolean("recursive", 'R', "List subdirectories recursively"));
-    try myls.addArg(flag.boolean("one-line", '1', null));
-    try myls.addArg(flag.boolean("size", 's', null));
-    try myls.addArg(flag.boolean("version", null, null));
-    try myls.addArg(flag.argOne("ignore", 'I', null));
-    try myls.addArg(flag.argOne("hide", null, null));
+    try myls.addArg(Arg.booleanOption("all", 'a', "Don't ignore the hidden directories"));
+    try myls.addArg(Arg.booleanOption("recursive", 'R', "List subdirectories recursively"));
+    try myls.addArg(Arg.booleanOption("one-line", '1', null));
+    try myls.addArg(Arg.booleanOption("size", 's', null));
+    try myls.addArg(Arg.booleanOption("version", null, null));
+    try myls.addArg(Arg.singleArgumentOption("ignore", 'I', null));
+    try myls.addArg(Arg.singleArgumentOption("hide", null, null));
 
-    try myls.addArg(flag.option("color", 'C', &[_][]const u8{
+    try myls.addArg(Arg.singleArgumentOptionWithValidValues("color", 'C', &[_][]const u8{
         "always",
         "auto",
         "never",
