@@ -2,8 +2,8 @@ const std = @import("std");
 const yazap = @import("yazap");
 
 const allocator = std.heap.page_allocator;
-const flag = yazap.flag;
 const App = yazap.App;
+const Arg = yazap.Arg;
 
 pub fn main() anyerror!void {
     var app = App.init(allocator, "mytouch", null);
@@ -14,8 +14,8 @@ pub fn main() anyerror!void {
     try touch.takesSingleValue("FILE_NAME");
     touch.setSetting(.positional_arg_required);
 
-    try touch.addArg(flag.boolean("no-create", 'c', "Do not create any files"));
-    try touch.addArg(flag.boolean("version", 'v', "Display app version"));
+    try touch.addArg(Arg.booleanOption("no-create", 'c', "Do not create any files"));
+    try touch.addArg(Arg.booleanOption("version", 'v', "Display app version"));
 
     const args = try app.parseProcess();
 

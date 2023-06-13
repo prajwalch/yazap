@@ -3,8 +3,8 @@ const yazap = @import("yazap");
 
 const allocator = std.heap.page_allocator;
 const log = std.log;
-const flag = yazap.flag;
 const App = yazap.App;
+const Arg = yazap.Arg;
 
 pub fn main() anyerror!void {
     var app = App.init(allocator, "myls", "My custom ls");
@@ -13,24 +13,23 @@ pub fn main() anyerror!void {
     var myls = app.rootCommand();
 
     var update_cmd = app.createCommand("update", "Update the app or check for new updates");
-    try update_cmd.addArg(flag.boolean("check-only", null, "Only check for new update"));
-    try update_cmd.addArg(flag.option("branch", 'b', &[_][]const u8{ "stable", "nightly", "beta" }, "Branch to update"));
+    try update_cmd.addArg(Arg.booleanOption("check-only", null, "Only check for new update"));
+    try update_cmd.addArg(Arg.singleArgumentOptionWithValidValues("branch", 'b', &[_][]const u8{
+        "stable",
+        "nightly",
+        "beta",
+    }, "Branch to update"));
 
     try myls.addSubcommand(update_cmd);
 
-    try myls.addArg(flag.boolean("all", 'a', "Don't ignore the hidden directories"));
-    try myls.addArg(flag.boolean("recursive", 'R', "List subdirectories recursively"));
-
-    // For now short name can be null but not long name
-    //     // that's why one-line long name is used for -1 short name
-    try myls.addArg(flag.boolean("one-line", '1', null));
-    try myls.addArg(flag.boolean("size", 's', null));
-    try myls.addArg(flag.boolean("version", null, null));
-
-    try myls.addArg(flag.argOne("ignore", 'I', null));
-    try myls.addArg(flag.argOne("hide", null, null));
-
-    try myls.addArg(flag.option("color", 'C', &[_][]const u8{
+    try myls.addArg(Arg.booleanOption("all", 'a', "Don't ignore the hidden directories"));
+    try myls.addArg(Arg.booleanOption("recursive", 'R', "List subdirectories recursively"));
+    try myls.addArg(Arg.booleanOption("one-line", '1', null));
+    try myls.addArg(Arg.booleanOption("size", 's', null));
+    try myls.addArg(Arg.booleanOption("version", null, null));
+    try myls.addArg(Arg.singleArgumentOption("ignore", 'I', null));
+    try myls.addArg(Arg.singleArgumentOption("hide", null, null));
+    try myls.addArg(Arg.singleArgumentOptionWithValidValues("color", 'C', &[_][]const u8{
         "always",
         "auto",
         "never",

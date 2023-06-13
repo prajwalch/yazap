@@ -2,8 +2,8 @@ const std = @import("std");
 const yazap = @import("yazap");
 
 const allocator = std.heap.page_allocator;
-const flag = yazap.flag;
 const App = yazap.App;
+const Arg = yazap.Arg;
 
 // git init
 // git commit -m "message"
@@ -17,7 +17,7 @@ pub fn main() anyerror!void {
     var git = app.rootCommand();
 
     var cmd_commit = app.createCommand("commit", "Record changes to the repository");
-    try cmd_commit.addArg(flag.argOne("message", 'm', "commit message"));
+    try cmd_commit.addArg(Arg.singleArgumentOption("message", 'm', "commit message"));
 
     var cmd_pull = app.createCommand("pull", "Fetch from remote branch and merge it to local");
     try cmd_pull.takesSingleValue("REMOTE");
