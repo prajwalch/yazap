@@ -21,6 +21,8 @@ allowed_values: ?[]const []const u8,
 values_delimiter: ?[]const u8,
 settings: Settings,
 
+// # Constructors
+
 /// Creates a new instance of it
 pub fn init(name: []const u8, description: ?[]const u8) Arg {
     return Arg{
@@ -33,6 +35,54 @@ pub fn init(name: []const u8, description: ?[]const u8) Arg {
         .settings = Settings{},
     };
 }
+
+/// Creates a boolean option.
+pub fn booleanOption(name: []const u8, short_name: ?u8, description: ?[]const u8) Arg {
+    var arg = Arg.init(name, description);
+    arg.setLongName(name);
+
+    if (short_name) |n| arg.setShortName(n);
+
+    return arg;
+}
+
+/// Creates a single argument option.
+pub fn singleArgumentOption(name: []const u8, short_name: ?u8, description: ?[]const u8) Arg {
+    return Arg.multiArgumentsOption(name, short_name, 1, description);
+}
+
+/// Creates a single argument option with valid values which user can pass.
+pub fn singleArgumentOptionWithValidValues(
+    name: []const u8,
+    short_name: ?u8,
+    values: []const []const u8,
+    description: ?[]const u8,
+) Arg {
+    var arg = Arg.singleArgumentOption(name, short_name, description);
+    arg.setAllowedValues(values);
+    return arg;
+}
+
+/// Creates a multi arguments option.
+pub fn multiArgumentsOption(
+    name: []const u8,
+    short_name: ?u8,
+    max_values: usize,
+    description: ?[]const u8,
+) Arg {
+    var arg = Arg.init(name, description);
+    arg.setLongName(name);
+    arg.setMinValues(1);
+    arg.setMaxValues(max_values);
+    arg.setSetting(.takes_value);
+
+    if (short_name) |n| arg.setShortName(n);
+    if (max_values > 1) arg.setDefaultValuesDelimiter();
+
+    return arg;
+}
+
+// # Setters
 
 /// Sets the short name of the argument
 pub fn setShortName(self: *Arg, short_name: u8) void {
@@ -86,6 +136,8 @@ pub fn setSetting(self: *Arg, option: Settings.Option) void {
 pub fn unsetSetting(self: *Arg, option: Settings.Option) void {
     return self.settings.unset(option);
 }
+
+// # Getters
 
 pub fn isSettingSet(self: *const Arg, option: Settings.Option) bool {
     return self.settings.isSet(option);

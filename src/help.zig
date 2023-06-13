@@ -1,5 +1,4 @@
 const std = @import("std");
-const flag = @import("flag.zig");
 const Command = @import("Command.zig");
 const ArgsContext = @import("args_context.zig").ArgsContext;
 
