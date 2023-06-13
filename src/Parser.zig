@@ -64,7 +64,7 @@ const ShortOption = struct {
 };
 
 allocator: Allocator,
-cmd: *const Command,
+command: *const Command,
 err: erro.Error,
 tokenizer: Tokenizer,
 args_ctx: ArgsContext,
@@ -72,7 +72,7 @@ args_ctx: ArgsContext,
 pub fn init(allocator: Allocator, tokenizer: Tokenizer, command: *const Command) Parser {
     return Parser{
         .allocator = allocator,
-        .cmd = command,
+        .command = command,
         .err = erro.Error.init(),
         .tokenizer = tokenizer,
         .args_ctx = ArgsContext.init(allocator),
@@ -83,14 +83,14 @@ pub fn parse(self: *Parser) Error!ArgsContext {
     errdefer self.args_ctx.deinit();
 
     const takes_pos_args =
-        (self.cmd.hasProperty(.takes_positional_arg) and self.cmd.countPositionalArgs() >= 1);
+        (self.command.hasProperty(.takes_positional_arg) and self.command.countPositionalArgs() >= 1);
     var pos_args_idx: usize = 0;
     var parsed_all_pos_args = false;
 
     while (self.tokenizer.nextToken()) |*token| {
         if (mem.eql(u8, token.value, "help") or mem.eql(u8, token.value, "h")) {
-            // Check whether help is enabled for `cmd`
-            if (self.cmd.hasProperty(.enable_help)) {
+            // Check whether help is enabled for `command`
+            if (self.command.hasProperty(.enable_help)) {
                 try self.putMatchedArg(&Arg.init("help", null), .none);
                 break;
             } else {
@@ -106,7 +106,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
         if (takes_pos_args and !parsed_all_pos_args) {
             try self.parseCommandArg(token, pos_args_idx);
             pos_args_idx += 1;
-            parsed_all_pos_args = (pos_args_idx >= self.cmd.countPositionalArgs());
+            parsed_all_pos_args = (pos_args_idx >= self.command.countPositionalArgs());
             continue;
         }
         try self.args_ctx.setSubcommand(
@@ -116,15 +116,15 @@ pub fn parse(self: *Parser) Error!ArgsContext {
 
     if (!(self.args_ctx.isPresent("help"))) {
         const takes_pos_args_and_is_required =
-            (takes_pos_args and (self.cmd.hasProperty(.positional_arg_required)));
+            (takes_pos_args and (self.command.hasProperty(.positional_arg_required)));
 
         if (takes_pos_args_and_is_required and !parsed_all_pos_args) {
-            self.err.setContext(.{ .valid_cmd = self.cmd.name });
+            self.err.setContext(.{ .valid_cmd = self.command.name });
             return Error.CommandArgumentNotProvided;
         }
 
-        if (self.cmd.hasProperty(.subcommand_required) and self.args_ctx.subcommand == null) {
-            self.err.setContext(.{ .valid_cmd = self.cmd.name });
+        if (self.command.hasProperty(.subcommand_required) and self.args_ctx.subcommand == null) {
+            self.err.setContext(.{ .valid_cmd = self.command.name });
             return Error.CommandSubcommandNotProvided;
         }
     }
@@ -132,7 +132,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
 }
 
 fn parseCommandArg(self: *Parser, token: *const Token, pos_arg_idx: usize) Error!void {
-    const arg = &self.cmd.positional_args.items[pos_arg_idx];
+    const arg = &self.command.positional_args.items[pos_arg_idx];
 
     if (arg.values_delimiter) |delimiter| {
         if (try self.splitValue(arg, token.value, delimiter)) |values| {
@@ -177,7 +177,7 @@ fn parseShortOption(self: *Parser, token: *const Token) Error!void {
     var short_option = ShortOption.init(option_tuple[0], option_tuple[1]);
 
     while (short_option.next()) |option| {
-        const arg = self.cmd.findShortOption(option) orelse {
+        const arg = self.command.findShortOption(option) orelse {
             self.err.setContext(.{ .invalid_arg = short_option.getCurrentOptionAsStr() });
             return Error.UnknownFlag;
         };
@@ -208,7 +208,7 @@ fn parseShortOption(self: *Parser, token: *const Token) Error!void {
 
 fn parseLongOption(self: *Parser, token: *const Token) Error!void {
     const option_tuple = optionTokenToOptionTuple(token);
-    const arg = self.cmd.findLongOption(option_tuple[0]) orelse {
+    const arg = self.command.findLongOption(option_tuple[0]) orelse {
         self.err.setContext(.{ .invalid_arg = option_tuple[0] });
         return Error.UnknownFlag;
     };
@@ -427,7 +427,7 @@ fn takesMorethanOneValue(arg: *const Arg) bool {
 }
 
 fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubCommand {
-    const subcmd = self.cmd.findSubcommand(provided_subcmd) orelse {
+    const subcmd = self.command.findSubcommand(provided_subcmd) orelse {
         self.err.setContext(.{ .invalid_arg = provided_subcmd });
         return Error.UnknownCommand;
     };
