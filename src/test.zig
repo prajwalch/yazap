@@ -3,7 +3,6 @@ const lib = @import("lib.zig");
 
 const testing = std.testing;
 const allocator = testing.allocator;
-const flag = lib.flag;
 const App = lib.App;
 const Arg = lib.Arg;
 
@@ -188,7 +187,7 @@ test "passing positional argument before options" {
     errdefer app.deinit();
 
     try app.rootCommand().takesSingleValue("PATH");
-    try app.rootCommand().addArg(flag.boolean("all", 'a', null));
+    try app.rootCommand().addArg(Arg.booleanOption("all", 'a', null));
     app.rootCommand().setSetting(.positional_arg_required);
 
     const args = try app.parseFrom(&.{ ".", "-a" });
@@ -203,7 +202,7 @@ test "passing positional argument after options" {
     errdefer app.deinit();
 
     try app.rootCommand().takesSingleValue("PATH");
-    try app.rootCommand().addArg(flag.boolean("all", 'a', null));
+    try app.rootCommand().addArg(Arg.booleanOption("all", 'a', null));
 
     const args = try app.parseFrom(&.{ "-a", "." });
     try testing.expectEqualStrings(".", args.valueOf("PATH").?);
@@ -217,8 +216,8 @@ test "passing positional argument before and after options" {
     errdefer app.deinit();
 
     try app.rootCommand().takesSingleValue("PATH");
-    try app.rootCommand().addArg(flag.boolean("all", 'a', null));
-    try app.rootCommand().addArg(flag.boolean("one-line", '1', null));
+    try app.rootCommand().addArg(Arg.booleanOption("all", 'a', null));
+    try app.rootCommand().addArg(Arg.booleanOption("one-line", '1', null));
 
     const args = try app.parseFrom(&.{ "-1", ".", "-a" });
     try testing.expectEqualStrings(".", args.valueOf("PATH").?);
