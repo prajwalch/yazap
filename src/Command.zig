@@ -94,7 +94,7 @@ pub fn isSettingSet(self: *const Command, option: SettingsOption) bool {
     return self.settings.contains(option);
 }
 
-pub fn countArgs(self: *const Command) usize {
+pub fn countPositionalArgs(self: *const Command) usize {
     return (self.positional_args.items.len);
 }
 

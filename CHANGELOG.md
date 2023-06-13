@@ -36,5 +36,6 @@
     ```
 - `Arg.setShortNameFromName` is removed.
 - `Arg.setNameAsLongName` is removed.
+- `Command.countArgs` is renamed to `Command.countPositionalArgs`
 
 ## What's New

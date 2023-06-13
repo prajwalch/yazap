@@ -38,7 +38,7 @@ pub const Help = struct {
             self.parents = std.ArrayList([]const u8).init(allocator);
             try self.setCommandAndItsParents(root_cmd, subcmd);
         }
-        self.include_args = (self.cmd.countArgs() >= 1);
+        self.include_args = (self.cmd.countPositionalArgs() >= 1);
         self.include_subcmds = (self.cmd.countSubcommands() >= 1);
         self.include_flags = (self.cmd.countOptions() >= 1);
         return self;
@@ -199,7 +199,7 @@ pub const Help = struct {
 
 pub fn enableFor(cmd: *Command) void {
     // zig fmt: off
-    if (cmd.countArgs() >= 1
+    if (cmd.countPositionalArgs() >= 1
         or cmd.countOptions() >= 1
         or cmd.countSubcommands() >= 1) {
         // zig fmt: on

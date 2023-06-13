@@ -83,7 +83,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
     errdefer self.args_ctx.deinit();
 
     const takes_pos_args =
-        (self.cmd.isSettingSet(.takes_positional_arg) and self.cmd.countArgs() >= 1);
+        (self.cmd.isSettingSet(.takes_positional_arg) and self.cmd.countPositionalArgs() >= 1);
     var pos_args_idx: usize = 0;
     var parsed_all_pos_args = false;
 
@@ -106,7 +106,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
         if (takes_pos_args and !parsed_all_pos_args) {
             try self.parseCommandArg(token, pos_args_idx);
             pos_args_idx += 1;
-            parsed_all_pos_args = (pos_args_idx >= self.cmd.countArgs());
+            parsed_all_pos_args = (pos_args_idx >= self.cmd.countPositionalArgs());
             continue;
         }
         try self.args_ctx.setSubcommand(
@@ -433,7 +433,7 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
     };
     // zig fmt: off
     const takes_value = subcmd.isSettingSet(.takes_positional_arg)
-        or (subcmd.countArgs() >= 1)
+        or (subcmd.countPositionalArgs() >= 1)
         or (subcmd.countOptions() >= 1)
         or (subcmd.countSubcommands() >= 1);
     // zig fmt: on
