@@ -36,6 +36,9 @@
     ```
 - `Arg.setShortNameFromName` is removed.
 - `Arg.setNameAsLongName` is removed.
+- `Arg.setSetting` is renamed to `Arg.addProperty`.
+- `Arg.unsetSetting` is renamed to `Arg.removeProperty`.
+- `Arg.isSettingSet` is renamed to `Arg.hasProperty`.
 - `Command.countArgs` is renamed to `Command.countPositionalArgs`.
 - `Command.setSetting` is renamed to `Command.addProperty`.
 - `Command.unsetSetting` is renamed to `Command.removeProperty`.

@@ -5,7 +5,7 @@ const std = @import("std");
 
 const DEFAULT_VALUES_DELIMITER = ",";
 
-const SettingsOption = enum {
+const Property = enum {
     takes_value,
     takes_multiple_values,
     allow_empty_value,
@@ -19,7 +19,7 @@ min_values: ?usize = null,
 max_values: ?usize = null,
 allowed_values: ?[]const []const u8,
 values_delimiter: ?[]const u8,
-settings: std.EnumSet(SettingsOption),
+properties: std.EnumSet(Property),
 
 // # Constructors
 
@@ -32,7 +32,7 @@ pub fn init(name: []const u8, description: ?[]const u8) Arg {
         .description = description,
         .allowed_values = null,
         .values_delimiter = null,
-        .settings = .{},
+        .properties = .{},
     };
 }
 
@@ -74,7 +74,7 @@ pub fn multiArgumentsOption(
     arg.setLongName(name);
     arg.setMinValues(1);
     arg.setMaxValues(max_values);
-    arg.setSetting(.takes_value);
+    arg.addProperty(.takes_value);
 
     if (short_name) |n| arg.setShortName(n);
     if (max_values > 1) arg.setDefaultValuesDelimiter();
@@ -133,18 +133,18 @@ pub fn setValuesDelimiter(self: *Arg, delimiter: []const u8) void {
     self.values_delimiter = delimiter;
 }
 
-pub fn setSetting(self: *Arg, option: SettingsOption) void {
-    return self.settings.insert(option);
+pub fn addProperty(self: *Arg, property: Property) void {
+    return self.properties.insert(property);
 }
 
-pub fn unsetSetting(self: *Arg, option: SettingsOption) void {
-    return self.settings.remove(option);
+pub fn removeProperty(self: *Arg, property: Property) void {
+    return self.properties.remove(property);
 }
 
 // # Getters
 
-pub fn isSettingSet(self: *const Arg, option: SettingsOption) bool {
-    return self.settings.contains(option);
+pub fn hasProperty(self: *const Arg, property: Property) bool {
+    return self.properties.contains(property);
 }
 
 pub fn isValidValue(self: *const Arg, value_to_check: []const u8) bool {

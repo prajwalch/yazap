@@ -145,7 +145,7 @@ fn parseCommandArg(self: *Parser, token: *const Token, pos_arg_idx: usize) Error
     // TODO: This code and the code at line 262 is exactly same.
     // Either move it a function or do something about this.
     const num_values_to_consume = arg.max_values orelse arg.min_values orelse blk: {
-        if (arg.isSettingSet(.takes_multiple_values)) {
+        if (arg.hasProperty(.takes_multiple_values)) {
             try self.verifyAndAppendValue(arg, token.value, &values);
             try self.consumeValuesTillNextOption(arg, &values);
             return self.putMatchedArg(arg, .{ .many = values });
@@ -182,7 +182,7 @@ fn parseShortOption(self: *Parser, token: *const Token) Error!void {
             return Error.UnknownFlag;
         };
 
-        if (!(arg.isSettingSet(.takes_value))) {
+        if (!(arg.hasProperty(.takes_value))) {
             if (short_option.hasValue()) {
                 self.err.setContext(.{ .valid_arg = arg.name });
                 return Error.UnneededAttachedValue;
@@ -213,7 +213,7 @@ fn parseLongOption(self: *Parser, token: *const Token) Error!void {
         return Error.UnknownFlag;
     };
 
-    if (!(arg.isSettingSet(.takes_value))) {
+    if (!(arg.hasProperty(.takes_value))) {
         if (option_tuple[1] != null) {
             self.err.setContext(.{ .valid_arg = option_tuple[0] });
             return Error.UnneededAttachedValue;
@@ -258,7 +258,7 @@ fn parseOptionValue(self: *Parser, arg: *const Arg, attached_value: ?[]const u8)
     errdefer values.deinit();
 
     const num_values_to_consume = arg.max_values orelse arg.min_values orelse blk: {
-        if (arg.isSettingSet(.takes_multiple_values)) {
+        if (arg.hasProperty(.takes_multiple_values)) {
             try self.consumeValuesTillNextOption(arg, &values);
             return self.putMatchedArg(arg, .{ .many = values });
         }
@@ -348,7 +348,7 @@ fn verifyAndAppendValue(
 fn verifyValue(self: *Parser, arg: *const Arg, value: []const u8) Error!void {
     self.err.setContext(.{ .valid_arg = arg.name });
 
-    if ((value.len == 0) and !(arg.isSettingSet(.allow_empty_value)))
+    if ((value.len == 0) and !(arg.hasProperty(.allow_empty_value)))
         return Error.EmptyArgValueNotAllowed;
 
     if (!(arg.isValidValue(value))) {
@@ -423,7 +423,7 @@ fn verifyValuesLength(self: *Parser, arg: *const Arg, len: usize) Error!void {
 
 fn takesMorethanOneValue(arg: *const Arg) bool {
     const num_values = arg.max_values orelse arg.min_values orelse 1;
-    return ((num_values > 1) or (arg.isSettingSet(.takes_multiple_values)));
+    return ((num_values > 1) or (arg.hasProperty(.takes_multiple_values)));
 }
 
 fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubCommand {

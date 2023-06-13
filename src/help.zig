@@ -92,7 +92,7 @@ pub const Help = struct {
 
             for (self.cmd.positional_args.items) |arg| {
                 try writer.print("{c}{s}", .{ braces[0], arg.name });
-                if (arg.isSettingSet(.takes_multiple_values))
+                if (arg.hasProperty(.takes_multiple_values))
                     try writer.writeAll("...");
                 try writer.print("{c} ", .{braces[1]});
             }
@@ -152,7 +152,7 @@ pub const Help = struct {
             const padding: usize = if (option.short_name == null) 6 else 0;
             try writer.print(" {[1]s:>[0]}{[2]s} ", .{ padding, "--", long_name });
 
-            if (option.isSettingSet(.takes_value)) {
+            if (option.hasProperty(.takes_value)) {
                 // TODO: Add new `Arg.placeholderName()` to display proper placeholder
                 if (option.allowed_values) |values| {
                     try writer.writeByte('{');
