@@ -24,8 +24,8 @@ test "command that takes many values" {
     errdefer app.deinit();
 
     var paths = Arg.init("PATHS", null);
-    paths.setSetting(.takes_multiple_values);
-    paths.setSetting(.takes_value);
+    paths.addProperty(.takes_multiple_values);
+    paths.addProperty(.takes_value);
 
     try app.rootCommand().addArg(paths);
     app.rootCommand().addProperty(.takes_positional_arg);
@@ -41,7 +41,7 @@ test "command that takes many values using delimiter" {
     errdefer app.deinit();
 
     var paths = Arg.init("PATHS", null);
-    paths.setSetting(.takes_multiple_values);
+    paths.addProperty(.takes_multiple_values);
     paths.setValuesDelimiter(":");
 
     try app.rootCommand().addArg(paths);
@@ -105,7 +105,7 @@ test "Option that takes single value" {
 
     var browser = Arg.init("output", null);
     browser.setShortName('o');
-    browser.setSetting(.takes_value);
+    browser.addProperty(.takes_value);
 
     try app.rootCommand().addArg(browser);
     try testing.expectError(error.ArgValueNotProvided, app.parseFrom(&.{"-o"}));
@@ -120,8 +120,8 @@ test "Option that takes many/multiple values" {
     var srcs = Arg.init("sources", null);
     srcs.setShortName('s');
     srcs.setValuesDelimiter(":");
-    srcs.setSetting(.takes_value);
-    srcs.setSetting(.takes_multiple_values);
+    srcs.addProperty(.takes_value);
+    srcs.addProperty(.takes_multiple_values);
 
     // ex: clang sources...
     try app.rootCommand().addArg(srcs);
@@ -140,7 +140,7 @@ test "Option with min values" {
     srcs.setShortName('s');
     srcs.setMinValues(2);
     srcs.setValuesDelimiter(":");
-    srcs.setSetting(.takes_value);
+    srcs.addProperty(.takes_value);
 
     try app.rootCommand().addArg(srcs);
     try testing.expectError(error.TooFewArgValue, app.parseFrom(&.{"-s=f1"}));
@@ -157,7 +157,7 @@ test "Option with max values" {
     srcs.setMinValues(2);
     srcs.setMaxValues(5);
     srcs.setValuesDelimiter(":");
-    srcs.setSetting(.takes_value);
+    srcs.addProperty(.takes_value);
 
     try app.rootCommand().addArg(srcs);
     try testing.expectError(error.TooManyArgValue, app.parseFrom(
@@ -174,7 +174,7 @@ test "Option with allowed values" {
     var stdd = Arg.init("std", null);
     stdd.setLongName("std");
     stdd.setAllowedValues(&.{ "c99", "c11", "c17" });
-    stdd.setSetting(.takes_value);
+    stdd.addProperty(.takes_value);
 
     try app.rootCommand().addArg(stdd);
     try testing.expectError(error.ProvidedValueIsNotValidOption, app.parseFrom(&.{"--std=c100"}));
