@@ -17,11 +17,11 @@ Inspired by [clap-rs](https://github.com/clap-rs/clap) and [andrewrk/ziglang: sr
 
 - Option (short and long)
     * Providing value using `=`, using space and without using space (`-f=value, -f value, -fvalue`)
-    * Providing comma-separated values using `=` and without using space (`-f=v1,v2,v3, -fv1,v2,v3`)
+    * Providing delimiter-separated values using `=` and without using space (`-f=v1,v2,v3, -fv1:v2:v3`)
     * Chaining multiple short boolean options (`-abc`)
-    * Providing value and comma-separated values for multiple chained options using `=` (`-abc=val`, `-abc=v1,v2,v3`)
+    * Providing value and delimiter-separated values for multiple chained options using `=` (`-abc=val`, `-abc=v1,v2,v3`)
     * Specifying an option multiple times (`-a 1 -a 2 -a 3`)
-- Providing comma-separated values for command (`touch one,two,three`)
+- Providing delimiter-separated values for command (`touch one,two,three`, `touch one:two:three`)
 - Nested subcommands
 - Automatic handling help option (`-h` and `--help`)
 - Automatic help generation
