@@ -59,7 +59,7 @@ pub fn singleArgumentOptionWithValidValues(
     values: []const []const u8,
 ) Arg {
     var arg = Arg.singleArgumentOption(name, short_name, description);
-    arg.setAllowedValues(values);
+    arg.setValidValues(values);
     return arg;
 }
 
@@ -91,7 +91,7 @@ pub fn multiArgumentsOptionWithValidValues(
     values: []const []const u8,
 ) Arg {
     var arg = Arg.multiArgumentsOption(name, short_name, max_values, description);
-    arg.setAllowedValues(values);
+    arg.setValidValues(values);
     return arg;
 }
 
@@ -117,9 +117,8 @@ pub fn setMaxValues(self: *Arg, num: usize) void {
     self.max_values = if (num >= 1) num else null;
 }
 
-/// Sets the allowed values for an argument.
-/// Value outside of allowed values will be consider as error.
-pub fn setAllowedValues(self: *Arg, values: []const []const u8) void {
+/// Sets the valid values for an argument.
+pub fn setValidValues(self: *Arg, values: []const []const u8) void {
     self.valid_values = values;
 }
 

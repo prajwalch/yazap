@@ -37,6 +37,7 @@
 - `Arg.allowed_values` is renamed to `Arg.valid_values`.
 - `Arg.setShortNameFromName` is removed.
 - `Arg.setNameAsLongName` is removed.
+- `Arg.setAllowedValues` is renamed to `Arg.setValidValues`.
 - `Arg.setSetting` is renamed to `Arg.addProperty`.
 - `Arg.unsetSetting` is renamed to `Arg.removeProperty`.
 - `Arg.isSettingSet` is renamed to `Arg.hasProperty`.

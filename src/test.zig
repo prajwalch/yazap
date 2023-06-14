@@ -173,7 +173,7 @@ test "Option with allowed values" {
 
     var stdd = Arg.init("std", null);
     stdd.setLongName("std");
-    stdd.setAllowedValues(&.{ "c99", "c11", "c17" });
+    stdd.setValidValues(&.{ "c99", "c11", "c17" });
     stdd.addProperty(.takes_value);
 
     try app.rootCommand().addArg(stdd);
