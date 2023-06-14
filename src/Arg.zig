@@ -17,7 +17,7 @@ long_name: ?[]const u8,
 description: ?[]const u8,
 min_values: ?usize = null,
 max_values: ?usize = null,
-allowed_values: ?[]const []const u8,
+valid_values: ?[]const []const u8,
 values_delimiter: ?[]const u8,
 properties: std.EnumSet(Property),
 
@@ -30,7 +30,7 @@ pub fn init(name: []const u8, description: ?[]const u8) Arg {
         .short_name = null,
         .long_name = null,
         .description = description,
-        .allowed_values = null,
+        .valid_values = null,
         .values_delimiter = null,
         .properties = .{},
     };
@@ -120,7 +120,7 @@ pub fn setMaxValues(self: *Arg, num: usize) void {
 /// Sets the allowed values for an argument.
 /// Value outside of allowed values will be consider as error.
 pub fn setAllowedValues(self: *Arg, values: []const []const u8) void {
-    self.allowed_values = values;
+    self.valid_values = values;
 }
 
 /// Sets the default separator between the values of an argument.
@@ -148,7 +148,7 @@ pub fn hasProperty(self: *const Arg, property: Property) bool {
 }
 
 pub fn isValidValue(self: *const Arg, value_to_check: []const u8) bool {
-    if (self.allowed_values) |values| {
+    if (self.valid_values) |values| {
         for (values) |value| {
             if (std.mem.eql(u8, value, value_to_check)) return true;
         }

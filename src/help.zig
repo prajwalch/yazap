@@ -154,7 +154,7 @@ pub const Help = struct {
 
             if (option.hasProperty(.takes_value)) {
                 // TODO: Add new `Arg.placeholderName()` to display proper placeholder
-                if (option.allowed_values) |values| {
+                if (option.valid_values) |values| {
                     try writer.writeByte('{');
 
                     for (values, 0..) |value, idx| {

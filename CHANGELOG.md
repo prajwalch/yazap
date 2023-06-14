@@ -34,6 +34,7 @@
     }));
     // -- snip --
     ```
+- `Arg.allowed_values` is renamed to `Arg.valid_values`.
 - `Arg.setShortNameFromName` is removed.
 - `Arg.setNameAsLongName` is removed.
 - `Arg.setSetting` is renamed to `Arg.addProperty`.
