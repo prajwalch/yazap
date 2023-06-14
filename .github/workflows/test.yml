@@ -22,7 +22,7 @@ jobs:
         run: zig build test
 
       - name: Run test by passing test file
-        run: zig test src/test
+        run: zig test src/test.zig
 
       - name: Build examples
         run: zig build examples
