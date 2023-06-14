@@ -197,16 +197,6 @@ pub const Help = struct {
     }
 };
 
-pub fn enableFor(cmd: *Command) void {
-    // zig fmt: off
-    if (cmd.countPositionalArgs() >= 1
-        or cmd.countOptions() >= 1
-        or cmd.countSubcommands() >= 1) {
-        // zig fmt: on
-        cmd.addProperty(.enable_help);
-    }
-}
-
 /// Returns which subcommand is active on command line with `-h` or `--help` option
 /// null if none of the subcommands were present
 pub fn findSubcommand(root_cmd: *const Command, ctx: *ArgsContext) ?[]const u8 {

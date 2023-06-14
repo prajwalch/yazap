@@ -46,3 +46,7 @@
 
 ## What's New
 - Added new `Arg.multiArgumentsOptionWithValidValues` API
+
+## Internal Changes
+- `enable_help` property is removed and no longer needed to set for a command
+which basically means `-h` and `--help` options will be always available to root command and subcommands.

@@ -89,13 +89,8 @@ pub fn parse(self: *Parser) Error!ArgsContext {
 
     while (self.tokenizer.nextToken()) |*token| {
         if (mem.eql(u8, token.value, "help") or mem.eql(u8, token.value, "h")) {
-            // Check whether help is enabled for `command`
-            if (self.command.hasProperty(.enable_help)) {
-                try self.putMatchedArg(&Arg.init("help", null), .none);
-                break;
-            } else {
-                // Return error?
-            }
+            try self.args_ctx.args.put("help", .none);
+            break;
         }
 
         if (token.isShortOption() or token.isLongOption()) {

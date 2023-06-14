@@ -52,14 +52,12 @@ pub fn parseProcess(self: *App) YazapError!(*const ArgsContext) {
 
 /// Starts parsing the given arguments
 pub fn parseFrom(self: *App, argv: []const [:0]const u8) YazapError!(*const ArgsContext) {
-    try self.addBuiltinArgs();
-
     var parser = Parser.init(self.allocator, Tokenizer.init(argv), self.rootCommand());
     self.args_ctx = parser.parse() catch |e| {
         try parser.err.log(e);
         return e;
     };
-    try self.handleBuiltinArgs();
+    try self.handleHelpOption();
     return &self.args_ctx.?;
 }
 
@@ -79,11 +77,7 @@ pub fn displaySubcommandHelp(self: *App) !void {
     if (self.subcommand_help) |*h| return h.writeAll(std.io.getStdErr().writer());
 }
 
-fn addBuiltinArgs(self: *App) !void {
-    help.enableFor(&self.command);
-}
-
-fn handleBuiltinArgs(self: *App) !void {
+fn handleHelpOption(self: *App) !void {
     // Set the `Help` of a subcommand present on the command line with the `-h` or `--help` option
     // remains null if none of the subcommands were present
     if (help.findSubcommand(self.rootCommand(), &self.args_ctx.?)) |subcmd| {

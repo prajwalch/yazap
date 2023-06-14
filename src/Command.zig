@@ -12,7 +12,6 @@ const Property = enum {
     takes_positional_arg,
     positional_arg_required,
     subcommand_required,
-    enable_help,
 };
 
 allocator: Allocator,
@@ -56,9 +55,7 @@ pub fn addArgs(self: *Command, args: []Arg) !void {
 /// Appends the new subcommand into the subcommands list
 pub fn addSubcommand(self: *Command, new_subcommand: Command) !void {
     // Add help option for subcommand
-    var subcmd = new_subcommand;
-    help.enableFor(&subcmd);
-    return self.subcommands.append(self.allocator, subcmd);
+    return self.subcommands.append(self.allocator, new_subcommand);
 }
 
 /// Appends the `subcommands` into the subcommands list
