@@ -72,14 +72,15 @@ pub fn multiArgumentsOption(
     description: ?[]const u8,
 ) Arg {
     var arg = Arg.init(name, description);
+
+    if (short_name) |n| {
+        arg.setShortName(n);
+    }
     arg.setLongName(name);
     arg.setMinValues(1);
     arg.setMaxValues(max_values);
+    arg.setDefaultValuesDelimiter();
     arg.addProperty(.takes_value);
-
-    if (short_name) |n| arg.setShortName(n);
-    if (max_values > 1) arg.setDefaultValuesDelimiter();
-
     return arg;
 }
 
