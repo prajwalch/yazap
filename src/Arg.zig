@@ -98,6 +98,21 @@ pub fn multiArgumentsOptionWithValidValues(
 }
 
 /// Creates a positional argument.
+/// The index represents the position of your argument starting from **1**.
+///
+/// NOTE: Index is optional so by default it will be assigned in order of evalution.
+///
+/// ```zig
+/// Order dependent
+/// try root.addArg(Arg.positional("ONE", null, null));
+/// try root.addArg(Arg.positional("TWO", null, null));
+/// try root.addArg(Arg.positional("THREE", null, null));
+///
+/// // Equivalent but order independent
+/// try root.addArg(Arg.positional("THREE", null, 3));
+/// try root.addArg(Arg.positional("TWO", null, 2));
+/// try root.addArg(Arg.positional("ONE", null, 1));
+/// ```
 pub fn positional(name: []const u8, description: ?[]const u8, index: ?usize) Arg {
     var arg = Arg.init(name, description);
 
