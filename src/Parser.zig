@@ -94,8 +94,13 @@ pub fn parse(self: *Parser) Error!ArgsContext {
             break;
         }
 
-        if (token.isShortOption() or token.isLongOption()) {
-            try self.parseOption(token);
+        if (token.isShortOption()) {
+            try self.parseShortOption(token);
+            continue;
+        }
+
+        if (token.isLongOption()) {
+            try self.parseLongOption(token);
             continue;
         }
 
@@ -169,14 +174,6 @@ fn parsePositionalArg(self: *Parser, token: *const Token, pos_args_idx: usize) E
     try self.verifyAndAppendValue(arg, token.value, &values);
     try self.consumeNValues(arg, num_values_to_consume -% 1, &values);
     return self.putMatchedArg(arg, .{ .many = values });
-}
-
-fn parseOption(self: *Parser, token: *const Token) Error!void {
-    if (token.isShortOption()) {
-        try self.parseShortOption(token);
-    } else if (token.isLongOption()) {
-        try self.parseLongOption(token);
-    }
 }
 
 fn parseShortOption(self: *Parser, token: *const Token) Error!void {
