@@ -41,7 +41,12 @@ pub fn booleanOption(name: []const u8, short_name: ?u8, description: ?[]const u8
 
 /// Creates a single argument option.
 pub fn singleArgumentOption(name: []const u8, short_name: ?u8, description: ?[]const u8) Arg {
-    return Arg.multiArgumentsOption(name, short_name, 1, description);
+    var arg = Arg.init(name, description);
+
+    if (short_name) |n| arg.setShortName(n);
+    arg.setLongName(name);
+    arg.addProperty(.takes_value);
+    return arg;
 }
 
 /// Creates a single argument option with valid values which user can pass.
