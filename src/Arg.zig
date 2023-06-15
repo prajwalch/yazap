@@ -100,7 +100,10 @@ pub fn multiArgumentsOptionWithValidValues(
 /// Creates a positional argument.
 pub fn positional(name: []const u8, description: ?[]const u8, index: ?usize) Arg {
     var arg = Arg.init(name, description);
-    arg.index = index;
+
+    if (index) |i| {
+        arg.setIndex(i);
+    }
     arg.addProperty(.takes_value);
     return arg;
 }
