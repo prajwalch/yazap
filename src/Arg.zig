@@ -312,6 +312,24 @@ pub fn setDefaultValuesDelimiter(self: *Arg) void {
 }
 
 /// Sets separator between the values of an argument.
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+///
+/// var nums = Arg.init("nums", "Numbers to add");
+/// nums.setShortName("n");
+/// nums.setLongName("nums");
+/// nums.setMinValues(2);
+/// nums.setValuesDelimiter(":");
+/// nums.addProperty(.takes_value);
+///
+/// try root.addArg(nums);
+///
+/// // From command line: myapp --nums 1:2
+/// ```
 pub fn setValuesDelimiter(self: *Arg, delimiter: []const u8) void {
     self.values_delimiter = delimiter;
 }
