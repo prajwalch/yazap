@@ -12,29 +12,21 @@ const Property = enum {
 };
 
 name: []const u8,
-short_name: ?u8,
-long_name: ?[]const u8,
+short_name: ?u8 = null,
+long_name: ?[]const u8 = null,
 description: ?[]const u8,
 min_values: ?usize = null,
 max_values: ?usize = null,
-valid_values: ?[]const []const u8,
-values_delimiter: ?[]const u8,
+valid_values: ?[]const []const u8 = null,
+values_delimiter: ?[]const u8 = null,
 index: ?usize = null,
-properties: std.EnumSet(Property),
+properties: std.EnumSet(Property) = .{},
 
 // # Constructors
 
 /// Creates a new instance of it
 pub fn init(name: []const u8, description: ?[]const u8) Arg {
-    return Arg{
-        .name = name,
-        .short_name = null,
-        .long_name = null,
-        .description = description,
-        .valid_values = null,
-        .values_delimiter = null,
-        .properties = .{},
-    };
+    return Arg{ .name = name, .description = description };
 }
 
 /// Creates a boolean option.
