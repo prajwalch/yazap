@@ -6,12 +6,43 @@ const allocator = testing.allocator;
 const App = lib.App;
 const Arg = lib.Arg;
 
+test "positional arguments with auto index" {
+    var app = App.init(allocator, "app", null);
+    errdefer app.deinit();
+
+    try app.rootCommand().addArg(Arg.positional("ONE", null, null));
+    try app.rootCommand().addArg(Arg.positional("TWO", null, null));
+    try app.rootCommand().addArg(Arg.positional("THREE", null, null));
+
+    const args = try app.parseFrom(&.{ "val1", "val2", "val3" });
+    try testing.expectEqualStrings("val1", args.valueOf("ONE").?);
+    try testing.expectEqualStrings("val2", args.valueOf("TWO").?);
+    try testing.expectEqualStrings("val3", args.valueOf("THREE").?);
+
+    app.deinit();
+}
+
+test "positional arguments with manual index" {
+    var app = App.init(allocator, "app", null);
+    errdefer app.deinit();
+
+    try app.rootCommand().addArg(Arg.positional("ONE", null, 1));
+    try app.rootCommand().addArg(Arg.positional("THREE", null, 3));
+    try app.rootCommand().addArg(Arg.positional("TWO", null, 2));
+
+    const args = try app.parseFrom(&.{ "val1", "val2", "val3" });
+    try testing.expectEqualStrings("val1", args.valueOf("ONE").?);
+    try testing.expectEqualStrings("val2", args.valueOf("TWO").?);
+    try testing.expectEqualStrings("val3", args.valueOf("THREE").?);
+
+    app.deinit();
+}
+
 test "command that takes single value" {
     var app = App.init(allocator, "rm", null);
     errdefer app.deinit();
 
-    try app.rootCommand().addArg(Arg.init("PATH", null));
-    app.rootCommand().addProperty(.takes_positional_arg);
+    try app.rootCommand().addArg(Arg.positional("PATH", null, 1));
 
     const args = try app.parseFrom(&.{"test.txt"});
     try testing.expectEqualStrings("test.txt", args.valueOf("PATH").?);
@@ -19,56 +50,59 @@ test "command that takes single value" {
     app.deinit();
 }
 
-test "command that takes many values" {
+//  Positional argument can no longer take multiple values
+//
+// test "command that takes many values" {
+//     var app = App.init(allocator, "rm", null);
+//     errdefer app.deinit();
+
+//     var paths = Arg.init("PATHS", null);
+//     paths.addProperty(.takes_multiple_values);
+//     paths.addProperty(.takes_value);
+
+//     try app.rootCommand().addArg(paths);
+//     app.rootCommand().addProperty(.takes_positional_arg);
+
+//     const args = try app.parseFrom(&.{ "a", "b", "c" });
+//     try testing.expectEqualSlices([]const u8, &.{ "a", "b", "c" }, args.valuesOf("PATHS").?);
+
+//     app.deinit();
+// }
+
+//  Positional argument can no longer take multiple values
+//
+// test "command that takes many values using delimiter" {
+//     var app = App.init(allocator, "rm", null);
+//     errdefer app.deinit();
+
+//     var paths = Arg.init("PATHS", null);
+//     paths.addProperty(.takes_multiple_values);
+//     paths.setValuesDelimiter(":");
+
+//     try app.rootCommand().addArg(paths);
+//     app.rootCommand().addProperty(.takes_positional_arg);
+
+//     const args = try app.parseFrom(&.{"a:b:c"});
+
+//     // This gives weird error like:
+//     // index 0 incorrect. expected { 97 }, found { 97 }
+//     //try testing.expectEqualSlices([]const u8, &.{ "a", "b", "c" }, args.valuesOf("PATHS").?);
+
+//     const given_paths = args.valuesOf("PATHS");
+//     try testing.expectEqual(true, given_paths != null);
+//     try testing.expectEqual(@as(usize, 3), given_paths.?.len);
+//     try testing.expectEqualStrings("a", given_paths.?[0]);
+//     try testing.expectEqualStrings("b", given_paths.?[1]);
+//     try testing.expectEqualStrings("c", given_paths.?[2]);
+
+//     app.deinit();
+// }
+
+test "command that takes required positional arg" {
     var app = App.init(allocator, "rm", null);
     errdefer app.deinit();
 
-    var paths = Arg.init("PATHS", null);
-    paths.addProperty(.takes_multiple_values);
-    paths.addProperty(.takes_value);
-
-    try app.rootCommand().addArg(paths);
-    app.rootCommand().addProperty(.takes_positional_arg);
-
-    const args = try app.parseFrom(&.{ "a", "b", "c" });
-    try testing.expectEqualSlices([]const u8, &.{ "a", "b", "c" }, args.valuesOf("PATHS").?);
-
-    app.deinit();
-}
-
-test "command that takes many values using delimiter" {
-    var app = App.init(allocator, "rm", null);
-    errdefer app.deinit();
-
-    var paths = Arg.init("PATHS", null);
-    paths.addProperty(.takes_multiple_values);
-    paths.setValuesDelimiter(":");
-
-    try app.rootCommand().addArg(paths);
-    app.rootCommand().addProperty(.takes_positional_arg);
-
-    const args = try app.parseFrom(&.{"a:b:c"});
-
-    // This gives weird error like:
-    // index 0 incorrect. expected { 97 }, found { 97 }
-    //try testing.expectEqualSlices([]const u8, &.{ "a", "b", "c" }, args.valuesOf("PATHS").?);
-
-    const given_paths = args.valuesOf("PATHS");
-    try testing.expectEqual(true, given_paths != null);
-    try testing.expectEqual(@as(usize, 3), given_paths.?.len);
-    try testing.expectEqualStrings("a", given_paths.?[0]);
-    try testing.expectEqualStrings("b", given_paths.?[1]);
-    try testing.expectEqualStrings("c", given_paths.?[2]);
-
-    app.deinit();
-}
-
-test "command that takes required value" {
-    var app = App.init(allocator, "rm", null);
-    errdefer app.deinit();
-
-    try app.rootCommand().addArg(Arg.init("PATH", null));
-    app.rootCommand().addProperty(.takes_positional_arg);
+    try app.rootCommand().addArg(Arg.positional("PATH", null, null));
     app.rootCommand().addProperty(.positional_arg_required);
     try testing.expectError(error.CommandArgumentNotProvided, app.parseFrom(&.{}));
 
@@ -186,7 +220,7 @@ test "passing positional argument before options" {
     var app = App.init(allocator, "ls", null);
     errdefer app.deinit();
 
-    try app.rootCommand().takesSingleValue("PATH");
+    try app.rootCommand().addArg(Arg.positional("PATH", null, null));
     try app.rootCommand().addArg(Arg.booleanOption("all", 'a', null));
     app.rootCommand().addProperty(.positional_arg_required);
 
@@ -201,7 +235,7 @@ test "passing positional argument after options" {
     var app = App.init(allocator, "ls", null);
     errdefer app.deinit();
 
-    try app.rootCommand().takesSingleValue("PATH");
+    try app.rootCommand().addArg(Arg.positional("PATH", null, null));
     try app.rootCommand().addArg(Arg.booleanOption("all", 'a', null));
 
     const args = try app.parseFrom(&.{ "-a", "." });
@@ -215,7 +249,7 @@ test "passing positional argument before and after options" {
     var app = App.init(allocator, "ls", null);
     errdefer app.deinit();
 
-    try app.rootCommand().takesSingleValue("PATH");
+    try app.rootCommand().addArg(Arg.positional("PATH", null, null));
     try app.rootCommand().addArg(Arg.booleanOption("all", 'a', null));
     try app.rootCommand().addArg(Arg.booleanOption("one-line", '1', null));
 

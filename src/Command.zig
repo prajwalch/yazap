@@ -9,7 +9,6 @@ const ArrayList = std.ArrayListUnmanaged;
 const Allocator = mem.Allocator;
 
 const Property = enum {
-    takes_positional_arg,
     positional_arg_required,
     subcommand_required,
 };
@@ -40,11 +39,36 @@ pub fn deinit(self: *Command) void {
 
 /// Appends the new arg into the args list
 pub fn addArg(self: *Command, new_arg: Arg) !void {
-    if ((new_arg.short_name == null) and (new_arg.long_name == null)) {
-        try self.positional_args.append(self.allocator, new_arg);
-    } else {
-        try self.options.append(self.allocator, new_arg);
+    // Dang!! This is the reason why i love `mut` keyword and variable shadowing from rust.
+    var arg = new_arg;
+    const is_positional = (arg.short_name == null) and (arg.long_name == null);
+
+    if (!is_positional) {
+        return self.options.append(self.allocator, arg);
     }
+
+    if (arg.index != null) {
+        return self.positional_args.append(self.allocator, arg);
+    }
+
+    // Index is not set but is a first positional arg.
+    if (self.positional_args.items.len == 0) {
+        arg.setIndex(1);
+        return self.positional_args.append(self.allocator, arg);
+    }
+
+    // Index is not set and not a first positional arg.
+    var highest_index: usize = 1;
+
+    for (self.positional_args.items) |pos_arg| {
+        std.debug.assert(pos_arg.index != null);
+
+        if (pos_arg.index.? > highest_index) {
+            highest_index = pos_arg.index.?;
+        }
+    }
+    arg.setIndex(highest_index + 1);
+    try self.positional_args.append(self.allocator, arg);
 }
 
 /// Appends args into the args list
@@ -61,22 +85,6 @@ pub fn addSubcommand(self: *Command, new_subcommand: Command) !void {
 /// Appends the `subcommands` into the subcommands list
 pub fn addSubcommands(self: *Command, subcommands: []Command) !void {
     for (subcommands) |subcmd| try self.addSubcommand(subcmd);
-}
-
-/// Create a new [Argument] with the given name and specifies that Command will take single value
-pub fn takesSingleValue(self: *Command, arg_name: []const u8) !void {
-    try self.takesNValues(arg_name, 1);
-}
-
-/// Creates an [Argument](/#root;Arg) with given name and specifies that command will take `n` values
-pub fn takesNValues(self: *Command, arg_name: []const u8, n: usize) !void {
-    var arg = Arg.init(arg_name, null);
-    arg.setMinValues(1);
-    arg.setMaxValues(n);
-    if (n > 1) arg.setDefaultValuesDelimiter();
-
-    try self.addArg(arg);
-    self.addProperty(.takes_positional_arg);
 }
 
 pub fn addProperty(self: *Command, property: Property) void {
@@ -101,6 +109,18 @@ pub fn countOptions(self: *const Command) usize {
 
 pub fn countSubcommands(self: *const Command) usize {
     return (self.subcommands.items.len);
+}
+
+/// Linearly searches for a postional argument having given index.
+pub fn findPositionalArgByIndex(self: *const Command, index: usize) ?*const Arg {
+    for (self.positional_args.items) |*pos_arg| {
+        std.debug.assert(pos_arg.index != null);
+
+        if (pos_arg.index.? == index) {
+            return pos_arg;
+        }
+    }
+    return null;
 }
 
 /// Linearly searches for an argument with short name equals to given `short_name`.

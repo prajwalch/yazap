@@ -11,7 +11,7 @@ pub fn main() anyerror!void {
 
     var touch = app.rootCommand();
 
-    try touch.takesSingleValue("FILE_NAME");
+    try touch.addArg(Arg.positional("FILE_NAME", null, null));
     touch.addProperty(.positional_arg_required);
 
     try touch.addArg(Arg.booleanOption("no-create", 'c', "Do not create any files"));

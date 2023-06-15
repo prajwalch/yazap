@@ -82,9 +82,10 @@ pub fn init(allocator: Allocator, tokenizer: Tokenizer, command: *const Command)
 pub fn parse(self: *Parser) Error!ArgsContext {
     errdefer self.args_ctx.deinit();
 
-    const takes_pos_args =
-        (self.command.hasProperty(.takes_positional_arg) and self.command.countPositionalArgs() >= 1);
-    var pos_args_idx: usize = 0;
+    const takes_pos_args = self.command.countPositionalArgs() >= 1;
+    const highest_pos_arg_index = self.highestPositionalArgIndex();
+
+    var pos_args_idx: usize = 1;
     var parsed_all_pos_args = false;
 
     while (self.tokenizer.nextToken()) |*token| {
@@ -99,9 +100,9 @@ pub fn parse(self: *Parser) Error!ArgsContext {
         }
 
         if (takes_pos_args and !parsed_all_pos_args) {
-            try self.parseCommandArg(token, pos_args_idx);
+            try self.parsePositionalArg(token, pos_args_idx);
             pos_args_idx += 1;
-            parsed_all_pos_args = (pos_args_idx >= self.command.countPositionalArgs());
+            parsed_all_pos_args = (pos_args_idx > highest_pos_arg_index);
             continue;
         }
         try self.args_ctx.setSubcommand(
@@ -126,8 +127,21 @@ pub fn parse(self: *Parser) Error!ArgsContext {
     return self.args_ctx;
 }
 
-fn parseCommandArg(self: *Parser, token: *const Token, pos_arg_idx: usize) Error!void {
-    const arg = &self.command.positional_args.items[pos_arg_idx];
+fn highestPositionalArgIndex(self: *const Parser) usize {
+    var highest_index: usize = 1;
+
+    for (self.command.positional_args.items) |pos_arg| {
+        std.debug.assert(pos_arg.index != null);
+
+        if (pos_arg.index.? > highest_index) {
+            highest_index = pos_arg.index.?;
+        }
+    }
+    return highest_index;
+}
+
+fn parsePositionalArg(self: *Parser, token: *const Token, pos_args_idx: usize) Error!void {
+    const arg = self.command.findPositionalArgByIndex(pos_args_idx) orelse return;
 
     if (arg.values_delimiter) |delimiter| {
         if (try self.splitValue(arg, token.value, delimiter)) |values| {
@@ -137,8 +151,6 @@ fn parseCommandArg(self: *Parser, token: *const Token, pos_arg_idx: usize) Error
     var values = std.ArrayList([]const u8).init(self.allocator);
     errdefer values.deinit();
 
-    // TODO: This code and the code at line 262 is exactly same.
-    // Either move it a function or do something about this.
     const num_values_to_consume = arg.max_values orelse arg.min_values orelse blk: {
         if (arg.hasProperty(.takes_multiple_values)) {
             try self.verifyAndAppendValue(arg, token.value, &values);
@@ -427,10 +439,9 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
         return Error.UnknownCommand;
     };
     // zig fmt: off
-    const takes_value = subcmd.hasProperty(.takes_positional_arg)
-        or (subcmd.countPositionalArgs() >= 1)
-        or (subcmd.countOptions() >= 1)
-        or (subcmd.countSubcommands() >= 1);
+    const takes_value = subcmd.countPositionalArgs() >= 1
+        or subcmd.countOptions() >= 1
+        or subcmd.countSubcommands() >= 1;
     // zig fmt: on
 
     if (!takes_value) {

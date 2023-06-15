@@ -20,13 +20,11 @@ pub fn main() anyerror!void {
     try cmd_commit.addArg(Arg.singleArgumentOption("message", 'm', "commit message"));
 
     var cmd_pull = app.createCommand("pull", "Fetch from remote branch and merge it to local");
-    try cmd_pull.takesSingleValue("REMOTE");
-    cmd_pull.addProperty(.positional_arg_required);
+    try cmd_pull.addArg(Arg.positional("REMOTE", null, null));
 
     var cmd_push = app.createCommand("push", "Update the remote branch");
-    try cmd_push.takesSingleValue("REMOTE");
-    try cmd_push.takesSingleValue("BRANCH_NAME");
-    cmd_push.addProperty(.positional_arg_required);
+    try cmd_pull.addArg(Arg.positional("REMOTE", null, null));
+    try cmd_pull.addArg(Arg.positional("BRANCH_NAME", null, null));
 
     try git.addSubcommand(app.createCommand("init", "Create an empty Git repository or reinitialize an existing one"));
     try git.addSubcommand(cmd_commit);

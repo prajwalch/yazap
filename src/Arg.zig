@@ -19,6 +19,7 @@ min_values: ?usize = null,
 max_values: ?usize = null,
 valid_values: ?[]const []const u8,
 values_delimiter: ?[]const u8,
+index: ?usize = null,
 properties: std.EnumSet(Property),
 
 // # Constructors
@@ -95,6 +96,14 @@ pub fn multiArgumentsOptionWithValidValues(
     return arg;
 }
 
+/// Creates a positional argument.
+pub fn positional(name: []const u8, description: ?[]const u8, index: ?usize) Arg {
+    var arg = Arg.init(name, description);
+    arg.index = index;
+    arg.addProperty(.takes_value);
+    return arg;
+}
+
 // # Setters
 
 /// Sets the short name of the argument
@@ -130,6 +139,14 @@ pub fn setDefaultValuesDelimiter(self: *Arg) void {
 /// Sets separator between the values of an argument.
 pub fn setValuesDelimiter(self: *Arg, delimiter: []const u8) void {
     self.values_delimiter = delimiter;
+}
+
+/// Sets the index of a positional argument starting with **1**.
+/// It is optional so by default it will be assigned based on order of defining argument.
+///
+/// Note: Setting index for options will not take any effect and it will be sliently ignored.
+pub fn setIndex(self: *Arg, index: usize) void {
+    self.index = index;
 }
 
 pub fn addProperty(self: *Arg, property: Property) void {
