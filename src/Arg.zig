@@ -68,8 +68,8 @@ pub fn singleArgumentOptionWithValidValues(
 pub fn multiArgumentsOption(
     name: []const u8,
     short_name: ?u8,
-    max_values: usize,
     description: ?[]const u8,
+    max_values: usize,
 ) Arg {
     var arg = Arg.init(name, description);
 

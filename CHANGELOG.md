@@ -2,11 +2,21 @@
 ## Breaking Changes
 - `flag.boolean` is moved and renamed to `Arg.booleanOption`.
 - `flag.argOne` is moved and renamed to `Arg.singleArgumentOption`.
-- `flag.argN` is moved and renamed to `Arg.multiArgumentsOption`.
+- `flag.argN` is moved and renamed to `Arg.multiArgumentsOption` and the order of parameters is slighlty changed.
+
+    Old
+    ```zig
+    fn(name: []const u8, short_name: ?u8, max_values: usize, description: ?[]const u8) Arg;
+    ```
+
+    New
+    ```zig
+    fn(name: []const u8, short_name: ?u8, description: ?[]const u8, max_values: usize) Arg;
+    ```
 - `flag.option` is moved and renamed to `Arg.singleArgumentOptionWithValidValues`. Also the signature of function is changed to `fn(name: []const u8, short_name: ?u8, description: ?[]const u8, values: []const []const u8)`.
 
+    Before
     ```zig
-    // Old
     const flag = yazap.flag
 
     // -- snip --
@@ -20,14 +30,14 @@
     // -- snip --
     ```
 
+    After
     ```zig
-    // new
     const Arg = yazap.Arg
 
     // -- snip --
     try root.addArg(Arg.booleanOption("bool", null, null));
     try root.addArg(Arg.singleArgumentOption("one", null, null));
-    try root.addArg(Arg.multiArgumentsOption("many", null, 2, null));
+    try root.addArg(Arg.multiArgumentsOption("many", null, null, 2));
     try root.addArg(Arg.singleArgumentOptionWithValidValues("opt", null, null, &[_][]const u8 {
         "opt1",
         "opt2",
