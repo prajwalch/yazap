@@ -12,9 +12,9 @@ const Property = enum {
 };
 
 name: []const u8,
+description: ?[]const u8,
 short_name: ?u8 = null,
 long_name: ?[]const u8 = null,
-description: ?[]const u8,
 min_values: ?usize = null,
 max_values: ?usize = null,
 valid_values: ?[]const []const u8 = null,
