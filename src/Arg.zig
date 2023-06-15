@@ -217,6 +217,20 @@ pub fn setLongName(self: *Arg, long_name: []const u8) void {
 }
 
 /// Sets the minimum number of values required to provide for an argument.
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+///
+/// var nums = Arg.init("nums", "Numbers to add");
+/// nums.setShortName("n");
+/// nums.setMinValues(2);
+/// nums.addProperty(.takes_value);
+///
+/// try root.addArg(nums);
+/// ```
 pub fn setMinValues(self: *Arg, num: usize) void {
     self.min_values = if (num >= 1) num else null;
 }
