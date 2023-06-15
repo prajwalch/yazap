@@ -257,6 +257,32 @@ pub fn setMaxValues(self: *Arg, num: usize) void {
 }
 
 /// Sets the valid values for an argument.
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+///
+/// var distros = Arg.init("distros", "Two Fav Distros");
+/// distros.setShortName('d');
+/// distros.setLongName("distros");
+/// distros.setMinValues(1);
+/// distros.setMaxValues(2);
+/// distros.setValidValues(&[_][]const u8{
+///     "debian",
+///     "ubuntu",
+///     "arch",
+/// });
+/// distros.addProperty(.takes_value);
+///
+/// // Equivalent
+/// var distros = Arg.multiArgumentsOptionWithValidValues(
+///     "distros", 'd', "Two Fav Distros", 2, &[_]const u8 { "debian", "ubuntu", "arch" },
+/// );
+///
+/// try root.addArg(distros);
+/// ```
 pub fn setValidValues(self: *Arg, values: []const []const u8) void {
     self.valid_values = values;
 }
