@@ -165,69 +165,59 @@
 <span class="line" id="L52"></span>
 <span class="line" id="L53"><span class="tok-comment">/// Starts parsing the given arguments</span></span>
 <span class="line" id="L54"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">parseFrom</span>(self: *App, argv: []<span class="tok-kw">const</span> [:<span class="tok-number">0</span>]<span class="tok-kw">const</span> <span class="tok-type">u8</span>) YazapError!(*<span class="tok-kw">const</span> ArgsContext) {</span>
-<span class="line" id="L55">    <span class="tok-kw">try</span> self.addBuiltinArgs();</span>
-<span class="line" id="L56"></span>
-<span class="line" id="L57">    <span class="tok-kw">var</span> parser = Parser.init(self.allocator, Tokenizer.init(argv), self.rootCommand());</span>
-<span class="line" id="L58">    self.args_ctx = parser.parse() <span class="tok-kw">catch</span> |e| {</span>
-<span class="line" id="L59">        <span class="tok-kw">try</span> parser.err.log(e);</span>
-<span class="line" id="L60">        <span class="tok-kw">return</span> e;</span>
-<span class="line" id="L61">    };</span>
-<span class="line" id="L62">    <span class="tok-kw">try</span> self.handleBuiltinArgs();</span>
-<span class="line" id="L63">    <span class="tok-kw">return</span> &amp;self.args_ctx.?;</span>
-<span class="line" id="L64">}</span>
-<span class="line" id="L65"></span>
-<span class="line" id="L66"><span class="tok-comment">/// Displays the help message of root command</span></span>
-<span class="line" id="L67"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">displayHelp</span>(self: *App) !<span class="tok-type">void</span> {</span>
-<span class="line" id="L68">    <span class="tok-kw">var</span> cmd_help = help.Help.init(</span>
-<span class="line" id="L69">        self.allocator,</span>
-<span class="line" id="L70">        self.rootCommand(),</span>
-<span class="line" id="L71">        self.rootCommand().name,</span>
-<span class="line" id="L72">    ) <span class="tok-kw">catch</span> <span class="tok-kw">unreachable</span>;</span>
-<span class="line" id="L73">    <span class="tok-kw">return</span> cmd_help.writeAll(std.io.getStdErr().writer());</span>
-<span class="line" id="L74">}</span>
-<span class="line" id="L75"></span>
-<span class="line" id="L76"><span class="tok-comment">/// Displays the help message of subcommand if it is provided on command line</span></span>
-<span class="line" id="L77"><span class="tok-comment">/// otherwise it will display nothing</span></span>
-<span class="line" id="L78"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">displaySubcommandHelp</span>(self: *App) !<span class="tok-type">void</span> {</span>
-<span class="line" id="L79">    <span class="tok-kw">if</span> (self.subcommand_help) |*h| <span class="tok-kw">return</span> h.writeAll(std.io.getStdErr().writer());</span>
-<span class="line" id="L80">}</span>
-<span class="line" id="L81"></span>
-<span class="line" id="L82"><span class="tok-kw">fn</span> <span class="tok-fn">addBuiltinArgs</span>(self: *App) !<span class="tok-type">void</span> {</span>
-<span class="line" id="L83">    help.enableFor(&amp;self.command);</span>
-<span class="line" id="L84">}</span>
-<span class="line" id="L85"></span>
-<span class="line" id="L86"><span class="tok-kw">fn</span> <span class="tok-fn">handleBuiltinArgs</span>(self: *App) !<span class="tok-type">void</span> {</span>
-<span class="line" id="L87">    <span class="tok-comment">// Set the `Help` of a subcommand present on the command line with the `-h` or `--help` option</span>
+<span class="line" id="L55">    <span class="tok-kw">var</span> parser = Parser.init(self.allocator, Tokenizer.init(argv), self.rootCommand());</span>
+<span class="line" id="L56">    self.args_ctx = parser.parse() <span class="tok-kw">catch</span> |e| {</span>
+<span class="line" id="L57">        <span class="tok-kw">try</span> parser.err.log(e);</span>
+<span class="line" id="L58">        <span class="tok-kw">return</span> e;</span>
+<span class="line" id="L59">    };</span>
+<span class="line" id="L60">    <span class="tok-kw">try</span> self.handleHelpOption();</span>
+<span class="line" id="L61">    <span class="tok-kw">return</span> &amp;self.args_ctx.?;</span>
+<span class="line" id="L62">}</span>
+<span class="line" id="L63"></span>
+<span class="line" id="L64"><span class="tok-comment">/// Displays the help message of root command</span></span>
+<span class="line" id="L65"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">displayHelp</span>(self: *App) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L66">    <span class="tok-kw">var</span> cmd_help = help.Help.init(</span>
+<span class="line" id="L67">        self.allocator,</span>
+<span class="line" id="L68">        self.rootCommand(),</span>
+<span class="line" id="L69">        self.rootCommand().name,</span>
+<span class="line" id="L70">    ) <span class="tok-kw">catch</span> <span class="tok-kw">unreachable</span>;</span>
+<span class="line" id="L71">    <span class="tok-kw">return</span> cmd_help.writeAll(std.io.getStdErr().writer());</span>
+<span class="line" id="L72">}</span>
+<span class="line" id="L73"></span>
+<span class="line" id="L74"><span class="tok-comment">/// Displays the help message of subcommand if it is provided on command line</span></span>
+<span class="line" id="L75"><span class="tok-comment">/// otherwise it will display nothing</span></span>
+<span class="line" id="L76"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">displaySubcommandHelp</span>(self: *App) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L77">    <span class="tok-kw">if</span> (self.subcommand_help) |*h| <span class="tok-kw">return</span> h.writeAll(std.io.getStdErr().writer());</span>
+<span class="line" id="L78">}</span>
+<span class="line" id="L79"></span>
+<span class="line" id="L80"><span class="tok-kw">fn</span> <span class="tok-fn">handleHelpOption</span>(self: *App) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L81">    <span class="tok-comment">// Set the `Help` of a subcommand present on the command line with the `-h` or `--help` option</span>
 </span>
-<span class="line" id="L88">    <span class="tok-comment">// remains null if none of the subcommands were present</span>
+<span class="line" id="L82">    <span class="tok-comment">// remains null if none of the subcommands were present</span>
 </span>
-<span class="line" id="L89">    <span class="tok-kw">if</span> (help.findSubcommand(self.rootCommand(), &amp;self.args_ctx.?)) |subcmd| {</span>
-<span class="line" id="L90">        self.subcommand_help = <span class="tok-kw">try</span> help.Help.init(self.allocator, self.rootCommand(), subcmd);</span>
-<span class="line" id="L91">    }</span>
-<span class="line" id="L92">    <span class="tok-kw">try</span> self.displayHelpAndExitIfFound();</span>
-<span class="line" id="L93">}</span>
-<span class="line" id="L94"></span>
-<span class="line" id="L95"><span class="tok-kw">fn</span> <span class="tok-fn">displayHelpAndExitIfFound</span>(self: *App) !<span class="tok-type">void</span> {</span>
-<span class="line" id="L96">    <span class="tok-kw">var</span> args_ctx = self.args_ctx.?;</span>
-<span class="line" id="L97">    <span class="tok-kw">var</span> help_displayed = <span class="tok-null">false</span>;</span>
-<span class="line" id="L98"></span>
-<span class="line" id="L99">    <span class="tok-kw">if</span> (args_ctx.isPresent(<span class="tok-str">&quot;help&quot;</span>)) {</span>
-<span class="line" id="L100">        <span class="tok-kw">try</span> self.displayHelp();</span>
-<span class="line" id="L101">        help_displayed = <span class="tok-null">true</span>;</span>
-<span class="line" id="L102">    } <span class="tok-kw">else</span> {</span>
-<span class="line" id="L103">        <span class="tok-kw">try</span> self.displaySubcommandHelp();</span>
-<span class="line" id="L104">        help_displayed = (self.subcommand_help != <span class="tok-null">null</span>);</span>
-<span class="line" id="L105">    }</span>
+<span class="line" id="L83">    <span class="tok-kw">if</span> (help.findSubcommand(self.rootCommand(), &amp;self.args_ctx.?)) |subcmd| {</span>
+<span class="line" id="L84">        self.subcommand_help = <span class="tok-kw">try</span> help.Help.init(self.allocator, self.rootCommand(), subcmd);</span>
+<span class="line" id="L85">    }</span>
+<span class="line" id="L86">    <span class="tok-kw">try</span> self.displayHelpAndExitIfFound();</span>
+<span class="line" id="L87">}</span>
+<span class="line" id="L88"></span>
+<span class="line" id="L89"><span class="tok-kw">fn</span> <span class="tok-fn">displayHelpAndExitIfFound</span>(self: *App) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L90">    <span class="tok-kw">var</span> args_ctx = self.args_ctx.?;</span>
+<span class="line" id="L91">    <span class="tok-kw">var</span> help_displayed = <span class="tok-null">false</span>;</span>
+<span class="line" id="L92"></span>
+<span class="line" id="L93">    <span class="tok-kw">if</span> (args_ctx.isPresent(<span class="tok-str">&quot;help&quot;</span>)) {</span>
+<span class="line" id="L94">        <span class="tok-kw">try</span> self.displayHelp();</span>
+<span class="line" id="L95">        help_displayed = <span class="tok-null">true</span>;</span>
+<span class="line" id="L96">    } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L97">        <span class="tok-kw">try</span> self.displaySubcommandHelp();</span>
+<span class="line" id="L98">        help_displayed = (self.subcommand_help != <span class="tok-null">null</span>);</span>
+<span class="line" id="L99">    }</span>
+<span class="line" id="L100"></span>
+<span class="line" id="L101">    <span class="tok-kw">if</span> (help_displayed) {</span>
+<span class="line" id="L102">        self.deinit();</span>
+<span class="line" id="L103">        std.process.exit(<span class="tok-number">0</span>);</span>
+<span class="line" id="L104">    }</span>
+<span class="line" id="L105">}</span>
 <span class="line" id="L106"></span>
-<span class="line" id="L107">    <span class="tok-kw">if</span> (help_displayed) {</span>
-<span class="line" id="L108">        self.deinit();</span>
-<span class="line" id="L109">        std.process.exit(<span class="tok-number">0</span>);</span>
-<span class="line" id="L110">    }</span>
-<span class="line" id="L111">}</span>
-<span class="line" id="L112"></span>
-<span class="line" id="L113"><span class="tok-kw">test</span> <span class="tok-str">&quot;emit docs&quot;</span> {</span>
-<span class="line" id="L114">    std.testing.refAllDecls(<span class="tok-builtin">@This</span>());</span>
-<span class="line" id="L115">}</span>
-<span class="line" id="L116"></span>
 </code></pre></body>
 </html>

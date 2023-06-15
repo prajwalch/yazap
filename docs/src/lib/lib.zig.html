@@ -113,15 +113,14 @@
 <body>
 <pre><code><span class="line" id="L1"><span class="tok-kw">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>);</span>
 <span class="line" id="L2"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> err = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;error.zig&quot;</span>);</span>
-<span class="line" id="L3"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> flag = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;flag.zig&quot;</span>);</span>
-<span class="line" id="L4"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> args_context = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;args_context.zig&quot;</span>);</span>
-<span class="line" id="L5"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> App = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;App.zig&quot;</span>);</span>
-<span class="line" id="L6"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Arg = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;Arg.zig&quot;</span>);</span>
-<span class="line" id="L7"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Command = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;Command.zig&quot;</span>);</span>
-<span class="line" id="L8"></span>
-<span class="line" id="L9"><span class="tok-kw">test</span> <span class="tok-str">&quot;emit docs&quot;</span> {</span>
-<span class="line" id="L10">    std.testing.refAllDecls(<span class="tok-builtin">@This</span>());</span>
-<span class="line" id="L11">}</span>
-<span class="line" id="L12"></span>
+<span class="line" id="L3"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> args_context = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;args_context.zig&quot;</span>);</span>
+<span class="line" id="L4"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> App = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;App.zig&quot;</span>);</span>
+<span class="line" id="L5"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Arg = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;Arg.zig&quot;</span>);</span>
+<span class="line" id="L6"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Command = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;Command.zig&quot;</span>);</span>
+<span class="line" id="L7"></span>
+<span class="line" id="L8"><span class="tok-kw">test</span> <span class="tok-str">&quot;emit docs&quot;</span> {</span>
+<span class="line" id="L9">    std.testing.refAllDeclsRecursive(<span class="tok-builtin">@This</span>());</span>
+<span class="line" id="L10">}</span>
+<span class="line" id="L11"></span>
 </code></pre></body>
 </html>
