@@ -5,7 +5,7 @@ const std = @import("std");
 
 const DEFAULT_VALUES_DELIMITER = ",";
 
-const Property = enum {
+pub const Property = enum {
     takes_value,
     takes_multiple_values,
     allow_empty_value,

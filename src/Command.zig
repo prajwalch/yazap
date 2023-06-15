@@ -8,7 +8,7 @@ const mem = std.mem;
 const ArrayList = std.ArrayListUnmanaged;
 const Allocator = mem.Allocator;
 
-const Property = enum {
+pub const Property = enum {
     positional_arg_required,
     subcommand_required,
 };
