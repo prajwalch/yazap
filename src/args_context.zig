@@ -130,7 +130,3 @@ pub const ArgsContext = struct {
         return null;
     }
 };
-
-test "emit methods docs" {
-    std.testing.refAllDecls(@This());
-}

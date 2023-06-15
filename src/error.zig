@@ -149,7 +149,3 @@ pub const Error = struct {
         return (active_tag == matched_tag);
     }
 };
-
-test "emit docs" {
-    std.testing.refAllDecls(@This());
-}

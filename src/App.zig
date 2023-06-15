@@ -103,7 +103,3 @@ fn displayHelpAndExitIfFound(self: *App) !void {
         std.process.exit(0);
     }
 }
-
-test "emit docs" {
-    std.testing.refAllDecls(@This());
-}

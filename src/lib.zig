@@ -6,5 +6,5 @@ pub const Arg = @import("Arg.zig");
 pub const Command = @import("Command.zig");
 
 test "emit docs" {
-    std.testing.refAllDecls(@This());
+    std.testing.refAllDeclsRecursive(@This());
 }

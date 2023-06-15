@@ -156,7 +156,3 @@ pub fn findSubcommand(self: *const Command, provided_subcmd: []const u8) ?*const
 
     return null;
 }
-
-test "emit methods docs" {
-    std.testing.refAllDecls(@This());
-}

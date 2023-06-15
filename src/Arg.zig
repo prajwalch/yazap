@@ -172,7 +172,3 @@ pub fn isValidValue(self: *const Arg, value_to_check: []const u8) bool {
     }
     return true;
 }
-
-test "emit methods docs" {
-    std.testing.refAllDecls(@This());
-}
