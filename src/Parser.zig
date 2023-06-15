@@ -458,7 +458,6 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
     var parser = Parser.init(self.allocator, Tokenizer.init(args), subcmd);
     const subcmd_ctx = parser.parse() catch |err| {
         // Bubble up the error trace to the parent command that happened while parsing subcommand
-        //self.err_builder = parser.err_builder;
         self.err = parser.err;
         return err;
     };
