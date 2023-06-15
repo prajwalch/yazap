@@ -119,6 +119,16 @@ pub fn multiArgumentsOption(
 }
 
 /// Creates a multi arguments option with valid values which user can pass.
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+/// try root.addArg(Arg.multiArgumentsOptionWithValidValues(
+///     "distros", 'd', "Two Fav Distros", 2, &[_]const u8 { "debian", "ubuntu", "arch" },
+/// ));
+/// ```
 pub fn multiArgumentsOptionWithValidValues(
     name: []const u8,
     short_name: ?u8,
