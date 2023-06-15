@@ -32,10 +32,11 @@ pub fn init(name: []const u8, description: ?[]const u8) Arg {
 /// Creates a boolean option.
 pub fn booleanOption(name: []const u8, short_name: ?u8, description: ?[]const u8) Arg {
     var arg = Arg.init(name, description);
+
+    if (short_name) |n| {
+        arg.setShortName(n);
+    }
     arg.setLongName(name);
-
-    if (short_name) |n| arg.setShortName(n);
-
     return arg;
 }
 
