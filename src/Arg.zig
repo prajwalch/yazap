@@ -30,6 +30,14 @@ pub fn init(name: []const u8, description: ?[]const u8) Arg {
 }
 
 /// Creates a boolean option.
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+/// try root.addArg(Arg.booleanOption("version", 'v', "Show version number"));
+/// ```
 pub fn booleanOption(name: []const u8, short_name: ?u8, description: ?[]const u8) Arg {
     var arg = Arg.init(name, description);
 
