@@ -88,8 +88,8 @@ pub fn multiArgumentsOption(
 pub fn multiArgumentsOptionWithValidValues(
     name: []const u8,
     short_name: ?u8,
-    max_values: usize,
     description: ?[]const u8,
+    max_values: usize,
     values: []const []const u8,
 ) Arg {
     var arg = Arg.multiArgumentsOption(name, short_name, max_values, description);
