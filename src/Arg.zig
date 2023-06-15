@@ -195,7 +195,23 @@ pub fn setShortName(self: *Arg, short_name: u8) void {
     self.short_name = short_name;
 }
 
-/// Sets the long name of the argument
+/// Sets the long name of the argument.
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+///
+/// var port = Arg.init("port", "Port number to bind");
+/// port.setLongName('p');
+/// port.addProperty(.takes_value);
+///
+/// // Equivalent
+/// var port = Arg.singleArgumentOption("port", null, "Port number to bind");
+///
+/// try root.addArg(port);
+/// ```
 pub fn setLongName(self: *Arg, long_name: []const u8) void {
     self.long_name = long_name;
 }
