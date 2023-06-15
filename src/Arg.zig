@@ -338,6 +338,40 @@ pub fn setValuesDelimiter(self: *Arg, delimiter: []const u8) void {
 /// It is optional so by default it will be assigned based on order of defining argument.
 ///
 /// Note: Setting index for options will not take any effect and it will be sliently ignored.
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+///
+/// var second = Arg.init("SECOND", "Second positional arg");
+/// second.setIndex(2);
+/// second.addProperty(.takes_value);
+///
+/// // Equivalent
+/// var second = Arg.positional("SECOND", "Second positional arg", 2);
+///
+/// var first = Arg.init("FIRST", "First positional arg");
+/// first.setIndex(1);
+/// first.addProperty(.takes_value);
+///
+/// // Equivalent
+/// var first = Arg.positional("FIRST", "First positional arg", 2);
+///
+/// // No effect on this
+/// var option = Arg.singleArgumentOption("option", 'o', "Some description");
+/// option.setIndex(3);
+///
+/// try root.addArg(first);
+/// try root.addArg(second);
+/// try root.addArg(option);
+///
+/// // From command line:
+/// //  myapp firstvalue secondvalue
+/// //  myapp firstvalue secondvalue --option optionvalue
+/// //  myapp --option optionvalue firstvalue secondvalue
+/// ```
 pub fn setIndex(self: *Arg, index: usize) void {
     self.index = index;
 }
