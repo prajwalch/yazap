@@ -91,6 +91,14 @@ pub fn singleArgumentOptionWithValidValues(
 }
 
 /// Creates a multi arguments option.
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+/// try root.addArg(Arg.multiArgumentsOption("nums", 'n', "Numbers to add", 2));
+/// ```
 pub fn multiArgumentsOption(
     name: []const u8,
     short_name: ?u8,
