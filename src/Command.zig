@@ -15,7 +15,7 @@ const Property = enum {
 
 allocator: Allocator,
 name: []const u8,
-description: ?[]const u8 = null,
+description: ?[]const u8,
 positional_args: ArrayList(Arg) = .{},
 options: ArrayList(Arg) = .{},
 subcommands: ArrayList(Command) = .{},
