@@ -49,6 +49,14 @@ pub fn booleanOption(name: []const u8, short_name: ?u8, description: ?[]const u8
 }
 
 /// Creates a single argument option.
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+/// try root.addArg(Arg.singleArgumentOption("port", 'p', "Port number to bind"));
+/// ```
 pub fn singleArgumentOption(name: []const u8, short_name: ?u8, description: ?[]const u8) Arg {
     var arg = Arg.init(name, description);
 
