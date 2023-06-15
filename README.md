@@ -94,6 +94,7 @@ After you get the root command, you can start adding [Argument](https://prajwalc
 See [Command](https://prajwalch.github.io/yazap/#root;Command) to see all the available API.
 
 ```zig
+try myls.addArg(Arg.positional("FILE", null, null));
 try myls.addArg(Arg.booleanOption("all", 'a', "Don't ignore the hidden directories"));
 try myls.addArg(Arg.booleanOption("recursive", 'R', "List subdirectories recursively"));
 try myls.addArg(Arg.booleanOption("one-line", '1', null));
@@ -140,6 +141,11 @@ const ls_args = try app.parseProcess();
 
 if (ls_args.isPresent("version")) {
     log.info("v0.1.0", .{});
+    return;
+}
+
+if (ls_args.valueOf("FILE")) |f| {
+    log.info("List contents of {f}");
     return;
 }
 
@@ -227,6 +233,7 @@ pub fn main() anyerror!void {
 
     try myls.addSubcommand(update_cmd);
 
+    try myls.addArg(Arg.positional("FILE", null, null));
     try myls.addArg(Arg.booleanOption("all", 'a', "Don't ignore the hidden directories"));
     try myls.addArg(Arg.booleanOption("recursive", 'R', "List subdirectories recursively"));
     try myls.addArg(Arg.booleanOption("one-line", '1', null));
@@ -250,6 +257,11 @@ pub fn main() anyerror!void {
 
     if (ls_args.isPresent("version")) {
         log.info("v0.1.0", .{});
+        return;
+    }
+
+    if (ls_args.valueOf("FILE")) |f| {
+        log.info("List contents of {f}");
         return;
     }
 
