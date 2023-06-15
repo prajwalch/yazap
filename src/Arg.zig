@@ -69,6 +69,16 @@ pub fn singleArgumentOption(name: []const u8, short_name: ?u8, description: ?[]c
 }
 
 /// Creates a single argument option with valid values which user can pass.
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+/// try root.addArg(Arg.singleArgumentOptionWithValidValues(
+///     "std", 's', "Language standard", &[_]const u8 { "c99", "c11" },
+/// ));
+/// ```
 pub fn singleArgumentOptionWithValidValues(
     name: []const u8,
     short_name: ?u8,
