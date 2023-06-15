@@ -136,7 +136,7 @@ pub fn multiArgumentsOptionWithValidValues(
     max_values: usize,
     values: []const []const u8,
 ) Arg {
-    var arg = Arg.multiArgumentsOption(name, short_name, max_values, description);
+    var arg = Arg.multiArgumentsOption(name, short_name, description, max_values);
     arg.setValidValues(values);
     return arg;
 }
