@@ -13,19 +13,29 @@ Effortlessly handle flags, subcommands, and custom arguments with ease.
 
 Inspired by [clap-rs](https://github.com/clap-rs/clap) and [andrewrk/ziglang: src-self-hosted/arg.zig](https://git.sr.ht/~andrewrk/ziglang/tree/725b6ee634f01355da4a6badc5675751b85f0bf0/src-self-hosted/arg.zig)
 
-## Features:
+## Key Features:
 
-- Option (short and long)
-    * Providing value using `=`, using space and without using space (`-f=value, -f value, -fvalue`)
-    * Providing delimiter-separated values using `=` and without using space (`-f=v1,v2,v3, -fv1:v2:v3`)
-    * Chaining multiple short boolean options (`-abc`)
-    * Providing value and delimiter-separated values for multiple chained options using `=` (`-abc=val`, `-abc=v1,v2,v3`)
-    * Specifying an option multiple times (`-a 1 -a 2 -a 3`)
-- Providing delimiter-separated values for command (`touch one,two,three`, `touch one:two:three`)
-- Nested subcommands
-- Automatic handling help option (`-h` and `--help`)
-- Automatic help generation
-- Defining custom [Argument](https://prajwalch.github.io/yazap/#A;lib:Arg)
+- **Options**:
+  - Easily provide values with `=`, space, or no space (`-f=value`, `-f value`, `-fvalue`).
+  - Handle delimiter-separated values with `=` or without space (`-f=v1,v2,v3`, `-fv1:v2:v3`).
+  - Chain multiple short boolean options (`-abc`).
+  - Assign values and delimiter-separated values for multiple chained options using `=` (`-abc=val`, `-abc=v1,v2,v3`).
+  - Specify an option multiple times (`-a 1 -a 2 -a 3`).
+
+- **Positional arguments**:
+  - Support positional arguments alongside options for more flexible command-line inputs. For example:
+    - `command <positional_arg>`
+    - `command <arg1> <arg2> <arg3>`
+
+- **Nested subcommands**:
+  - Organize commands with nested subcommands for a structured command-line interface. For example:
+    - `command subcommand`
+    - `command subcommand subsubcommand`
+
+- **Automatic help handling and generation**:
+
+- **Custom Argument definition**:
+  - Define custom [Argument](https://prajwalch.github.io/yazap/#A;lib:Arg) types for specific application requirements.
 
 ## Limitation:
 
