@@ -57,11 +57,11 @@ test "command that takes single value" {
 //     errdefer app.deinit();
 
 //     var paths = Arg.init("PATHS", null);
-//     paths.addProperty(.takes_multiple_values);
-//     paths.addProperty(.takes_value);
+//     paths.setProperty(.takes_multiple_values);
+//     paths.setProperty(.takes_value);
 
 //     try app.rootCommand().addArg(paths);
-//     app.rootCommand().addProperty(.takes_positional_arg);
+//     app.rootCommand().setProperty(.takes_positional_arg);
 
 //     const args = try app.parseFrom(&.{ "a", "b", "c" });
 //     try testing.expectEqualSlices([]const u8, &.{ "a", "b", "c" }, args.valuesOf("PATHS").?);
@@ -76,11 +76,11 @@ test "command that takes single value" {
 //     errdefer app.deinit();
 
 //     var paths = Arg.init("PATHS", null);
-//     paths.addProperty(.takes_multiple_values);
+//     paths.setProperty(.takes_multiple_values);
 //     paths.setValuesDelimiter(":");
 
 //     try app.rootCommand().addArg(paths);
-//     app.rootCommand().addProperty(.takes_positional_arg);
+//     app.rootCommand().setProperty(.takes_positional_arg);
 
 //     const args = try app.parseFrom(&.{"a:b:c"});
 
@@ -103,7 +103,7 @@ test "command that takes required positional arg" {
     errdefer app.deinit();
 
     try app.rootCommand().addArg(Arg.positional("PATH", null, null));
-    app.rootCommand().addProperty(.positional_arg_required);
+    app.rootCommand().setProperty(.positional_arg_required);
     try testing.expectError(error.CommandArgumentNotProvided, app.parseFrom(&.{}));
 
     app.deinit();
@@ -114,7 +114,7 @@ test "command requires subcommand" {
     errdefer app.deinit();
 
     try app.rootCommand().addSubcommand(app.createCommand("init", null));
-    app.rootCommand().addProperty(.subcommand_required);
+    app.rootCommand().setProperty(.subcommand_required);
     try testing.expectError(error.CommandSubcommandNotProvided, app.parseFrom(&.{}));
 
     app.deinit();
@@ -139,7 +139,7 @@ test "Option that takes single value" {
 
     var browser = Arg.init("output", null);
     browser.setShortName('o');
-    browser.addProperty(.takes_value);
+    browser.setProperty(.takes_value);
 
     try app.rootCommand().addArg(browser);
     try testing.expectError(error.ArgValueNotProvided, app.parseFrom(&.{"-o"}));
@@ -154,8 +154,8 @@ test "Option that takes many/multiple values" {
     var srcs = Arg.init("sources", null);
     srcs.setShortName('s');
     srcs.setValuesDelimiter(":");
-    srcs.addProperty(.takes_value);
-    srcs.addProperty(.takes_multiple_values);
+    srcs.setProperty(.takes_value);
+    srcs.setProperty(.takes_multiple_values);
 
     // ex: clang sources...
     try app.rootCommand().addArg(srcs);
@@ -174,7 +174,7 @@ test "Option with min values" {
     srcs.setShortName('s');
     srcs.setMinValues(2);
     srcs.setValuesDelimiter(":");
-    srcs.addProperty(.takes_value);
+    srcs.setProperty(.takes_value);
 
     try app.rootCommand().addArg(srcs);
     try testing.expectError(error.TooFewArgValue, app.parseFrom(&.{"-s=f1"}));
@@ -191,7 +191,7 @@ test "Option with max values" {
     srcs.setMinValues(2);
     srcs.setMaxValues(5);
     srcs.setValuesDelimiter(":");
-    srcs.addProperty(.takes_value);
+    srcs.setProperty(.takes_value);
 
     try app.rootCommand().addArg(srcs);
     try testing.expectError(error.TooManyArgValue, app.parseFrom(
@@ -208,7 +208,7 @@ test "Option with allowed values" {
     var stdd = Arg.init("std", null);
     stdd.setLongName("std");
     stdd.setValidValues(&.{ "c99", "c11", "c17" });
-    stdd.addProperty(.takes_value);
+    stdd.setProperty(.takes_value);
 
     try app.rootCommand().addArg(stdd);
     try testing.expectError(error.ProvidedValueIsNotValidOption, app.parseFrom(&.{"--std=c100"}));
@@ -222,7 +222,7 @@ test "passing positional argument before options" {
 
     try app.rootCommand().addArg(Arg.positional("PATH", null, null));
     try app.rootCommand().addArg(Arg.booleanOption("all", 'a', null));
-    app.rootCommand().addProperty(.positional_arg_required);
+    app.rootCommand().setProperty(.positional_arg_required);
 
     const args = try app.parseFrom(&.{ ".", "-a" });
     try testing.expectEqualStrings(".", args.valueOf("PATH").?);

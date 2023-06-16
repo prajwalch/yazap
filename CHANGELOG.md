@@ -48,12 +48,12 @@
 - `Arg.setShortNameFromName` is removed.
 - `Arg.setNameAsLongName` is removed.
 - `Arg.setAllowedValues` is renamed to `Arg.setValidValues`.
-- `Arg.setSetting` is renamed to `Arg.addProperty`.
+- `Arg.setSetting` is renamed to `Arg.setProperty`.
 - `Arg.unsetSetting` is renamed to `Arg.removeProperty`.
 - `Arg.isSettingSet` is renamed to `Arg.hasProperty`.
 - `Command.takesSingleValue` and `Command.takesNValues` are removed, use new `Arg.positional` instead.
 - `Command.countArgs` is renamed to `Command.countPositionalArgs`.
-- `Command.setSetting` is renamed to `Command.addProperty`.
+- `Command.setSetting` is renamed to `Command.setProperty`.
 - `Command.unsetSetting` is renamed to `Command.removeProperty`.
 - `Command.isSettingSet` is renamed to `Command.hasProperty`.
 

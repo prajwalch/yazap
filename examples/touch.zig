@@ -12,7 +12,7 @@ pub fn main() anyerror!void {
     var touch = app.rootCommand();
 
     try touch.addArg(Arg.positional("FILE_NAME", null, null));
-    touch.addProperty(.positional_arg_required);
+    touch.setProperty(.positional_arg_required);
 
     try touch.addArg(Arg.booleanOption("no-create", 'c', "Do not create any files"));
     try touch.addArg(Arg.booleanOption("version", 'v', "Display app version"));

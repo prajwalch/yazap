@@ -87,7 +87,7 @@ pub fn addSubcommands(self: *Command, subcommands: []Command) !void {
     for (subcommands) |subcmd| try self.addSubcommand(subcmd);
 }
 
-pub fn addProperty(self: *Command, property: Property) void {
+pub fn setProperty(self: *Command, property: Property) void {
     return self.properties.insert(property);
 }
 

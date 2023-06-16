@@ -71,7 +71,7 @@ pub fn singleArgumentOption(name: []const u8, short_name: ?u8, description: ?[]c
         arg.setShortName(n);
     }
     arg.setLongName(name);
-    arg.addProperty(.takes_value);
+    arg.setProperty(.takes_value);
     return arg;
 }
 
@@ -126,7 +126,7 @@ pub fn multiArgumentsOption(
     arg.setMinValues(1);
     arg.setMaxValues(max_values);
     arg.setDefaultValuesDelimiter();
-    arg.addProperty(.takes_value);
+    arg.setProperty(.takes_value);
     return arg;
 }
 
@@ -186,7 +186,7 @@ pub fn positional(name: []const u8, description: ?[]const u8, index: ?usize) Arg
     if (index) |i| {
         arg.setIndex(i);
     }
-    arg.addProperty(.takes_value);
+    arg.setProperty(.takes_value);
     return arg;
 }
 
@@ -204,7 +204,7 @@ pub fn positional(name: []const u8, description: ?[]const u8, index: ?usize) Arg
 ///
 /// var port = Arg.init("port", "Port number to bind");
 /// port.setShortName('p');
-/// port.addProperty(.takes_value);
+/// port.setProperty(.takes_value);
 ///
 /// // Equivalent, except `singleArgumentOption` sets the long name as well.
 /// var port = Arg.singleArgumentOption("port", 'p', "Port number to bind");
@@ -227,7 +227,7 @@ pub fn setShortName(self: *Arg, short_name: u8) void {
 ///
 /// var port = Arg.init("port", "Port number to bind");
 /// port.setLongName("port");
-/// port.addProperty(.takes_value);
+/// port.setProperty(.takes_value);
 ///
 /// // Equivalent
 /// var port = Arg.singleArgumentOption("port", null, "Port number to bind");
@@ -251,7 +251,7 @@ pub fn setLongName(self: *Arg, long_name: []const u8) void {
 /// var nums = Arg.init("nums", "Numbers to add");
 /// nums.setShortName('n');
 /// nums.setMinValues(2);
-/// nums.addProperty(.takes_value);
+/// nums.setProperty(.takes_value);
 ///
 /// try root.addArg(nums);
 /// ```
@@ -274,7 +274,7 @@ pub fn setMinValues(self: *Arg, num: usize) void {
 /// nums.setLongName("nums");
 /// nums.setMinValues(2);
 /// nums.setMaxValues(5);
-/// nums.addProperty(.takes_value);
+/// nums.setProperty(.takes_value);
 ///
 /// try root.addArg(nums);
 /// ```
@@ -302,7 +302,7 @@ pub fn setMaxValues(self: *Arg, num: usize) void {
 ///     "ubuntu",
 ///     "arch",
 /// });
-/// distros.addProperty(.takes_value);
+/// distros.setProperty(.takes_value);
 ///
 /// // Equivalent
 /// var distros = Arg.multiArgumentsOptionWithValidValues(
@@ -332,7 +332,7 @@ pub fn setValidValues(self: *Arg, values: []const []const u8) void {
 /// nums.setLongName("nums");
 /// nums.setMinValues(2);
 /// nums.setDefaultValuesDelimiter();
-/// nums.addProperty(.takes_value);
+/// nums.setProperty(.takes_value);
 ///
 /// try root.addArg(nums);
 ///
@@ -358,7 +358,7 @@ pub fn setDefaultValuesDelimiter(self: *Arg) void {
 /// nums.setLongName("nums");
 /// nums.setMinValues(2);
 /// nums.setValuesDelimiter(":");
-/// nums.addProperty(.takes_value);
+/// nums.setProperty(.takes_value);
 ///
 /// try root.addArg(nums);
 ///
@@ -388,14 +388,14 @@ pub fn setValuesDelimiter(self: *Arg, delimiter: []const u8) void {
 ///
 /// var second = Arg.init("SECOND", "Second positional arg");
 /// second.setIndex(2);
-/// second.addProperty(.takes_value);
+/// second.setProperty(.takes_value);
 ///
 /// // Equivalent
 /// var second = Arg.positional("SECOND", "Second positional arg", 2);
 ///
 /// var first = Arg.init("FIRST", "First positional arg");
 /// first.setIndex(1);
-/// first.addProperty(.takes_value);
+/// first.setProperty(.takes_value);
 ///
 /// // Equivalent
 /// var first = Arg.positional("FIRST", "First positional arg", 2);
@@ -431,13 +431,13 @@ pub fn setIndex(self: *Arg, index: usize) void {
 ///
 /// var name = Arg.init("name", "Person to greet");
 /// name.setShortName('n');
-/// name.addProperty(.takes_value);
+/// name.setProperty(.takes_value);
 ///
 /// try root.addArg(name);
 ///
 /// // Command line input: myapp -n foo
 /// ```
-pub fn addProperty(self: *Arg, property: Property) void {
+pub fn setProperty(self: *Arg, property: Property) void {
     return self.properties.insert(property);
 }
 
