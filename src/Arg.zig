@@ -262,6 +262,8 @@ pub fn setMinValues(self: *Arg, num: usize) void {
 
 /// Sets the maximum number of values an argument can take.
 ///
+/// ## Examples
+///
 /// ```zig
 /// var app = App.init(allocator, "myapp", "My app description");
 /// defer app.deinit();
@@ -269,7 +271,7 @@ pub fn setMinValues(self: *Arg, num: usize) void {
 /// var root = app.rootCommand();
 ///
 /// var nums = Arg.init("nums", "Numbers to add");
-/// nums.setShortName("n");
+/// nums.setShortName('n');
 /// nums.setLongName("nums");
 /// nums.setMinValues(2);
 /// nums.setMaxValues(5);
