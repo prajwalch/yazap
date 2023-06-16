@@ -157,11 +157,10 @@ pub fn multiArgumentsOptionWithValidValues(
 }
 
 /// Creates a positional argument.
-/// The index represents the position of the argument starting from **1**.
 ///
-/// ## Note
-///
-/// The index is optional, and if not provided, it will be assigned based on the order of evaluation.
+/// The index starts with **1** and determines the position of the positional
+/// argument relative to other positional arguments. By default, the index is
+/// assigned based on the order in which the arguments are defined.
 ///
 /// ## Examples
 ///
@@ -373,7 +372,7 @@ pub fn setValuesDelimiter(self: *Arg, delimiter: []const u8) void {
 ///
 /// The index determines the position of the positional argument relative to
 /// other positional arguments. By default, the index is assigned based on the
-/// order of defining the arguments.
+/// order in which the arguments are defined.
 ///
 /// ## Note
 ///
