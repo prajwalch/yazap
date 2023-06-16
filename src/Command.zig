@@ -56,7 +56,6 @@ pub fn deinit(self: *Command) void {
 /// try subcmd.addArg(Arg.positional("FIRST", null, null));
 /// ```
 pub fn addArg(self: *Command, new_arg: Arg) !void {
-    // Dang!! This is the reason why i love `mut` keyword and variable shadowing from rust.
     var arg = new_arg;
     const is_positional = (arg.short_name == null) and (arg.long_name == null);
 
@@ -68,13 +67,13 @@ pub fn addArg(self: *Command, new_arg: Arg) !void {
         return self.positional_args.append(self.allocator, arg);
     }
 
-    // Index is not set but is a first positional arg.
+    // Index is not set but it is the first positional argument.
     if (self.positional_args.items.len == 0) {
         arg.setIndex(1);
         return self.positional_args.append(self.allocator, arg);
     }
 
-    // Index is not set and not a first positional arg.
+    // Index is not set and it is not the first positional argument.
     var highest_index: usize = 1;
 
     for (self.positional_args.items) |pos_arg| {
