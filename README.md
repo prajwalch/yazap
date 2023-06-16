@@ -159,13 +159,13 @@ if (matches.valueOf("FILE")) |f| {
     return;
 }
 
-if (matches.subcommandMatches("update")) |update_cmd_args| {
-    if (update_cmd_args.isPresent("check-only")) {
+if (matches.subcommandMatches("update")) |update_cmd_matches| {
+    if (update_cmd_matches.isPresent("check-only")) {
         std.log.info("Check and report new update", .{});
         return;
     }
 
-    if (update_cmd_args.valueOf("branch")) |branch| {
+    if (update_cmd_matches.valueOf("branch")) |branch| {
         std.log.info("Branch to update: {s}", .{branch});
         return;
     }
@@ -208,8 +208,8 @@ if (!matches.hasArgs()) {
     return;
 }
 
-if (matches.subcommandMatches("update")) |update_cmd_args| {
-    if (!update_cmd_args.hasArgs()) {
+if (matches.subcommandMatches("update")) |update_cmd_matches| {
+    if (!update_cmd_matches.hasArgs()) {
         try app.displaySubcommandHelp();
         return;
     }
@@ -275,17 +275,17 @@ pub fn main() anyerror!void {
         return;
     }
 
-    if (matches.subcommandMatches("update")) |update_cmd_args| {
-        if (!update_cmd_args.hasArgs()) {
+    if (matches.subcommandMatches("update")) |update_cmd_matches| {
+        if (!update_cmd_matches.hasArgs()) {
             try app.displaySubcommandHelp();
             return;
         }
 
-        if (update_cmd_args.isPresent("check-only")) {
+        if (update_cmd_matches.isPresent("check-only")) {
             std.log.info("Check and report new update", .{});
             return;
         }
-        if (update_cmd_args.valueOf("branch")) |branch| {
+        if (update_cmd_matches.valueOf("branch")) |branch| {
             std.log.info("Branch to update: {s}", .{branch});
             return;
         }
