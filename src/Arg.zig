@@ -374,9 +374,8 @@ pub fn setValuesDelimiter(self: *Arg, delimiter: []const u8) void {
 /// other positional arguments. By default, the index is assigned based on the
 /// order in which the arguments are defined.
 ///
-/// ## Note
-///
-/// Setting index for options will have no effect and will be sliently ignored.
+/// **NOTE:** Setting index for options will have no effect and will be sliently
+/// ignored.
 ///
 /// ## Examples
 ///
@@ -467,10 +466,8 @@ pub fn unsetProperty(self: *Arg, property: Property) void {
 
 /// Checks if the argument has a specific property set.
 ///
-/// ## Note
-///
-/// This function is mainly used by the parser to determine the presence of a
-/// specific property for the argument.
+/// **NOTE:** This function is primarily used by the parser to determine the
+/// presence of a specific property for the argument.
 ///
 /// ## Examples
 ///
@@ -495,13 +492,11 @@ pub fn hasProperty(self: *const Arg, property: Property) bool {
 
 /// Checks whether a given value is valid or not.
 ///
-/// ## Note
+/// **NOTE:** If `Arg.valid_values` is not set through `Arg.setValidValues`,
+/// this function always returns true.
 ///
-/// If `Arg.valid_values` is not set through `Arg.setValidValues`, this function
-/// always returns true.
-///
-/// This function is mainly used by the parser to determine whether the value
-/// present on the command line is valid or not.
+/// **NOTE:** This function is primarily used by the parser to determine whether
+/// the value present on the command line is valid or not.
 ///
 /// ## Examples
 ///
