@@ -137,19 +137,19 @@ obtain the raw arguments, or you can call `app.parseFrom` by passing your own ra
 Both functions return a constant pointer to [ArgMatches](https://prajwalch.github.io/yazap/#root;ArgMatches).
 
 ```zig
-const ls_args = try app.parseProcess();
+const matches = try app.parseProcess();
 
-if (ls_args.isPresent("version")) {
+if (matches.isPresent("version")) {
     log.info("v0.1.0", .{});
     return;
 }
 
-if (ls_args.valueOf("FILE")) |f| {
+if (matches.valueOf("FILE")) |f| {
     log.info("List contents of {f}");
     return;
 }
 
-if (ls_args.subcommandContext("update")) |update_cmd_args| {
+if (matches.subcommandContext("update")) |update_cmd_args| {
     if (update_cmd_args.isPresent("check-only")) {
         std.log.info("Check and report new update", .{});
         return;
@@ -162,23 +162,23 @@ if (ls_args.subcommandContext("update")) |update_cmd_args| {
     return;
 }
 
-if (ls_args.isPresent("all")) {
+if (matches.isPresent("all")) {
     log.info("show all", .{});
     return;
 }
 
-if (ls_args.isPresent("recursive")) {
+if (matches.isPresent("recursive")) {
     log.info("show recursive", .{});
     return;
 }
 
-if (ls_args.valueOf("ignore")) |pattern| {
+if (matches.valueOf("ignore")) |pattern| {
     log.info("ignore pattern = {s}", .{pattern});
     return;
 }
 
-if (ls_args.isPresent("color")) {
-    const when = ls_args.valueOf("color").?;
+if (matches.isPresent("color")) {
+    const when = matches.valueOf("color").?;
 
     log.info("color={s}", .{when});
     return;
@@ -193,12 +193,12 @@ are two functions which you can use i.e. `App.displayHelp` and `App.displaySubco
 it queries for the subcommand which was present on the command line and displays its usage.
 
 ```zig
-if (!ls_args.hasArgs()) {
+if (!matches.hasArgs()) {
     try app.displayHelp();
     return;
 }
 
-if (ls_args.subcommandContext("update")) |update_cmd_args| {
+if (matches.subcommandContext("update")) |update_cmd_args| {
     if (!update_cmd_args.hasArgs()) {
         try app.displaySubcommandHelp();
         return;
@@ -248,24 +248,24 @@ pub fn main() anyerror!void {
         "never",
     }));
 
-    const ls_args = try app.parseProcess();
+    const matches = try app.parseProcess();
     
-    if (!ls_args.hasArgs()) {
+    if (!matches.hasArgs()) {
         try app.displayHelp();
         return;
     }
 
-    if (ls_args.isPresent("version")) {
+    if (matches.isPresent("version")) {
         log.info("v0.1.0", .{});
         return;
     }
 
-    if (ls_args.valueOf("FILE")) |f| {
+    if (matches.valueOf("FILE")) |f| {
         log.info("List contents of {f}");
         return;
     }
 
-    if (ls_args.subcommandContext("update")) |update_cmd_args| {
+    if (matches.subcommandContext("update")) |update_cmd_args| {
         if (!update_cmd_args.hasArgs()) {
             try app.displaySubcommandHelp();
             return;
@@ -282,23 +282,23 @@ pub fn main() anyerror!void {
         return;
     }
 
-    if (ls_args.isPresent("all")) {
+    if (matches.isPresent("all")) {
         log.info("show all", .{});
         return;
     }
 
-    if (ls_args.isPresent("recursive")) {
+    if (matches.isPresent("recursive")) {
         log.info("show recursive", .{});
         return;
     }
 
-    if (ls_args.valueOf("ignore")) |pattern| {
+    if (matches.valueOf("ignore")) |pattern| {
         log.info("ignore pattern = {s}", .{pattern});
         return;
     }
 
-    if (ls_args.isPresent("color")) {
-        const when = ls_args.valueOf("color").?;
+    if (matches.isPresent("color")) {
+        const when = matches.valueOf("color").?;
 
         log.info("color={s}", .{when});
         return;
