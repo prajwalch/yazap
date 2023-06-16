@@ -15,7 +15,7 @@ Inspired by [clap-rs](https://github.com/clap-rs/clap) and [andrewrk/ziglang: sr
 
 ## Key Features:
 
-- **Options**:
+- **Options (short and long)**:
   - Easily provide values with `=`, space, or no space (`-f=value`, `-f value`, `-fvalue`).
   - Handle delimiter-separated values with `=` or without space (`-f=v1,v2,v3`, `-fv1:v2:v3`).
   - Chain multiple short boolean options (`-abc`).
