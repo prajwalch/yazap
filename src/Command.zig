@@ -248,8 +248,10 @@ pub fn findLongOption(self: *const Command, long_name: []const u8) ?*const Arg {
     return null;
 }
 
-/// Linearly searches a sub-command with name equals to given `subcmd_name`.
-/// Returns a const pointer of a found sub-command otherwise null.
+/// Performs a linear search to find a subcommand with the given subcommand name.
+///
+/// **NOTE:** This function is primarily used by the parser to find a subcommand
+/// based on its name.
 pub fn findSubcommand(self: *const Command, provided_subcmd: []const u8) ?*const Command {
     for (self.subcommands.items) |*subcmd| {
         if (std.mem.eql(u8, subcmd.name, provided_subcmd)) {
