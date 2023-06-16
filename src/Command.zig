@@ -30,7 +30,7 @@ pub fn init(allocator: Allocator, name: []const u8, description: ?[]const u8) Co
     };
 }
 
-/// Release all allocated memory
+/// Deallocates all allocated memory.
 pub fn deinit(self: *Command) void {
     self.positional_args.deinit(self.allocator);
     self.options.deinit(self.allocator);
