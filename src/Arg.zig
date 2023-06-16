@@ -31,6 +31,8 @@ pub fn init(name: []const u8, description: ?[]const u8) Arg {
 
 /// Creates a boolean option.
 ///
+/// ## Examples
+///
 /// ```zig
 /// var app = App.init(allocator, "myapp", "My app description");
 /// defer app.deinit();
