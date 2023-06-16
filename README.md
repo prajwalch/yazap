@@ -8,8 +8,8 @@
 > Use [v0.9.x-v0.10.x](https://github.com/PrajwalCH/yazap/tree/v0.9.x-v0.10.x) branch
 > if you're using an older versions.
 
-**Yazap** is a simple and easy-to-use [zig](https://ziglang.org) library that is designed for parsing not only flags
-but also subcommands, nested subcommands and custom arguments.
+The ultimate [zig](https://ziglang.org) library for seamless command-line parsing.
+Effortlessly handle flags, subcommands, and custom arguments with ease.
 
 Inspired by [clap-rs](https://github.com/clap-rs/clap) and [andrewrk/ziglang: src-self-hosted/arg.zig](https://git.sr.ht/~andrewrk/ziglang/tree/725b6ee634f01355da4a6badc5675751b85f0bf0/src-self-hosted/arg.zig)
 
