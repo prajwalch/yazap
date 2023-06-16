@@ -170,6 +170,7 @@ pub fn setProperty(self: *Command, property: Property) void {
     return self.properties.insert(property);
 }
 
+/// Unsets a property from the command, reversing its effect on parsing and processing.
 pub fn unsetProperty(self: *Command, property: Property) void {
     return self.properties.remove(property);
 }
