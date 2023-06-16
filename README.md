@@ -16,14 +16,14 @@ Inspired by [clap-rs](https://github.com/clap-rs/clap) and [andrewrk/ziglang: sr
 ## Key Features:
 
 - **Options (short and long)**:
-  - Easily provide values with `=`, space, or no space (`-f=value`, `-f value`, `-fvalue`).
-  - Handle delimiter-separated values with `=` or without space (`-f=v1,v2,v3`, `-fv1:v2:v3`).
-  - Chain multiple short boolean options (`-abc`).
-  - Assign values and delimiter-separated values for multiple chained options using `=` (`-abc=val`, `-abc=v1,v2,v3`).
-  - Specify an option multiple times (`-a 1 -a 2 -a 3`).
+  - Providing values with `=`, space, or no space (`-f=value`, `-f value`, `-fvalue`).
+  - Supports delimiter-separated values with `=` or without space (`-f=v1,v2,v3`, `-fv1:v2:v3`).
+  - Chaining multiple short boolean options (`-abc`).
+  - Providing values and delimiter-separated values for multiple chained options using `=` (`-abc=val`, `-abc=v1,v2,v3`).
+  - Specifying an option multiple times (`-a 1 -a 2 -a 3`).
 
 - **Positional arguments**:
-  - Support positional arguments alongside options for more flexible command-line inputs. For example:
+  - Supports positional arguments alongside options for more flexible command-line inputs. For example:
     - `command <positional_arg>`
     - `command <arg1> <arg2> <arg3>`
 
