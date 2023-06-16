@@ -131,7 +131,21 @@ pub fn addSubcommand(self: *Command, new_subcommand: Command) !void {
     return self.subcommands.append(self.allocator, new_subcommand);
 }
 
-/// Appends the `subcommands` into the subcommands list
+/// Appends multiple subcommands to the list of subcommands.
+///
+/// ## Examples
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+///
+/// try root.addSubcommands(&[_]Command{
+///     app.createCommand("init-exe", "Initilize the project"),
+///     app.createCommand("build", "Build the project"),
+/// });
+/// ```
 pub fn addSubcommands(self: *Command, subcommands: []Command) !void {
     for (subcommands) |subcmd| try self.addSubcommand(subcmd);
 }
