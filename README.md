@@ -37,10 +37,11 @@ Inspired by [clap-rs](https://github.com/clap-rs/clap) and [andrewrk/ziglang: sr
 - **Custom Argument definition**:
   - Define custom [Argument](https://prajwalch.github.io/yazap/#A;lib:Arg) types for specific application requirements.
 
-## Limitation:
+## Limitations:
 
-- Providing comma-separated values using space (`-f v1,v2,v3`)
-- Providing value and comma-separated values for multiple chained options using space (`-abc value, -abc v1,v2,v3`)
+- Does not support delimiter-separated values using space (`-f v1,v2,v3`).
+- Does not supoort providing value and comma-separated values for multiple
+chained options using space (`-abc value, -abc v1,v2,v3`).
 
 ## Installing
 
