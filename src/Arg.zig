@@ -343,7 +343,10 @@ pub fn setDefaultValuesDelimiter(self: *Arg) void {
     self.setValuesDelimiter(DEFAULT_VALUES_DELIMITER);
 }
 
-/// Sets separator between the values of an argument.
+/// Sets the given separator for values of an argument.
+/// This separator is used when multiple values are provided for the argument.
+///
+/// ## Examples
 ///
 /// ```zig
 /// var app = App.init(allocator, "myapp", "My app description");
@@ -360,7 +363,7 @@ pub fn setDefaultValuesDelimiter(self: *Arg) void {
 ///
 /// try root.addArg(nums);
 ///
-/// // From command line: myapp --nums 1:2
+/// // Command line input: myapp --nums 1:2
 /// ```
 pub fn setValuesDelimiter(self: *Arg, delimiter: []const u8) void {
     self.values_delimiter = delimiter;
