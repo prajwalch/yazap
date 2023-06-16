@@ -91,7 +91,7 @@ pub fn setProperty(self: *Command, property: Property) void {
     return self.properties.insert(property);
 }
 
-pub fn removeProperty(self: *Command, property: Property) void {
+pub fn unsetProperty(self: *Command, property: Property) void {
     return self.properties.remove(property);
 }
 

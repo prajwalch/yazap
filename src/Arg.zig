@@ -455,11 +455,11 @@ pub fn setProperty(self: *Arg, property: Property) void {
 ///
 /// var name = Arg.singleArgumentOption("name", 'n', "Person to greet");
 /// // Convert to boolean option by removing the `takes_value` property
-/// name.removeProperty(.takes_value);
+/// name.unsetProperty(.takes_value);
 ///
 /// try root.addArg(name);
 /// ```
-pub fn removeProperty(self: *Arg, property: Property) void {
+pub fn unsetProperty(self: *Arg, property: Property) void {
     return self.properties.remove(property);
 }
 
