@@ -50,7 +50,7 @@ pub fn booleanOption(name: []const u8, short_name: ?u8, description: ?[]const u8
     return arg;
 }
 
-/// Creates a single argument option.
+/// Creates an option that accepts a single argument.
 ///
 /// ## Examples
 ///
