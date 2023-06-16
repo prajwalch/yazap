@@ -199,6 +199,10 @@ pub fn countOptions(self: *const Command) usize {
     return (self.options.items.len);
 }
 
+/// Returns the count of subcommands in the subcommand list.
+///
+/// **NOTE:** This function is primarily used by the parser to determine the
+/// total number of valid subcommands.
 pub fn countSubcommands(self: *const Command) usize {
     return (self.subcommands.items.len);
 }
