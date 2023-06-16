@@ -78,11 +78,6 @@ pub fn singleArgumentOption(name: []const u8, short_name: ?u8, description: ?[]c
 /// Creates a single argument option with a predefined set of valid values that
 /// the user can pass.
 ///
-/// This option allows the user to specify a value from a predefined list of
-/// options. Only the values provided in the `values` parameter will be
-/// considered valid. If the user passes a value that is not in the list, it
-/// will be considered invalid.
-///
 /// ## Examples
 ///
 /// ```zig
