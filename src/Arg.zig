@@ -417,7 +417,7 @@ pub fn setIndex(self: *Arg, index: usize) void {
     self.index = index;
 }
 
-/// Adds a property to the argument, specifying how it should be parsed and processed.
+/// Sets a property to the argument, specifying how it should be parsed and processed.
 ///
 /// ## Examples
 ///
@@ -441,7 +441,7 @@ pub fn setProperty(self: *Arg, property: Property) void {
     return self.properties.insert(property);
 }
 
-/// Removes a property from the argument, reversing its effect on parsing and processing.
+/// Unsets a property from the argument, reversing its effect on parsing and processing.
 ///
 /// ## Examples
 ///
