@@ -424,6 +424,30 @@ pub fn removeProperty(self: *Arg, property: Property) void {
 
 // # Getters
 
+/// Checks if the argument has a specific property set.
+///
+/// ## Note
+///
+/// This function is mainly used by the parser to determine the presence of a
+/// specific property for the argument.
+///
+/// ## Examples
+///
+/// Checking if the argument takes a value from the command line:
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+///
+/// var name = Arg.singleArgumentOption("name", 'n', "Person to greet");
+/// if (name.hasProperty(.takes_value)) {
+///     std.debug.print("The `name` flag takes a value", .{});
+/// }
+///
+/// try root.addArg(name);
+/// ```
 pub fn hasProperty(self: *const Arg, property: Property) bool {
     return self.properties.contains(property);
 }
