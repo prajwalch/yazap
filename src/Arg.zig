@@ -72,7 +72,9 @@ pub fn singleArgumentOption(name: []const u8, short_name: ?u8, description: ?[]c
     return arg;
 }
 
-/// Creates a single argument option with valid values which user can pass.
+/// Creates a single argument option with valid values that the user can pass.
+///
+/// ## Examples
 ///
 /// ```zig
 /// var app = App.init(allocator, "myapp", "My app description");
@@ -80,7 +82,7 @@ pub fn singleArgumentOption(name: []const u8, short_name: ?u8, description: ?[]c
 ///
 /// var root = app.rootCommand();
 /// try root.addArg(Arg.singleArgumentOptionWithValidValues(
-///     "std", 's', "Language standard", &[_]const u8 { "c99", "c11" },
+///     "output", 'o', "Output format", &[_][]const u8 { "json", "xml", "csv" },
 /// ));
 /// ```
 pub fn singleArgumentOptionWithValidValues(
