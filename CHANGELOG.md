@@ -56,6 +56,30 @@
 - `Command.setSetting` is renamed to `Command.setProperty`.
 - `Command.unsetSetting` is renamed to `Command.unsetProperty`.
 - `Command.isSettingSet` is renamed to `Command.hasProperty`.
+- `ArgsContext` is renamed to `ArgMatches`.
+- `ArgsContext.subcommandContext` is renamed to `ArgMatches.subcommandMatches`.
+
+    Before
+    ```zig
+    // -- snip --
+    const args = app.parseProcess();
+
+    if (args.subcommandContext("some_subcmd")) |some_subcmd_args| {
+        // Handle here
+    }
+    // -- snip --
+    ```
+
+    After
+    ```zig
+    // -- snip --
+    const matches = app.parseProcess();
+
+    if (matches.subcommandMatches("some_subcmd")) |some_subcmd_matches| {
+        // Handle here
+    }
+    // -- snip --
+    ```
 
 ## What's New
 - Improved documentation for `Arg.*` API and included examples as well.
