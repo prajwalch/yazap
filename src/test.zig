@@ -14,10 +14,10 @@ test "positional arguments with auto index" {
     try app.rootCommand().addArg(Arg.positional("TWO", null, null));
     try app.rootCommand().addArg(Arg.positional("THREE", null, null));
 
-    const args = try app.parseFrom(&.{ "val1", "val2", "val3" });
-    try testing.expectEqualStrings("val1", args.valueOf("ONE").?);
-    try testing.expectEqualStrings("val2", args.valueOf("TWO").?);
-    try testing.expectEqualStrings("val3", args.valueOf("THREE").?);
+    const matches = try app.parseFrom(&.{ "val1", "val2", "val3" });
+    try testing.expectEqualStrings("val1", matches.valueOf("ONE").?);
+    try testing.expectEqualStrings("val2", matches.valueOf("TWO").?);
+    try testing.expectEqualStrings("val3", matches.valueOf("THREE").?);
 
     app.deinit();
 }
@@ -30,10 +30,10 @@ test "positional arguments with manual index" {
     try app.rootCommand().addArg(Arg.positional("THREE", null, 3));
     try app.rootCommand().addArg(Arg.positional("TWO", null, 2));
 
-    const args = try app.parseFrom(&.{ "val1", "val2", "val3" });
-    try testing.expectEqualStrings("val1", args.valueOf("ONE").?);
-    try testing.expectEqualStrings("val2", args.valueOf("TWO").?);
-    try testing.expectEqualStrings("val3", args.valueOf("THREE").?);
+    const matches = try app.parseFrom(&.{ "val1", "val2", "val3" });
+    try testing.expectEqualStrings("val1", matches.valueOf("ONE").?);
+    try testing.expectEqualStrings("val2", matches.valueOf("TWO").?);
+    try testing.expectEqualStrings("val3", matches.valueOf("THREE").?);
 
     app.deinit();
 }
@@ -44,8 +44,8 @@ test "command that takes single value" {
 
     try app.rootCommand().addArg(Arg.positional("PATH", null, 1));
 
-    const args = try app.parseFrom(&.{"test.txt"});
-    try testing.expectEqualStrings("test.txt", args.valueOf("PATH").?);
+    const matches = try app.parseFrom(&.{"test.txt"});
+    try testing.expectEqualStrings("test.txt", matches.valueOf("PATH").?);
 
     app.deinit();
 }
@@ -63,7 +63,7 @@ test "command that takes single value" {
 //     try app.rootCommand().addArg(paths);
 //     app.rootCommand().setProperty(.takes_positional_arg);
 
-//     const args = try app.parseFrom(&.{ "a", "b", "c" });
+//     const matches = try app.parseFrom(&.{ "a", "b", "c" });
 //     try testing.expectEqualSlices([]const u8, &.{ "a", "b", "c" }, args.valuesOf("PATHS").?);
 
 //     app.deinit();
@@ -82,7 +82,7 @@ test "command that takes single value" {
 //     try app.rootCommand().addArg(paths);
 //     app.rootCommand().setProperty(.takes_positional_arg);
 
-//     const args = try app.parseFrom(&.{"a:b:c"});
+//     const matches = try app.parseFrom(&.{"a:b:c"});
 
 //     // This gives weird error like:
 //     // index 0 incorrect. expected { 97 }, found { 97 }
@@ -159,9 +159,9 @@ test "Option that takes many/multiple values" {
 
     // ex: clang sources...
     try app.rootCommand().addArg(srcs);
-    const args = try app.parseFrom(&.{ "-s", "f1", "f2", "f3", "f4", "f5" });
+    const matches = try app.parseFrom(&.{ "-s", "f1", "f2", "f3", "f4", "f5" });
 
-    try testing.expectEqual(@as(usize, 5), args.valuesOf("sources").?.len);
+    try testing.expectEqual(@as(usize, 5), matches.valuesOf("sources").?.len);
 
     app.deinit();
 }
@@ -224,9 +224,9 @@ test "passing positional argument before options" {
     try app.rootCommand().addArg(Arg.booleanOption("all", 'a', null));
     app.rootCommand().setProperty(.positional_arg_required);
 
-    const args = try app.parseFrom(&.{ ".", "-a" });
-    try testing.expectEqualStrings(".", args.valueOf("PATH").?);
-    try testing.expectEqual(true, args.isPresent("all"));
+    const matches = try app.parseFrom(&.{ ".", "-a" });
+    try testing.expectEqualStrings(".", matches.valueOf("PATH").?);
+    try testing.expectEqual(true, matches.isPresent("all"));
 
     app.deinit();
 }
@@ -238,9 +238,9 @@ test "passing positional argument after options" {
     try app.rootCommand().addArg(Arg.positional("PATH", null, null));
     try app.rootCommand().addArg(Arg.booleanOption("all", 'a', null));
 
-    const args = try app.parseFrom(&.{ "-a", "." });
-    try testing.expectEqualStrings(".", args.valueOf("PATH").?);
-    try testing.expectEqual(true, args.isPresent("all"));
+    const matches = try app.parseFrom(&.{ "-a", "." });
+    try testing.expectEqualStrings(".", matches.valueOf("PATH").?);
+    try testing.expectEqual(true, matches.isPresent("all"));
 
     app.deinit();
 }
@@ -253,10 +253,10 @@ test "passing positional argument before and after options" {
     try app.rootCommand().addArg(Arg.booleanOption("all", 'a', null));
     try app.rootCommand().addArg(Arg.booleanOption("one-line", '1', null));
 
-    const args = try app.parseFrom(&.{ "-1", ".", "-a" });
-    try testing.expectEqualStrings(".", args.valueOf("PATH").?);
-    try testing.expectEqual(true, args.isPresent("one-line"));
-    try testing.expectEqual(true, args.isPresent("all"));
+    const matches = try app.parseFrom(&.{ "-1", ".", "-a" });
+    try testing.expectEqualStrings(".", matches.valueOf("PATH").?);
+    try testing.expectEqual(true, matches.isPresent("one-line"));
+    try testing.expectEqual(true, matches.isPresent("all"));
 
     app.deinit();
 }

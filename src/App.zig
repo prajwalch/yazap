@@ -4,7 +4,7 @@ const std = @import("std");
 const help = @import("help.zig");
 const Command = @import("Command.zig");
 const Parser = @import("Parser.zig");
-const ArgsContext = @import("args_context.zig").ArgsContext;
+const ArgMatches = @import("arg_matches.zig").ArgMatches;
 const Tokenizer = @import("tokenizer.zig").Tokenizer;
 const YazapError = @import("error.zig").YazapError;
 
@@ -13,7 +13,7 @@ const Allocator = std.mem.Allocator;
 allocator: Allocator,
 command: Command,
 subcommand_help: ?help.Help = null,
-args_ctx: ?ArgsContext = null,
+arg_matches: ?ArgMatches = null,
 process_args: ?[]const [:0]u8 = null,
 
 pub fn init(allocator: Allocator, cmd_name: []const u8, description: ?[]const u8) App {
@@ -25,7 +25,7 @@ pub fn init(allocator: Allocator, cmd_name: []const u8, description: ?[]const u8
 
 /// Deinitialize all the structures of `app` and release all the memory used by them
 pub fn deinit(self: *App) void {
-    if (self.args_ctx) |*ctx| ctx.deinit();
+    if (self.arg_matches) |*matches| matches.deinit();
     if (self.process_args) |pargs| std.process.argsFree(self.allocator, pargs);
     self.command.deinit();
 
@@ -45,20 +45,20 @@ pub fn rootCommand(self: *App) *Command {
 }
 
 /// Starts parsing the process arguments
-pub fn parseProcess(self: *App) YazapError!(*const ArgsContext) {
+pub fn parseProcess(self: *App) YazapError!(*const ArgMatches) {
     self.process_args = try std.process.argsAlloc(self.allocator);
     return self.parseFrom(self.process_args.?[1..]);
 }
 
 /// Starts parsing the given arguments
-pub fn parseFrom(self: *App, argv: []const [:0]const u8) YazapError!(*const ArgsContext) {
+pub fn parseFrom(self: *App, argv: []const [:0]const u8) YazapError!(*const ArgMatches) {
     var parser = Parser.init(self.allocator, Tokenizer.init(argv), self.rootCommand());
-    self.args_ctx = parser.parse() catch |e| {
+    self.arg_matches = parser.parse() catch |e| {
         try parser.err.log(e);
         return e;
     };
     try self.handleHelpOption();
-    return &self.args_ctx.?;
+    return &self.arg_matches.?;
 }
 
 /// Displays the help message of root command
@@ -80,17 +80,17 @@ pub fn displaySubcommandHelp(self: *App) !void {
 fn handleHelpOption(self: *App) !void {
     // Set the `Help` of a subcommand present on the command line with the `-h` or `--help` option
     // remains null if none of the subcommands were present
-    if (help.findSubcommand(self.rootCommand(), &self.args_ctx.?)) |subcmd| {
+    if (help.findSubcommand(self.rootCommand(), &self.arg_matches.?)) |subcmd| {
         self.subcommand_help = try help.Help.init(self.allocator, self.rootCommand(), subcmd);
     }
     try self.displayHelpAndExitIfFound();
 }
 
 fn displayHelpAndExitIfFound(self: *App) !void {
-    var args_ctx = self.args_ctx.?;
+    var arg_matches = self.arg_matches.?;
     var help_displayed = false;
 
-    if (args_ctx.isPresent("help")) {
+    if (arg_matches.isPresent("help")) {
         try self.displayHelp();
         help_displayed = true;
     } else {

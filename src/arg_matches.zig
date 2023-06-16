@@ -33,32 +33,32 @@ pub const MatchedArgValue = union(enum) {
 
 pub const MatchedSubCommand = struct {
     name: []const u8,
-    ctx: ?ArgsContext,
+    matches: ?ArgMatches,
 
-    pub fn init(name: []const u8, args_ctx: ?ArgsContext) MatchedSubCommand {
-        return MatchedSubCommand{ .name = name, .ctx = args_ctx };
+    pub fn init(name: []const u8, arg_matches: ?ArgMatches) MatchedSubCommand {
+        return MatchedSubCommand{ .name = name, .matches = arg_matches };
     }
 
     pub fn deinit(self: *MatchedSubCommand) void {
-        if (self.ctx) |*ctx| ctx.deinit();
+        if (self.matches) |*matches| matches.deinit();
     }
 };
 
 /// A structure for querying the parse result.
-pub const ArgsContext = struct {
+pub const ArgMatches = struct {
     allocator: std.mem.Allocator,
     args: ArgHashMap,
     subcommand: ?*MatchedSubCommand,
 
-    pub fn init(allocator: std.mem.Allocator) ArgsContext {
-        return ArgsContext{
+    pub fn init(allocator: std.mem.Allocator) ArgMatches {
+        return ArgMatches{
             .allocator = allocator,
             .args = ArgHashMap.init(allocator),
             .subcommand = null,
         };
     }
 
-    pub fn deinit(self: *ArgsContext) void {
+    pub fn deinit(self: *ArgMatches) void {
         var args_value_iter = self.args.valueIterator();
 
         while (args_value_iter.next()) |value| {
@@ -72,7 +72,7 @@ pub const ArgsContext = struct {
         }
     }
 
-    pub fn setSubcommand(self: *ArgsContext, subcommand: MatchedSubCommand) !void {
+    pub fn setSubcommand(self: *ArgMatches, subcommand: MatchedSubCommand) !void {
         if (self.subcommand != null) return;
 
         var alloc_subcmd = try self.allocator.create(MatchedSubCommand);
@@ -81,7 +81,7 @@ pub const ArgsContext = struct {
     }
 
     /// Checks if argument or subcommand is present
-    pub fn isPresent(self: *const ArgsContext, name_to_lookup: []const u8) bool {
+    pub fn isPresent(self: *const ArgMatches, name_to_lookup: []const u8) bool {
         if (self.args.contains(name_to_lookup)) {
             return true;
         } else if (self.subcommand) |subcmd| {
@@ -93,17 +93,17 @@ pub const ArgsContext = struct {
     }
 
     /// Checks if arguments were present on command line or not
-    pub fn hasArgs(self: *const ArgsContext) bool {
+    pub fn hasArgs(self: *const ArgMatches) bool {
         return ((self.args.count() >= 1) or (self.subcommand != null));
     }
 
     /// Returns the single value of an argument if found otherwise null
-    pub fn valueOf(self: *const ArgsContext, arg_name: []const u8) ?[]const u8 {
+    pub fn valueOf(self: *const ArgMatches, arg_name: []const u8) ?[]const u8 {
         if (self.args.get(arg_name)) |value| {
             if (value.isSingle()) return value.single;
         } else if (self.subcommand) |subcmd| {
-            if (subcmd.ctx) |ctx| {
-                return ctx.valueOf(arg_name);
+            if (subcmd.matches) |matches| {
+                return matches.valueOf(arg_name);
             }
         }
 
@@ -111,18 +111,18 @@ pub const ArgsContext = struct {
     }
 
     /// Returns the array of values of an argument if found otherwise null
-    pub fn valuesOf(self: *const ArgsContext, name_to_lookup: []const u8) ?[][]const u8 {
+    pub fn valuesOf(self: *const ArgMatches, name_to_lookup: []const u8) ?[][]const u8 {
         if (self.args.get(name_to_lookup)) |value| {
             if (value.isMany()) return value.many.items[0..];
         }
         return null;
     }
 
-    /// Returns the subcommand `ArgsContext` if subcommand is present otherwise null
-    pub fn subcommandContext(self: *const ArgsContext, subcmd_name: []const u8) ?ArgsContext {
+    /// Returns the subcommand `ArgMatches` if subcommand is present otherwise null
+    pub fn subcommandContext(self: *const ArgMatches, subcmd_name: []const u8) ?ArgMatches {
         if (self.subcommand) |subcmd| {
             if (std.mem.eql(u8, subcmd.name, subcmd_name)) {
-                return subcmd.ctx;
+                return subcmd.matches;
             }
         }
         return null;

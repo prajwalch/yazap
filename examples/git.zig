@@ -31,24 +31,24 @@ pub fn main() anyerror!void {
     try git.addSubcommand(cmd_pull);
     try git.addSubcommand(cmd_push);
 
-    const args = try app.parseProcess();
+    const matches = try app.parseProcess();
 
-    if (args.isPresent("init")) {
+    if (matches.isPresent("init")) {
         std.debug.print("Initilize empty repo", .{});
         return;
     }
 
-    if (args.subcommandContext("commit")) |commit_args| {
-        if (commit_args.valueOf("message")) |message| {
+    if (matches.subcommandContext("commit")) |commit_matches| {
+        if (commit_matches.valueOf("message")) |message| {
             std.log.info("Commit message {s}", .{message});
             return;
         }
     }
 
-    if (args.subcommandContext("push")) |push_args| {
-        if (push_args.isPresent("REMOTE") and push_args.isPresent("BRANCH_NAME")) {
-            const remote = push_args.valueOf("REMOTE").?;
-            const branch_name = push_args.valueOf("BRANCH_NAME").?;
+    if (matches.subcommandContext("push")) |push_matches| {
+        if (push_matches.isPresent("REMOTE") and push_matches.isPresent("BRANCH_NAME")) {
+            const remote = push_matches.valueOf("REMOTE").?;
+            const branch_name = push_matches.valueOf("BRANCH_NAME").?;
 
             std.log.info("REMOTE={s}, BRANCH_NAME={s}", .{ remote, branch_name });
             return;

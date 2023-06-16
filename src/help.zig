@@ -1,6 +1,6 @@
 const std = @import("std");
 const Command = @import("Command.zig");
-const ArgsContext = @import("args_context.zig").ArgsContext;
+const ArgMatches = @import("arg_matches.zig").ArgMatches;
 
 const mem = std.mem;
 
@@ -199,17 +199,17 @@ pub const Help = struct {
 
 /// Returns which subcommand is active on command line with `-h` or `--help` option
 /// null if none of the subcommands were present
-pub fn findSubcommand(root_cmd: *const Command, ctx: *ArgsContext) ?[]const u8 {
-    if ((ctx.subcommand != null) and (ctx.subcommand.?.ctx != null)) {
-        const subcmd_name = ctx.subcommand.?.name;
-        const subcmd_ctx = &ctx.subcommand.?.ctx.?;
+pub fn findSubcommand(root_cmd: *const Command, matches: *ArgMatches) ?[]const u8 {
+    if ((matches.subcommand != null) and (matches.subcommand.?.matches != null)) {
+        const subcmd_name = matches.subcommand.?.name;
+        const subcmd_matches = &matches.subcommand.?.matches.?;
 
-        if (subcmd_ctx.isPresent("help")) {
+        if (subcmd_matches.isPresent("help")) {
             return subcmd_name;
         } else {
             // If current subcommand's arg doesnot have `help` option
             // start to look its child subcommand's arg. (This happens recursively)
-            return findSubcommand(root_cmd, subcmd_ctx);
+            return findSubcommand(root_cmd, subcmd_matches);
         }
     }
     return null;

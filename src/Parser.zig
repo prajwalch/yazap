@@ -1,7 +1,7 @@
 const Parser = @This();
 
 const std = @import("std");
-const args_context = @import("args_context.zig");
+const arg_matches = @import("arg_matches.zig");
 const erro = @import("error.zig");
 const Arg = @import("Arg.zig");
 const Command = @import("Command.zig");
@@ -10,8 +10,8 @@ const Tokenizer = @import("tokenizer.zig").Tokenizer;
 
 const mem = std.mem;
 const Allocator = std.mem.Allocator;
-const ArgsContext = args_context.ArgsContext;
-const MatchedSubCommand = args_context.MatchedSubCommand;
+const ArgMatches = arg_matches.ArgMatches;
+const MatchedSubCommand = arg_matches.MatchedSubCommand;
 
 const Error = erro.ParseError || erro.AllocatorError;
 
@@ -67,7 +67,7 @@ allocator: Allocator,
 command: *const Command,
 err: erro.Error,
 tokenizer: Tokenizer,
-args_ctx: ArgsContext,
+arg_matches: ArgMatches,
 
 pub fn init(allocator: Allocator, tokenizer: Tokenizer, command: *const Command) Parser {
     return Parser{
@@ -75,12 +75,12 @@ pub fn init(allocator: Allocator, tokenizer: Tokenizer, command: *const Command)
         .command = command,
         .err = erro.Error.init(),
         .tokenizer = tokenizer,
-        .args_ctx = ArgsContext.init(allocator),
+        .arg_matches = ArgMatches.init(allocator),
     };
 }
 
-pub fn parse(self: *Parser) Error!ArgsContext {
-    errdefer self.args_ctx.deinit();
+pub fn parse(self: *Parser) Error!ArgMatches {
+    errdefer self.arg_matches.deinit();
 
     const takes_pos_args = self.command.countPositionalArgs() >= 1;
     const highest_pos_arg_index = self.highestPositionalArgIndex();
@@ -90,7 +90,7 @@ pub fn parse(self: *Parser) Error!ArgsContext {
 
     while (self.tokenizer.nextToken()) |*token| {
         if (mem.eql(u8, token.value, "help") or mem.eql(u8, token.value, "h")) {
-            try self.args_ctx.args.put("help", .none);
+            try self.arg_matches.args.put("help", .none);
             break;
         }
 
@@ -110,12 +110,12 @@ pub fn parse(self: *Parser) Error!ArgsContext {
             parsed_all_pos_args = (pos_args_idx > highest_pos_arg_index);
             continue;
         }
-        try self.args_ctx.setSubcommand(
+        try self.arg_matches.setSubcommand(
             try self.parseSubCommand(token.value),
         );
     }
 
-    if (!self.args_ctx.isPresent("help")) {
+    if (!self.arg_matches.isPresent("help")) {
         const takes_pos_args_and_is_required =
             (takes_pos_args and (self.command.hasProperty(.positional_arg_required)));
 
@@ -124,12 +124,12 @@ pub fn parse(self: *Parser) Error!ArgsContext {
             return Error.CommandArgumentNotProvided;
         }
 
-        if (self.command.hasProperty(.subcommand_required) and self.args_ctx.subcommand == null) {
+        if (self.command.hasProperty(.subcommand_required) and self.arg_matches.subcommand == null) {
             self.err.setContext(.{ .valid_cmd = self.command.name });
             return Error.CommandSubcommandNotProvided;
         }
     }
-    return self.args_ctx;
+    return self.arg_matches;
 }
 
 fn highestPositionalArgIndex(self: *const Parser) usize {
@@ -361,12 +361,12 @@ fn verifyValue(self: *Parser, arg: *const Arg, value: []const u8) Error!void {
     }
 }
 
-fn putMatchedArg(self: *Parser, arg: *const Arg, value: args_context.MatchedArgValue) Error!void {
+fn putMatchedArg(self: *Parser, arg: *const Arg, value: arg_matches.MatchedArgValue) Error!void {
     errdefer if (value.isMany()) value.many.deinit();
     try self.verifyValuesLength(arg, value.count());
 
-    var ctx = &self.args_ctx;
-    var maybe_old_value = ctx.args.getPtr(arg.name);
+    var matches = &self.arg_matches;
+    var maybe_old_value = matches.args.getPtr(arg.name);
 
     if (maybe_old_value) |old_value| {
         // To fix the const error
@@ -374,7 +374,7 @@ fn putMatchedArg(self: *Parser, arg: *const Arg, value: args_context.MatchedArgV
 
         switch (old_value.*) {
             .none => if (!new_value.isNone()) {
-                return ctx.args.put(arg.name, new_value);
+                return matches.args.put(arg.name, new_value);
             },
             .single => |old_single_value| {
                 if (new_value.isSingle()) {
@@ -384,12 +384,12 @@ fn putMatchedArg(self: *Parser, arg: *const Arg, value: args_context.MatchedArgV
                     try many.append(old_single_value);
                     try many.append(new_value.single);
 
-                    return ctx.args.put(arg.name, .{ .many = many });
+                    return matches.args.put(arg.name, .{ .many = many });
                 } else if (new_value.isMany()) {
                     // If old value is single but the new value is many then
                     // append the old one into new many value
                     try new_value.many.append(old_single_value);
-                    return ctx.args.put(arg.name, new_value);
+                    return matches.args.put(arg.name, new_value);
                 }
             },
             .many => |*old_many_values| {
@@ -405,7 +405,7 @@ fn putMatchedArg(self: *Parser, arg: *const Arg, value: args_context.MatchedArgV
         }
     } else {
         // We don't have old value, put the new value
-        return ctx.args.put(arg.name, value);
+        return matches.args.put(arg.name, value);
     }
 }
 
@@ -452,15 +452,15 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
         }
         return MatchedSubCommand.init(
             subcmd.name,
-            ArgsContext.init(self.allocator),
+            ArgMatches.init(self.allocator),
         );
     };
     var parser = Parser.init(self.allocator, Tokenizer.init(args), subcmd);
-    const subcmd_ctx = parser.parse() catch |err| {
+    const subcmd_matches = parser.parse() catch |err| {
         // Bubble up the error trace to the parent command that happened while parsing subcommand
         self.err = parser.err;
         return err;
     };
 
-    return MatchedSubCommand.init(subcmd.name, subcmd_ctx);
+    return MatchedSubCommand.init(subcmd.name, subcmd_matches);
 }

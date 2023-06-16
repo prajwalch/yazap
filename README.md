@@ -134,7 +134,7 @@ try myls.addSubcommand(update_cmd);
 Once you're done adding arguments and subcommands call `app.parseProcess` to starts parsing.
 It internally calls [std.process.argsAlloc](https://ziglang.org/documentation/master/std/#root;process.argsAlloc) to
 obtain the raw arguments, or you can call `app.parseFrom` by passing your own raw arguments which can be useful on test.
-Both functions return a constant pointer to [ArgsContext](https://prajwalch.github.io/yazap/#root;ArgsContext).
+Both functions return a constant pointer to [ArgMatches](https://prajwalch.github.io/yazap/#root;ArgMatches).
 
 ```zig
 const ls_args = try app.parseProcess();

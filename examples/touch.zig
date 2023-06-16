@@ -17,15 +17,15 @@ pub fn main() anyerror!void {
     try touch.addArg(Arg.booleanOption("no-create", 'c', "Do not create any files"));
     try touch.addArg(Arg.booleanOption("version", 'v', "Display app version"));
 
-    const args = try app.parseProcess();
+    const matches = try app.parseProcess();
 
-    if (args.isPresent("version")) {
+    if (matches.isPresent("version")) {
         std.debug.print("v0.1.0", .{});
         return;
     }
 
-    if (args.valueOf("FILE_NAME")) |file_name| {
-        if (args.isPresent("no-create")) {
+    if (matches.valueOf("FILE_NAME")) |file_name| {
+        if (matches.isPresent("no-create")) {
             std.debug.print("I'am not creating it", .{});
         } else {
             var file = try std.fs.cwd().createFile(file_name, .{});
