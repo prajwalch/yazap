@@ -175,6 +175,10 @@ pub fn unsetProperty(self: *Command, property: Property) void {
     return self.properties.remove(property);
 }
 
+/// Checks if the command has a specific property set.
+///
+/// **NOTE:** This function is primarily used by the parser to determine the
+/// presence of a specific property for the command.
 pub fn hasProperty(self: *const Command, property: Property) bool {
     return self.properties.contains(property);
 }
