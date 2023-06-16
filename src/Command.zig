@@ -150,6 +150,22 @@ pub fn addSubcommands(self: *Command, subcommands: []Command) !void {
     for (subcommands) |subcmd| try self.addSubcommand(subcmd);
 }
 
+/// Sets a property to the command, specifying how it should be parsed and processed.
+///
+/// ## Examples
+///
+/// Setting a property to indicate that the positional argument is required:
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+///
+/// try root.addArg(Arg.positional("SOURCE", "Source file to move", null));
+/// try root.addArg(Arg.positional("DEST", "Destination path", null));
+/// root.setProperty(.positional_arg_required);
+/// ```
 pub fn setProperty(self: *Command, property: Property) void {
     return self.properties.insert(property);
 }
