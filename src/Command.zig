@@ -87,7 +87,26 @@ pub fn addArg(self: *Command, new_arg: Arg) !void {
     try self.positional_args.append(self.allocator, arg);
 }
 
-/// Appends args into the args list
+/// Appends multiple arguments to the list of arguments.
+///
+/// ## Examples
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+/// try root.addArgs(&[_]Arg {
+///     Arg.singleArgumentOption("firstname", 'f', "First name"),
+///     Arg.singleArgumentOption("lastname", 'l', "Last name"),
+/// });
+///
+/// var address = app.createCommand("address", "Address");
+/// try address.addArgs(&[_]Arg {
+///     Arg.singleArgumentOption("street", 's', "Street name"),
+///     Arg.singleArgumentOption("postal", 'p', "Postal code"),
+/// });
+/// ```
 pub fn addArgs(self: *Command, args: []Arg) !void {
     for (args) |arg| try self.addArg(arg);
 }
