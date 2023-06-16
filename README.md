@@ -25,7 +25,7 @@ Inspired by [clap-rs](https://github.com/clap-rs/clap) and [andrewrk/ziglang: sr
 - Nested subcommands
 - Automatic handling help option (`-h` and `--help`)
 - Automatic help generation
-- Defining custom [Argument](https://prajwalch.github.io/yazap/#root;Arg)
+- Defining custom [Argument](https://prajwalch.github.io/yazap/#A;lib:Arg)
 
 ## Limitation:
 
@@ -68,7 +68,7 @@ $ ./zig-out/bin/example_name
 
 ### Initializing the yazap
 
-The first step in using the `yazap` is making an instance of [App](https://prajwalch.github.io/yazap/#root;App)
+The first step in using the `yazap` is making an instance of [App](https://prajwalch.github.io/yazap/#A;lib:App)
 by calling `App.init(allocator, "Your app name", "optional description")` which internally creates a root command for
 your app.
 
@@ -79,7 +79,7 @@ defer app.deinit();
 
 ### Getting a root command
 
-[App](https://prajwalch.github.io/yazap/#root;App) itself don't provide any methods to add arguments for your command.
+[App](https://prajwalch.github.io/yazap/#A;lib:App) itself don't provide any methods to add arguments for your command.
 Its only purpose is to initialize the library, invoking parser and freeing all the structures.
 Therefore, you must have to use root command to add arguments and subcommands.
 You can simply get it by calling `App.rootCommand` which returns a pointer to it.
@@ -132,9 +132,9 @@ try myls.addSubcommand(update_cmd);
 ### Parsing arguments
 
 Once you're done adding arguments and subcommands call `app.parseProcess` to starts parsing.
-It internally calls [std.process.argsAlloc](https://ziglang.org/documentation/master/std/#root;process.argsAlloc) to
+It internally calls [`std.process.argsAlloc`](https://ziglang.org/documentation/master/std/#A;std:process.argsAlloc) to
 obtain the raw arguments, or you can call `app.parseFrom` by passing your own raw arguments which can be useful on test.
-Both functions return a constant pointer to [ArgMatches](https://prajwalch.github.io/yazap/#root;ArgMatches).
+Both functions return a constant pointer to [ArgMatches](https://prajwalch.github.io/yazap/#A;lib:ArgMatches).
 
 ```zig
 const matches = try app.parseProcess();
