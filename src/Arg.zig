@@ -195,6 +195,8 @@ pub fn positional(name: []const u8, description: ?[]const u8, index: ?usize) Arg
 
 /// Sets the short name of the argument.
 ///
+/// ## Examples
+///
 /// ```zig
 /// var app = App.init(allocator, "myapp", "My app description");
 /// defer app.deinit();
@@ -205,7 +207,7 @@ pub fn positional(name: []const u8, description: ?[]const u8, index: ?usize) Arg
 /// port.setShortName('p');
 /// port.addProperty(.takes_value);
 ///
-/// // Equivalent except `singleArgumentOption` sets long name too.
+/// // Equivalent, except `singleArgumentOption` sets the long name as well.
 /// var port = Arg.singleArgumentOption("port", 'p', "Port number to bind");
 ///
 /// try root.addArg(port);
