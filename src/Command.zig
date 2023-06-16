@@ -21,9 +21,13 @@ options: ArrayList(Arg) = .{},
 subcommands: ArrayList(Command) = .{},
 properties: std.EnumSet(Property) = .{},
 
-/// Creates a new instance of it
+/// Creates a new instance of Command.
 pub fn init(allocator: Allocator, name: []const u8, description: ?[]const u8) Command {
-    return Command{ .allocator = allocator, .name = name, .description = description };
+    return Command{
+        .allocator = allocator,
+        .name = name,
+        .description = description,
+    };
 }
 
 /// Release all allocated memory
