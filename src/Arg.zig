@@ -105,7 +105,9 @@ pub fn singleArgumentOptionWithValidValues(
     return arg;
 }
 
-/// Creates a multi arguments option.
+/// Creates an option that accepts multiple arguments.
+///
+/// ## Examples
 ///
 /// ```zig
 /// var app = App.init(allocator, "myapp", "My app description");
