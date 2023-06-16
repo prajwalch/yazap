@@ -111,7 +111,21 @@ pub fn addArgs(self: *Command, args: []Arg) !void {
     for (args) |arg| try self.addArg(arg);
 }
 
-/// Appends the new subcommand into the subcommands list
+/// Appends the new subcommand to the list of subcommands.
+///
+/// ## Examples
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+///
+/// var test = app.createCommand("test", "Run test");
+/// try test.addArg(Arg.positional("FILE", null, null));
+///
+/// try root.addSubcommand(test);
+/// ```
 pub fn addSubcommand(self: *Command, new_subcommand: Command) !void {
     // Add help option for subcommand
     return self.subcommands.append(self.allocator, new_subcommand);
