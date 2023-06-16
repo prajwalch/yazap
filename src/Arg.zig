@@ -157,9 +157,13 @@ pub fn multiArgumentsOptionWithValidValues(
 }
 
 /// Creates a positional argument.
-/// The index represents the position of your argument starting from **1**.
+/// The index represents the position of the argument starting from **1**.
 ///
-/// NOTE: Index is optional so by default it will be assigned in order of evalution.
+/// ## Note
+///
+/// The index is optional, and if not provided, it will be assigned based on the order of evaluation.
+///
+/// ## Examples
 ///
 /// ```zig
 /// var app = App.init(allocator, "myapp", "My app description");
