@@ -47,16 +47,16 @@ chained options using space (`-abc value, -abc v1,v2,v3`).
 
 Requires [zig v0.11.x](https://ziglang.org)
 
-1. Initialize your project as repository (if not initialized already) by running `git init`
-2. On your root project make a directory named `libs`
-3. Run `git submodule add https://github.com/PrajwalCH/yazap libs/yazap`
-4. After above step is completed add the following code snippet on your `build.zig` file
+1. Initialize your project as repository (if not initialized already) by running `git init`.
+2. On your root project make a directory named `libs`.
+3. Run `git submodule add https://github.com/PrajwalCH/yazap libs/yazap`.
+4. After above step is completed add the following code snippet on your `build.zig` file:
     ```zig
     exe.addAnonymousModule("yazap", .{
         .source_file = .{ .path = "libs/yazap/src/lib.zig" },
     });
     ```
-5. Now you can import this library on your src file as
+5. Now you can import this library on your src file as:
     ```zig
     const yazap = @import("yazap");
     ```
