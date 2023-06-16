@@ -452,6 +452,33 @@ pub fn hasProperty(self: *const Arg, property: Property) bool {
     return self.properties.contains(property);
 }
 
+/// Checks whether a given value is valid or not.
+///
+/// ## Note
+///
+/// If `Arg.valid_values` is not set through `Arg.setValidValues`, this function
+/// always returns true.
+///
+/// This function is mainly used by the parser to determine whether the value
+/// present on the command line is valid or not.
+///
+/// ## Examples
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+/// var color = Arg.singleArgumentOptionWithValidValues(
+///     "color", 'c', "Your Favorite Color", &[_]const u8 { "blue", "red" },
+/// );
+///
+/// if (color.isValidValue("foo")) {
+///     std.debug.print("Foo is not a valid color");
+/// }
+///
+/// try root.addArg(color);
+/// ```
 pub fn isValidValue(self: *const Arg, value_to_check: []const u8) bool {
     if (self.valid_values) |values| {
         for (values) |value| {
