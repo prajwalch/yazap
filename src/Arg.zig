@@ -376,6 +376,26 @@ pub fn setIndex(self: *Arg, index: usize) void {
     self.index = index;
 }
 
+/// Adds a property to the argument, specifying how it should be parsed and processed.
+///
+/// ## Examples
+///
+/// Setting a property to indicate that the argument takes a value from the command line:
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+///
+/// var name = Arg.init("name", "Person to greet");
+/// name.setShortName('n');
+/// name.addProperty(.takes_value);
+///
+/// try root.addArg(name);
+///
+/// // Command line input: myapp -n foo
+/// ```
 pub fn addProperty(self: *Arg, property: Property) void {
     return self.properties.insert(property);
 }
