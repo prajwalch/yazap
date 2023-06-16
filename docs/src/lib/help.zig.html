@@ -113,7 +113,7 @@
 <body>
 <pre><code><span class="line" id="L1"><span class="tok-kw">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>);</span>
 <span class="line" id="L2"><span class="tok-kw">const</span> Command = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;Command.zig&quot;</span>);</span>
-<span class="line" id="L3"><span class="tok-kw">const</span> ArgsContext = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;args_context.zig&quot;</span>).ArgsContext;</span>
+<span class="line" id="L3"><span class="tok-kw">const</span> ArgMatches = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;arg_matches.zig&quot;</span>).ArgMatches;</span>
 <span class="line" id="L4"></span>
 <span class="line" id="L5"><span class="tok-kw">const</span> mem = std.mem;</span>
 <span class="line" id="L6"></span>
@@ -320,19 +320,19 @@
 <span class="line" id="L199"></span>
 <span class="line" id="L200"><span class="tok-comment">/// Returns which subcommand is active on command line with `-h` or `--help` option</span></span>
 <span class="line" id="L201"><span class="tok-comment">/// null if none of the subcommands were present</span></span>
-<span class="line" id="L202"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">findSubcommand</span>(root_cmd: *<span class="tok-kw">const</span> Command, ctx: *ArgsContext) ?[]<span class="tok-kw">const</span> <span class="tok-type">u8</span> {</span>
-<span class="line" id="L203">    <span class="tok-kw">if</span> ((ctx.subcommand != <span class="tok-null">null</span>) <span class="tok-kw">and</span> (ctx.subcommand.?.ctx != <span class="tok-null">null</span>)) {</span>
-<span class="line" id="L204">        <span class="tok-kw">const</span> subcmd_name = ctx.subcommand.?.name;</span>
-<span class="line" id="L205">        <span class="tok-kw">const</span> subcmd_ctx = &amp;ctx.subcommand.?.ctx.?;</span>
+<span class="line" id="L202"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">findSubcommand</span>(root_cmd: *<span class="tok-kw">const</span> Command, matches: *ArgMatches) ?[]<span class="tok-kw">const</span> <span class="tok-type">u8</span> {</span>
+<span class="line" id="L203">    <span class="tok-kw">if</span> ((matches.subcommand != <span class="tok-null">null</span>) <span class="tok-kw">and</span> (matches.subcommand.?.matches != <span class="tok-null">null</span>)) {</span>
+<span class="line" id="L204">        <span class="tok-kw">const</span> subcmd_name = matches.subcommand.?.name;</span>
+<span class="line" id="L205">        <span class="tok-kw">const</span> subcmd_matches = &amp;matches.subcommand.?.matches.?;</span>
 <span class="line" id="L206"></span>
-<span class="line" id="L207">        <span class="tok-kw">if</span> (subcmd_ctx.isPresent(<span class="tok-str">&quot;help&quot;</span>)) {</span>
+<span class="line" id="L207">        <span class="tok-kw">if</span> (subcmd_matches.isPresent(<span class="tok-str">&quot;help&quot;</span>)) {</span>
 <span class="line" id="L208">            <span class="tok-kw">return</span> subcmd_name;</span>
 <span class="line" id="L209">        } <span class="tok-kw">else</span> {</span>
 <span class="line" id="L210">            <span class="tok-comment">// If current subcommand's arg doesnot have `help` option</span>
 </span>
 <span class="line" id="L211">            <span class="tok-comment">// start to look its child subcommand's arg. (This happens recursively)</span>
 </span>
-<span class="line" id="L212">            <span class="tok-kw">return</span> findSubcommand(root_cmd, subcmd_ctx);</span>
+<span class="line" id="L212">            <span class="tok-kw">return</span> findSubcommand(root_cmd, subcmd_matches);</span>
 <span class="line" id="L213">        }</span>
 <span class="line" id="L214">    }</span>
 <span class="line" id="L215">    <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>

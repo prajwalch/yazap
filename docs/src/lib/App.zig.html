@@ -117,7 +117,7 @@
 <span class="line" id="L4"><span class="tok-kw">const</span> help = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;help.zig&quot;</span>);</span>
 <span class="line" id="L5"><span class="tok-kw">const</span> Command = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;Command.zig&quot;</span>);</span>
 <span class="line" id="L6"><span class="tok-kw">const</span> Parser = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;Parser.zig&quot;</span>);</span>
-<span class="line" id="L7"><span class="tok-kw">const</span> ArgsContext = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;args_context.zig&quot;</span>).ArgsContext;</span>
+<span class="line" id="L7"><span class="tok-kw">const</span> ArgMatches = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;arg_matches.zig&quot;</span>).ArgMatches;</span>
 <span class="line" id="L8"><span class="tok-kw">const</span> Tokenizer = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;tokenizer.zig&quot;</span>).Tokenizer;</span>
 <span class="line" id="L9"><span class="tok-kw">const</span> YazapError = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;error.zig&quot;</span>).YazapError;</span>
 <span class="line" id="L10"></span>
@@ -126,7 +126,7 @@
 <span class="line" id="L13">allocator: Allocator,</span>
 <span class="line" id="L14">command: Command,</span>
 <span class="line" id="L15">subcommand_help: ?help.Help = <span class="tok-null">null</span>,</span>
-<span class="line" id="L16">args_ctx: ?ArgsContext = <span class="tok-null">null</span>,</span>
+<span class="line" id="L16">arg_matches: ?ArgMatches = <span class="tok-null">null</span>,</span>
 <span class="line" id="L17">process_args: ?[]<span class="tok-kw">const</span> [:<span class="tok-number">0</span>]<span class="tok-type">u8</span> = <span class="tok-null">null</span>,</span>
 <span class="line" id="L18"></span>
 <span class="line" id="L19"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">init</span>(allocator: Allocator, cmd_name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>, description: ?[]<span class="tok-kw">const</span> <span class="tok-type">u8</span>) App {</span>
@@ -138,7 +138,7 @@
 <span class="line" id="L25"></span>
 <span class="line" id="L26"><span class="tok-comment">/// Deinitialize all the structures of `app` and release all the memory used by them</span></span>
 <span class="line" id="L27"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">deinit</span>(self: *App) <span class="tok-type">void</span> {</span>
-<span class="line" id="L28">    <span class="tok-kw">if</span> (self.args_ctx) |*ctx| ctx.deinit();</span>
+<span class="line" id="L28">    <span class="tok-kw">if</span> (self.arg_matches) |*matches| matches.deinit();</span>
 <span class="line" id="L29">    <span class="tok-kw">if</span> (self.process_args) |pargs| std.process.argsFree(self.allocator, pargs);</span>
 <span class="line" id="L30">    self.command.deinit();</span>
 <span class="line" id="L31"></span>
@@ -158,20 +158,20 @@
 <span class="line" id="L45">}</span>
 <span class="line" id="L46"></span>
 <span class="line" id="L47"><span class="tok-comment">/// Starts parsing the process arguments</span></span>
-<span class="line" id="L48"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">parseProcess</span>(self: *App) YazapError!(*<span class="tok-kw">const</span> ArgsContext) {</span>
+<span class="line" id="L48"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">parseProcess</span>(self: *App) YazapError!(*<span class="tok-kw">const</span> ArgMatches) {</span>
 <span class="line" id="L49">    self.process_args = <span class="tok-kw">try</span> std.process.argsAlloc(self.allocator);</span>
 <span class="line" id="L50">    <span class="tok-kw">return</span> self.parseFrom(self.process_args.?[<span class="tok-number">1</span>..]);</span>
 <span class="line" id="L51">}</span>
 <span class="line" id="L52"></span>
 <span class="line" id="L53"><span class="tok-comment">/// Starts parsing the given arguments</span></span>
-<span class="line" id="L54"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">parseFrom</span>(self: *App, argv: []<span class="tok-kw">const</span> [:<span class="tok-number">0</span>]<span class="tok-kw">const</span> <span class="tok-type">u8</span>) YazapError!(*<span class="tok-kw">const</span> ArgsContext) {</span>
+<span class="line" id="L54"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">parseFrom</span>(self: *App, argv: []<span class="tok-kw">const</span> [:<span class="tok-number">0</span>]<span class="tok-kw">const</span> <span class="tok-type">u8</span>) YazapError!(*<span class="tok-kw">const</span> ArgMatches) {</span>
 <span class="line" id="L55">    <span class="tok-kw">var</span> parser = Parser.init(self.allocator, Tokenizer.init(argv), self.rootCommand());</span>
-<span class="line" id="L56">    self.args_ctx = parser.parse() <span class="tok-kw">catch</span> |e| {</span>
+<span class="line" id="L56">    self.arg_matches = parser.parse() <span class="tok-kw">catch</span> |e| {</span>
 <span class="line" id="L57">        <span class="tok-kw">try</span> parser.err.log(e);</span>
 <span class="line" id="L58">        <span class="tok-kw">return</span> e;</span>
 <span class="line" id="L59">    };</span>
 <span class="line" id="L60">    <span class="tok-kw">try</span> self.handleHelpOption();</span>
-<span class="line" id="L61">    <span class="tok-kw">return</span> &amp;self.args_ctx.?;</span>
+<span class="line" id="L61">    <span class="tok-kw">return</span> &amp;self.arg_matches.?;</span>
 <span class="line" id="L62">}</span>
 <span class="line" id="L63"></span>
 <span class="line" id="L64"><span class="tok-comment">/// Displays the help message of root command</span></span>
@@ -195,17 +195,17 @@
 </span>
 <span class="line" id="L82">    <span class="tok-comment">// remains null if none of the subcommands were present</span>
 </span>
-<span class="line" id="L83">    <span class="tok-kw">if</span> (help.findSubcommand(self.rootCommand(), &amp;self.args_ctx.?)) |subcmd| {</span>
+<span class="line" id="L83">    <span class="tok-kw">if</span> (help.findSubcommand(self.rootCommand(), &amp;self.arg_matches.?)) |subcmd| {</span>
 <span class="line" id="L84">        self.subcommand_help = <span class="tok-kw">try</span> help.Help.init(self.allocator, self.rootCommand(), subcmd);</span>
 <span class="line" id="L85">    }</span>
 <span class="line" id="L86">    <span class="tok-kw">try</span> self.displayHelpAndExitIfFound();</span>
 <span class="line" id="L87">}</span>
 <span class="line" id="L88"></span>
 <span class="line" id="L89"><span class="tok-kw">fn</span> <span class="tok-fn">displayHelpAndExitIfFound</span>(self: *App) !<span class="tok-type">void</span> {</span>
-<span class="line" id="L90">    <span class="tok-kw">var</span> args_ctx = self.args_ctx.?;</span>
+<span class="line" id="L90">    <span class="tok-kw">var</span> arg_matches = self.arg_matches.?;</span>
 <span class="line" id="L91">    <span class="tok-kw">var</span> help_displayed = <span class="tok-null">false</span>;</span>
 <span class="line" id="L92"></span>
-<span class="line" id="L93">    <span class="tok-kw">if</span> (args_ctx.isPresent(<span class="tok-str">&quot;help&quot;</span>)) {</span>
+<span class="line" id="L93">    <span class="tok-kw">if</span> (arg_matches.isPresent(<span class="tok-str">&quot;help&quot;</span>)) {</span>
 <span class="line" id="L94">        <span class="tok-kw">try</span> self.displayHelp();</span>
 <span class="line" id="L95">        help_displayed = <span class="tok-null">true</span>;</span>
 <span class="line" id="L96">    } <span class="tok-kw">else</span> {</span>

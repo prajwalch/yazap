@@ -114,7 +114,7 @@
 <pre><code><span class="line" id="L1"><span class="tok-kw">const</span> Parser = <span class="tok-builtin">@This</span>();</span>
 <span class="line" id="L2"></span>
 <span class="line" id="L3"><span class="tok-kw">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;std&quot;</span>);</span>
-<span class="line" id="L4"><span class="tok-kw">const</span> args_context = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;args_context.zig&quot;</span>);</span>
+<span class="line" id="L4"><span class="tok-kw">const</span> arg_matches = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;arg_matches.zig&quot;</span>);</span>
 <span class="line" id="L5"><span class="tok-kw">const</span> erro = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;error.zig&quot;</span>);</span>
 <span class="line" id="L6"><span class="tok-kw">const</span> Arg = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;Arg.zig&quot;</span>);</span>
 <span class="line" id="L7"><span class="tok-kw">const</span> Command = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;Command.zig&quot;</span>);</span>
@@ -123,8 +123,8 @@
 <span class="line" id="L10"></span>
 <span class="line" id="L11"><span class="tok-kw">const</span> mem = std.mem;</span>
 <span class="line" id="L12"><span class="tok-kw">const</span> Allocator = std.mem.Allocator;</span>
-<span class="line" id="L13"><span class="tok-kw">const</span> ArgsContext = args_context.ArgsContext;</span>
-<span class="line" id="L14"><span class="tok-kw">const</span> MatchedSubCommand = args_context.MatchedSubCommand;</span>
+<span class="line" id="L13"><span class="tok-kw">const</span> ArgMatches = arg_matches.ArgMatches;</span>
+<span class="line" id="L14"><span class="tok-kw">const</span> MatchedSubCommand = arg_matches.MatchedSubCommand;</span>
 <span class="line" id="L15"></span>
 <span class="line" id="L16"><span class="tok-kw">const</span> Error = erro.ParseError || erro.AllocatorError;</span>
 <span class="line" id="L17"></span>
@@ -180,7 +180,7 @@
 <span class="line" id="L67">command: *<span class="tok-kw">const</span> Command,</span>
 <span class="line" id="L68">err: erro.Error,</span>
 <span class="line" id="L69">tokenizer: Tokenizer,</span>
-<span class="line" id="L70">args_ctx: ArgsContext,</span>
+<span class="line" id="L70">arg_matches: ArgMatches,</span>
 <span class="line" id="L71"></span>
 <span class="line" id="L72"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">init</span>(allocator: Allocator, tokenizer: Tokenizer, command: *<span class="tok-kw">const</span> Command) Parser {</span>
 <span class="line" id="L73">    <span class="tok-kw">return</span> Parser{</span>
@@ -188,12 +188,12 @@
 <span class="line" id="L75">        .command = command,</span>
 <span class="line" id="L76">        .err = erro.Error.init(),</span>
 <span class="line" id="L77">        .tokenizer = tokenizer,</span>
-<span class="line" id="L78">        .args_ctx = ArgsContext.init(allocator),</span>
+<span class="line" id="L78">        .arg_matches = ArgMatches.init(allocator),</span>
 <span class="line" id="L79">    };</span>
 <span class="line" id="L80">}</span>
 <span class="line" id="L81"></span>
-<span class="line" id="L82"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">parse</span>(self: *Parser) Error!ArgsContext {</span>
-<span class="line" id="L83">    <span class="tok-kw">errdefer</span> self.args_ctx.deinit();</span>
+<span class="line" id="L82"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">parse</span>(self: *Parser) Error!ArgMatches {</span>
+<span class="line" id="L83">    <span class="tok-kw">errdefer</span> self.arg_matches.deinit();</span>
 <span class="line" id="L84"></span>
 <span class="line" id="L85">    <span class="tok-kw">const</span> takes_pos_args = self.command.countPositionalArgs() &gt;= <span class="tok-number">1</span>;</span>
 <span class="line" id="L86">    <span class="tok-kw">const</span> highest_pos_arg_index = self.highestPositionalArgIndex();</span>
@@ -203,7 +203,7 @@
 <span class="line" id="L90"></span>
 <span class="line" id="L91">    <span class="tok-kw">while</span> (self.tokenizer.nextToken()) |*token| {</span>
 <span class="line" id="L92">        <span class="tok-kw">if</span> (mem.eql(<span class="tok-type">u8</span>, token.value, <span class="tok-str">&quot;help&quot;</span>) <span class="tok-kw">or</span> mem.eql(<span class="tok-type">u8</span>, token.value, <span class="tok-str">&quot;h&quot;</span>)) {</span>
-<span class="line" id="L93">            <span class="tok-kw">try</span> self.args_ctx.args.put(<span class="tok-str">&quot;help&quot;</span>, .none);</span>
+<span class="line" id="L93">            <span class="tok-kw">try</span> self.arg_matches.args.put(<span class="tok-str">&quot;help&quot;</span>, .none);</span>
 <span class="line" id="L94">            <span class="tok-kw">break</span>;</span>
 <span class="line" id="L95">        }</span>
 <span class="line" id="L96"></span>
@@ -223,12 +223,12 @@
 <span class="line" id="L110">            parsed_all_pos_args = (pos_args_idx &gt; highest_pos_arg_index);</span>
 <span class="line" id="L111">            <span class="tok-kw">continue</span>;</span>
 <span class="line" id="L112">        }</span>
-<span class="line" id="L113">        <span class="tok-kw">try</span> self.args_ctx.setSubcommand(</span>
+<span class="line" id="L113">        <span class="tok-kw">try</span> self.arg_matches.setSubcommand(</span>
 <span class="line" id="L114">            <span class="tok-kw">try</span> self.parseSubCommand(token.value),</span>
 <span class="line" id="L115">        );</span>
 <span class="line" id="L116">    }</span>
 <span class="line" id="L117"></span>
-<span class="line" id="L118">    <span class="tok-kw">if</span> (!self.args_ctx.isPresent(<span class="tok-str">&quot;help&quot;</span>)) {</span>
+<span class="line" id="L118">    <span class="tok-kw">if</span> (!self.arg_matches.isPresent(<span class="tok-str">&quot;help&quot;</span>)) {</span>
 <span class="line" id="L119">        <span class="tok-kw">const</span> takes_pos_args_and_is_required =</span>
 <span class="line" id="L120">            (takes_pos_args <span class="tok-kw">and</span> (self.command.hasProperty(.positional_arg_required)));</span>
 <span class="line" id="L121"></span>
@@ -237,12 +237,12 @@
 <span class="line" id="L124">            <span class="tok-kw">return</span> Error.CommandArgumentNotProvided;</span>
 <span class="line" id="L125">        }</span>
 <span class="line" id="L126"></span>
-<span class="line" id="L127">        <span class="tok-kw">if</span> (self.command.hasProperty(.subcommand_required) <span class="tok-kw">and</span> self.args_ctx.subcommand == <span class="tok-null">null</span>) {</span>
+<span class="line" id="L127">        <span class="tok-kw">if</span> (self.command.hasProperty(.subcommand_required) <span class="tok-kw">and</span> self.arg_matches.subcommand == <span class="tok-null">null</span>) {</span>
 <span class="line" id="L128">            self.err.setContext(.{ .valid_cmd = self.command.name });</span>
 <span class="line" id="L129">            <span class="tok-kw">return</span> Error.CommandSubcommandNotProvided;</span>
 <span class="line" id="L130">        }</span>
 <span class="line" id="L131">    }</span>
-<span class="line" id="L132">    <span class="tok-kw">return</span> self.args_ctx;</span>
+<span class="line" id="L132">    <span class="tok-kw">return</span> self.arg_matches;</span>
 <span class="line" id="L133">}</span>
 <span class="line" id="L134"></span>
 <span class="line" id="L135"><span class="tok-kw">fn</span> <span class="tok-fn">highestPositionalArgIndex</span>(self: *<span class="tok-kw">const</span> Parser) <span class="tok-type">usize</span> {</span>
@@ -485,12 +485,12 @@
 <span class="line" id="L361">    }</span>
 <span class="line" id="L362">}</span>
 <span class="line" id="L363"></span>
-<span class="line" id="L364"><span class="tok-kw">fn</span> <span class="tok-fn">putMatchedArg</span>(self: *Parser, arg: *<span class="tok-kw">const</span> Arg, value: args_context.MatchedArgValue) Error!<span class="tok-type">void</span> {</span>
+<span class="line" id="L364"><span class="tok-kw">fn</span> <span class="tok-fn">putMatchedArg</span>(self: *Parser, arg: *<span class="tok-kw">const</span> Arg, value: arg_matches.MatchedArgValue) Error!<span class="tok-type">void</span> {</span>
 <span class="line" id="L365">    <span class="tok-kw">errdefer</span> <span class="tok-kw">if</span> (value.isMany()) value.many.deinit();</span>
 <span class="line" id="L366">    <span class="tok-kw">try</span> self.verifyValuesLength(arg, value.count());</span>
 <span class="line" id="L367"></span>
-<span class="line" id="L368">    <span class="tok-kw">var</span> ctx = &amp;self.args_ctx;</span>
-<span class="line" id="L369">    <span class="tok-kw">var</span> maybe_old_value = ctx.args.getPtr(arg.name);</span>
+<span class="line" id="L368">    <span class="tok-kw">var</span> matches = &amp;self.arg_matches;</span>
+<span class="line" id="L369">    <span class="tok-kw">var</span> maybe_old_value = matches.args.getPtr(arg.name);</span>
 <span class="line" id="L370"></span>
 <span class="line" id="L371">    <span class="tok-kw">if</span> (maybe_old_value) |old_value| {</span>
 <span class="line" id="L372">        <span class="tok-comment">// To fix the const error</span>
@@ -499,7 +499,7 @@
 <span class="line" id="L374"></span>
 <span class="line" id="L375">        <span class="tok-kw">switch</span> (old_value.*) {</span>
 <span class="line" id="L376">            .none =&gt; <span class="tok-kw">if</span> (!new_value.isNone()) {</span>
-<span class="line" id="L377">                <span class="tok-kw">return</span> ctx.args.put(arg.name, new_value);</span>
+<span class="line" id="L377">                <span class="tok-kw">return</span> matches.args.put(arg.name, new_value);</span>
 <span class="line" id="L378">            },</span>
 <span class="line" id="L379">            .single =&gt; |old_single_value| {</span>
 <span class="line" id="L380">                <span class="tok-kw">if</span> (new_value.isSingle()) {</span>
@@ -511,14 +511,14 @@
 <span class="line" id="L384">                    <span class="tok-kw">try</span> many.append(old_single_value);</span>
 <span class="line" id="L385">                    <span class="tok-kw">try</span> many.append(new_value.single);</span>
 <span class="line" id="L386"></span>
-<span class="line" id="L387">                    <span class="tok-kw">return</span> ctx.args.put(arg.name, .{ .many = many });</span>
+<span class="line" id="L387">                    <span class="tok-kw">return</span> matches.args.put(arg.name, .{ .many = many });</span>
 <span class="line" id="L388">                } <span class="tok-kw">else</span> <span class="tok-kw">if</span> (new_value.isMany()) {</span>
 <span class="line" id="L389">                    <span class="tok-comment">// If old value is single but the new value is many then</span>
 </span>
 <span class="line" id="L390">                    <span class="tok-comment">// append the old one into new many value</span>
 </span>
 <span class="line" id="L391">                    <span class="tok-kw">try</span> new_value.many.append(old_single_value);</span>
-<span class="line" id="L392">                    <span class="tok-kw">return</span> ctx.args.put(arg.name, new_value);</span>
+<span class="line" id="L392">                    <span class="tok-kw">return</span> matches.args.put(arg.name, new_value);</span>
 <span class="line" id="L393">                }</span>
 <span class="line" id="L394">            },</span>
 <span class="line" id="L395">            .many =&gt; |*old_many_values| {</span>
@@ -538,7 +538,7 @@
 <span class="line" id="L406">    } <span class="tok-kw">else</span> {</span>
 <span class="line" id="L407">        <span class="tok-comment">// We don't have old value, put the new value</span>
 </span>
-<span class="line" id="L408">        <span class="tok-kw">return</span> ctx.args.put(arg.name, value);</span>
+<span class="line" id="L408">        <span class="tok-kw">return</span> matches.args.put(arg.name, value);</span>
 <span class="line" id="L409">    }</span>
 <span class="line" id="L410">}</span>
 <span class="line" id="L411"></span>
@@ -587,18 +587,18 @@
 <span class="line" id="L452">        }</span>
 <span class="line" id="L453">        <span class="tok-kw">return</span> MatchedSubCommand.init(</span>
 <span class="line" id="L454">            subcmd.name,</span>
-<span class="line" id="L455">            ArgsContext.init(self.allocator),</span>
+<span class="line" id="L455">            ArgMatches.init(self.allocator),</span>
 <span class="line" id="L456">        );</span>
 <span class="line" id="L457">    };</span>
 <span class="line" id="L458">    <span class="tok-kw">var</span> parser = Parser.init(self.allocator, Tokenizer.init(args), subcmd);</span>
-<span class="line" id="L459">    <span class="tok-kw">const</span> subcmd_ctx = parser.parse() <span class="tok-kw">catch</span> |err| {</span>
+<span class="line" id="L459">    <span class="tok-kw">const</span> subcmd_matches = parser.parse() <span class="tok-kw">catch</span> |err| {</span>
 <span class="line" id="L460">        <span class="tok-comment">// Bubble up the error trace to the parent command that happened while parsing subcommand</span>
 </span>
 <span class="line" id="L461">        self.err = parser.err;</span>
 <span class="line" id="L462">        <span class="tok-kw">return</span> err;</span>
 <span class="line" id="L463">    };</span>
 <span class="line" id="L464"></span>
-<span class="line" id="L465">    <span class="tok-kw">return</span> MatchedSubCommand.init(subcmd.name, subcmd_ctx);</span>
+<span class="line" id="L465">    <span class="tok-kw">return</span> MatchedSubCommand.init(subcmd.name, subcmd_matches);</span>
 <span class="line" id="L466">}</span>
 <span class="line" id="L467"></span>
 </code></pre></body>
