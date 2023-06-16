@@ -52,6 +52,8 @@ pub fn booleanOption(name: []const u8, short_name: ?u8, description: ?[]const u8
 
 /// Creates a single argument option.
 ///
+/// ## Examples
+///
 /// ```zig
 /// var app = App.init(allocator, "myapp", "My app description");
 /// defer app.deinit();
