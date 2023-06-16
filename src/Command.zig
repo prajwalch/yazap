@@ -41,7 +41,20 @@ pub fn deinit(self: *Command) void {
     self.subcommands.deinit(self.allocator);
 }
 
-/// Appends the new arg into the args list
+/// Appends the new argument to the argument list.
+///
+/// ## Examples
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+/// try root.addArg(Arg.booleanOption("version", 'v', "Show version number"));
+///
+/// var subcmd = app.createCommand("subcmd", "Subcommand Description");
+/// try subcmd.addArg(Arg.positional("FIRST", null, null));
+/// ```
 pub fn addArg(self: *Command, new_arg: Arg) !void {
     // Dang!! This is the reason why i love `mut` keyword and variable shadowing from rust.
     var arg = new_arg;
