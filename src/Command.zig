@@ -235,8 +235,10 @@ pub fn findShortOption(self: *const Command, short_name: u8) ?*const Arg {
     return null;
 }
 
-/// Linearly searches for an argument with long name equals to given `long_name`.
-/// Returns a const pointer of a found argument otherwise null.
+/// Performs a linear search to find a long option with the given long name.
+///
+/// **NOTE:** This function is primarily used by the parser to find a long option
+/// based on its long name.
 pub fn findLongOption(self: *const Command, long_name: []const u8) ?*const Arg {
     for (self.options.items) |*arg| {
         if (arg.long_name) |l| {
