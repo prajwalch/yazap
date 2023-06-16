@@ -222,8 +222,10 @@ pub fn findPositionalArgByIndex(self: *const Command, index: usize) ?*const Arg 
     return null;
 }
 
-/// Linearly searches for an argument with short name equals to given `short_name`.
-/// Returns a const pointer of a found argument otherwise null.
+/// Performs a linear search to find a short option with the given short name.
+///
+/// **NOTE:** This function is primarily used by the parser to find a short option
+/// based on its short name.
 pub fn findShortOption(self: *const Command, short_name: u8) ?*const Arg {
     for (self.options.items) |*arg| {
         if (arg.short_name) |s| {
