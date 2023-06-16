@@ -183,6 +183,10 @@ pub fn hasProperty(self: *const Command, property: Property) bool {
     return self.properties.contains(property);
 }
 
+/// Returns the count of positional arguments in the positional argument list.
+///
+/// **NOTE:** This function is primarily used by the parser to determine the
+/// total number of valid positional arguments.
 pub fn countPositionalArgs(self: *const Command) usize {
     return (self.positional_args.items.len);
 }
