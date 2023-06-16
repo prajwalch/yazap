@@ -185,7 +185,7 @@
 <span class="line" id="L71">        arg.setShortName(n);</span>
 <span class="line" id="L72">    }</span>
 <span class="line" id="L73">    arg.setLongName(name);</span>
-<span class="line" id="L74">    arg.addProperty(.takes_value);</span>
+<span class="line" id="L74">    arg.setProperty(.takes_value);</span>
 <span class="line" id="L75">    <span class="tok-kw">return</span> arg;</span>
 <span class="line" id="L76">}</span>
 <span class="line" id="L77"></span>
@@ -240,7 +240,7 @@
 <span class="line" id="L126">    arg.setMinValues(<span class="tok-number">1</span>);</span>
 <span class="line" id="L127">    arg.setMaxValues(max_values);</span>
 <span class="line" id="L128">    arg.setDefaultValuesDelimiter();</span>
-<span class="line" id="L129">    arg.addProperty(.takes_value);</span>
+<span class="line" id="L129">    arg.setProperty(.takes_value);</span>
 <span class="line" id="L130">    <span class="tok-kw">return</span> arg;</span>
 <span class="line" id="L131">}</span>
 <span class="line" id="L132"></span>
@@ -300,7 +300,7 @@
 <span class="line" id="L186">    <span class="tok-kw">if</span> (index) |i| {</span>
 <span class="line" id="L187">        arg.setIndex(i);</span>
 <span class="line" id="L188">    }</span>
-<span class="line" id="L189">    arg.addProperty(.takes_value);</span>
+<span class="line" id="L189">    arg.setProperty(.takes_value);</span>
 <span class="line" id="L190">    <span class="tok-kw">return</span> arg;</span>
 <span class="line" id="L191">}</span>
 <span class="line" id="L192"></span>
@@ -319,7 +319,7 @@
 <span class="line" id="L204"><span class="tok-comment">///</span></span>
 <span class="line" id="L205"><span class="tok-comment">/// var port = Arg.init(&quot;port&quot;, &quot;Port number to bind&quot;);</span></span>
 <span class="line" id="L206"><span class="tok-comment">/// port.setShortName('p');</span></span>
-<span class="line" id="L207"><span class="tok-comment">/// port.addProperty(.takes_value);</span></span>
+<span class="line" id="L207"><span class="tok-comment">/// port.setProperty(.takes_value);</span></span>
 <span class="line" id="L208"><span class="tok-comment">///</span></span>
 <span class="line" id="L209"><span class="tok-comment">/// // Equivalent, except `singleArgumentOption` sets the long name as well.</span></span>
 <span class="line" id="L210"><span class="tok-comment">/// var port = Arg.singleArgumentOption(&quot;port&quot;, 'p', &quot;Port number to bind&quot;);</span></span>
@@ -342,7 +342,7 @@
 <span class="line" id="L227"><span class="tok-comment">///</span></span>
 <span class="line" id="L228"><span class="tok-comment">/// var port = Arg.init(&quot;port&quot;, &quot;Port number to bind&quot;);</span></span>
 <span class="line" id="L229"><span class="tok-comment">/// port.setLongName(&quot;port&quot;);</span></span>
-<span class="line" id="L230"><span class="tok-comment">/// port.addProperty(.takes_value);</span></span>
+<span class="line" id="L230"><span class="tok-comment">/// port.setProperty(.takes_value);</span></span>
 <span class="line" id="L231"><span class="tok-comment">///</span></span>
 <span class="line" id="L232"><span class="tok-comment">/// // Equivalent</span></span>
 <span class="line" id="L233"><span class="tok-comment">/// var port = Arg.singleArgumentOption(&quot;port&quot;, null, &quot;Port number to bind&quot;);</span></span>
@@ -366,7 +366,7 @@
 <span class="line" id="L251"><span class="tok-comment">/// var nums = Arg.init(&quot;nums&quot;, &quot;Numbers to add&quot;);</span></span>
 <span class="line" id="L252"><span class="tok-comment">/// nums.setShortName('n');</span></span>
 <span class="line" id="L253"><span class="tok-comment">/// nums.setMinValues(2);</span></span>
-<span class="line" id="L254"><span class="tok-comment">/// nums.addProperty(.takes_value);</span></span>
+<span class="line" id="L254"><span class="tok-comment">/// nums.setProperty(.takes_value);</span></span>
 <span class="line" id="L255"><span class="tok-comment">///</span></span>
 <span class="line" id="L256"><span class="tok-comment">/// try root.addArg(nums);</span></span>
 <span class="line" id="L257"><span class="tok-comment">/// ```</span></span>
@@ -389,7 +389,7 @@
 <span class="line" id="L274"><span class="tok-comment">/// nums.setLongName(&quot;nums&quot;);</span></span>
 <span class="line" id="L275"><span class="tok-comment">/// nums.setMinValues(2);</span></span>
 <span class="line" id="L276"><span class="tok-comment">/// nums.setMaxValues(5);</span></span>
-<span class="line" id="L277"><span class="tok-comment">/// nums.addProperty(.takes_value);</span></span>
+<span class="line" id="L277"><span class="tok-comment">/// nums.setProperty(.takes_value);</span></span>
 <span class="line" id="L278"><span class="tok-comment">///</span></span>
 <span class="line" id="L279"><span class="tok-comment">/// try root.addArg(nums);</span></span>
 <span class="line" id="L280"><span class="tok-comment">/// ```</span></span>
@@ -417,7 +417,7 @@
 <span class="line" id="L302"><span class="tok-comment">///     &quot;ubuntu&quot;,</span></span>
 <span class="line" id="L303"><span class="tok-comment">///     &quot;arch&quot;,</span></span>
 <span class="line" id="L304"><span class="tok-comment">/// });</span></span>
-<span class="line" id="L305"><span class="tok-comment">/// distros.addProperty(.takes_value);</span></span>
+<span class="line" id="L305"><span class="tok-comment">/// distros.setProperty(.takes_value);</span></span>
 <span class="line" id="L306"><span class="tok-comment">///</span></span>
 <span class="line" id="L307"><span class="tok-comment">/// // Equivalent</span></span>
 <span class="line" id="L308"><span class="tok-comment">/// var distros = Arg.multiArgumentsOptionWithValidValues(</span></span>
@@ -447,7 +447,7 @@
 <span class="line" id="L332"><span class="tok-comment">/// nums.setLongName(&quot;nums&quot;);</span></span>
 <span class="line" id="L333"><span class="tok-comment">/// nums.setMinValues(2);</span></span>
 <span class="line" id="L334"><span class="tok-comment">/// nums.setDefaultValuesDelimiter();</span></span>
-<span class="line" id="L335"><span class="tok-comment">/// nums.addProperty(.takes_value);</span></span>
+<span class="line" id="L335"><span class="tok-comment">/// nums.setProperty(.takes_value);</span></span>
 <span class="line" id="L336"><span class="tok-comment">///</span></span>
 <span class="line" id="L337"><span class="tok-comment">/// try root.addArg(nums);</span></span>
 <span class="line" id="L338"><span class="tok-comment">///</span></span>
@@ -473,7 +473,7 @@
 <span class="line" id="L358"><span class="tok-comment">/// nums.setLongName(&quot;nums&quot;);</span></span>
 <span class="line" id="L359"><span class="tok-comment">/// nums.setMinValues(2);</span></span>
 <span class="line" id="L360"><span class="tok-comment">/// nums.setValuesDelimiter(&quot;:&quot;);</span></span>
-<span class="line" id="L361"><span class="tok-comment">/// nums.addProperty(.takes_value);</span></span>
+<span class="line" id="L361"><span class="tok-comment">/// nums.setProperty(.takes_value);</span></span>
 <span class="line" id="L362"><span class="tok-comment">///</span></span>
 <span class="line" id="L363"><span class="tok-comment">/// try root.addArg(nums);</span></span>
 <span class="line" id="L364"><span class="tok-comment">///</span></span>
@@ -503,14 +503,14 @@
 <span class="line" id="L388"><span class="tok-comment">///</span></span>
 <span class="line" id="L389"><span class="tok-comment">/// var second = Arg.init(&quot;SECOND&quot;, &quot;Second positional arg&quot;);</span></span>
 <span class="line" id="L390"><span class="tok-comment">/// second.setIndex(2);</span></span>
-<span class="line" id="L391"><span class="tok-comment">/// second.addProperty(.takes_value);</span></span>
+<span class="line" id="L391"><span class="tok-comment">/// second.setProperty(.takes_value);</span></span>
 <span class="line" id="L392"><span class="tok-comment">///</span></span>
 <span class="line" id="L393"><span class="tok-comment">/// // Equivalent</span></span>
 <span class="line" id="L394"><span class="tok-comment">/// var second = Arg.positional(&quot;SECOND&quot;, &quot;Second positional arg&quot;, 2);</span></span>
 <span class="line" id="L395"><span class="tok-comment">///</span></span>
 <span class="line" id="L396"><span class="tok-comment">/// var first = Arg.init(&quot;FIRST&quot;, &quot;First positional arg&quot;);</span></span>
 <span class="line" id="L397"><span class="tok-comment">/// first.setIndex(1);</span></span>
-<span class="line" id="L398"><span class="tok-comment">/// first.addProperty(.takes_value);</span></span>
+<span class="line" id="L398"><span class="tok-comment">/// first.setProperty(.takes_value);</span></span>
 <span class="line" id="L399"><span class="tok-comment">///</span></span>
 <span class="line" id="L400"><span class="tok-comment">/// // Equivalent</span></span>
 <span class="line" id="L401"><span class="tok-comment">/// var first = Arg.positional(&quot;FIRST&quot;, &quot;First positional arg&quot;, 2);</span></span>
@@ -546,13 +546,13 @@
 <span class="line" id="L431"><span class="tok-comment">///</span></span>
 <span class="line" id="L432"><span class="tok-comment">/// var name = Arg.init(&quot;name&quot;, &quot;Person to greet&quot;);</span></span>
 <span class="line" id="L433"><span class="tok-comment">/// name.setShortName('n');</span></span>
-<span class="line" id="L434"><span class="tok-comment">/// name.addProperty(.takes_value);</span></span>
+<span class="line" id="L434"><span class="tok-comment">/// name.setProperty(.takes_value);</span></span>
 <span class="line" id="L435"><span class="tok-comment">///</span></span>
 <span class="line" id="L436"><span class="tok-comment">/// try root.addArg(name);</span></span>
 <span class="line" id="L437"><span class="tok-comment">///</span></span>
 <span class="line" id="L438"><span class="tok-comment">/// // Command line input: myapp -n foo</span></span>
 <span class="line" id="L439"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L440"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">addProperty</span>(self: *Arg, property: Property) <span class="tok-type">void</span> {</span>
+<span class="line" id="L440"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">setProperty</span>(self: *Arg, property: Property) <span class="tok-type">void</span> {</span>
 <span class="line" id="L441">    <span class="tok-kw">return</span> self.properties.insert(property);</span>
 <span class="line" id="L442">}</span>
 <span class="line" id="L443"></span>
@@ -570,11 +570,11 @@
 <span class="line" id="L455"><span class="tok-comment">///</span></span>
 <span class="line" id="L456"><span class="tok-comment">/// var name = Arg.singleArgumentOption(&quot;name&quot;, 'n', &quot;Person to greet&quot;);</span></span>
 <span class="line" id="L457"><span class="tok-comment">/// // Convert to boolean option by removing the `takes_value` property</span></span>
-<span class="line" id="L458"><span class="tok-comment">/// name.removeProperty(.takes_value);</span></span>
+<span class="line" id="L458"><span class="tok-comment">/// name.unsetProperty(.takes_value);</span></span>
 <span class="line" id="L459"><span class="tok-comment">///</span></span>
 <span class="line" id="L460"><span class="tok-comment">/// try root.addArg(name);</span></span>
 <span class="line" id="L461"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L462"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">removeProperty</span>(self: *Arg, property: Property) <span class="tok-type">void</span> {</span>
+<span class="line" id="L462"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">unsetProperty</span>(self: *Arg, property: Property) <span class="tok-type">void</span> {</span>
 <span class="line" id="L463">    <span class="tok-kw">return</span> self.properties.remove(property);</span>
 <span class="line" id="L464">}</span>
 <span class="line" id="L465"></span>

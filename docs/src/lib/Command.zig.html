@@ -204,11 +204,11 @@
 <span class="line" id="L87">    <span class="tok-kw">for</span> (subcommands) |subcmd| <span class="tok-kw">try</span> self.addSubcommand(subcmd);</span>
 <span class="line" id="L88">}</span>
 <span class="line" id="L89"></span>
-<span class="line" id="L90"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">addProperty</span>(self: *Command, property: Property) <span class="tok-type">void</span> {</span>
+<span class="line" id="L90"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">setProperty</span>(self: *Command, property: Property) <span class="tok-type">void</span> {</span>
 <span class="line" id="L91">    <span class="tok-kw">return</span> self.properties.insert(property);</span>
 <span class="line" id="L92">}</span>
 <span class="line" id="L93"></span>
-<span class="line" id="L94"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">removeProperty</span>(self: *Command, property: Property) <span class="tok-type">void</span> {</span>
+<span class="line" id="L94"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">unsetProperty</span>(self: *Command, property: Property) <span class="tok-type">void</span> {</span>
 <span class="line" id="L95">    <span class="tok-kw">return</span> self.properties.remove(property);</span>
 <span class="line" id="L96">}</span>
 <span class="line" id="L97"></span>
