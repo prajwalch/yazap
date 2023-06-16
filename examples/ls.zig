@@ -47,7 +47,7 @@ pub fn main() anyerror!void {
         return;
     }
 
-    if (matches.subcommandContext("update")) |update_cmd_args| {
+    if (matches.subcommandMatches("update")) |update_cmd_args| {
         if (!(update_cmd_args.hasArgs())) {
             try app.displaySubcommandHelp();
             return;

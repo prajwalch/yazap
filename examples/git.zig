@@ -38,14 +38,14 @@ pub fn main() anyerror!void {
         return;
     }
 
-    if (matches.subcommandContext("commit")) |commit_matches| {
+    if (matches.subcommandMatches("commit")) |commit_matches| {
         if (commit_matches.valueOf("message")) |message| {
             std.log.info("Commit message {s}", .{message});
             return;
         }
     }
 
-    if (matches.subcommandContext("push")) |push_matches| {
+    if (matches.subcommandMatches("push")) |push_matches| {
         if (push_matches.isPresent("REMOTE") and push_matches.isPresent("BRANCH_NAME")) {
             const remote = push_matches.valueOf("REMOTE").?;
             const branch_name = push_matches.valueOf("BRANCH_NAME").?;

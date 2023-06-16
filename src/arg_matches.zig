@@ -119,7 +119,7 @@ pub const ArgMatches = struct {
     }
 
     /// Returns the subcommand `ArgMatches` if subcommand is present otherwise null
-    pub fn subcommandContext(self: *const ArgMatches, subcmd_name: []const u8) ?ArgMatches {
+    pub fn subcommandMatches(self: *const ArgMatches, subcmd_name: []const u8) ?ArgMatches {
         if (self.subcommand) |subcmd| {
             if (std.mem.eql(u8, subcmd.name, subcmd_name)) {
                 return subcmd.matches;

@@ -159,7 +159,7 @@ if (matches.valueOf("FILE")) |f| {
     return;
 }
 
-if (matches.subcommandContext("update")) |update_cmd_args| {
+if (matches.subcommandMatches("update")) |update_cmd_args| {
     if (update_cmd_args.isPresent("check-only")) {
         std.log.info("Check and report new update", .{});
         return;
@@ -208,7 +208,7 @@ if (!matches.hasArgs()) {
     return;
 }
 
-if (matches.subcommandContext("update")) |update_cmd_args| {
+if (matches.subcommandMatches("update")) |update_cmd_args| {
     if (!update_cmd_args.hasArgs()) {
         try app.displaySubcommandHelp();
         return;
@@ -275,7 +275,7 @@ pub fn main() anyerror!void {
         return;
     }
 
-    if (matches.subcommandContext("update")) |update_cmd_args| {
+    if (matches.subcommandMatches("update")) |update_cmd_args| {
         if (!update_cmd_args.hasArgs()) {
             try app.displaySubcommandHelp();
             return;
