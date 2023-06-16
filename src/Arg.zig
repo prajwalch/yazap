@@ -130,7 +130,8 @@ pub fn multiArgumentsOption(
     return arg;
 }
 
-/// Creates a multi arguments option with valid values which user can pass.
+/// Creates a multi-arguments option with a predefined set of valid values that
+/// the user can pass.
 ///
 /// ```zig
 /// var app = App.init(allocator, "myapp", "My app description");
