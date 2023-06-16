@@ -29,7 +29,10 @@ pub fn init(name: []const u8, description: ?[]const u8) Arg {
     return Arg{ .name = name, .description = description };
 }
 
-/// Creates a boolean option.
+/// Creates a boolean option to enable or disable a specific feature or behavior.
+///
+/// This option represents a simple on/off switch that can be used to control a
+/// boolean setting in the application.
 ///
 /// ## Examples
 ///
