@@ -400,6 +400,24 @@ pub fn addProperty(self: *Arg, property: Property) void {
     return self.properties.insert(property);
 }
 
+/// Removes a property from the argument, reversing its effect on parsing and processing.
+///
+/// ## Examples
+///
+/// Removing a property to indicate that the argument no longer takes a value from the command line:
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+///
+/// var name = Arg.singleArgumentOption("name", 'n', "Person to greet");
+/// // Convert to boolean option by removing the `takes_value` property
+/// name.removeProperty(.takes_value);
+///
+/// try root.addArg(name);
+/// ```
 pub fn removeProperty(self: *Arg, property: Property) void {
     return self.properties.remove(property);
 }
