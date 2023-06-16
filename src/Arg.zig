@@ -285,6 +285,8 @@ pub fn setMaxValues(self: *Arg, num: usize) void {
 
 /// Sets the valid values for an argument.
 ///
+/// ## Examples
+///
 /// ```zig
 /// var app = App.init(allocator, "myapp", "My app description");
 /// defer app.deinit();
