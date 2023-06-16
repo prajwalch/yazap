@@ -32,7 +32,7 @@ Inspired by [clap-rs](https://github.com/clap-rs/clap) and [andrewrk/ziglang: sr
     - `command subcommand`
     - `command subcommand subsubcommand`
 
-- **Automatic help handling and generation**:
+- **Automatic help handling and generation**
 
 - **Custom Argument definition**:
   - Define custom [Argument](https://prajwalch.github.io/yazap/#A;lib:Arg) types for specific application requirements.
