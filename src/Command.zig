@@ -41,7 +41,7 @@ pub fn deinit(self: *Command) void {
     self.subcommands.deinit(self.allocator);
 }
 
-/// Appends the new argument to the argument list.
+/// Appends the new argument to the list of arguments.
 ///
 /// ## Examples
 ///
@@ -52,8 +52,8 @@ pub fn deinit(self: *Command) void {
 /// var root = app.rootCommand();
 /// try root.addArg(Arg.booleanOption("version", 'v', "Show version number"));
 ///
-/// var subcmd = app.createCommand("subcmd", "Subcommand Description");
-/// try subcmd.addArg(Arg.positional("FIRST", null, null));
+/// var test = app.createCommand("test", "Run test");
+/// try test.addArg(Arg.positional("FILE", null, null));
 /// ```
 pub fn addArg(self: *Command, new_arg: Arg) !void {
     var arg = new_arg;
