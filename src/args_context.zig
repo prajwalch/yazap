@@ -1,6 +1,3 @@
-//! A structure for querying the parser result
-//! which includes the getting command's raw value, flag's value, subcommand's args result and so on.
-
 const std = @import("std");
 const Arg = @import("Arg.zig");
 const Help = @import("help.zig").Help;
@@ -47,6 +44,7 @@ pub const MatchedSubCommand = struct {
     }
 };
 
+/// A structure for querying the parse result.
 pub const ArgsContext = struct {
     allocator: std.mem.Allocator,
     args: ArgHashMap,
