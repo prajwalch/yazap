@@ -207,7 +207,10 @@ pub fn countSubcommands(self: *const Command) usize {
     return (self.subcommands.items.len);
 }
 
-/// Linearly searches for a postional argument having given index.
+/// Performs a linear search to find a positional argument with the given index.
+///
+/// **NOTE:** This function is primarily used by the parser to find a positional
+/// argument based on its index.
 pub fn findPositionalArgByIndex(self: *const Command, index: usize) ?*const Arg {
     for (self.positional_args.items) |*pos_arg| {
         std.debug.assert(pos_arg.index != null);
