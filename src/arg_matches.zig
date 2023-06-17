@@ -79,8 +79,8 @@ pub const ArgMatches = struct {
         self.subcommand = alloc_subcmd;
     }
 
-    /// Checks whether an option or subcommand with the specified name is
-    /// present in the command-line arguments.
+    /// Checks whether an option, positional argument or subcommand with the
+    /// specified name was present on the command line.
     ///
     /// ## Examples
     ///
