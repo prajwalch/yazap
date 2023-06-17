@@ -30,7 +30,15 @@ pub fn init(allocator: Allocator, name: []const u8, description: ?[]const u8) Ap
     };
 }
 
-/// Deinitialize all the structures of `app` and release all the memory used by them
+/// Deinitializes the library by releasing all the allocated memory and cleaning
+/// up structures.
+///
+/// ## Examples
+///
+/// ```zig
+/// var app = App.init("myls", "My custom ls");
+/// defer app.deinit();
+/// ```
 pub fn deinit(self: *App) void {
     if (self.arg_matches) |*matches| matches.deinit();
     if (self.process_args) |pargs| std.process.argsFree(self.allocator, pargs);
