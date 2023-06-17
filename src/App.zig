@@ -21,7 +21,7 @@ process_args: ?[]const [:0]u8 = null,
 /// ## Examples
 ///
 /// ```zig
-/// var app = App.init("myls", "My custom ls");
+/// var app = App.init("myapp", "My app description");
 /// ```
 pub fn init(allocator: Allocator, name: []const u8, description: ?[]const u8) App {
     return App{
@@ -36,7 +36,7 @@ pub fn init(allocator: Allocator, name: []const u8, description: ?[]const u8) Ap
 /// ## Examples
 ///
 /// ```zig
-/// var app = App.init("myls", "My custom ls");
+/// var app = App.init("myapp", "My app description");
 /// defer app.deinit();
 /// ```
 pub fn deinit(self: *App) void {
@@ -54,7 +54,7 @@ pub fn deinit(self: *App) void {
 /// ## Examples
 ///
 /// ```zig
-/// var app = App.init("myls", "My custom ls");
+/// var app = App.init("myapp", "My app description");
 /// defer app.deinit();
 ///
 /// var subcmd1 = app.createCommand("subcmd1", "First Subcommand");
@@ -68,7 +68,7 @@ pub fn createCommand(self: *App, cmd_name: []const u8, cmd_description: ?[]const
 /// ## Examples
 ///
 /// ```zig
-/// var app = App.init("myls", "My custom ls");
+/// var app = App.init("myapp", "My app description");
 /// defer app.deinit();
 ///
 /// var root = app.rootCommand();
@@ -84,7 +84,7 @@ pub fn rootCommand(self: *App) *Command {
 /// ## Examples
 ///
 /// ```zig
-/// var app = App.init("myls", "My custom ls");
+/// var app = App.init("myapp", "My app description");
 /// defer app.deinit();
 ///
 /// var root = app.rootCommand();
@@ -103,7 +103,7 @@ pub fn parseProcess(self: *App) YazapError!(*const ArgMatches) {
 /// ## Examples
 ///
 /// ```zig
-/// var app = App.init("myls", "My custom ls");
+/// var app = App.init("myapp", "My app description");
 /// defer app.deinit();
 ///
 /// var root = app.rootCommand();
