@@ -24,7 +24,21 @@ properties: std.EnumSet(Property) = .{},
 
 // # Constructors
 
-/// Creates a new instance of it
+/// Creates a new instance of `Arg`.
+///
+/// ## Examples
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+///
+/// var verbose = Arg.init("verbose", "Enable verbose output");
+/// verbose.setShortName('v');
+///
+/// try root.addArg(Arg);
+/// ```
 pub fn init(name: []const u8, description: ?[]const u8) Arg {
     return Arg{ .name = name, .description = description };
 }
