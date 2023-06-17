@@ -79,7 +79,20 @@ pub fn rootCommand(self: *App) *Command {
     return &self.command;
 }
 
-/// Starts parsing the process arguments
+/// Parses the command line arguments.
+///
+/// ## Examples
+///
+/// ```zig
+/// var app = App.init("myls", "My custom ls");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+///
+/// // Add arguments and subcommands using `root`.
+///
+/// const matches = try app.parseProcess();
+/// ```
 pub fn parseProcess(self: *App) YazapError!(*const ArgMatches) {
     self.process_args = try std.process.argsAlloc(self.allocator);
     return self.parseFrom(self.process_args.?[1..]);
