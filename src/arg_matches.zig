@@ -79,12 +79,43 @@ pub const ArgMatches = struct {
         self.subcommand = alloc_subcmd;
     }
 
-    /// Checks if argument or subcommand is present
-    pub fn isPresent(self: *const ArgMatches, name_to_lookup: []const u8) bool {
-        if (self.args.contains(name_to_lookup)) {
+    /// Checks whether an option or subcommand with the specified name is
+    /// present in the command-line arguments.
+    ///
+    /// ## Examples
+    ///
+    /// ```zig
+    /// var app = App.init(allocator, "myapp", "My app description");
+    /// defer app.deinit();
+    ///
+    /// var root = app.rootCommand();
+    /// try root.addArg(Arg.booleanOption("verbose", 'v', "Enable verbose output"));
+    ///
+    /// // Define a subcommand
+    /// var build_cmd = app.createCommand("build", "Build the project");
+    /// try build_cmd.addArg(Arg.singleArgumentOption("target", 't', "Build target"));
+    /// try build_cmd.addArg(Arg.booleanOption("release", 'r', "Build in release mode"));
+    ///
+    /// try root.addSubcommand(build_cmd);
+    ///
+    /// const matches = try app.parseProcess();
+    ///
+    /// // Checks if the `verbose` option is present
+    /// if (matches.isArgumentPresent("verbose")) {
+    ///     // Handle verbose operation
+    /// }
+    ///
+    /// // Check if the `build` subcommand is present
+    /// if (matches.isArgumentPresent("build")) {
+    ///     // Handle build command
+    /// }
+    ///
+    /// ```
+    pub fn isArgumentPresent(self: *const ArgMatches, name: []const u8) bool {
+        if (self.args.contains(name)) {
             return true;
         } else if (self.subcommand) |subcmd| {
-            if (std.mem.eql(u8, subcmd.name, name_to_lookup))
+            if (std.mem.eql(u8, subcmd.name, name))
                 return true;
         }
 
