@@ -122,7 +122,29 @@ pub fn parseFrom(self: *App, argv: []const [:0]const u8) YazapError!(*const ArgM
     return &self.arg_matches.?;
 }
 
-/// Displays the help message of root command
+/// Displays the overall usage and description of the application.
+///
+/// **Note:** By default, the handling of the `-h` and `--help` options,
+/// and the automatic display of the usage message are taken care of. Use this
+/// function if you want to display the usage message when the `-h` or `--help`
+/// options are not present on the command line.
+///
+/// ## Examples
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+/// try root.addArg(Arg.booleanOption("verbose", 'v', "Enable verbose output"));
+///
+/// const matches = try app.parseProcess();
+///
+/// if (!matches.hasArguments()) {
+///     try app.displayHelp();
+///     return;
+/// }
+/// ```
 pub fn displayHelp(self: *App) !void {
     var cmd_help = help.Help.init(
         self.allocator,
