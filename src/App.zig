@@ -63,7 +63,18 @@ pub fn createCommand(self: *App, cmd_name: []const u8, cmd_description: ?[]const
     return Command.init(self.allocator, cmd_name, cmd_description);
 }
 
-/// Returns a pointer to a root `Command`.
+/// Returns a pointer to the root `Command` of the application.
+///
+/// ## Examples
+///
+/// ```zig
+/// var app = App.init("myls", "My custom ls");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+///
+/// // Add arguments and subcommands using `root`.
+/// ```
 pub fn rootCommand(self: *App) *Command {
     return &self.command;
 }
