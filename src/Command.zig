@@ -21,7 +21,20 @@ options: ArrayList(Arg) = .{},
 subcommands: ArrayList(Command) = .{},
 properties: std.EnumSet(Property) = .{},
 
-/// Creates a new instance of Command.
+/// Creates a new instance of `Command`.
+///
+/// **NOTE:** It is generally recommended to use `App.createCommand` to create a
+/// new instance of a `Command`.
+///
+/// ## Examples
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var subcmd1 = app.createCommand("subcmd1", "First Subcommand");
+/// var subcmd2 = app.createCommand("subcmd2", "Second Subcommand");
+/// ```
 pub fn init(allocator: Allocator, name: []const u8, description: ?[]const u8) Command {
     return Command{
         .allocator = allocator,
