@@ -164,12 +164,7 @@ pub const ArgMatches = struct {
     pub fn getArgumentValue(self: *const ArgMatches, name: []const u8) ?[]const u8 {
         if (self.args.get(name)) |value| {
             if (value.isSingle()) return value.single;
-        } else if (self.subcommand) |subcmd| {
-            if (subcmd.matches) |matches| {
-                return matches.getArgumentValue(name);
-            }
         }
-
         return null;
     }
 
