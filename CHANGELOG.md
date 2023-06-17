@@ -89,6 +89,7 @@ instead.
 - Renamed `subcommandContext()` to `subcommandMatches()`.
 
 ## What's New
+- Enhanced documentation for `App.*` API with detailed explanations and examples.
 - Enhanced documentation for `Arg.*` API with detailed explanations and examples.
 - Enhanced documentation for `Command.*` API with detailed explanations and examples.
 - Introduced `Arg.multiArgumentsOptionWithValidValues()` API to support creating
