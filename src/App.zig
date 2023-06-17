@@ -49,7 +49,16 @@ pub fn deinit(self: *App) void {
     }
 }
 
-/// Creates a new `Command` with given name by setting a allocator to it
+/// Creates a new `Command` with given name and optional description.
+///
+/// ## Examples
+///
+/// ```zig
+/// var app = App.init("myls", "My custom ls");
+/// defer app.deinit();
+///
+/// var subcmd1 = app.createCommand("subcmd1", "First Subcommand");
+/// ```
 pub fn createCommand(self: *App, cmd_name: []const u8, cmd_description: ?[]const u8) Command {
     return Command.init(self.allocator, cmd_name, cmd_description);
 }
