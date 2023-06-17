@@ -145,13 +145,30 @@ pub const ArgMatches = struct {
         return ((self.args.count() >= 1) or (self.subcommand != null));
     }
 
-    /// Returns the single value of an argument if found otherwise null
-    pub fn valueOf(self: *const ArgMatches, arg_name: []const u8) ?[]const u8 {
-        if (self.args.get(arg_name)) |value| {
+    /// Returns the value of an option or positional argument if it was present
+    /// present on the command line; otherwise, returns `null`.
+    ///
+    /// ## Examples
+    ///
+    /// ```zig
+    /// var app = App.init(allocator, "myapp", "My app description");
+    /// defer app.deinit();
+    ///
+    /// var root = app.rootCommand();
+    /// try root.addArg(Arg.singleArgumentOption("config", 'c', "Config file"));
+    ///
+    /// const matches = try app.parseProcess();
+    ///
+    /// if (matches.getArgumentValue("config")) |config_file| {
+    ///     std.debug.print("Config file name: {s}", .{config_file});
+    /// }
+    /// ```
+    pub fn getArgumentValue(self: *const ArgMatches, name: []const u8) ?[]const u8 {
+        if (self.args.get(name)) |value| {
             if (value.isSingle()) return value.single;
         } else if (self.subcommand) |subcmd| {
             if (subcmd.matches) |matches| {
-                return matches.valueOf(arg_name);
+                return matches.getArgumentValue(name);
             }
         }
 

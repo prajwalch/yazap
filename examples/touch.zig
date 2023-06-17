@@ -24,7 +24,7 @@ pub fn main() anyerror!void {
         return;
     }
 
-    if (matches.valueOf("FILE_NAME")) |file_name| {
+    if (matches.getArgumentValue("FILE_NAME")) |file_name| {
         if (matches.isArgumentPresent("no-create")) {
             std.debug.print("I'am not creating it", .{});
         } else {

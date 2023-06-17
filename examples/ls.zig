@@ -57,7 +57,7 @@ pub fn main() anyerror!void {
             std.log.info("Check and report new update", .{});
             return;
         }
-        if (update_cmd_matches.valueOf("branch")) |branch| {
+        if (update_cmd_matches.getArgumentValue("branch")) |branch| {
             std.log.info("Branch to update: {s}", .{branch});
             return;
         }
@@ -74,13 +74,13 @@ pub fn main() anyerror!void {
         return;
     }
 
-    if (matches.valueOf("ignore")) |pattern| {
+    if (matches.getArgumentValue("ignore")) |pattern| {
         log.info("ignore pattern = {s}", .{pattern});
         return;
     }
 
     if (matches.isArgumentPresent("color")) {
-        const when = matches.valueOf("color").?;
+        const when = matches.getArgumentValue("color").?;
 
         log.info("color={s}", .{when});
         return;
