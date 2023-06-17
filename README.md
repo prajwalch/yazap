@@ -45,21 +45,25 @@ chained options using space (`-abc value, -abc v1,v2,v3`).
 
 ## Installing
 
-Requires [zig v0.11.x](https://ziglang.org)
+Requires [zig v0.11.x](https://ziglang.org).
 
-1. Initialize your project as repository (if not initialized already) by running `git init`.
-2. On your root project make a directory named `libs`.
-3. Run `git submodule add https://github.com/PrajwalCH/yazap libs/yazap`.
-4. After above step is completed add the following code snippet on your `build.zig` file:
+1. Initialize your project as a repository (if it hasn't been initilized already) by running `git init`.
+2. Create a directory named `libs` in the root of your project.
+3. Add the `yazap` library as submodule by running the following command:
+    ```bash
+    git submodule add https://github.com/PrajwalCH/yazap libs/yazap
+    ```
+4. After the previous step is completed, add the following code snippet to your `build.zig` file:
     ```zig
     exe.addAnonymousModule("yazap", .{
         .source_file = .{ .path = "libs/yazap/src/lib.zig" },
     });
     ```
-5. Now you can import this library on your src file as:
+5. You can now import this library in your source file as follows:
     ```zig
     const yazap = @import("yazap");
     ```
+
 ## Docs
 
 Visit [here](https://prajwalch.github.io/yazap/) for complete documentation
