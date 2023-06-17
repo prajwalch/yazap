@@ -93,21 +93,21 @@ pub const ArgMatches = struct {
     ///
     /// // Define a subcommand
     /// var build_cmd = app.createCommand("build", "Build the project");
-    /// try build_cmd.addArg(Arg.singleArgumentOption("target", 't', "Build target"));
     /// try build_cmd.addArg(Arg.booleanOption("release", 'r', "Build in release mode"));
-    ///
     /// try root.addSubcommand(build_cmd);
     ///
     /// const matches = try app.parseProcess();
     ///
-    /// // Checks if the `verbose` option is present
     /// if (matches.isArgumentPresent("verbose")) {
     ///     // Handle verbose operation
     /// }
     ///
-    /// // Check if the `build` subcommand is present
     /// if (matches.isArgumentPresent("build")) {
-    ///     // Handle build command
+    ///     const build_cmd_matches = matches.subcommandMatches("build").?;
+    ///
+    ///     if (build_cmd_matches.isArgumentPresent("release")) {
+    ///         // Build for release mode
+    ///     }
     /// }
     ///
     /// ```
