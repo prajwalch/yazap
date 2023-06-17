@@ -154,8 +154,34 @@ pub fn displayHelp(self: *App) !void {
     return cmd_help.writeAll(std.io.getStdErr().writer());
 }
 
-/// Displays the help message of subcommand if it is provided on command line
-/// otherwise it will display nothing
+/// Displays the usage message of specified subcomand on the command line.
+///
+/// **Note:** By default, the handling of the `-h` and `--help` options,
+/// and the automatic display of the usage message are taken care of. Use this
+/// function if you want to display the usage message when the `-h` or `--help`
+/// options are not present on the command line.
+///
+/// ## Examples
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+///
+/// var subcmd = app.createCommand("subcmd", "Subcommand description");
+/// try subcmd.addArg(Arg.booleanOption("verbose", 'v', "Enable verbose output"));
+/// try root.addSubcommand(subcmd);
+///
+/// const matches = try app.parseProcess();
+///
+/// if (matches.subcommandMatches("subcmd")) |subcmd_matches| {
+///     if (!subcmd_matches.hasArguments()) {
+///         try app.displaySubcommandHelp();
+///         return;
+///     }
+/// }
+/// ```
 pub fn displaySubcommandHelp(self: *App) !void {
     if (self.subcommand_help) |*h| return h.writeAll(std.io.getStdErr().writer());
 }
