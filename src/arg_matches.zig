@@ -79,6 +79,29 @@ pub const ArgMatches = struct {
         self.subcommand = alloc_subcmd;
     }
 
+    /// Checks whether any arguments were present on the command line.
+    ///
+    /// ## Examples
+    ///
+    /// ```zig
+    /// var app = App.init(allocator, "myapp", "My app description");
+    /// defer app.deinit();
+    ///
+    /// var root = app.rootCommand();
+    /// try root.addArg(Arg.booleanOption("verbose", 'v', "Enable verbose output"));
+    /// try root.addSubcommand(app.createCommand("init-exe", "Initilize project"));
+    ///
+    /// const matches = try app.parseProcess();
+    ///
+    /// if (!matches.hasArguments()) {
+    ///     try app.displayHelp();
+    ///     return;
+    /// }
+    /// ```
+    pub fn hasArguments(self: *const ArgMatches) bool {
+        return ((self.args.count() >= 1) or (self.subcommand != null));
+    }
+
     /// Checks whether an option, positional argument or subcommand with the
     /// specified name was present on the command line.
     ///
@@ -118,29 +141,6 @@ pub const ArgMatches = struct {
             return std.mem.eql(u8, subcmd.name, name);
         }
         return false;
-    }
-
-    /// Checks whether any arguments were present on the command line.
-    ///
-    /// ## Examples
-    ///
-    /// ```zig
-    /// var app = App.init(allocator, "myapp", "My app description");
-    /// defer app.deinit();
-    ///
-    /// var root = app.rootCommand();
-    /// try root.addArg(Arg.booleanOption("verbose", 'v', "Enable verbose output"));
-    /// try root.addSubcommand(app.createCommand("init-exe", "Initilize project"));
-    ///
-    /// const matches = try app.parseProcess();
-    ///
-    /// if (!matches.hasArguments()) {
-    ///     try app.displayHelp();
-    ///     return;
-    /// }
-    /// ```
-    pub fn hasArguments(self: *const ArgMatches) bool {
-        return ((self.args.count() >= 1) or (self.subcommand != null));
     }
 
     /// Returns the value of an option or positional argument if it was present
