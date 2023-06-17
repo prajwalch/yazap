@@ -7,11 +7,11 @@ pub const MatchedArgValue = union(enum) {
     single: []const u8,
     many: std.ArrayList([]const u8),
 
-    pub fn count(val: MatchedArgValue) usize {
-        if (val.isSingle()) {
+    pub fn count(value: MatchedArgValue) usize {
+        if (value.isSingle()) {
             return 1;
-        } else if (val.isMany()) {
-            return val.many.items.len;
+        } else if (value.isMany()) {
+            return value.many.items.len;
         } else {
             return 0;
         }
