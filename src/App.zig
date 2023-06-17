@@ -98,7 +98,20 @@ pub fn parseProcess(self: *App) YazapError!(*const ArgMatches) {
     return self.parseFrom(self.process_args.?[1..]);
 }
 
-/// Starts parsing the given arguments
+/// Parses the given arguments.
+///
+/// ## Examples
+///
+/// ```zig
+/// var app = App.init("myls", "My custom ls");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+///
+/// // Add arguments and subcommands using `root`.
+///
+/// const matches = try app.parseFrom(&.{ "arg1", "--some-option" "subcmd" });
+/// ```
 pub fn parseFrom(self: *App, argv: []const [:0]const u8) YazapError!(*const ArgMatches) {
     var parser = Parser.init(self.allocator, Tokenizer.init(argv), self.rootCommand());
     self.arg_matches = parser.parse() catch |e| {
