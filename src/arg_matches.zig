@@ -200,10 +200,35 @@ pub const ArgMatches = struct {
         return null;
     }
 
-    /// Returns the subcommand `ArgMatches` if subcommand is present otherwise null
-    pub fn subcommandMatches(self: *const ArgMatches, subcmd_name: []const u8) ?ArgMatches {
+    /// Returns the `ArgMatches` for a specific subcommand if it was present on
+    /// on the command line; otherwise, returns `null`.
+    ///
+    /// ## Examples
+    ///
+    /// ```zig
+    /// var app = App.init(allocator, "myapp", "My app description");
+    /// defer app.deinit();
+    ///
+    /// var root = app.rootCommand();
+    ///
+    /// var build_cmd = app.createCommand("build", "Build the project");
+    /// try build_cmd.addArg(Arg.booleanOption("release", 'r', "Build in release mode"));
+    /// try build_cmd.addArg(Arg.singleArgumentOption("target", 't', "Build for given target"));
+    /// try root.addSubcommand(build_cmd);
+    ///
+    /// const matches = try app.parseProcess();
+    ///
+    /// if (matches.subcommandMatches("build")) |build_cmd_matches| {
+    ///     if (build_cmd_matches.isArgumentPresent("release")) {
+    ///         const target = build_cmd_matches.getArgumentValue("target") orelse "default";
+    ///         // Build for release mode to given target
+    ///     }
+    /// }
+    ///
+    /// ```
+    pub fn subcommandMatches(self: *const ArgMatches, name: []const u8) ?ArgMatches {
         if (self.subcommand) |subcmd| {
-            if (std.mem.eql(u8, subcmd.name, subcmd_name)) {
+            if (std.mem.eql(u8, subcmd.name, name)) {
                 return subcmd.matches;
             }
         }
