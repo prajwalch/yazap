@@ -64,9 +64,9 @@ Requires [zig v0.11.x](https://ziglang.org).
     const yazap = @import("yazap");
     ```
 
-## Docs
+## Documentation
 
-Visit [here](https://prajwalch.github.io/yazap/) for complete documentation
+For detailed and comprehensive documentation, please visit [this link](https://prajwalch.github.io/yazap/).
 
 ## Building and running examples
 
