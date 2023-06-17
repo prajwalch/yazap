@@ -129,7 +129,7 @@ var myls = app.rootCommand();
 
 Once you have obtained the root command, you can proceed to arguments using the
 provided methods in the `Command`. For a complete list of available methods,
-refer to the [Command API](https://prajwalch.github.io/yazap/#root;Command)
+refer to the [Command API](https://prajwalch.github.io/yazap/#A;lib;Command)
 documentation.
 
 ```zig
