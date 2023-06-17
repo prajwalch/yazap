@@ -144,7 +144,7 @@ pub const ArgMatches = struct {
     }
 
     /// Returns the value of an option or positional argument if it was present
-    /// present on the command line; otherwise, returns `null`.
+    /// on the command line; otherwise, returns `null`.
     ///
     /// ## Examples
     ///
