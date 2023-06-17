@@ -175,9 +175,26 @@ pub const ArgMatches = struct {
         return null;
     }
 
-    /// Returns the array of values of an argument if found otherwise null
-    pub fn valuesOf(self: *const ArgMatches, name_to_lookup: []const u8) ?[][]const u8 {
-        if (self.args.get(name_to_lookup)) |value| {
+    /// Returns the values of an option if it was present on the command line;
+    /// otherwise, returns `null`.
+    ///
+    /// ## Examples
+    ///
+    /// ```zig
+    /// var app = App.init(allocator, "myapp", "My app description");
+    /// defer app.deinit();
+    ///
+    /// var root = app.rootCommand();
+    /// try root.addArg(Arg.multiArgumentsOption("nums", 'n', "Numbers to add", 2));
+    ///
+    /// const matches = try app.parseProcess();
+    ///
+    /// if (matches.getArgumentValues("nums")) |numbers| {
+    ///     std.debug.print("Add {s} + {s}", .{ numbers[0], numbers[1] });
+    /// }
+    /// ```
+    pub fn getArgumentValues(self: *const ArgMatches, name: []const u8) ?[][]const u8 {
+        if (self.args.get(name)) |value| {
             if (value.isMany()) return value.many.items[0..];
         }
         return null;
