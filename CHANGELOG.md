@@ -83,6 +83,7 @@ instead.
 ### `ArgsContext` Changes
 - Renamed `ArgsContext` to `ArgMatches`.
 - Renamed `isPresent()` to `isArgumentPresent()`.
+- Renamed `hasArgs()` to `hasArguments()`.
 - Renamed `subcommandContext()` to `subcommandMatches()`.
 
 ## What's New

@@ -122,8 +122,26 @@ pub const ArgMatches = struct {
         return false;
     }
 
-    /// Checks if arguments were present on command line or not
-    pub fn hasArgs(self: *const ArgMatches) bool {
+    /// Checks whether any arguments were present on the command line.
+    ///
+    /// ## Examples
+    ///
+    /// ```zig
+    /// var app = App.init(allocator, "myapp", "My app description");
+    /// defer app.deinit();
+    ///
+    /// var root = app.rootCommand();
+    /// try root.addArg(Arg.booleanOption("verbose", 'v', "Enable verbose output"));
+    /// try root.addSubcommand(app.createCommand("init-exe", "Initilize project"));
+    ///
+    /// const matches = try app.parseProcess();
+    ///
+    /// if (!matches.hasArguments()) {
+    ///     try app.displayHelp();
+    ///     return;
+    /// }
+    /// ```
+    pub fn hasArguments(self: *const ArgMatches) bool {
         return ((self.args.count() >= 1) or (self.subcommand != null));
     }
 
