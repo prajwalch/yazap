@@ -129,95 +129,204 @@
 <span class="line" id="L16">arg_matches: ?ArgMatches = <span class="tok-null">null</span>,</span>
 <span class="line" id="L17">process_args: ?[]<span class="tok-kw">const</span> [:<span class="tok-number">0</span>]<span class="tok-type">u8</span> = <span class="tok-null">null</span>,</span>
 <span class="line" id="L18"></span>
-<span class="line" id="L19"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">init</span>(allocator: Allocator, cmd_name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>, description: ?[]<span class="tok-kw">const</span> <span class="tok-type">u8</span>) App {</span>
-<span class="line" id="L20">    <span class="tok-kw">return</span> App{</span>
-<span class="line" id="L21">        .allocator = allocator,</span>
-<span class="line" id="L22">        .command = Command.init(allocator, cmd_name, description),</span>
-<span class="line" id="L23">    };</span>
-<span class="line" id="L24">}</span>
-<span class="line" id="L25"></span>
-<span class="line" id="L26"><span class="tok-comment">/// Deinitialize all the structures of `app` and release all the memory used by them</span></span>
-<span class="line" id="L27"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">deinit</span>(self: *App) <span class="tok-type">void</span> {</span>
-<span class="line" id="L28">    <span class="tok-kw">if</span> (self.arg_matches) |*matches| matches.deinit();</span>
-<span class="line" id="L29">    <span class="tok-kw">if</span> (self.process_args) |pargs| std.process.argsFree(self.allocator, pargs);</span>
-<span class="line" id="L30">    self.command.deinit();</span>
-<span class="line" id="L31"></span>
-<span class="line" id="L32">    <span class="tok-kw">if</span> (self.subcommand_help) |subcmd_help| {</span>
-<span class="line" id="L33">        subcmd_help.parents.?.deinit();</span>
-<span class="line" id="L34">    }</span>
-<span class="line" id="L35">}</span>
-<span class="line" id="L36"></span>
-<span class="line" id="L37"><span class="tok-comment">/// Creates a new `Command` with given name by setting a allocator to it</span></span>
-<span class="line" id="L38"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">createCommand</span>(self: *App, cmd_name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>, cmd_description: ?[]<span class="tok-kw">const</span> <span class="tok-type">u8</span>) Command {</span>
-<span class="line" id="L39">    <span class="tok-kw">return</span> Command.init(self.allocator, cmd_name, cmd_description);</span>
-<span class="line" id="L40">}</span>
-<span class="line" id="L41"></span>
-<span class="line" id="L42"><span class="tok-comment">/// Returns a pointer to a root `Command`.</span></span>
-<span class="line" id="L43"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">rootCommand</span>(self: *App) *Command {</span>
-<span class="line" id="L44">    <span class="tok-kw">return</span> &amp;self.command;</span>
-<span class="line" id="L45">}</span>
+<span class="line" id="L19"><span class="tok-comment">/// Creates a new instance of `App`.</span></span>
+<span class="line" id="L20"><span class="tok-comment">///</span></span>
+<span class="line" id="L21"><span class="tok-comment">/// ## Examples</span></span>
+<span class="line" id="L22"><span class="tok-comment">///</span></span>
+<span class="line" id="L23"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L24"><span class="tok-comment">/// var app = App.init(&quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L25"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L26"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">init</span>(allocator: Allocator, name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>, description: ?[]<span class="tok-kw">const</span> <span class="tok-type">u8</span>) App {</span>
+<span class="line" id="L27">    <span class="tok-kw">return</span> App{</span>
+<span class="line" id="L28">        .allocator = allocator,</span>
+<span class="line" id="L29">        .command = Command.init(allocator, name, description),</span>
+<span class="line" id="L30">    };</span>
+<span class="line" id="L31">}</span>
+<span class="line" id="L32"></span>
+<span class="line" id="L33"><span class="tok-comment">/// Deinitializes the library by releasing all the allocated memory and cleaning</span></span>
+<span class="line" id="L34"><span class="tok-comment">/// up structures.</span></span>
+<span class="line" id="L35"><span class="tok-comment">///</span></span>
+<span class="line" id="L36"><span class="tok-comment">/// ## Examples</span></span>
+<span class="line" id="L37"><span class="tok-comment">///</span></span>
+<span class="line" id="L38"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L39"><span class="tok-comment">/// var app = App.init(&quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L40"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L41"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L42"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">deinit</span>(self: *App) <span class="tok-type">void</span> {</span>
+<span class="line" id="L43">    <span class="tok-kw">if</span> (self.arg_matches) |*matches| matches.deinit();</span>
+<span class="line" id="L44">    <span class="tok-kw">if</span> (self.process_args) |pargs| std.process.argsFree(self.allocator, pargs);</span>
+<span class="line" id="L45">    self.command.deinit();</span>
 <span class="line" id="L46"></span>
-<span class="line" id="L47"><span class="tok-comment">/// Starts parsing the process arguments</span></span>
-<span class="line" id="L48"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">parseProcess</span>(self: *App) YazapError!(*<span class="tok-kw">const</span> ArgMatches) {</span>
-<span class="line" id="L49">    self.process_args = <span class="tok-kw">try</span> std.process.argsAlloc(self.allocator);</span>
-<span class="line" id="L50">    <span class="tok-kw">return</span> self.parseFrom(self.process_args.?[<span class="tok-number">1</span>..]);</span>
-<span class="line" id="L51">}</span>
-<span class="line" id="L52"></span>
-<span class="line" id="L53"><span class="tok-comment">/// Starts parsing the given arguments</span></span>
-<span class="line" id="L54"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">parseFrom</span>(self: *App, argv: []<span class="tok-kw">const</span> [:<span class="tok-number">0</span>]<span class="tok-kw">const</span> <span class="tok-type">u8</span>) YazapError!(*<span class="tok-kw">const</span> ArgMatches) {</span>
-<span class="line" id="L55">    <span class="tok-kw">var</span> parser = Parser.init(self.allocator, Tokenizer.init(argv), self.rootCommand());</span>
-<span class="line" id="L56">    self.arg_matches = parser.parse() <span class="tok-kw">catch</span> |e| {</span>
-<span class="line" id="L57">        <span class="tok-kw">try</span> parser.err.log(e);</span>
-<span class="line" id="L58">        <span class="tok-kw">return</span> e;</span>
-<span class="line" id="L59">    };</span>
-<span class="line" id="L60">    <span class="tok-kw">try</span> self.handleHelpOption();</span>
-<span class="line" id="L61">    <span class="tok-kw">return</span> &amp;self.arg_matches.?;</span>
-<span class="line" id="L62">}</span>
-<span class="line" id="L63"></span>
-<span class="line" id="L64"><span class="tok-comment">/// Displays the help message of root command</span></span>
-<span class="line" id="L65"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">displayHelp</span>(self: *App) !<span class="tok-type">void</span> {</span>
-<span class="line" id="L66">    <span class="tok-kw">var</span> cmd_help = help.Help.init(</span>
-<span class="line" id="L67">        self.allocator,</span>
-<span class="line" id="L68">        self.rootCommand(),</span>
-<span class="line" id="L69">        self.rootCommand().name,</span>
-<span class="line" id="L70">    ) <span class="tok-kw">catch</span> <span class="tok-kw">unreachable</span>;</span>
-<span class="line" id="L71">    <span class="tok-kw">return</span> cmd_help.writeAll(std.io.getStdErr().writer());</span>
-<span class="line" id="L72">}</span>
-<span class="line" id="L73"></span>
-<span class="line" id="L74"><span class="tok-comment">/// Displays the help message of subcommand if it is provided on command line</span></span>
-<span class="line" id="L75"><span class="tok-comment">/// otherwise it will display nothing</span></span>
-<span class="line" id="L76"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">displaySubcommandHelp</span>(self: *App) !<span class="tok-type">void</span> {</span>
-<span class="line" id="L77">    <span class="tok-kw">if</span> (self.subcommand_help) |*h| <span class="tok-kw">return</span> h.writeAll(std.io.getStdErr().writer());</span>
-<span class="line" id="L78">}</span>
-<span class="line" id="L79"></span>
-<span class="line" id="L80"><span class="tok-kw">fn</span> <span class="tok-fn">handleHelpOption</span>(self: *App) !<span class="tok-type">void</span> {</span>
-<span class="line" id="L81">    <span class="tok-comment">// Set the `Help` of a subcommand present on the command line with the `-h` or `--help` option</span>
-</span>
-<span class="line" id="L82">    <span class="tok-comment">// remains null if none of the subcommands were present</span>
-</span>
-<span class="line" id="L83">    <span class="tok-kw">if</span> (help.findSubcommand(self.rootCommand(), &amp;self.arg_matches.?)) |subcmd| {</span>
-<span class="line" id="L84">        self.subcommand_help = <span class="tok-kw">try</span> help.Help.init(self.allocator, self.rootCommand(), subcmd);</span>
-<span class="line" id="L85">    }</span>
-<span class="line" id="L86">    <span class="tok-kw">try</span> self.displayHelpAndExitIfFound();</span>
-<span class="line" id="L87">}</span>
-<span class="line" id="L88"></span>
-<span class="line" id="L89"><span class="tok-kw">fn</span> <span class="tok-fn">displayHelpAndExitIfFound</span>(self: *App) !<span class="tok-type">void</span> {</span>
-<span class="line" id="L90">    <span class="tok-kw">var</span> arg_matches = self.arg_matches.?;</span>
-<span class="line" id="L91">    <span class="tok-kw">var</span> help_displayed = <span class="tok-null">false</span>;</span>
-<span class="line" id="L92"></span>
-<span class="line" id="L93">    <span class="tok-kw">if</span> (arg_matches.isPresent(<span class="tok-str">&quot;help&quot;</span>)) {</span>
-<span class="line" id="L94">        <span class="tok-kw">try</span> self.displayHelp();</span>
-<span class="line" id="L95">        help_displayed = <span class="tok-null">true</span>;</span>
-<span class="line" id="L96">    } <span class="tok-kw">else</span> {</span>
-<span class="line" id="L97">        <span class="tok-kw">try</span> self.displaySubcommandHelp();</span>
-<span class="line" id="L98">        help_displayed = (self.subcommand_help != <span class="tok-null">null</span>);</span>
-<span class="line" id="L99">    }</span>
+<span class="line" id="L47">    <span class="tok-kw">if</span> (self.subcommand_help) |subcmd_help| {</span>
+<span class="line" id="L48">        subcmd_help.parents.?.deinit();</span>
+<span class="line" id="L49">    }</span>
+<span class="line" id="L50">}</span>
+<span class="line" id="L51"></span>
+<span class="line" id="L52"><span class="tok-comment">/// Creates a new `Command` with given name and optional description.</span></span>
+<span class="line" id="L53"><span class="tok-comment">///</span></span>
+<span class="line" id="L54"><span class="tok-comment">/// ## Examples</span></span>
+<span class="line" id="L55"><span class="tok-comment">///</span></span>
+<span class="line" id="L56"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L57"><span class="tok-comment">/// var app = App.init(&quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L58"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L59"><span class="tok-comment">///</span></span>
+<span class="line" id="L60"><span class="tok-comment">/// var subcmd1 = app.createCommand(&quot;subcmd1&quot;, &quot;First Subcommand&quot;);</span></span>
+<span class="line" id="L61"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L62"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">createCommand</span>(self: *App, cmd_name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>, cmd_description: ?[]<span class="tok-kw">const</span> <span class="tok-type">u8</span>) Command {</span>
+<span class="line" id="L63">    <span class="tok-kw">return</span> Command.init(self.allocator, cmd_name, cmd_description);</span>
+<span class="line" id="L64">}</span>
+<span class="line" id="L65"></span>
+<span class="line" id="L66"><span class="tok-comment">/// Returns a pointer to the root `Command` of the application.</span></span>
+<span class="line" id="L67"><span class="tok-comment">///</span></span>
+<span class="line" id="L68"><span class="tok-comment">/// ## Examples</span></span>
+<span class="line" id="L69"><span class="tok-comment">///</span></span>
+<span class="line" id="L70"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L71"><span class="tok-comment">/// var app = App.init(&quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L72"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L73"><span class="tok-comment">///</span></span>
+<span class="line" id="L74"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L75"><span class="tok-comment">///</span></span>
+<span class="line" id="L76"><span class="tok-comment">/// // Add arguments and subcommands using `root`.</span></span>
+<span class="line" id="L77"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L78"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">rootCommand</span>(self: *App) *Command {</span>
+<span class="line" id="L79">    <span class="tok-kw">return</span> &amp;self.command;</span>
+<span class="line" id="L80">}</span>
+<span class="line" id="L81"></span>
+<span class="line" id="L82"><span class="tok-comment">/// Parses the command line arguments.</span></span>
+<span class="line" id="L83"><span class="tok-comment">///</span></span>
+<span class="line" id="L84"><span class="tok-comment">/// ## Examples</span></span>
+<span class="line" id="L85"><span class="tok-comment">///</span></span>
+<span class="line" id="L86"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L87"><span class="tok-comment">/// var app = App.init(&quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L88"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L89"><span class="tok-comment">///</span></span>
+<span class="line" id="L90"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L91"><span class="tok-comment">///</span></span>
+<span class="line" id="L92"><span class="tok-comment">/// // Add arguments and subcommands using `root`.</span></span>
+<span class="line" id="L93"><span class="tok-comment">///</span></span>
+<span class="line" id="L94"><span class="tok-comment">/// const matches = try app.parseProcess();</span></span>
+<span class="line" id="L95"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L96"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">parseProcess</span>(self: *App) YazapError!(*<span class="tok-kw">const</span> ArgMatches) {</span>
+<span class="line" id="L97">    self.process_args = <span class="tok-kw">try</span> std.process.argsAlloc(self.allocator);</span>
+<span class="line" id="L98">    <span class="tok-kw">return</span> self.parseFrom(self.process_args.?[<span class="tok-number">1</span>..]);</span>
+<span class="line" id="L99">}</span>
 <span class="line" id="L100"></span>
-<span class="line" id="L101">    <span class="tok-kw">if</span> (help_displayed) {</span>
-<span class="line" id="L102">        self.deinit();</span>
-<span class="line" id="L103">        std.process.exit(<span class="tok-number">0</span>);</span>
-<span class="line" id="L104">    }</span>
-<span class="line" id="L105">}</span>
-<span class="line" id="L106"></span>
+<span class="line" id="L101"><span class="tok-comment">/// Parses the given arguments.</span></span>
+<span class="line" id="L102"><span class="tok-comment">///</span></span>
+<span class="line" id="L103"><span class="tok-comment">/// ## Examples</span></span>
+<span class="line" id="L104"><span class="tok-comment">///</span></span>
+<span class="line" id="L105"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L106"><span class="tok-comment">/// var app = App.init(&quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L107"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L108"><span class="tok-comment">///</span></span>
+<span class="line" id="L109"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L110"><span class="tok-comment">///</span></span>
+<span class="line" id="L111"><span class="tok-comment">/// // Add arguments and subcommands using `root`.</span></span>
+<span class="line" id="L112"><span class="tok-comment">///</span></span>
+<span class="line" id="L113"><span class="tok-comment">/// const matches = try app.parseFrom(&amp;.{ &quot;arg1&quot;, &quot;--some-option&quot; &quot;subcmd&quot; });</span></span>
+<span class="line" id="L114"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L115"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">parseFrom</span>(self: *App, argv: []<span class="tok-kw">const</span> [:<span class="tok-number">0</span>]<span class="tok-kw">const</span> <span class="tok-type">u8</span>) YazapError!(*<span class="tok-kw">const</span> ArgMatches) {</span>
+<span class="line" id="L116">    <span class="tok-kw">var</span> parser = Parser.init(self.allocator, Tokenizer.init(argv), self.rootCommand());</span>
+<span class="line" id="L117">    self.arg_matches = parser.parse() <span class="tok-kw">catch</span> |e| {</span>
+<span class="line" id="L118">        <span class="tok-kw">try</span> parser.err.log(e);</span>
+<span class="line" id="L119">        <span class="tok-kw">return</span> e;</span>
+<span class="line" id="L120">    };</span>
+<span class="line" id="L121">    <span class="tok-kw">try</span> self.handleHelpOption();</span>
+<span class="line" id="L122">    <span class="tok-kw">return</span> &amp;self.arg_matches.?;</span>
+<span class="line" id="L123">}</span>
+<span class="line" id="L124"></span>
+<span class="line" id="L125"><span class="tok-comment">/// Displays the overall usage and description of the application.</span></span>
+<span class="line" id="L126"><span class="tok-comment">///</span></span>
+<span class="line" id="L127"><span class="tok-comment">/// **Note:** By default, the handling of the `-h` and `--help` options,</span></span>
+<span class="line" id="L128"><span class="tok-comment">/// and the automatic display of the usage message are taken care of. Use this</span></span>
+<span class="line" id="L129"><span class="tok-comment">/// function if you want to display the usage message when the `-h` or `--help`</span></span>
+<span class="line" id="L130"><span class="tok-comment">/// options are not present on the command line.</span></span>
+<span class="line" id="L131"><span class="tok-comment">///</span></span>
+<span class="line" id="L132"><span class="tok-comment">/// ## Examples</span></span>
+<span class="line" id="L133"><span class="tok-comment">///</span></span>
+<span class="line" id="L134"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L135"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L136"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L137"><span class="tok-comment">///</span></span>
+<span class="line" id="L138"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L139"><span class="tok-comment">/// try root.addArg(Arg.booleanOption(&quot;verbose&quot;, 'v', &quot;Enable verbose output&quot;));</span></span>
+<span class="line" id="L140"><span class="tok-comment">///</span></span>
+<span class="line" id="L141"><span class="tok-comment">/// const matches = try app.parseProcess();</span></span>
+<span class="line" id="L142"><span class="tok-comment">///</span></span>
+<span class="line" id="L143"><span class="tok-comment">/// if (!matches.hasArguments()) {</span></span>
+<span class="line" id="L144"><span class="tok-comment">///     try app.displayHelp();</span></span>
+<span class="line" id="L145"><span class="tok-comment">///     return;</span></span>
+<span class="line" id="L146"><span class="tok-comment">/// }</span></span>
+<span class="line" id="L147"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L148"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">displayHelp</span>(self: *App) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L149">    <span class="tok-kw">var</span> cmd_help = help.Help.init(</span>
+<span class="line" id="L150">        self.allocator,</span>
+<span class="line" id="L151">        self.rootCommand(),</span>
+<span class="line" id="L152">        self.rootCommand().name,</span>
+<span class="line" id="L153">    ) <span class="tok-kw">catch</span> <span class="tok-kw">unreachable</span>;</span>
+<span class="line" id="L154">    <span class="tok-kw">return</span> cmd_help.writeAll(std.io.getStdErr().writer());</span>
+<span class="line" id="L155">}</span>
+<span class="line" id="L156"></span>
+<span class="line" id="L157"><span class="tok-comment">/// Displays the usage message of specified subcomand on the command line.</span></span>
+<span class="line" id="L158"><span class="tok-comment">///</span></span>
+<span class="line" id="L159"><span class="tok-comment">/// **Note:** By default, the handling of the `-h` and `--help` options,</span></span>
+<span class="line" id="L160"><span class="tok-comment">/// and the automatic display of the usage message are taken care of. Use this</span></span>
+<span class="line" id="L161"><span class="tok-comment">/// function if you want to display the usage message when the `-h` or `--help`</span></span>
+<span class="line" id="L162"><span class="tok-comment">/// options are not present on the command line.</span></span>
+<span class="line" id="L163"><span class="tok-comment">///</span></span>
+<span class="line" id="L164"><span class="tok-comment">/// ## Examples</span></span>
+<span class="line" id="L165"><span class="tok-comment">///</span></span>
+<span class="line" id="L166"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L167"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L168"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L169"><span class="tok-comment">///</span></span>
+<span class="line" id="L170"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L171"><span class="tok-comment">///</span></span>
+<span class="line" id="L172"><span class="tok-comment">/// var subcmd = app.createCommand(&quot;subcmd&quot;, &quot;Subcommand description&quot;);</span></span>
+<span class="line" id="L173"><span class="tok-comment">/// try subcmd.addArg(Arg.booleanOption(&quot;verbose&quot;, 'v', &quot;Enable verbose output&quot;));</span></span>
+<span class="line" id="L174"><span class="tok-comment">/// try root.addSubcommand(subcmd);</span></span>
+<span class="line" id="L175"><span class="tok-comment">///</span></span>
+<span class="line" id="L176"><span class="tok-comment">/// const matches = try app.parseProcess();</span></span>
+<span class="line" id="L177"><span class="tok-comment">///</span></span>
+<span class="line" id="L178"><span class="tok-comment">/// if (matches.subcommandMatches(&quot;subcmd&quot;)) |subcmd_matches| {</span></span>
+<span class="line" id="L179"><span class="tok-comment">///     if (!subcmd_matches.hasArguments()) {</span></span>
+<span class="line" id="L180"><span class="tok-comment">///         try app.displaySubcommandHelp();</span></span>
+<span class="line" id="L181"><span class="tok-comment">///         return;</span></span>
+<span class="line" id="L182"><span class="tok-comment">///     }</span></span>
+<span class="line" id="L183"><span class="tok-comment">/// }</span></span>
+<span class="line" id="L184"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L185"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">displaySubcommandHelp</span>(self: *App) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L186">    <span class="tok-kw">if</span> (self.subcommand_help) |*h| <span class="tok-kw">return</span> h.writeAll(std.io.getStdErr().writer());</span>
+<span class="line" id="L187">}</span>
+<span class="line" id="L188"></span>
+<span class="line" id="L189"><span class="tok-kw">fn</span> <span class="tok-fn">handleHelpOption</span>(self: *App) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L190">    <span class="tok-comment">// Set the `Help` of a subcommand present on the command line with the `-h` or `--help` option</span>
+</span>
+<span class="line" id="L191">    <span class="tok-comment">// remains null if none of the subcommands were present</span>
+</span>
+<span class="line" id="L192">    <span class="tok-kw">if</span> (help.findSubcommand(self.rootCommand(), &amp;self.arg_matches.?)) |subcmd| {</span>
+<span class="line" id="L193">        self.subcommand_help = <span class="tok-kw">try</span> help.Help.init(self.allocator, self.rootCommand(), subcmd);</span>
+<span class="line" id="L194">    }</span>
+<span class="line" id="L195">    <span class="tok-kw">try</span> self.displayHelpAndExitIfFound();</span>
+<span class="line" id="L196">}</span>
+<span class="line" id="L197"></span>
+<span class="line" id="L198"><span class="tok-kw">fn</span> <span class="tok-fn">displayHelpAndExitIfFound</span>(self: *App) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L199">    <span class="tok-kw">var</span> arg_matches = self.arg_matches.?;</span>
+<span class="line" id="L200">    <span class="tok-kw">var</span> help_displayed = <span class="tok-null">false</span>;</span>
+<span class="line" id="L201"></span>
+<span class="line" id="L202">    <span class="tok-kw">if</span> (arg_matches.isArgumentPresent(<span class="tok-str">&quot;help&quot;</span>)) {</span>
+<span class="line" id="L203">        <span class="tok-kw">try</span> self.displayHelp();</span>
+<span class="line" id="L204">        help_displayed = <span class="tok-null">true</span>;</span>
+<span class="line" id="L205">    } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L206">        <span class="tok-kw">try</span> self.displaySubcommandHelp();</span>
+<span class="line" id="L207">        help_displayed = (self.subcommand_help != <span class="tok-null">null</span>);</span>
+<span class="line" id="L208">    }</span>
+<span class="line" id="L209"></span>
+<span class="line" id="L210">    <span class="tok-kw">if</span> (help_displayed) {</span>
+<span class="line" id="L211">        self.deinit();</span>
+<span class="line" id="L212">        std.process.exit(<span class="tok-number">0</span>);</span>
+<span class="line" id="L213">    }</span>
+<span class="line" id="L214">}</span>
+<span class="line" id="L215"></span>
 </code></pre></body>
 </html>
