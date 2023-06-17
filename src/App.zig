@@ -16,6 +16,13 @@ subcommand_help: ?help.Help = null,
 arg_matches: ?ArgMatches = null,
 process_args: ?[]const [:0]u8 = null,
 
+/// Creates a new instance of `App`.
+///
+/// ## Examples
+///
+/// ```zig
+/// var app = App.init("myls", "My custom ls");
+/// ```
 pub fn init(allocator: Allocator, name: []const u8, description: ?[]const u8) App {
     return App{
         .allocator = allocator,
