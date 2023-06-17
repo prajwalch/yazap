@@ -16,10 +16,10 @@ subcommand_help: ?help.Help = null,
 arg_matches: ?ArgMatches = null,
 process_args: ?[]const [:0]u8 = null,
 
-pub fn init(allocator: Allocator, cmd_name: []const u8, description: ?[]const u8) App {
+pub fn init(allocator: Allocator, name: []const u8, description: ?[]const u8) App {
     return App{
         .allocator = allocator,
-        .command = Command.init(allocator, cmd_name, description),
+        .command = Command.init(allocator, name, description),
     };
 }
 
