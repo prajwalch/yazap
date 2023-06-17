@@ -1,8 +1,12 @@
 # Upcoming version
+
 ## Breaking Changes
-- `flag.boolean` is moved and renamed to `Arg.booleanOption`.
-- `flag.argOne` is moved and renamed to `Arg.singleArgumentOption`.
-- `flag.argN` is moved and renamed to `Arg.multiArgumentsOption` and the order of parameters is slighlty changed.
+
+### `flag` Changes
+- Moved and Renamed `boolean` to `Arg.booleanOption`.
+- Moved and Renamed `argOne` to `Arg.singleArgumentOption`.
+- Moved and Renamed `argN` to `Arg.multiArgumentsOption` with slightly
+    modified parameter order.
 
     Old
     ```zig
@@ -13,61 +17,82 @@
     ```zig
     fn(name: []const u8, short_name: ?u8, description: ?[]const u8, max_values: usize) Arg;
     ```
-- `flag.option` is moved and renamed to `Arg.singleArgumentOptionWithValidValues`. Also the signature of function is changed to `fn(name: []const u8, short_name: ?u8, description: ?[]const u8, values: []const []const u8)`.
 
-    Before
+- Moved and Renamed `option` to `Arg.singleArgumentOptionWithValidValues` with
+slightly modified parameter order.
+
+    Old
     ```zig
-    const flag = yazap.flag
-
-    // -- snip --
-    try root.addArg(flag.boolean("bool", null, null));
-    try root.addArg(flag.argOne("one", null, null));
-    try root.addArg(flag.argN("many", null, 2, null));
-    try root.addArg(flag.option("opt", null, &[_][]const u8 {
-        "opt1",
-        "opt2",
-    }, null));
-    // -- snip --
+    fn(name: []const u8, short_name: ?u8, values: []const []const u8, description: ?[]const u8);
+    ```
+    
+    New
+    ```zig
+    fn(name: []const u8, short_name: ?u8, description: ?[]const u8, values: []const []const u8);
     ```
 
-    After
-    ```zig
-    const Arg = yazap.Arg
+#### Examples 
 
-    // -- snip --
-    try root.addArg(Arg.booleanOption("bool", null, null));
-    try root.addArg(Arg.singleArgumentOption("one", null, null));
-    try root.addArg(Arg.multiArgumentsOption("many", null, null, 2));
-    try root.addArg(Arg.singleArgumentOptionWithValidValues("opt", null, null, &[_][]const u8 {
-        "opt1",
-        "opt2",
-    }));
-    // -- snip --
-    ```
-- `Arg.allowed_values` is renamed to `Arg.valid_values`.
-- `Arg.setShortNameFromName` is removed.
-- `Arg.setNameAsLongName` is removed.
-- `Arg.setAllowedValues` is renamed to `Arg.setValidValues`.
-- `Arg.setSetting` is renamed to `Arg.setProperty`.
-- `Arg.unsetSetting` is renamed to `Arg.unsetProperty`.
-- `Arg.isSettingSet` is renamed to `Arg.hasProperty`.
-- `Command.takesSingleValue` and `Command.takesNValues` are removed, use new `Arg.positional` instead.
-- `Command.countArgs` is renamed to `Command.countPositionalArgs`.
-- `Command.setSetting` is renamed to `Command.setProperty`.
-- `Command.unsetSetting` is renamed to `Command.unsetProperty`.
-- `Command.isSettingSet` is renamed to `Command.hasProperty`.
+Before:
+```zig
+const flag = yazap.flag
 
+// -- snip --
+try root.addArg(flag.boolean("bool", null, null));
+try root.addArg(flag.argOne("one", null, null));
+try root.addArg(flag.argN("many", null, 2, null));
+try root.addArg(flag.option("opt", null, &[_][]const u8 {
+    "opt1",
+    "opt2",
+}, null));
+// -- snip --
+```
+
+After:
+```zig
+const Arg = yazap.Arg
+
+// -- snip --
+try root.addArg(Arg.booleanOption("bool", null, null));
+try root.addArg(Arg.singleArgumentOption("one", null, null));
+try root.addArg(Arg.multiArgumentsOption("many", null, null, 2));
+try root.addArg(Arg.singleArgumentOptionWithValidValues("opt", null, null, &[_][]const u8 {
+    "opt1",
+    "opt2",
+}));
+// -- snip --
+```
+
+### `Command` Changes
+- Renamed `countArgs()` to `countPositionalArgs()`.
+- Renamed `setSetting()` to `setProperty()`.
+- Renamed `unsetSetting()` to `unsetProperty()`.
+- Renamed `isSettingSet()` to `hasProperty()`.
+- Removed `takesSingleValue()` and `takesNValues()`, use new `Arg.positional`
+instead.
+
+### `Arg` Changes
+- Renamed `allowed_values` to `valid_values`.
+- Renamed `setAllowedValues()` to `setValidValues()`.
+- Renamed `setSetting()` to `setProperty()`.
+- Renamed `unsetSetting()` to `unsetProperty()`.
+- Renamed `isSettingSet()` to `hasProperty()`.
+- Removed `setShortNameFromName()`.
+- Removed `setNameAsLongName()`.
+
+### `ArgsContext` Changes
 - Renamed `ArgsContext` to `ArgMatches`.
-    - **Method Changes**
-        - Renamed `isPresent()` to `isArgumentPresent()`.
-        - Renamed `subcommandContext()` to `subcommandMatches()`.
+- Renamed `isPresent()` to `isArgumentPresent()`.
+- Renamed `subcommandContext()` to `subcommandMatches()`.
 
 ## What's New
-- Improved documentation for `Arg.*` API and included examples as well.
-- Improved documentation for `Command.*` APT and included examples as well.
-- Added new `Arg.multiArgumentsOptionWithValidValues` API
-- Added new `Arg.positional` API for creating a new positional argument and with this changes it's no
-longer required to set `.takes_positional_arg` property to root `Command`.
+- Enhanced documentation for `Arg.*` API with detailed explanations and examples.
+- Enhanced documentation for `Command.*` API with detailed explanations and examples.
+- Introduced `Arg.multiArgumentsOptionWithValidValues` API to support creating
+an argument that can take multiple arguments from pre-defined values.
+- Introduced `Arg.positional` API, eliminating the need to set the
+`.takes_positional_arg` property for commands. This simplifies the
+process of creating positional arguments.
 
     Before
     ```zig
@@ -99,5 +124,5 @@ longer required to set `.takes_positional_arg` property to root `Command`.
     ```
 
 ## Internal Changes
-- `enable_help` property is removed and no longer needed to set for a command
-which basically means `-h` and `--help` options will be always available to root command and subcommands.
+- Removed `enable_help` property for commands, making `-h` and `--help` options
+always available for both the root command and subcommands.
