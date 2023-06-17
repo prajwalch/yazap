@@ -177,7 +177,7 @@ try myls.addArgs(&[_]Arg {
 
 To create a subcommand, you can use `App.createCommand("name", "optional description")`.
 Once you have created a subcommand, you can add its own arguments and subcommands
-just like the root command then add it to the root command using `App.addSubcommand()`.
+just like the root command then add it to the root command using `Command.addSubcommand()`.
 
 ```zig
 var update_cmd = app.createCommand("update", "Update the app or check for new updates");
