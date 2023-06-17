@@ -47,26 +47,32 @@ chained options using space (`-abc value, -abc v1,v2,v3`).
 
 Requires [zig v0.11.x](https://ziglang.org).
 
-1. Initialize your project as a repository (if it hasn't been initilized already) by running `git init`.
+1. Initialize your project as a repository (if it hasn't been initilized already)
+by running `git init`.
 2. Create a directory named `libs` in the root of your project.
 3. Add the `yazap` library as submodule by running the following command:
+
     ```bash
     git submodule add https://github.com/PrajwalCH/yazap libs/yazap
     ```
-4. After the previous step is completed, add the following code snippet to your `build.zig` file:
+4. After the previous step is completed, add the following code snippet to your
+`build.zig` file:
+
     ```zig
     exe.addAnonymousModule("yazap", .{
         .source_file = .{ .path = "libs/yazap/src/lib.zig" },
     });
     ```
 5. You can now import this library in your source file as follows:
+
     ```zig
     const yazap = @import("yazap");
     ```
 
 ## Documentation
 
-For detailed and comprehensive documentation, please visit [this link](https://prajwalch.github.io/yazap/).
+For detailed and comprehensive documentation, please visit
+[this link](https://prajwalch.github.io/yazap/).
 
 ## Building and Running Examples
 
@@ -84,8 +90,8 @@ corresponding binary:
 $ ./zig-out/bin/example_name
 ```
 
-To view the usage and available options for each example, you can use `-h` or `--help`
-flag:
+To view the usage and available options for each example, you can use `-h` or
+`--help` flag:
 
 ```bash
 $ ./zig-out/bin/example_name --help
@@ -93,32 +99,38 @@ $ ./zig-out/bin/example_name --help
 
 ## Usage
 
-### Initializing the yazap
+### Initializing Yazap
 
-The first step in using the `yazap` is making an instance of [App](https://prajwalch.github.io/yazap/#A;lib:App)
-by calling `App.init(allocator, "Your app name", "optional description")` which internally creates a root command for
-your app.
+The begin using `yazap`, the first step is to create an instance of 
+[App](https://prajwalch.github.io/yazap/#A;lib:App) by calling
+`App.init(allocator, "Your app name", "optional description")`. This function
+internally creates a root command for your application.
 
 ```zig
 var app = App.init(allocator, "myls", "My custom ls");
 defer app.deinit();
 ```
 
-### Getting a root command
+### Obtaining the Root Command
 
-[App](https://prajwalch.github.io/yazap/#A;lib:App) itself don't provide any methods to add arguments for your command.
-Its only purpose is to initialize the library, invoking parser and freeing all the structures.
-Therefore, you must have to use root command to add arguments and subcommands.
-You can simply get it by calling `App.rootCommand` which returns a pointer to it.
+The [App](https://prajwalch.github.io/yazap/#A;lib:App) itself does not provide
+any methods for adding arguments to your command. Its main purpose is to
+initialize the library, invoke the parser, and free associated structures. To
+add arguments and subcommands, you'll need to use the root command.
+
+To obtain the root command, simply call `App.rootCommand()`, which returns a
+pointer to it. This gives you access to the core command of your application.
 
 ```zig
 var myls = app.rootCommand();
 ```
 
-### Adding arguments
+### Adding Arguments
 
-After you get the root command, you can start adding [Argument](https://prajwalch.github.io/yazap/#A;lib:Arg)s using the appropriate methods provided by the `Command`.
-See [Command](https://prajwalch.github.io/yazap/#root;Command) to see all the available API.
+Once you have obtained the root command, you can proceed to arguments using the
+provided methods in the `Command`. For a complete list of available methods,
+refer to the [Command API](https://prajwalch.github.io/yazap/#root;Command)
+documentation.
 
 ```zig
 try myls.addArg(Arg.positional("FILE", null, null));
@@ -138,10 +150,34 @@ try myls.addArg(Arg.singleArgumentOptionWithValidValues("color", 'C', null, &[_]
 }));
 ```
 
-### Adding subcommands
+Alternatively, you can add multiple arguments in a single function call using
+`Command.addArgs()`:
 
-Use `App.createCommand("name", "Subcommand description")` or `App.createCommand("name", null)` to create a subcommand.
-Once you create a subcommand, you can add its own arguments and subcommands just like root command.
+```zig
+try myls.addArgs(&[_]Arg {
+    Arg.positional("FILE", null, null),
+    Arg.booleanOption("all", 'a', "Don't ignore the hidden directories"),
+    Arg.booleanOption("recursive", 'R', "List subdirectories recursively"),
+    Arg.booleanOption("one-line", '1', null),
+    Arg.booleanOption("size", 's', null),
+    Arg.booleanOption("version", null, null),
+
+    Arg.singleArgumentOption("ignore", 'I', null),
+    Arg.singleArgumentOption("hide", null, null),
+
+    Arg.singleArgumentOptionWithValidValues("color", 'C', null, &[_][]const u8{
+        "always",
+        "auto",
+        "never",
+    }),
+});
+```
+
+### Adding Subcommands
+
+To create a subcommand, you can use `App.createCommand("name", "optional description")`.
+Once you have created a subcommand, you can add its own arguments and subcommands
+just like the root command then add it to the root command using `App.addSubcommand()`.
 
 ```zig
 var update_cmd = app.createCommand("update", "Update the app or check for new updates");
@@ -155,13 +191,14 @@ try update_cmd.addArg(Arg.singleArgumentOptionWithValidValues("branch", 'b', "Br
 try myls.addSubcommand(update_cmd);
 ```
 
+### Parsing Arguments
 
-### Parsing arguments
-
-Once you're done adding arguments and subcommands call `app.parseProcess` to starts parsing.
-It internally calls [`std.process.argsAlloc`](https://ziglang.org/documentation/master/std/#A;std:process.argsAlloc) to
-obtain the raw arguments, or you can call `app.parseFrom` by passing your own raw arguments which can be useful on test.
-Both functions return a constant pointer to [ArgMatches](https://prajwalch.github.io/yazap/#A;lib:ArgMatches).
+Once you have finished adding arguments and subcommands, call `App.parseProcess()`
+to start the parsing process. This function internally utilizes
+[`std.process.argsAlloc`](https://ziglang.org/documentation/master/std/#A;std:process.argsAlloc)
+to obtain the raw arguments. Alternatively, you can use `App.parseFrom()` and
+pass your own raw arguments, which can be useful during testing. Both functions
+return a constant pointer to [`ArgMatches`](https://prajwalch.github.io/yazap/#A;lib:ArgMatches).
 
 ```zig
 const matches = try app.parseProcess();
@@ -212,12 +249,19 @@ if (matches.isPresent("color")) {
 }
 ```
 
-### Handling help
+### Handling Help
 
-Handling `-h` or `--help` and displaying usage is done automatically, but if you want to display help manually, there
-are two functions which you can use i.e. `App.displayHelp` and `App.displaySubcommandHelp`.
-`displayHelp` is simple it just prints the root level help but the `displaySubcommandHelp` is a bit different,
-it queries for the subcommand which was present on the command line and displays its usage.
+The handling of `-h` or `--help` option and the automatic display of usage
+information are taken care by the library. However, if you need to manually
+display the help information, there are two functions available: `App.displayHelp()`
+and `App.displaySubcommandHelp()`.
+
+- `App.displayHelp()` prints the help information for the root command,
+providing a simple way to display the overall usage and description of the
+application.
+
+- On the other hand, `App.displaySubcommandHelp()` queries the sepecifed
+subcommand on the command line and displays its specific usage information.
 
 ```zig
 if (!matches.hasArgs()) {
@@ -233,7 +277,7 @@ if (matches.subcommandMatches("update")) |update_cmd_matches| {
 }
 ```
 
-### Putting it all together
+### Putting it All Together
 
 ```zig
 const std = @import("std");
