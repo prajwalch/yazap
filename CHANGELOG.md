@@ -83,6 +83,7 @@
 
 ## What's New
 - Improved documentation for `Arg.*` API and included examples as well.
+- Improved documentation for `Command.*` APT and included examples as well.
 - Added new `Arg.multiArgumentsOptionWithValidValues` API
 - Added new `Arg.positional` API for creating a new positional argument and with this changes it's no
 longer required to set `.takes_positional_arg` property to root `Command`.
