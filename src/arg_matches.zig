@@ -115,10 +115,8 @@ pub const ArgMatches = struct {
         if (self.args.contains(name)) {
             return true;
         } else if (self.subcommand) |subcmd| {
-            if (std.mem.eql(u8, subcmd.name, name))
-                return true;
+            return std.mem.eql(u8, subcmd.name, name);
         }
-
         return false;
     }
 
