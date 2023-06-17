@@ -68,15 +68,27 @@ Requires [zig v0.11.x](https://ziglang.org).
 
 For detailed and comprehensive documentation, please visit [this link](https://prajwalch.github.io/yazap/).
 
-## Building and running examples
+## Building and Running Examples
 
-The examples are present [here](/examples) and to build all of them run:
+The examples can be found [here](/examples). To build all of them, run the
+following command on your terminal:
+
 ```bash
 $ zig build examples
 ```
-Then after the compilation finishes, you can run them as:
+
+After the compilation finishes, you can run each example by executing the
+corresponding binary:
+
 ```bash
 $ ./zig-out/bin/example_name
+```
+
+To view the usage and available options for each example, you can use `-h` or `--help`
+flag:
+
+```bash
+$ ./zig-out/bin/example_name --help
 ```
 
 ## Usage
