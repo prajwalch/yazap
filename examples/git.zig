@@ -33,7 +33,7 @@ pub fn main() anyerror!void {
 
     const matches = try app.parseProcess();
 
-    if (matches.isPresent("init")) {
+    if (matches.isArgumentPresent("init")) {
         std.debug.print("Initilize empty repo", .{});
         return;
     }
@@ -46,7 +46,7 @@ pub fn main() anyerror!void {
     }
 
     if (matches.subcommandMatches("push")) |push_matches| {
-        if (push_matches.isPresent("REMOTE") and push_matches.isPresent("BRANCH_NAME")) {
+        if (push_matches.isArgumentPresent("REMOTE") and push_matches.isArgumentPresent("BRANCH_NAME")) {
             const remote = push_matches.valueOf("REMOTE").?;
             const branch_name = push_matches.valueOf("BRANCH_NAME").?;
 

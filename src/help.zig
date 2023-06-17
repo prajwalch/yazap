@@ -204,7 +204,7 @@ pub fn findSubcommand(root_cmd: *const Command, matches: *ArgMatches) ?[]const u
         const subcmd_name = matches.subcommand.?.name;
         const subcmd_matches = &matches.subcommand.?.matches.?;
 
-        if (subcmd_matches.isPresent("help")) {
+        if (subcmd_matches.isArgumentPresent("help")) {
             return subcmd_name;
         } else {
             // If current subcommand's arg doesnot have `help` option

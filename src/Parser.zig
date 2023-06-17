@@ -115,7 +115,7 @@ pub fn parse(self: *Parser) Error!ArgMatches {
         );
     }
 
-    if (!self.arg_matches.isPresent("help")) {
+    if (!self.arg_matches.isArgumentPresent("help")) {
         const takes_pos_args_and_is_required =
             (takes_pos_args and (self.command.hasProperty(.positional_arg_required)));
 
