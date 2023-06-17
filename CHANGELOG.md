@@ -3,9 +3,9 @@
 ## Breaking Changes
 
 ### `flag` Changes
-- Moved and Renamed `boolean` to `Arg.booleanOption`.
-- Moved and Renamed `argOne` to `Arg.singleArgumentOption`.
-- Moved and Renamed `argN` to `Arg.multiArgumentsOption` with slightly
+- Moved and Renamed `boolean()` to `Arg.booleanOption()`.
+- Moved and Renamed `argOne()` to `Arg.singleArgumentOption()`.
+- Moved and Renamed `argN()` to `Arg.multiArgumentsOption()` with slightly
     modified parameter order.
 
     Old
@@ -18,7 +18,7 @@
     fn(name: []const u8, short_name: ?u8, description: ?[]const u8, max_values: usize) Arg;
     ```
 
-- Moved and Renamed `option` to `Arg.singleArgumentOptionWithValidValues` with
+- Moved and Renamed `option()` to `Arg.singleArgumentOptionWithValidValues()` with
 slightly modified parameter order.
 
     Old
@@ -68,7 +68,7 @@ try root.addArg(Arg.singleArgumentOptionWithValidValues("opt", null, null, &[_][
 - Renamed `setSetting()` to `setProperty()`.
 - Renamed `unsetSetting()` to `unsetProperty()`.
 - Renamed `isSettingSet()` to `hasProperty()`.
-- Removed `takesSingleValue()` and `takesNValues()`, use new `Arg.positional`
+- Removed `takesSingleValue()` and `takesNValues()`, use new `Arg.positional()`
 instead.
 
 ### `Arg` Changes
@@ -89,9 +89,9 @@ instead.
 ## What's New
 - Enhanced documentation for `Arg.*` API with detailed explanations and examples.
 - Enhanced documentation for `Command.*` API with detailed explanations and examples.
-- Introduced `Arg.multiArgumentsOptionWithValidValues` API to support creating
+- Introduced `Arg.multiArgumentsOptionWithValidValues()` API to support creating
 an argument that can take multiple arguments from pre-defined values.
-- Introduced `Arg.positional` API, eliminating the need to set the
+- Introduced `Arg.positional()` API, eliminating the need to set the
 `.takes_positional_arg` property for commands. This simplifies the
 process of creating positional arguments.
 
