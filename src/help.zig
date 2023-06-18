@@ -179,6 +179,7 @@ pub const Help = struct {
             try writer.writeAll("\n");
         }
         try writer.writeAll(" -h, --help\n\tPrint help and exit");
+        try writeNewLine(writer);
     }
 
     fn writeFooter(self: *Help, writer: anytype) !void {
