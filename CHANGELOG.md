@@ -18,7 +18,7 @@
     fn(name: []const u8, short_name: ?u8, description: ?[]const u8, max_values: usize) Arg;
     ```
 
-- Moved and Renamed `option()` to `Arg.singleArgumentOptionWithValidValues()` with
+- Moved and Renamed `option()` to `Arg.singleValueOptionWithValidValues()` with
 slightly modified parameter order.
 
     Old
@@ -56,7 +56,7 @@ const Arg = yazap.Arg
 try root.addArg(Arg.booleanOption("bool", null, null));
 try root.addArg(Arg.singleValueOption("one", null, null));
 try root.addArg(Arg.multiArgumentsOption("many", null, null, 2));
-try root.addArg(Arg.singleArgumentOptionWithValidValues("opt", null, null, &[_][]const u8 {
+try root.addArg(Arg.singleValueOptionWithValidValues("opt", null, null, &[_][]const u8 {
     "opt1",
     "opt2",
 }));

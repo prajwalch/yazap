@@ -89,8 +89,7 @@ pub fn singleValueOption(name: []const u8, short_name: ?u8, description: ?[]cons
     return arg;
 }
 
-/// Creates a single argument option with a predefined set of valid values that
-/// the user can pass.
+/// Creates an option that accepts a single value from a predefined set of values.
 ///
 /// ## Examples
 ///
@@ -99,11 +98,11 @@ pub fn singleValueOption(name: []const u8, short_name: ?u8, description: ?[]cons
 /// defer app.deinit();
 ///
 /// var root = app.rootCommand();
-/// try root.addArg(Arg.singleArgumentOptionWithValidValues(
+/// try root.addArg(Arg.singleValueOptionWithValidValues(
 ///     "output", 'o', "Output format", &[_][]const u8 { "json", "xml", "csv" },
 /// ));
 /// ```
-pub fn singleArgumentOptionWithValidValues(
+pub fn singleValueOptionWithValidValues(
     name: []const u8,
     short_name: ?u8,
     description: ?[]const u8,
@@ -519,7 +518,7 @@ pub fn hasProperty(self: *const Arg, property: Property) bool {
 /// defer app.deinit();
 ///
 /// var root = app.rootCommand();
-/// var color = Arg.singleArgumentOptionWithValidValues(
+/// var color = Arg.singleValueOptionWithValidValues(
 ///     "color", 'c', "Your Favorite Color", &[_]const u8 { "blue", "red" },
 /// );
 ///

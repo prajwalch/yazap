@@ -143,7 +143,7 @@ try myls.addArg(Arg.booleanOption("version", null, null));
 try myls.addArg(Arg.singleValueOption("ignore", 'I', null));
 try myls.addArg(Arg.singleValueOption("hide", null, null));
 
-try myls.addArg(Arg.singleArgumentOptionWithValidValues("color", 'C', null, &[_][]const u8{
+try myls.addArg(Arg.singleValueOptionWithValidValues("color", 'C', null, &[_][]const u8{
     "always",
     "auto",
     "never",
@@ -165,7 +165,7 @@ try myls.addArgs(&[_]Arg {
     Arg.singleValueOption("ignore", 'I', null),
     Arg.singleValueOption("hide", null, null),
 
-    Arg.singleArgumentOptionWithValidValues("color", 'C', null, &[_][]const u8{
+    Arg.singleValueOptionWithValidValues("color", 'C', null, &[_][]const u8{
         "always",
         "auto",
         "never",
@@ -182,7 +182,7 @@ just like the root command then add it to the root command using `Command.addSub
 ```zig
 var update_cmd = app.createCommand("update", "Update the app or check for new updates");
 try update_cmd.addArg(Arg.booleanOption("check-only", null, "Only check for new update"));
-try update_cmd.addArg(Arg.singleArgumentOptionWithValidValues("branch", 'b', "Branch to update", &[_][]const u8{ 
+try update_cmd.addArg(Arg.singleValueOptionWithValidValues("branch", 'b', "Branch to update", &[_][]const u8{ 
     "stable",
     "nightly",
     "beta"
@@ -296,7 +296,7 @@ pub fn main() anyerror!void {
 
     var update_cmd = app.createCommand("update", "Update the app or check for new updates");
     try update_cmd.addArg(Arg.booleanOption("check-only", null, "Only check for new update"));
-    try update_cmd.addArg(Arg.singleArgumentOptionWithValidValues("branch", 'b', "Branch to update", &[_][]const u8{
+    try update_cmd.addArg(Arg.singleValueOptionWithValidValues("branch", 'b', "Branch to update", &[_][]const u8{
         "stable",
         "nightly",
         "beta"
@@ -313,7 +313,7 @@ pub fn main() anyerror!void {
     try myls.addArg(Arg.singleValueOption("ignore", 'I', null));
     try myls.addArg(Arg.singleValueOption("hide", null, null));
 
-    try myls.addArg(Arg.singleArgumentOptionWithValidValues("color", 'C', null, &[_][]const u8{
+    try myls.addArg(Arg.singleValueOptionWithValidValues("color", 'C', null, &[_][]const u8{
         "always",
         "auto",
         "never",
