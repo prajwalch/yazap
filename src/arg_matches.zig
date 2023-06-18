@@ -153,7 +153,7 @@ pub const ArgMatches = struct {
     /// defer app.deinit();
     ///
     /// var root = app.rootCommand();
-    /// try root.addArg(Arg.singleArgumentOption("config", 'c', "Config file"));
+    /// try root.addArg(Arg.singleValueOption("config", 'c', "Config file"));
     ///
     /// const matches = try app.parseProcess();
     ///
@@ -206,7 +206,7 @@ pub const ArgMatches = struct {
     ///
     /// var build_cmd = app.createCommand("build", "Build the project");
     /// try build_cmd.addArg(Arg.booleanOption("release", 'r', "Build in release mode"));
-    /// try build_cmd.addArg(Arg.singleArgumentOption("target", 't', "Build for given target"));
+    /// try build_cmd.addArg(Arg.singleValueOption("target", 't', "Build for given target"));
     /// try root.addSubcommand(build_cmd);
     ///
     /// const matches = try app.parseProcess();

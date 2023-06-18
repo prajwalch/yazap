@@ -67,7 +67,7 @@ pub fn booleanOption(name: []const u8, short_name: ?u8, description: ?[]const u8
     return arg;
 }
 
-/// Creates an option that accepts a single argument.
+/// Creates an option that accepts a single value.
 ///
 /// ## Examples
 ///
@@ -76,9 +76,9 @@ pub fn booleanOption(name: []const u8, short_name: ?u8, description: ?[]const u8
 /// defer app.deinit();
 ///
 /// var root = app.rootCommand();
-/// try root.addArg(Arg.singleArgumentOption("port", 'p', "Port number to bind"));
+/// try root.addArg(Arg.singleValueOption("port", 'p', "Port number to bind"));
 /// ```
-pub fn singleArgumentOption(name: []const u8, short_name: ?u8, description: ?[]const u8) Arg {
+pub fn singleValueOption(name: []const u8, short_name: ?u8, description: ?[]const u8) Arg {
     var arg = Arg.init(name, description);
 
     if (short_name) |n| {
@@ -109,7 +109,7 @@ pub fn singleArgumentOptionWithValidValues(
     description: ?[]const u8,
     values: []const []const u8,
 ) Arg {
-    var arg = Arg.singleArgumentOption(name, short_name, description);
+    var arg = Arg.singleValueOption(name, short_name, description);
     arg.setValidValues(values);
     return arg;
 }
@@ -220,8 +220,8 @@ pub fn positional(name: []const u8, description: ?[]const u8, index: ?usize) Arg
 /// port.setShortName('p');
 /// port.setProperty(.takes_value);
 ///
-/// // Equivalent, except `singleArgumentOption` sets the long name as well.
-/// var port = Arg.singleArgumentOption("port", 'p', "Port number to bind");
+/// // Equivalent, except `singleValueOption` sets the long name as well.
+/// var port = Arg.singleValueOption("port", 'p', "Port number to bind");
 ///
 /// try root.addArg(port);
 /// ```
@@ -244,7 +244,7 @@ pub fn setShortName(self: *Arg, short_name: u8) void {
 /// port.setProperty(.takes_value);
 ///
 /// // Equivalent
-/// var port = Arg.singleArgumentOption("port", null, "Port number to bind");
+/// var port = Arg.singleValueOption("port", null, "Port number to bind");
 ///
 /// try root.addArg(port);
 /// ```
@@ -414,7 +414,7 @@ pub fn setValuesDelimiter(self: *Arg, delimiter: []const u8) void {
 /// var first = Arg.positional("FIRST", "First positional arg", 2);
 ///
 /// // No effect on this
-/// var option = Arg.singleArgumentOption("option", 'o', "Some description");
+/// var option = Arg.singleValueOption("option", 'o', "Some description");
 /// option.setIndex(3);
 ///
 /// try root.addArg(first);
@@ -466,7 +466,7 @@ pub fn setProperty(self: *Arg, property: Property) void {
 ///
 /// var root = app.rootCommand();
 ///
-/// var name = Arg.singleArgumentOption("name", 'n', "Person to greet");
+/// var name = Arg.singleValueOption("name", 'n', "Person to greet");
 /// // Convert to boolean option by removing the `takes_value` property
 /// name.unsetProperty(.takes_value);
 ///
@@ -493,7 +493,7 @@ pub fn unsetProperty(self: *Arg, property: Property) void {
 ///
 /// var root = app.rootCommand();
 ///
-/// var name = Arg.singleArgumentOption("name", 'n', "Person to greet");
+/// var name = Arg.singleValueOption("name", 'n', "Person to greet");
 /// if (name.hasProperty(.takes_value)) {
 ///     std.debug.print("The `name` flag takes a value", .{});
 /// }

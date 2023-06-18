@@ -140,8 +140,8 @@ try myls.addArg(Arg.booleanOption("one-line", '1', null));
 try myls.addArg(Arg.booleanOption("size", 's', null));
 try myls.addArg(Arg.booleanOption("version", null, null));
 
-try myls.addArg(Arg.singleArgumentOption("ignore", 'I', null));
-try myls.addArg(Arg.singleArgumentOption("hide", null, null));
+try myls.addArg(Arg.singleValueOption("ignore", 'I', null));
+try myls.addArg(Arg.singleValueOption("hide", null, null));
 
 try myls.addArg(Arg.singleArgumentOptionWithValidValues("color", 'C', null, &[_][]const u8{
     "always",
@@ -162,8 +162,8 @@ try myls.addArgs(&[_]Arg {
     Arg.booleanOption("size", 's', null),
     Arg.booleanOption("version", null, null),
 
-    Arg.singleArgumentOption("ignore", 'I', null),
-    Arg.singleArgumentOption("hide", null, null),
+    Arg.singleValueOption("ignore", 'I', null),
+    Arg.singleValueOption("hide", null, null),
 
     Arg.singleArgumentOptionWithValidValues("color", 'C', null, &[_][]const u8{
         "always",
@@ -310,8 +310,8 @@ pub fn main() anyerror!void {
     try myls.addArg(Arg.booleanOption("one-line", '1', null));
     try myls.addArg(Arg.booleanOption("size", 's', null));
     try myls.addArg(Arg.booleanOption("version", null, null));
-    try myls.addArg(Arg.singleArgumentOption("ignore", 'I', null));
-    try myls.addArg(Arg.singleArgumentOption("hide", null, null));
+    try myls.addArg(Arg.singleValueOption("ignore", 'I', null));
+    try myls.addArg(Arg.singleValueOption("hide", null, null));
 
     try myls.addArg(Arg.singleArgumentOptionWithValidValues("color", 'C', null, &[_][]const u8{
         "always",

@@ -110,14 +110,14 @@ pub fn addArg(self: *Command, new_arg: Arg) !void {
 ///
 /// var root = app.rootCommand();
 /// try root.addArgs(&[_]Arg {
-///     Arg.singleArgumentOption("firstname", 'f', "First name"),
-///     Arg.singleArgumentOption("lastname", 'l', "Last name"),
+///     Arg.singleValueOption("firstname", 'f', "First name"),
+///     Arg.singleValueOption("lastname", 'l', "Last name"),
 /// });
 ///
 /// var address = app.createCommand("address", "Address");
 /// try address.addArgs(&[_]Arg {
-///     Arg.singleArgumentOption("street", 's', "Street name"),
-///     Arg.singleArgumentOption("postal", 'p', "Postal code"),
+///     Arg.singleValueOption("street", 's', "Street name"),
+///     Arg.singleValueOption("postal", 'p', "Postal code"),
 /// });
 /// ```
 pub fn addArgs(self: *Command, args: []Arg) !void {
