@@ -43,6 +43,40 @@ pub fn init(name: []const u8, description: ?[]const u8) Arg {
     return Arg{ .name = name, .description = description };
 }
 
+/// Creates a positional argument.
+///
+/// The index starts with **1** and determines the position of the positional
+/// argument relative to other positional arguments. By default, the index is
+/// assigned based on the order in which the arguments are defined.
+///
+/// ## Examples
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+///
+/// // Order dependent
+/// try root.addArg(Arg.positional("FIRST", null, null));
+/// try root.addArg(Arg.positional("SECOND", null, null));
+/// try root.addArg(Arg.positional("THIRD", null, null));
+///
+/// // Equivalent but order independent
+/// try root.addArg(Arg.positional("THIRD", null, 3));
+/// try root.addArg(Arg.positional("SECOND", null, 2));
+/// try root.addArg(Arg.positional("FIRST", null, 1));
+/// ```
+pub fn positional(name: []const u8, description: ?[]const u8, index: ?usize) Arg {
+    var arg = Arg.init(name, description);
+
+    if (index) |i| {
+        arg.setIndex(i);
+    }
+    arg.setProperty(.takes_value);
+    return arg;
+}
+
 /// Creates a boolean option to enable or disable a specific feature or behavior.
 ///
 /// This option represents a simple on/off switch that can be used to control a
@@ -166,40 +200,6 @@ pub fn multiValuesOptionWithValidValues(
 ) Arg {
     var arg = Arg.multiValuesOption(name, short_name, description, max_values);
     arg.setValidValues(values);
-    return arg;
-}
-
-/// Creates a positional argument.
-///
-/// The index starts with **1** and determines the position of the positional
-/// argument relative to other positional arguments. By default, the index is
-/// assigned based on the order in which the arguments are defined.
-///
-/// ## Examples
-///
-/// ```zig
-/// var app = App.init(allocator, "myapp", "My app description");
-/// defer app.deinit();
-///
-/// var root = app.rootCommand();
-///
-/// // Order dependent
-/// try root.addArg(Arg.positional("FIRST", null, null));
-/// try root.addArg(Arg.positional("SECOND", null, null));
-/// try root.addArg(Arg.positional("THIRD", null, null));
-///
-/// // Equivalent but order independent
-/// try root.addArg(Arg.positional("THIRD", null, 3));
-/// try root.addArg(Arg.positional("SECOND", null, 2));
-/// try root.addArg(Arg.positional("FIRST", null, 1));
-/// ```
-pub fn positional(name: []const u8, description: ?[]const u8, index: ?usize) Arg {
-    var arg = Arg.init(name, description);
-
-    if (index) |i| {
-        arg.setIndex(i);
-    }
-    arg.setProperty(.takes_value);
     return arg;
 }
 
