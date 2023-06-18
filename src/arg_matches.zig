@@ -182,11 +182,11 @@ pub const ArgMatches = struct {
     ///
     /// const matches = try app.parseProcess();
     ///
-    /// if (matches.getArgumentValues("nums")) |numbers| {
+    /// if (matches.getMultiValues("nums")) |numbers| {
     ///     std.debug.print("Add {s} + {s}", .{ numbers[0], numbers[1] });
     /// }
     /// ```
-    pub fn getArgumentValues(self: *const ArgMatches, name: []const u8) ?[][]const u8 {
+    pub fn getMultiValues(self: *const ArgMatches, name: []const u8) ?[][]const u8 {
         if (self.args.get(name)) |value| {
             if (value.isMany()) return value.many.items[0..];
         }

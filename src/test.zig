@@ -64,7 +64,7 @@ test "command that takes single value" {
 //     app.rootCommand().setProperty(.takes_positional_arg);
 
 //     const matches = try app.parseFrom(&.{ "a", "b", "c" });
-//     try testing.expectEqualSlices([]const u8, &.{ "a", "b", "c" }, args.getArgumentValues("PATHS").?);
+//     try testing.expectEqualSlices([]const u8, &.{ "a", "b", "c" }, args.getMultiValues("PATHS").?);
 
 //     app.deinit();
 // }
@@ -86,9 +86,9 @@ test "command that takes single value" {
 
 //     // This gives weird error like:
 //     // index 0 incorrect. expected { 97 }, found { 97 }
-//     //try testing.expectEqualSlices([]const u8, &.{ "a", "b", "c" }, args.getArgumentValues("PATHS").?);
+//     //try testing.expectEqualSlices([]const u8, &.{ "a", "b", "c" }, args.getMultiValues("PATHS").?);
 
-//     const given_paths = args.getArgumentValues("PATHS");
+//     const given_paths = args.getMultiValues("PATHS");
 //     try testing.expectEqual(true, given_paths != null);
 //     try testing.expectEqual(@as(usize, 3), given_paths.?.len);
 //     try testing.expectEqualStrings("a", given_paths.?[0]);
@@ -161,7 +161,7 @@ test "Option that takes many/multiple values" {
     try app.rootCommand().addArg(srcs);
     const matches = try app.parseFrom(&.{ "-s", "f1", "f2", "f3", "f4", "f5" });
 
-    try testing.expectEqual(@as(usize, 5), matches.getArgumentValues("sources").?.len);
+    try testing.expectEqual(@as(usize, 5), matches.getMultiValues("sources").?.len);
 
     app.deinit();
 }
