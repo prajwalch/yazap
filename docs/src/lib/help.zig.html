@@ -325,7 +325,7 @@
 <span class="line" id="L204">        <span class="tok-kw">const</span> subcmd_name = matches.subcommand.?.name;</span>
 <span class="line" id="L205">        <span class="tok-kw">const</span> subcmd_matches = &amp;matches.subcommand.?.matches.?;</span>
 <span class="line" id="L206"></span>
-<span class="line" id="L207">        <span class="tok-kw">if</span> (subcmd_matches.isArgumentPresent(<span class="tok-str">&quot;help&quot;</span>)) {</span>
+<span class="line" id="L207">        <span class="tok-kw">if</span> (subcmd_matches.containsArg(<span class="tok-str">&quot;help&quot;</span>)) {</span>
 <span class="line" id="L208">            <span class="tok-kw">return</span> subcmd_name;</span>
 <span class="line" id="L209">        } <span class="tok-kw">else</span> {</span>
 <span class="line" id="L210">            <span class="tok-comment">// If current subcommand's arg doesnot have `help` option</span>

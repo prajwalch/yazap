@@ -225,14 +225,14 @@
 <span class="line" id="L110"><span class="tok-comment">///</span></span>
 <span class="line" id="L111"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
 <span class="line" id="L112"><span class="tok-comment">/// try root.addArgs(&amp;[_]Arg {</span></span>
-<span class="line" id="L113"><span class="tok-comment">///     Arg.singleArgumentOption(&quot;firstname&quot;, 'f', &quot;First name&quot;),</span></span>
-<span class="line" id="L114"><span class="tok-comment">///     Arg.singleArgumentOption(&quot;lastname&quot;, 'l', &quot;Last name&quot;),</span></span>
+<span class="line" id="L113"><span class="tok-comment">///     Arg.singleValueOption(&quot;firstname&quot;, 'f', &quot;First name&quot;),</span></span>
+<span class="line" id="L114"><span class="tok-comment">///     Arg.singleValueOption(&quot;lastname&quot;, 'l', &quot;Last name&quot;),</span></span>
 <span class="line" id="L115"><span class="tok-comment">/// });</span></span>
 <span class="line" id="L116"><span class="tok-comment">///</span></span>
 <span class="line" id="L117"><span class="tok-comment">/// var address = app.createCommand(&quot;address&quot;, &quot;Address&quot;);</span></span>
 <span class="line" id="L118"><span class="tok-comment">/// try address.addArgs(&amp;[_]Arg {</span></span>
-<span class="line" id="L119"><span class="tok-comment">///     Arg.singleArgumentOption(&quot;street&quot;, 's', &quot;Street name&quot;),</span></span>
-<span class="line" id="L120"><span class="tok-comment">///     Arg.singleArgumentOption(&quot;postal&quot;, 'p', &quot;Postal code&quot;),</span></span>
+<span class="line" id="L119"><span class="tok-comment">///     Arg.singleValueOption(&quot;street&quot;, 's', &quot;Street name&quot;),</span></span>
+<span class="line" id="L120"><span class="tok-comment">///     Arg.singleValueOption(&quot;postal&quot;, 'p', &quot;Postal code&quot;),</span></span>
 <span class="line" id="L121"><span class="tok-comment">/// });</span></span>
 <span class="line" id="L122"><span class="tok-comment">/// ```</span></span>
 <span class="line" id="L123"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">addArgs</span>(self: *Command, args: []Arg) !<span class="tok-type">void</span> {</span>

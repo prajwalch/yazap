@@ -228,7 +228,7 @@
 <span class="line" id="L115">        );</span>
 <span class="line" id="L116">    }</span>
 <span class="line" id="L117"></span>
-<span class="line" id="L118">    <span class="tok-kw">if</span> (!self.arg_matches.isArgumentPresent(<span class="tok-str">&quot;help&quot;</span>)) {</span>
+<span class="line" id="L118">    <span class="tok-kw">if</span> (!self.arg_matches.containsArg(<span class="tok-str">&quot;help&quot;</span>)) {</span>
 <span class="line" id="L119">        <span class="tok-kw">const</span> takes_pos_args_and_is_required =</span>
 <span class="line" id="L120">            (takes_pos_args <span class="tok-kw">and</span> (self.command.hasProperty(.positional_arg_required)));</span>
 <span class="line" id="L121"></span>

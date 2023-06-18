@@ -206,12 +206,12 @@
 <span class="line" id="L93">    <span class="tok-comment">///</span></span>
 <span class="line" id="L94">    <span class="tok-comment">/// const matches = try app.parseProcess();</span></span>
 <span class="line" id="L95">    <span class="tok-comment">///</span></span>
-<span class="line" id="L96">    <span class="tok-comment">/// if (!matches.hasArguments()) {</span></span>
+<span class="line" id="L96">    <span class="tok-comment">/// if (!matches.containsArgs()) {</span></span>
 <span class="line" id="L97">    <span class="tok-comment">///     try app.displayHelp();</span></span>
 <span class="line" id="L98">    <span class="tok-comment">///     return;</span></span>
 <span class="line" id="L99">    <span class="tok-comment">/// }</span></span>
 <span class="line" id="L100">    <span class="tok-comment">/// ```</span></span>
-<span class="line" id="L101">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">hasArguments</span>(self: *<span class="tok-kw">const</span> ArgMatches) <span class="tok-type">bool</span> {</span>
+<span class="line" id="L101">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">containsArgs</span>(self: *<span class="tok-kw">const</span> ArgMatches) <span class="tok-type">bool</span> {</span>
 <span class="line" id="L102">        <span class="tok-kw">return</span> ((self.args.count() &gt;= <span class="tok-number">1</span>) <span class="tok-kw">or</span> (self.subcommand != <span class="tok-null">null</span>));</span>
 <span class="line" id="L103">    }</span>
 <span class="line" id="L104"></span>
@@ -234,20 +234,20 @@
 <span class="line" id="L121">    <span class="tok-comment">///</span></span>
 <span class="line" id="L122">    <span class="tok-comment">/// const matches = try app.parseProcess();</span></span>
 <span class="line" id="L123">    <span class="tok-comment">///</span></span>
-<span class="line" id="L124">    <span class="tok-comment">/// if (matches.isArgumentPresent(&quot;verbose&quot;)) {</span></span>
+<span class="line" id="L124">    <span class="tok-comment">/// if (matches.containsArg(&quot;verbose&quot;)) {</span></span>
 <span class="line" id="L125">    <span class="tok-comment">///     // Handle verbose operation</span></span>
 <span class="line" id="L126">    <span class="tok-comment">/// }</span></span>
 <span class="line" id="L127">    <span class="tok-comment">///</span></span>
-<span class="line" id="L128">    <span class="tok-comment">/// if (matches.isArgumentPresent(&quot;build&quot;)) {</span></span>
+<span class="line" id="L128">    <span class="tok-comment">/// if (matches.containsArg(&quot;build&quot;)) {</span></span>
 <span class="line" id="L129">    <span class="tok-comment">///     const build_cmd_matches = matches.subcommandMatches(&quot;build&quot;).?;</span></span>
 <span class="line" id="L130">    <span class="tok-comment">///</span></span>
-<span class="line" id="L131">    <span class="tok-comment">///     if (build_cmd_matches.isArgumentPresent(&quot;release&quot;)) {</span></span>
+<span class="line" id="L131">    <span class="tok-comment">///     if (build_cmd_matches.containsArg(&quot;release&quot;)) {</span></span>
 <span class="line" id="L132">    <span class="tok-comment">///         // Build for release mode</span></span>
 <span class="line" id="L133">    <span class="tok-comment">///     }</span></span>
 <span class="line" id="L134">    <span class="tok-comment">/// }</span></span>
 <span class="line" id="L135">    <span class="tok-comment">///</span></span>
 <span class="line" id="L136">    <span class="tok-comment">/// ```</span></span>
-<span class="line" id="L137">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">isArgumentPresent</span>(self: *<span class="tok-kw">const</span> ArgMatches, name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) <span class="tok-type">bool</span> {</span>
+<span class="line" id="L137">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">containsArg</span>(self: *<span class="tok-kw">const</span> ArgMatches, name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) <span class="tok-type">bool</span> {</span>
 <span class="line" id="L138">        <span class="tok-kw">if</span> (self.args.contains(name)) {</span>
 <span class="line" id="L139">            <span class="tok-kw">return</span> <span class="tok-null">true</span>;</span>
 <span class="line" id="L140">        } <span class="tok-kw">else</span> <span class="tok-kw">if</span> (self.subcommand) |subcmd| {</span>
@@ -266,16 +266,16 @@
 <span class="line" id="L153">    <span class="tok-comment">/// defer app.deinit();</span></span>
 <span class="line" id="L154">    <span class="tok-comment">///</span></span>
 <span class="line" id="L155">    <span class="tok-comment">/// var root = app.rootCommand();</span></span>
-<span class="line" id="L156">    <span class="tok-comment">/// try root.addArg(Arg.singleArgumentOption(&quot;config&quot;, 'c', &quot;Config file&quot;));</span></span>
+<span class="line" id="L156">    <span class="tok-comment">/// try root.addArg(Arg.singleValueOption(&quot;config&quot;, 'c', &quot;Config file&quot;));</span></span>
 <span class="line" id="L157">    <span class="tok-comment">///</span></span>
 <span class="line" id="L158">    <span class="tok-comment">/// const matches = try app.parseProcess();</span></span>
 <span class="line" id="L159">    <span class="tok-comment">///</span></span>
-<span class="line" id="L160">    <span class="tok-comment">/// if (matches.getArgumentValue(&quot;config&quot;)) |config_file| {</span></span>
+<span class="line" id="L160">    <span class="tok-comment">/// if (matches.getSingleValue(&quot;config&quot;)) |config_file| {</span></span>
 <span class="line" id="L161">    <span class="tok-comment">///     std.debug.print(&quot;Config file name: {s}&quot;, .{config_file});</span></span>
 <span class="line" id="L162">    <span class="tok-comment">/// }</span></span>
 <span class="line" id="L163">    <span class="tok-comment">/// ```</span></span>
-<span class="line" id="L164">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">getArgumentValue</span>(self: *<span class="tok-kw">const</span> ArgMatches, name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) ?[]<span class="tok-kw">const</span> <span class="tok-type">u8</span> {</span>
-<span class="line" id="L165">        <span class="tok-kw">if</span> (self.args.get(name)) |value| {</span>
+<span class="line" id="L164">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">getSingleValue</span>(self: *<span class="tok-kw">const</span> ArgMatches, arg_name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) ?[]<span class="tok-kw">const</span> <span class="tok-type">u8</span> {</span>
+<span class="line" id="L165">        <span class="tok-kw">if</span> (self.args.get(arg_name)) |value| {</span>
 <span class="line" id="L166">            <span class="tok-kw">if</span> (value.isSingle()) <span class="tok-kw">return</span> value.single;</span>
 <span class="line" id="L167">        }</span>
 <span class="line" id="L168">        <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
@@ -291,16 +291,16 @@
 <span class="line" id="L178">    <span class="tok-comment">/// defer app.deinit();</span></span>
 <span class="line" id="L179">    <span class="tok-comment">///</span></span>
 <span class="line" id="L180">    <span class="tok-comment">/// var root = app.rootCommand();</span></span>
-<span class="line" id="L181">    <span class="tok-comment">/// try root.addArg(Arg.multiArgumentsOption(&quot;nums&quot;, 'n', &quot;Numbers to add&quot;, 2));</span></span>
+<span class="line" id="L181">    <span class="tok-comment">/// try root.addArg(Arg.multiValuesOption(&quot;nums&quot;, 'n', &quot;Numbers to add&quot;, 2));</span></span>
 <span class="line" id="L182">    <span class="tok-comment">///</span></span>
 <span class="line" id="L183">    <span class="tok-comment">/// const matches = try app.parseProcess();</span></span>
 <span class="line" id="L184">    <span class="tok-comment">///</span></span>
-<span class="line" id="L185">    <span class="tok-comment">/// if (matches.getArgumentValues(&quot;nums&quot;)) |numbers| {</span></span>
+<span class="line" id="L185">    <span class="tok-comment">/// if (matches.getMultiValues(&quot;nums&quot;)) |numbers| {</span></span>
 <span class="line" id="L186">    <span class="tok-comment">///     std.debug.print(&quot;Add {s} + {s}&quot;, .{ numbers[0], numbers[1] });</span></span>
 <span class="line" id="L187">    <span class="tok-comment">/// }</span></span>
 <span class="line" id="L188">    <span class="tok-comment">/// ```</span></span>
-<span class="line" id="L189">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">getArgumentValues</span>(self: *<span class="tok-kw">const</span> ArgMatches, name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) ?[][]<span class="tok-kw">const</span> <span class="tok-type">u8</span> {</span>
-<span class="line" id="L190">        <span class="tok-kw">if</span> (self.args.get(name)) |value| {</span>
+<span class="line" id="L189">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">getMultiValues</span>(self: *<span class="tok-kw">const</span> ArgMatches, arg_name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) ?[][]<span class="tok-kw">const</span> <span class="tok-type">u8</span> {</span>
+<span class="line" id="L190">        <span class="tok-kw">if</span> (self.args.get(arg_name)) |value| {</span>
 <span class="line" id="L191">            <span class="tok-kw">if</span> (value.isMany()) <span class="tok-kw">return</span> value.many.items[<span class="tok-number">0</span>..];</span>
 <span class="line" id="L192">        }</span>
 <span class="line" id="L193">        <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
@@ -319,14 +319,14 @@
 <span class="line" id="L206">    <span class="tok-comment">///</span></span>
 <span class="line" id="L207">    <span class="tok-comment">/// var build_cmd = app.createCommand(&quot;build&quot;, &quot;Build the project&quot;);</span></span>
 <span class="line" id="L208">    <span class="tok-comment">/// try build_cmd.addArg(Arg.booleanOption(&quot;release&quot;, 'r', &quot;Build in release mode&quot;));</span></span>
-<span class="line" id="L209">    <span class="tok-comment">/// try build_cmd.addArg(Arg.singleArgumentOption(&quot;target&quot;, 't', &quot;Build for given target&quot;));</span></span>
+<span class="line" id="L209">    <span class="tok-comment">/// try build_cmd.addArg(Arg.singleValueOption(&quot;target&quot;, 't', &quot;Build for given target&quot;));</span></span>
 <span class="line" id="L210">    <span class="tok-comment">/// try root.addSubcommand(build_cmd);</span></span>
 <span class="line" id="L211">    <span class="tok-comment">///</span></span>
 <span class="line" id="L212">    <span class="tok-comment">/// const matches = try app.parseProcess();</span></span>
 <span class="line" id="L213">    <span class="tok-comment">///</span></span>
 <span class="line" id="L214">    <span class="tok-comment">/// if (matches.subcommandMatches(&quot;build&quot;)) |build_cmd_matches| {</span></span>
-<span class="line" id="L215">    <span class="tok-comment">///     if (build_cmd_matches.isArgumentPresent(&quot;release&quot;)) {</span></span>
-<span class="line" id="L216">    <span class="tok-comment">///         const target = build_cmd_matches.getArgumentValue(&quot;target&quot;) orelse &quot;default&quot;;</span></span>
+<span class="line" id="L215">    <span class="tok-comment">///     if (build_cmd_matches.containsArg(&quot;release&quot;)) {</span></span>
+<span class="line" id="L216">    <span class="tok-comment">///         const target = build_cmd_matches.getSingleValue(&quot;target&quot;) orelse &quot;default&quot;;</span></span>
 <span class="line" id="L217">    <span class="tok-comment">///         // Build for release mode to given target</span></span>
 <span class="line" id="L218">    <span class="tok-comment">///     }</span></span>
 <span class="line" id="L219">    <span class="tok-comment">/// }</span></span>

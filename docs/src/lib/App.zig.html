@@ -253,7 +253,7 @@
 <span class="line" id="L140"><span class="tok-comment">///</span></span>
 <span class="line" id="L141"><span class="tok-comment">/// const matches = try app.parseProcess();</span></span>
 <span class="line" id="L142"><span class="tok-comment">///</span></span>
-<span class="line" id="L143"><span class="tok-comment">/// if (!matches.hasArguments()) {</span></span>
+<span class="line" id="L143"><span class="tok-comment">/// if (!matches.containsArgs()) {</span></span>
 <span class="line" id="L144"><span class="tok-comment">///     try app.displayHelp();</span></span>
 <span class="line" id="L145"><span class="tok-comment">///     return;</span></span>
 <span class="line" id="L146"><span class="tok-comment">/// }</span></span>
@@ -289,7 +289,7 @@
 <span class="line" id="L176"><span class="tok-comment">/// const matches = try app.parseProcess();</span></span>
 <span class="line" id="L177"><span class="tok-comment">///</span></span>
 <span class="line" id="L178"><span class="tok-comment">/// if (matches.subcommandMatches(&quot;subcmd&quot;)) |subcmd_matches| {</span></span>
-<span class="line" id="L179"><span class="tok-comment">///     if (!subcmd_matches.hasArguments()) {</span></span>
+<span class="line" id="L179"><span class="tok-comment">///     if (!subcmd_matches.containsArgs()) {</span></span>
 <span class="line" id="L180"><span class="tok-comment">///         try app.displaySubcommandHelp();</span></span>
 <span class="line" id="L181"><span class="tok-comment">///         return;</span></span>
 <span class="line" id="L182"><span class="tok-comment">///     }</span></span>
@@ -314,7 +314,7 @@
 <span class="line" id="L199">    <span class="tok-kw">var</span> arg_matches = self.arg_matches.?;</span>
 <span class="line" id="L200">    <span class="tok-kw">var</span> help_displayed = <span class="tok-null">false</span>;</span>
 <span class="line" id="L201"></span>
-<span class="line" id="L202">    <span class="tok-kw">if</span> (arg_matches.isArgumentPresent(<span class="tok-str">&quot;help&quot;</span>)) {</span>
+<span class="line" id="L202">    <span class="tok-kw">if</span> (arg_matches.containsArg(<span class="tok-str">&quot;help&quot;</span>)) {</span>
 <span class="line" id="L203">        <span class="tok-kw">try</span> self.displayHelp();</span>
 <span class="line" id="L204">        help_displayed = <span class="tok-null">true</span>;</span>
 <span class="line" id="L205">    } <span class="tok-kw">else</span> {</span>
