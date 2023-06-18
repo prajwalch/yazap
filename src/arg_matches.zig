@@ -157,12 +157,12 @@ pub const ArgMatches = struct {
     ///
     /// const matches = try app.parseProcess();
     ///
-    /// if (matches.getArgumentValue("config")) |config_file| {
+    /// if (matches.getSingleValue("config")) |config_file| {
     ///     std.debug.print("Config file name: {s}", .{config_file});
     /// }
     /// ```
-    pub fn getArgumentValue(self: *const ArgMatches, name: []const u8) ?[]const u8 {
-        if (self.args.get(name)) |value| {
+    pub fn getSingleValue(self: *const ArgMatches, arg_name: []const u8) ?[]const u8 {
+        if (self.args.get(arg_name)) |value| {
             if (value.isSingle()) return value.single;
         }
         return null;
@@ -213,7 +213,7 @@ pub const ArgMatches = struct {
     ///
     /// if (matches.subcommandMatches("build")) |build_cmd_matches| {
     ///     if (build_cmd_matches.isArgumentPresent("release")) {
-    ///         const target = build_cmd_matches.getArgumentValue("target") orelse "default";
+    ///         const target = build_cmd_matches.getSingleValue("target") orelse "default";
     ///         // Build for release mode to given target
     ///     }
     /// }

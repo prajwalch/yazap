@@ -15,9 +15,9 @@ test "positional arguments with auto index" {
     try app.rootCommand().addArg(Arg.positional("THREE", null, null));
 
     const matches = try app.parseFrom(&.{ "val1", "val2", "val3" });
-    try testing.expectEqualStrings("val1", matches.getArgumentValue("ONE").?);
-    try testing.expectEqualStrings("val2", matches.getArgumentValue("TWO").?);
-    try testing.expectEqualStrings("val3", matches.getArgumentValue("THREE").?);
+    try testing.expectEqualStrings("val1", matches.getSingleValue("ONE").?);
+    try testing.expectEqualStrings("val2", matches.getSingleValue("TWO").?);
+    try testing.expectEqualStrings("val3", matches.getSingleValue("THREE").?);
 
     app.deinit();
 }
@@ -31,9 +31,9 @@ test "positional arguments with manual index" {
     try app.rootCommand().addArg(Arg.positional("TWO", null, 2));
 
     const matches = try app.parseFrom(&.{ "val1", "val2", "val3" });
-    try testing.expectEqualStrings("val1", matches.getArgumentValue("ONE").?);
-    try testing.expectEqualStrings("val2", matches.getArgumentValue("TWO").?);
-    try testing.expectEqualStrings("val3", matches.getArgumentValue("THREE").?);
+    try testing.expectEqualStrings("val1", matches.getSingleValue("ONE").?);
+    try testing.expectEqualStrings("val2", matches.getSingleValue("TWO").?);
+    try testing.expectEqualStrings("val3", matches.getSingleValue("THREE").?);
 
     app.deinit();
 }
@@ -45,7 +45,7 @@ test "command that takes single value" {
     try app.rootCommand().addArg(Arg.positional("PATH", null, 1));
 
     const matches = try app.parseFrom(&.{"test.txt"});
-    try testing.expectEqualStrings("test.txt", matches.getArgumentValue("PATH").?);
+    try testing.expectEqualStrings("test.txt", matches.getSingleValue("PATH").?);
 
     app.deinit();
 }
@@ -225,7 +225,7 @@ test "passing positional argument before options" {
     app.rootCommand().setProperty(.positional_arg_required);
 
     const matches = try app.parseFrom(&.{ ".", "-a" });
-    try testing.expectEqualStrings(".", matches.getArgumentValue("PATH").?);
+    try testing.expectEqualStrings(".", matches.getSingleValue("PATH").?);
     try testing.expectEqual(true, matches.isArgumentPresent("all"));
 
     app.deinit();
@@ -239,7 +239,7 @@ test "passing positional argument after options" {
     try app.rootCommand().addArg(Arg.booleanOption("all", 'a', null));
 
     const matches = try app.parseFrom(&.{ "-a", "." });
-    try testing.expectEqualStrings(".", matches.getArgumentValue("PATH").?);
+    try testing.expectEqualStrings(".", matches.getSingleValue("PATH").?);
     try testing.expectEqual(true, matches.isArgumentPresent("all"));
 
     app.deinit();
@@ -254,7 +254,7 @@ test "passing positional argument before and after options" {
     try app.rootCommand().addArg(Arg.booleanOption("one-line", '1', null));
 
     const matches = try app.parseFrom(&.{ "-1", ".", "-a" });
-    try testing.expectEqualStrings(".", matches.getArgumentValue("PATH").?);
+    try testing.expectEqualStrings(".", matches.getSingleValue("PATH").?);
     try testing.expectEqual(true, matches.isArgumentPresent("one-line"));
     try testing.expectEqual(true, matches.isArgumentPresent("all"));
 

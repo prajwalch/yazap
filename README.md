@@ -208,7 +208,7 @@ if (matches.isArgumentPresent("version")) {
     return;
 }
 
-if (matches.getArgumentValue("FILE")) |f| {
+if (matches.getSingleValue("FILE")) |f| {
     log.info("List contents of {f}");
     return;
 }
@@ -219,7 +219,7 @@ if (matches.subcommandMatches("update")) |update_cmd_matches| {
         return;
     }
 
-    if (update_cmd_matches.getArgumentValue("branch")) |branch| {
+    if (update_cmd_matches.getSingleValue("branch")) |branch| {
         std.log.info("Branch to update: {s}", .{branch});
         return;
     }
@@ -236,13 +236,13 @@ if (matches.isArgumentPresent("recursive")) {
     return;
 }
 
-if (matches.getArgumentValue("ignore")) |pattern| {
+if (matches.getSingleValue("ignore")) |pattern| {
     log.info("ignore pattern = {s}", .{pattern});
     return;
 }
 
 if (matches.isArgumentPresent("color")) {
-    const when = matches.getArgumentValue("color").?;
+    const when = matches.getSingleValue("color").?;
 
     log.info("color={s}", .{when});
     return;
@@ -331,7 +331,7 @@ pub fn main() anyerror!void {
         return;
     }
 
-    if (matches.getArgumentValue("FILE")) |f| {
+    if (matches.getSingleValue("FILE")) |f| {
         log.info("List contents of {f}");
         return;
     }
@@ -346,7 +346,7 @@ pub fn main() anyerror!void {
             std.log.info("Check and report new update", .{});
             return;
         }
-        if (update_cmd_matches.getArgumentValue("branch")) |branch| {
+        if (update_cmd_matches.getSingleValue("branch")) |branch| {
             std.log.info("Branch to update: {s}", .{branch});
             return;
         }
@@ -363,13 +363,13 @@ pub fn main() anyerror!void {
         return;
     }
 
-    if (matches.getArgumentValue("ignore")) |pattern| {
+    if (matches.getSingleValue("ignore")) |pattern| {
         log.info("ignore pattern = {s}", .{pattern});
         return;
     }
 
     if (matches.isArgumentPresent("color")) {
-        const when = matches.getArgumentValue("color").?;
+        const when = matches.getSingleValue("color").?;
 
         log.info("color={s}", .{when});
         return;

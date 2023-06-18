@@ -39,7 +39,7 @@ pub fn main() anyerror!void {
     }
 
     if (matches.subcommandMatches("commit")) |commit_matches| {
-        if (commit_matches.getArgumentValue("message")) |message| {
+        if (commit_matches.getSingleValue("message")) |message| {
             std.log.info("Commit message {s}", .{message});
             return;
         }
@@ -47,8 +47,8 @@ pub fn main() anyerror!void {
 
     if (matches.subcommandMatches("push")) |push_matches| {
         if (push_matches.isArgumentPresent("REMOTE") and push_matches.isArgumentPresent("BRANCH_NAME")) {
-            const remote = push_matches.getArgumentValue("REMOTE").?;
-            const branch_name = push_matches.getArgumentValue("BRANCH_NAME").?;
+            const remote = push_matches.getSingleValue("REMOTE").?;
+            const branch_name = push_matches.getSingleValue("BRANCH_NAME").?;
 
             std.log.info("REMOTE={s}, BRANCH_NAME={s}", .{ remote, branch_name });
             return;
