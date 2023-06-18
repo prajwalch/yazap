@@ -5,7 +5,7 @@
 ### `flag` Changes
 - Moved and Renamed `boolean()` to `Arg.booleanOption()`.
 - Moved and Renamed `argOne()` to `Arg.singleValueOption()`.
-- Moved and Renamed `argN()` to `Arg.multiArgumentsOption()` with slightly
+- Moved and Renamed `argN()` to `Arg.multiValuesOption()` with slightly
     modified parameter order.
 
     Old
@@ -55,7 +55,7 @@ const Arg = yazap.Arg
 // -- snip --
 try root.addArg(Arg.booleanOption("bool", null, null));
 try root.addArg(Arg.singleValueOption("one", null, null));
-try root.addArg(Arg.multiArgumentsOption("many", null, null, 2));
+try root.addArg(Arg.multiValuesOption("many", null, null, 2));
 try root.addArg(Arg.singleValueOptionWithValidValues("opt", null, null, &[_][]const u8 {
     "opt1",
     "opt2",

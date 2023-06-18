@@ -113,7 +113,7 @@ pub fn singleValueOptionWithValidValues(
     return arg;
 }
 
-/// Creates an option that accepts multiple arguments.
+/// Creates an option that accepts multiple values.
 ///
 /// ## Examples
 ///
@@ -122,9 +122,9 @@ pub fn singleValueOptionWithValidValues(
 /// defer app.deinit();
 ///
 /// var root = app.rootCommand();
-/// try root.addArg(Arg.multiArgumentsOption("nums", 'n', "Numbers to add", 2));
+/// try root.addArg(Arg.multiValuesOption("nums", 'n', "Numbers to add", 2));
 /// ```
-pub fn multiArgumentsOption(
+pub fn multiValuesOption(
     name: []const u8,
     short_name: ?u8,
     description: ?[]const u8,
@@ -164,7 +164,7 @@ pub fn multiArgumentsOptionWithValidValues(
     max_values: usize,
     values: []const []const u8,
 ) Arg {
-    var arg = Arg.multiArgumentsOption(name, short_name, description, max_values);
+    var arg = Arg.multiValuesOption(name, short_name, description, max_values);
     arg.setValidValues(values);
     return arg;
 }

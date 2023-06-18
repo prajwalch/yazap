@@ -178,7 +178,7 @@ pub const ArgMatches = struct {
     /// defer app.deinit();
     ///
     /// var root = app.rootCommand();
-    /// try root.addArg(Arg.multiArgumentsOption("nums", 'n', "Numbers to add", 2));
+    /// try root.addArg(Arg.multiValuesOption("nums", 'n', "Numbers to add", 2));
     ///
     /// const matches = try app.parseProcess();
     ///
