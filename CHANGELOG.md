@@ -82,7 +82,7 @@ instead.
 
 ### `ArgsContext` Changes
 - Renamed `ArgsContext` to `ArgMatches`.
-- Renamed `isPresent()` to `isArgumentPresent()`.
+- Renamed `isPresent()` to `containsArg()`.
 - Renamed `valueOf()` to `getSingleValue()`.
 - Renamed `valuesOf()` to `getMultiValues()`.
 - Renamed `subcommandContext()` to `subcommandMatches()`.

@@ -199,7 +199,7 @@ fn displayHelpAndExitIfFound(self: *App) !void {
     var arg_matches = self.arg_matches.?;
     var help_displayed = false;
 
-    if (arg_matches.isArgumentPresent("help")) {
+    if (arg_matches.containsArg("help")) {
         try self.displayHelp();
         help_displayed = true;
     } else {

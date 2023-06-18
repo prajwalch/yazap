@@ -42,7 +42,7 @@ pub fn main() anyerror!void {
         return;
     }
 
-    if (matches.isArgumentPresent("version")) {
+    if (matches.containsArg("version")) {
         log.info("v0.1.0", .{});
         return;
     }
@@ -53,7 +53,7 @@ pub fn main() anyerror!void {
             return;
         }
 
-        if (update_cmd_matches.isArgumentPresent("check-only")) {
+        if (update_cmd_matches.containsArg("check-only")) {
             std.log.info("Check and report new update", .{});
             return;
         }
@@ -64,12 +64,12 @@ pub fn main() anyerror!void {
         return;
     }
 
-    if (matches.isArgumentPresent("all")) {
+    if (matches.containsArg("all")) {
         log.info("show all", .{});
         return;
     }
 
-    if (matches.isArgumentPresent("recursive")) {
+    if (matches.containsArg("recursive")) {
         log.info("show recursive", .{});
         return;
     }
@@ -79,7 +79,7 @@ pub fn main() anyerror!void {
         return;
     }
 
-    if (matches.isArgumentPresent("color")) {
+    if (matches.containsArg("color")) {
         const when = matches.getSingleValue("color").?;
 
         log.info("color={s}", .{when});

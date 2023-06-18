@@ -226,7 +226,7 @@ test "passing positional argument before options" {
 
     const matches = try app.parseFrom(&.{ ".", "-a" });
     try testing.expectEqualStrings(".", matches.getSingleValue("PATH").?);
-    try testing.expectEqual(true, matches.isArgumentPresent("all"));
+    try testing.expectEqual(true, matches.containsArg("all"));
 
     app.deinit();
 }
@@ -240,7 +240,7 @@ test "passing positional argument after options" {
 
     const matches = try app.parseFrom(&.{ "-a", "." });
     try testing.expectEqualStrings(".", matches.getSingleValue("PATH").?);
-    try testing.expectEqual(true, matches.isArgumentPresent("all"));
+    try testing.expectEqual(true, matches.containsArg("all"));
 
     app.deinit();
 }
@@ -255,8 +255,8 @@ test "passing positional argument before and after options" {
 
     const matches = try app.parseFrom(&.{ "-1", ".", "-a" });
     try testing.expectEqualStrings(".", matches.getSingleValue("PATH").?);
-    try testing.expectEqual(true, matches.isArgumentPresent("one-line"));
-    try testing.expectEqual(true, matches.isArgumentPresent("all"));
+    try testing.expectEqual(true, matches.containsArg("one-line"));
+    try testing.expectEqual(true, matches.containsArg("all"));
 
     app.deinit();
 }

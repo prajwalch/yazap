@@ -121,20 +121,20 @@ pub const ArgMatches = struct {
     ///
     /// const matches = try app.parseProcess();
     ///
-    /// if (matches.isArgumentPresent("verbose")) {
+    /// if (matches.containsArg("verbose")) {
     ///     // Handle verbose operation
     /// }
     ///
-    /// if (matches.isArgumentPresent("build")) {
+    /// if (matches.containsArg("build")) {
     ///     const build_cmd_matches = matches.subcommandMatches("build").?;
     ///
-    ///     if (build_cmd_matches.isArgumentPresent("release")) {
+    ///     if (build_cmd_matches.containsArg("release")) {
     ///         // Build for release mode
     ///     }
     /// }
     ///
     /// ```
-    pub fn isArgumentPresent(self: *const ArgMatches, name: []const u8) bool {
+    pub fn containsArg(self: *const ArgMatches, name: []const u8) bool {
         if (self.args.contains(name)) {
             return true;
         } else if (self.subcommand) |subcmd| {
@@ -212,7 +212,7 @@ pub const ArgMatches = struct {
     /// const matches = try app.parseProcess();
     ///
     /// if (matches.subcommandMatches("build")) |build_cmd_matches| {
-    ///     if (build_cmd_matches.isArgumentPresent("release")) {
+    ///     if (build_cmd_matches.containsArg("release")) {
     ///         const target = build_cmd_matches.getSingleValue("target") orelse "default";
     ///         // Build for release mode to given target
     ///     }

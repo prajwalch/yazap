@@ -19,13 +19,13 @@ pub fn main() anyerror!void {
 
     const matches = try app.parseProcess();
 
-    if (matches.isArgumentPresent("version")) {
+    if (matches.containsArg("version")) {
         std.debug.print("v0.1.0", .{});
         return;
     }
 
     if (matches.getSingleValue("FILE_NAME")) |file_name| {
-        if (matches.isArgumentPresent("no-create")) {
+        if (matches.containsArg("no-create")) {
             std.debug.print("I'am not creating it", .{});
         } else {
             var file = try std.fs.cwd().createFile(file_name, .{});

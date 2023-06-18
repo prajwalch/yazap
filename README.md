@@ -203,7 +203,7 @@ return a constant pointer to [`ArgMatches`](https://prajwalch.github.io/yazap/#A
 ```zig
 const matches = try app.parseProcess();
 
-if (matches.isArgumentPresent("version")) {
+if (matches.containsArg("version")) {
     log.info("v0.1.0", .{});
     return;
 }
@@ -214,7 +214,7 @@ if (matches.getSingleValue("FILE")) |f| {
 }
 
 if (matches.subcommandMatches("update")) |update_cmd_matches| {
-    if (update_cmd_matches.isArgumentPresent("check-only")) {
+    if (update_cmd_matches.containsArg("check-only")) {
         std.log.info("Check and report new update", .{});
         return;
     }
@@ -226,12 +226,12 @@ if (matches.subcommandMatches("update")) |update_cmd_matches| {
     return;
 }
 
-if (matches.isArgumentPresent("all")) {
+if (matches.containsArg("all")) {
     log.info("show all", .{});
     return;
 }
 
-if (matches.isArgumentPresent("recursive")) {
+if (matches.containsArg("recursive")) {
     log.info("show recursive", .{});
     return;
 }
@@ -241,7 +241,7 @@ if (matches.getSingleValue("ignore")) |pattern| {
     return;
 }
 
-if (matches.isArgumentPresent("color")) {
+if (matches.containsArg("color")) {
     const when = matches.getSingleValue("color").?;
 
     log.info("color={s}", .{when});
@@ -326,7 +326,7 @@ pub fn main() anyerror!void {
         return;
     }
 
-    if (matches.isArgumentPresent("version")) {
+    if (matches.containsArg("version")) {
         log.info("v0.1.0", .{});
         return;
     }
@@ -342,7 +342,7 @@ pub fn main() anyerror!void {
             return;
         }
 
-        if (update_cmd_matches.isArgumentPresent("check-only")) {
+        if (update_cmd_matches.containsArg("check-only")) {
             std.log.info("Check and report new update", .{});
             return;
         }
@@ -353,12 +353,12 @@ pub fn main() anyerror!void {
         return;
     }
 
-    if (matches.isArgumentPresent("all")) {
+    if (matches.containsArg("all")) {
         log.info("show all", .{});
         return;
     }
 
-    if (matches.isArgumentPresent("recursive")) {
+    if (matches.containsArg("recursive")) {
         log.info("show recursive", .{});
         return;
     }
@@ -368,7 +368,7 @@ pub fn main() anyerror!void {
         return;
     }
 
-    if (matches.isArgumentPresent("color")) {
+    if (matches.containsArg("color")) {
         const when = matches.getSingleValue("color").?;
 
         log.info("color={s}", .{when});
