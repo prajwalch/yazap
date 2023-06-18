@@ -140,7 +140,7 @@ pub fn parseFrom(self: *App, argv: []const [:0]const u8) YazapError!(*const ArgM
 ///
 /// const matches = try app.parseProcess();
 ///
-/// if (!matches.hasArgs()) {
+/// if (!matches.containsArgs()) {
 ///     try app.displayHelp();
 ///     return;
 /// }
@@ -176,7 +176,7 @@ pub fn displayHelp(self: *App) !void {
 /// const matches = try app.parseProcess();
 ///
 /// if (matches.subcommandMatches("subcmd")) |subcmd_matches| {
-///     if (!subcmd_matches.hasArgs()) {
+///     if (!subcmd_matches.containsArgs()) {
 ///         try app.displaySubcommandHelp();
 ///         return;
 ///     }

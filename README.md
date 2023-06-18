@@ -264,13 +264,13 @@ application.
 subcommand on the command line and displays its specific usage information.
 
 ```zig
-if (!matches.hasArgs()) {
+if (!matches.containsArgs()) {
     try app.displayHelp();
     return;
 }
 
 if (matches.subcommandMatches("update")) |update_cmd_matches| {
-    if (!update_cmd_matches.hasArgs()) {
+    if (!update_cmd_matches.containsArgs()) {
         try app.displaySubcommandHelp();
         return;
     }
@@ -321,7 +321,7 @@ pub fn main() anyerror!void {
 
     const matches = try app.parseProcess();
     
-    if (!matches.hasArgs()) {
+    if (!matches.containsArgs()) {
         try app.displayHelp();
         return;
     }
@@ -337,7 +337,7 @@ pub fn main() anyerror!void {
     }
 
     if (matches.subcommandMatches("update")) |update_cmd_matches| {
-        if (!update_cmd_matches.hasArgs()) {
+        if (!update_cmd_matches.containsArgs()) {
             try app.displaySubcommandHelp();
             return;
         }

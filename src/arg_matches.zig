@@ -93,12 +93,12 @@ pub const ArgMatches = struct {
     ///
     /// const matches = try app.parseProcess();
     ///
-    /// if (!matches.hasArgs()) {
+    /// if (!matches.containsArgs()) {
     ///     try app.displayHelp();
     ///     return;
     /// }
     /// ```
-    pub fn hasArgs(self: *const ArgMatches) bool {
+    pub fn containsArgs(self: *const ArgMatches) bool {
         return ((self.args.count() >= 1) or (self.subcommand != null));
     }
 
