@@ -37,7 +37,7 @@ pub fn main() anyerror!void {
 
     const matches = try app.parseProcess();
 
-    if (!(matches.hasArguments())) {
+    if (!(matches.hasArgs())) {
         try app.displayHelp();
         return;
     }
@@ -48,7 +48,7 @@ pub fn main() anyerror!void {
     }
 
     if (matches.subcommandMatches("update")) |update_cmd_matches| {
-        if (!(update_cmd_matches.hasArguments())) {
+        if (!(update_cmd_matches.hasArgs())) {
             try app.displaySubcommandHelp();
             return;
         }
