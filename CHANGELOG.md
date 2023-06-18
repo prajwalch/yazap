@@ -92,7 +92,7 @@ instead.
 - Enhanced documentation for `App.*` API with detailed explanations and examples.
 - Enhanced documentation for `Arg.*` API with detailed explanations and examples.
 - Enhanced documentation for `Command.*` API with detailed explanations and examples.
-- Introduced `Arg.multiArgumentsOptionWithValidValues()` API to support creating
+- Introduced `Arg.multiValuesOptionWithValidValues()` API to support creating
 an argument that can take multiple arguments from pre-defined values.
 - Introduced `Arg.positional()` API, eliminating the need to set the
 `.takes_positional_arg` property for commands. This simplifies the

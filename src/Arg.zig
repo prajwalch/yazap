@@ -143,8 +143,8 @@ pub fn multiValuesOption(
     return arg;
 }
 
-/// Creates a multi-arguments option with a predefined set of valid values that
-/// the user can pass.
+/// Creates an option that accepts multiple values from a predefined set of
+/// valid values.
 ///
 /// ## Examples
 ///
@@ -153,11 +153,11 @@ pub fn multiValuesOption(
 /// defer app.deinit();
 ///
 /// var root = app.rootCommand();
-/// try root.addArg(Arg.multiArgumentsOptionWithValidValues(
+/// try root.addArg(Arg.multiValuesOptionWithValidValues(
 ///     "distros", 'd', "Two Fav Distros", 2, &[_]const u8 { "debian", "ubuntu", "arch" },
 /// ));
 /// ```
-pub fn multiArgumentsOptionWithValidValues(
+pub fn multiValuesOptionWithValidValues(
     name: []const u8,
     short_name: ?u8,
     description: ?[]const u8,
@@ -318,7 +318,7 @@ pub fn setMaxValues(self: *Arg, num: usize) void {
 /// distros.setProperty(.takes_value);
 ///
 /// // Equivalent
-/// var distros = Arg.multiArgumentsOptionWithValidValues(
+/// var distros = Arg.multiValuesOptionWithValidValues(
 ///     "distros", 'd', "Two Fav Distros", 2, &[_]const u8 { "debian", "ubuntu", "arch" },
 /// );
 ///
