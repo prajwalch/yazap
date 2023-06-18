@@ -186,8 +186,8 @@ pub const ArgMatches = struct {
     ///     std.debug.print("Add {s} + {s}", .{ numbers[0], numbers[1] });
     /// }
     /// ```
-    pub fn getMultiValues(self: *const ArgMatches, name: []const u8) ?[][]const u8 {
-        if (self.args.get(name)) |value| {
+    pub fn getMultiValues(self: *const ArgMatches, arg_name: []const u8) ?[][]const u8 {
+        if (self.args.get(arg_name)) |value| {
             if (value.isMany()) return value.many.items[0..];
         }
         return null;
