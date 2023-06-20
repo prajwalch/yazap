@@ -94,6 +94,8 @@ pub fn addArg(self: *Command, new_arg: Arg) !void {
     if (arg.index != null) {
         // Check whether any positional argument has the same index as arg.
         for (self.positional_args.items) |positional_arg| {
+            std.debug.assert(positional_arg.index != null);
+
             if (positional_arg.index.? == arg.index.?) {
                 return error.DuplicatePositionalArgIndex;
             }
