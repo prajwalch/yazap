@@ -187,7 +187,8 @@ pub fn addSubcommands(self: *Command, subcommands: []Command) !void {
     for (subcommands) |subcmd| try self.addSubcommand(subcmd);
 }
 
-/// Sets a property to the command, specifying how it should be parsed and processed.
+/// Sets a property to the command, specifying how it should be parsed and
+/// processed.
 ///
 /// ## Examples
 ///
@@ -207,7 +208,8 @@ pub fn setProperty(self: *Command, property: Property) void {
     return self.properties.insert(property);
 }
 
-/// Unsets a property from the command, reversing its effect on parsing and processing.
+/// Unsets a property from the command, reversing its effect on parsing and
+/// processing.
 pub fn unsetProperty(self: *Command, property: Property) void {
     return self.properties.remove(property);
 }
