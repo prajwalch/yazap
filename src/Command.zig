@@ -56,6 +56,9 @@ pub fn deinit(self: *Command) void {
 
 /// Appends the new argument to the list of arguments.
 ///
+/// **NOTE:** It returns an `error.DuplicatePositionalArgIndex` when attempting
+/// to append two positional arguments with the same index. See the examples below.
+///
 /// ## Examples
 ///
 /// ```zig
@@ -68,6 +71,18 @@ pub fn deinit(self: *Command) void {
 /// var test = app.createCommand("test", "Run test");
 /// try test.addArg(Arg.positional("FILE", null, null));
 /// ```
+///
+/// Appending two positional arguments with the same index.
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+/// try root.addArg(Arg.positional("FIRST", null, 1));
+/// // Returns `error.DuplicatePositionalArgIndex`
+/// try root.addArg(Arg.positional("FIRST", null, 1));
+/// ```
 pub fn addArg(self: *Command, new_arg: Arg) !void {
     var arg = new_arg;
     const is_positional = (arg.short_name == null) and (arg.long_name == null);
@@ -77,6 +92,12 @@ pub fn addArg(self: *Command, new_arg: Arg) !void {
     }
 
     if (arg.index != null) {
+        // Check whether any positional argument has the same index as arg.
+        for (self.positional_args.items) |positional_arg| {
+            if (positional_arg.index.? == arg.index.?) {
+                return error.DuplicatePositionalArgIndex;
+            }
+        }
         return self.positional_args.append(self.allocator, arg);
     }
 

@@ -38,6 +38,19 @@ test "positional arguments with manual index" {
     app.deinit();
 }
 
+test "positional arguments with same index" {
+    var app = App.init(allocator, "app", null);
+    errdefer app.deinit();
+
+    try app.rootCommand().addArg(Arg.positional("ONE", null, 1));
+    try testing.expectError(
+        error.DuplicatePositionalArgIndex,
+        app.rootCommand().addArg(Arg.positional("TWO", null, 1)),
+    );
+
+    app.deinit();
+}
+
 test "command that takes single value" {
     var app = App.init(allocator, "rm", null);
     errdefer app.deinit();
