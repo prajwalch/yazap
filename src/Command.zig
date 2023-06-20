@@ -5,8 +5,9 @@ const help = @import("help.zig");
 const Arg = @import("Arg.zig");
 
 const mem = std.mem;
-const ArrayList = std.ArrayListUnmanaged;
+const ArrayListUnmanaged = std.ArrayListUnmanaged;
 const Allocator = mem.Allocator;
+const EnumSet = std.EnumSet;
 
 pub const Property = enum {
     positional_arg_required,
@@ -16,10 +17,10 @@ pub const Property = enum {
 allocator: Allocator,
 name: []const u8,
 description: ?[]const u8,
-positional_args: ArrayList(Arg) = .{},
-options: ArrayList(Arg) = .{},
-subcommands: ArrayList(Command) = .{},
-properties: std.EnumSet(Property) = .{},
+positional_args: ArrayListUnmanaged(Arg) = .{},
+options: ArrayListUnmanaged(Arg) = .{},
+subcommands: ArrayListUnmanaged(Command) = .{},
+properties: EnumSet(Property) = .{},
 
 /// Creates a new instance of `Command`.
 ///
