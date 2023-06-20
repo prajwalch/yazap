@@ -59,8 +59,8 @@ pub fn deinit(self: *App) void {
 ///
 /// var subcmd1 = app.createCommand("subcmd1", "First Subcommand");
 /// ```
-pub fn createCommand(self: *App, cmd_name: []const u8, cmd_description: ?[]const u8) Command {
-    return Command.init(self.allocator, cmd_name, cmd_description);
+pub fn createCommand(self: *App, name: []const u8, description: ?[]const u8) Command {
+    return Command.init(self.allocator, name, description);
 }
 
 /// Returns a pointer to the root `Command` of the application.
