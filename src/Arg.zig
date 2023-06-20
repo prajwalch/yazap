@@ -188,7 +188,11 @@ pub fn multiValuesOption(
 ///
 /// var root = app.rootCommand();
 /// try root.addArg(Arg.multiValuesOptionWithValidValues(
-///     "distros", 'd', "Two Fav Distros", 2, &[_]const u8 { "debian", "ubuntu", "arch" },
+///     "distros",
+///     'd',
+///     "Two Fav Distros",
+///     2,
+///     &[_]const u8 { "debian", "ubuntu", "arch" },
 /// ));
 /// ```
 pub fn multiValuesOptionWithValidValues(
@@ -319,7 +323,11 @@ pub fn setMaxValues(self: *Arg, num: usize) void {
 ///
 /// // Equivalent
 /// var distros = Arg.multiValuesOptionWithValidValues(
-///     "distros", 'd', "Two Fav Distros", 2, &[_]const u8 { "debian", "ubuntu", "arch" },
+///     "distros",
+///     'd',
+///     "Two Fav Distros",
+///     2,
+///     &[_]const u8 { "debian", "ubuntu", "arch" },
 /// );
 ///
 /// try root.addArg(distros);
@@ -429,11 +437,13 @@ pub fn setIndex(self: *Arg, index: usize) void {
     self.index = index;
 }
 
-/// Sets a property to the argument, specifying how it should be parsed and processed.
+/// Sets a property to the argument, specifying how it should be parsed and
+/// processed.
 ///
 /// ## Examples
 ///
-/// Setting a property to indicate that the argument takes a value from the command line:
+/// Setting a property to indicate that the argument takes a value from the
+/// command line:
 ///
 /// ```zig
 /// var app = App.init(allocator, "myapp", "My app description");
@@ -453,11 +463,13 @@ pub fn setProperty(self: *Arg, property: Property) void {
     return self.properties.insert(property);
 }
 
-/// Unsets a property from the argument, reversing its effect on parsing and processing.
+/// Unsets a property from the argument, reversing its effect on parsing and
+/// processing.
 ///
 /// ## Examples
 ///
-/// Removing a property to indicate that the argument no longer takes a value from the command line:
+/// Removing a property to indicate that the argument no longer takes a value
+/// from the command line:
 ///
 /// ```zig
 /// var app = App.init(allocator, "myapp", "My app description");
