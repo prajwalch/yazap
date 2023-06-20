@@ -137,10 +137,7 @@ test "Option that does not takes value" {
     var app = App.init(allocator, "clang", null);
     errdefer app.deinit();
 
-    var recursive = Arg.init("version", null);
-    recursive.setShortName('v');
-
-    try app.rootCommand().addArg(recursive);
+    try app.rootCommand().addArg(Arg.booleanOption("version", 'v', null));
     try testing.expectError(error.UnneededAttachedValue, app.parseFrom(&.{"-v=13"}));
 
     app.deinit();
@@ -150,11 +147,7 @@ test "Option that takes single value" {
     var app = App.init(allocator, "clang", null);
     errdefer app.deinit();
 
-    var browser = Arg.init("output", null);
-    browser.setShortName('o');
-    browser.setProperty(.takes_value);
-
-    try app.rootCommand().addArg(browser);
+    try app.rootCommand().addArg(Arg.singleValueOption("output", 'o', null));
     try testing.expectError(error.ArgValueNotProvided, app.parseFrom(&.{"-o"}));
 
     app.deinit();
@@ -199,12 +192,8 @@ test "Option with max values" {
     var app = App.init(allocator, "clang", null);
     errdefer app.deinit();
 
-    var srcs = Arg.init("sources", null);
-    srcs.setShortName('s');
-    srcs.setMinValues(2);
-    srcs.setMaxValues(5);
+    var srcs = Arg.multiValuesOption("sources", 's', null, 5);
     srcs.setValuesDelimiter(":");
-    srcs.setProperty(.takes_value);
 
     try app.rootCommand().addArg(srcs);
     try testing.expectError(error.TooManyArgValue, app.parseFrom(
@@ -218,10 +207,12 @@ test "Option with allowed values" {
     var app = App.init(allocator, "clang", null);
     errdefer app.deinit();
 
-    var stdd = Arg.init("std", null);
-    stdd.setLongName("std");
-    stdd.setValidValues(&.{ "c99", "c11", "c17" });
-    stdd.setProperty(.takes_value);
+    var stdd = Arg.singleValueOptionWithValidValues(
+        "std",
+        null,
+        null,
+        &[_][]const u8{ "c99", "c11", "c17" },
+    );
 
     try app.rootCommand().addArg(stdd);
     try testing.expectError(error.ProvidedValueIsNotValidOption, app.parseFrom(&.{"--std=c100"}));
