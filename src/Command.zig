@@ -112,11 +112,11 @@ pub fn addArg(self: *Command, new_arg: Arg) !void {
     // Index is not set and it is not the first positional argument.
     var highest_index: usize = 1;
 
-    for (self.positional_args.items) |pos_arg| {
-        std.debug.assert(pos_arg.index != null);
+    for (self.positional_args.items) |positional_arg| {
+        std.debug.assert(positional_arg.index != null);
 
-        if (pos_arg.index.? > highest_index) {
-            highest_index = pos_arg.index.?;
+        if (positional_arg.index.? > highest_index) {
+            highest_index = positional_arg.index.?;
         }
     }
     arg.setIndex(highest_index + 1);
