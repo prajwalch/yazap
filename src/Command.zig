@@ -81,7 +81,7 @@ pub fn deinit(self: *Command) void {
 /// var root = app.rootCommand();
 /// try root.addArg(Arg.positional("FIRST", null, 1));
 /// // Returns `error.DuplicatePositionalArgIndex`
-/// try root.addArg(Arg.positional("FIRST", null, 1));
+/// try root.addArg(Arg.positional("SECOND", null, 1));
 /// ```
 pub fn addArg(self: *Command, new_arg: Arg) !void {
     var arg = new_arg;
