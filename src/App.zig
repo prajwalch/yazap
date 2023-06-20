@@ -124,7 +124,7 @@ pub fn parseFrom(self: *App, argv: []const [:0]const u8) YazapError!(*const ArgM
 
 /// Displays the overall usage and description of the application.
 ///
-/// **Note:** By default, the handling of the `-h` and `--help` options,
+/// **NOTE:** By default, the handling of the `-h` and `--help` options,
 /// and the automatic display of the usage message are taken care of. Use this
 /// function if you want to display the usage message when the `-h` or `--help`
 /// options are not present on the command line.
@@ -156,7 +156,7 @@ pub fn displayHelp(self: *App) !void {
 
 /// Displays the usage message of specified subcomand on the command line.
 ///
-/// **Note:** By default, the handling of the `-h` and `--help` options,
+/// **NOTE:** By default, the handling of the `-h` and `--help` options,
 /// and the automatic display of the usage message are taken care of. Use this
 /// function if you want to display the usage message when the `-h` or `--help`
 /// options are not present on the command line.
