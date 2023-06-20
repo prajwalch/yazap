@@ -187,10 +187,12 @@ pub fn displaySubcommandHelp(self: *App) !void {
 }
 
 fn handleHelpOption(self: *App) !void {
-    // Set the `Help` of a subcommand present on the command line with the `-h` or `--help` option
-    // remains null if none of the subcommands were present
     if (help.findSubcommand(self.rootCommand(), &self.arg_matches.?)) |subcmd| {
-        self.subcommand_help = try help.Help.init(self.allocator, self.rootCommand(), subcmd);
+        self.subcommand_help = try help.Help.init(
+            self.allocator,
+            self.rootCommand(),
+            subcmd,
+        );
     }
     try self.displayHelpAndExitIfFound();
 }
