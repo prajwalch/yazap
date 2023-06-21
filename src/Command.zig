@@ -164,7 +164,6 @@ pub fn addArgs(self: *Command, args: []Arg) !void {
 /// try root.addSubcommand(test);
 /// ```
 pub fn addSubcommand(self: *Command, new_subcommand: Command) !void {
-    // Add help option for subcommand
     return self.subcommands.append(self.allocator, new_subcommand);
 }
 
