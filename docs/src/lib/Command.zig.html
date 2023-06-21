@@ -118,128 +118,129 @@
 <span class="line" id="L5"><span class="tok-kw">const</span> Arg = <span class="tok-builtin">@import</span>(<span class="tok-str">&quot;Arg.zig&quot;</span>);</span>
 <span class="line" id="L6"></span>
 <span class="line" id="L7"><span class="tok-kw">const</span> mem = std.mem;</span>
-<span class="line" id="L8"><span class="tok-kw">const</span> ArrayList = std.ArrayListUnmanaged;</span>
+<span class="line" id="L8"><span class="tok-kw">const</span> ArrayListUnmanaged = std.ArrayListUnmanaged;</span>
 <span class="line" id="L9"><span class="tok-kw">const</span> Allocator = mem.Allocator;</span>
-<span class="line" id="L10"></span>
-<span class="line" id="L11"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Property = <span class="tok-kw">enum</span> {</span>
-<span class="line" id="L12">    positional_arg_required,</span>
-<span class="line" id="L13">    subcommand_required,</span>
-<span class="line" id="L14">};</span>
-<span class="line" id="L15"></span>
-<span class="line" id="L16">allocator: Allocator,</span>
-<span class="line" id="L17">name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>,</span>
-<span class="line" id="L18">description: ?[]<span class="tok-kw">const</span> <span class="tok-type">u8</span>,</span>
-<span class="line" id="L19">positional_args: ArrayList(Arg) = .{},</span>
-<span class="line" id="L20">options: ArrayList(Arg) = .{},</span>
-<span class="line" id="L21">subcommands: ArrayList(Command) = .{},</span>
-<span class="line" id="L22">properties: std.EnumSet(Property) = .{},</span>
-<span class="line" id="L23"></span>
-<span class="line" id="L24"><span class="tok-comment">/// Creates a new instance of `Command`.</span></span>
-<span class="line" id="L25"><span class="tok-comment">///</span></span>
-<span class="line" id="L26"><span class="tok-comment">/// **NOTE:** It is generally recommended to use `App.createCommand` to create a</span></span>
-<span class="line" id="L27"><span class="tok-comment">/// new instance of a `Command`.</span></span>
-<span class="line" id="L28"><span class="tok-comment">///</span></span>
-<span class="line" id="L29"><span class="tok-comment">/// ## Examples</span></span>
-<span class="line" id="L30"><span class="tok-comment">///</span></span>
-<span class="line" id="L31"><span class="tok-comment">/// ```zig</span></span>
-<span class="line" id="L32"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
-<span class="line" id="L33"><span class="tok-comment">/// defer app.deinit();</span></span>
-<span class="line" id="L34"><span class="tok-comment">///</span></span>
-<span class="line" id="L35"><span class="tok-comment">/// var subcmd1 = app.createCommand(&quot;subcmd1&quot;, &quot;First Subcommand&quot;);</span></span>
-<span class="line" id="L36"><span class="tok-comment">/// var subcmd2 = app.createCommand(&quot;subcmd2&quot;, &quot;Second Subcommand&quot;);</span></span>
-<span class="line" id="L37"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L38"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">init</span>(allocator: Allocator, name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>, description: ?[]<span class="tok-kw">const</span> <span class="tok-type">u8</span>) Command {</span>
-<span class="line" id="L39">    <span class="tok-kw">return</span> Command{</span>
-<span class="line" id="L40">        .allocator = allocator,</span>
-<span class="line" id="L41">        .name = name,</span>
-<span class="line" id="L42">        .description = description,</span>
-<span class="line" id="L43">    };</span>
-<span class="line" id="L44">}</span>
-<span class="line" id="L45"></span>
-<span class="line" id="L46"><span class="tok-comment">/// Deallocates all allocated memory.</span></span>
-<span class="line" id="L47"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">deinit</span>(self: *Command) <span class="tok-type">void</span> {</span>
-<span class="line" id="L48">    self.positional_args.deinit(self.allocator);</span>
-<span class="line" id="L49">    self.options.deinit(self.allocator);</span>
-<span class="line" id="L50"></span>
-<span class="line" id="L51">    <span class="tok-kw">for</span> (self.subcommands.items) |*subcommand| {</span>
-<span class="line" id="L52">        subcommand.deinit();</span>
-<span class="line" id="L53">    }</span>
-<span class="line" id="L54">    self.subcommands.deinit(self.allocator);</span>
-<span class="line" id="L55">}</span>
-<span class="line" id="L56"></span>
-<span class="line" id="L57"><span class="tok-comment">/// Appends the new argument to the list of arguments.</span></span>
-<span class="line" id="L58"><span class="tok-comment">///</span></span>
-<span class="line" id="L59"><span class="tok-comment">/// ## Examples</span></span>
-<span class="line" id="L60"><span class="tok-comment">///</span></span>
-<span class="line" id="L61"><span class="tok-comment">/// ```zig</span></span>
-<span class="line" id="L62"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
-<span class="line" id="L63"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L10"><span class="tok-kw">const</span> EnumSet = std.EnumSet;</span>
+<span class="line" id="L11"></span>
+<span class="line" id="L12"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Property = <span class="tok-kw">enum</span> {</span>
+<span class="line" id="L13">    positional_arg_required,</span>
+<span class="line" id="L14">    subcommand_required,</span>
+<span class="line" id="L15">};</span>
+<span class="line" id="L16"></span>
+<span class="line" id="L17">allocator: Allocator,</span>
+<span class="line" id="L18">name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>,</span>
+<span class="line" id="L19">description: ?[]<span class="tok-kw">const</span> <span class="tok-type">u8</span>,</span>
+<span class="line" id="L20">positional_args: ArrayListUnmanaged(Arg) = .{},</span>
+<span class="line" id="L21">options: ArrayListUnmanaged(Arg) = .{},</span>
+<span class="line" id="L22">subcommands: ArrayListUnmanaged(Command) = .{},</span>
+<span class="line" id="L23">properties: EnumSet(Property) = .{},</span>
+<span class="line" id="L24"></span>
+<span class="line" id="L25"><span class="tok-comment">/// Creates a new instance of `Command`.</span></span>
+<span class="line" id="L26"><span class="tok-comment">///</span></span>
+<span class="line" id="L27"><span class="tok-comment">/// **NOTE:** It is generally recommended to use `App.createCommand` to create a</span></span>
+<span class="line" id="L28"><span class="tok-comment">/// new instance of a `Command`.</span></span>
+<span class="line" id="L29"><span class="tok-comment">///</span></span>
+<span class="line" id="L30"><span class="tok-comment">/// ## Examples</span></span>
+<span class="line" id="L31"><span class="tok-comment">///</span></span>
+<span class="line" id="L32"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L33"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L34"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L35"><span class="tok-comment">///</span></span>
+<span class="line" id="L36"><span class="tok-comment">/// var subcmd1 = app.createCommand(&quot;subcmd1&quot;, &quot;First Subcommand&quot;);</span></span>
+<span class="line" id="L37"><span class="tok-comment">/// var subcmd2 = app.createCommand(&quot;subcmd2&quot;, &quot;Second Subcommand&quot;);</span></span>
+<span class="line" id="L38"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L39"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">init</span>(allocator: Allocator, name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>, description: ?[]<span class="tok-kw">const</span> <span class="tok-type">u8</span>) Command {</span>
+<span class="line" id="L40">    <span class="tok-kw">return</span> Command{</span>
+<span class="line" id="L41">        .allocator = allocator,</span>
+<span class="line" id="L42">        .name = name,</span>
+<span class="line" id="L43">        .description = description,</span>
+<span class="line" id="L44">    };</span>
+<span class="line" id="L45">}</span>
+<span class="line" id="L46"></span>
+<span class="line" id="L47"><span class="tok-comment">/// Deallocates all allocated memory.</span></span>
+<span class="line" id="L48"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">deinit</span>(self: *Command) <span class="tok-type">void</span> {</span>
+<span class="line" id="L49">    self.positional_args.deinit(self.allocator);</span>
+<span class="line" id="L50">    self.options.deinit(self.allocator);</span>
+<span class="line" id="L51"></span>
+<span class="line" id="L52">    <span class="tok-kw">for</span> (self.subcommands.items) |*subcommand| {</span>
+<span class="line" id="L53">        subcommand.deinit();</span>
+<span class="line" id="L54">    }</span>
+<span class="line" id="L55">    self.subcommands.deinit(self.allocator);</span>
+<span class="line" id="L56">}</span>
+<span class="line" id="L57"></span>
+<span class="line" id="L58"><span class="tok-comment">/// Appends the new argument to the list of arguments.</span></span>
+<span class="line" id="L59"><span class="tok-comment">///</span></span>
+<span class="line" id="L60"><span class="tok-comment">/// **NOTE:** It returns an `error.DuplicatePositionalArgIndex` when attempting</span></span>
+<span class="line" id="L61"><span class="tok-comment">/// to append two positional arguments with the same index. See the examples below.</span></span>
+<span class="line" id="L62"><span class="tok-comment">///</span></span>
+<span class="line" id="L63"><span class="tok-comment">/// ## Examples</span></span>
 <span class="line" id="L64"><span class="tok-comment">///</span></span>
-<span class="line" id="L65"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
-<span class="line" id="L66"><span class="tok-comment">/// try root.addArg(Arg.booleanOption(&quot;version&quot;, 'v', &quot;Show version number&quot;));</span></span>
-<span class="line" id="L67"><span class="tok-comment">///</span></span>
-<span class="line" id="L68"><span class="tok-comment">/// var test = app.createCommand(&quot;test&quot;, &quot;Run test&quot;);</span></span>
-<span class="line" id="L69"><span class="tok-comment">/// try test.addArg(Arg.positional(&quot;FILE&quot;, null, null));</span></span>
-<span class="line" id="L70"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L71"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">addArg</span>(self: *Command, new_arg: Arg) !<span class="tok-type">void</span> {</span>
-<span class="line" id="L72">    <span class="tok-kw">var</span> arg = new_arg;</span>
-<span class="line" id="L73">    <span class="tok-kw">const</span> is_positional = (arg.short_name == <span class="tok-null">null</span>) <span class="tok-kw">and</span> (arg.long_name == <span class="tok-null">null</span>);</span>
-<span class="line" id="L74"></span>
-<span class="line" id="L75">    <span class="tok-kw">if</span> (!is_positional) {</span>
-<span class="line" id="L76">        <span class="tok-kw">return</span> self.options.append(self.allocator, arg);</span>
-<span class="line" id="L77">    }</span>
-<span class="line" id="L78"></span>
-<span class="line" id="L79">    <span class="tok-kw">if</span> (arg.index != <span class="tok-null">null</span>) {</span>
-<span class="line" id="L80">        <span class="tok-kw">return</span> self.positional_args.append(self.allocator, arg);</span>
-<span class="line" id="L81">    }</span>
-<span class="line" id="L82"></span>
-<span class="line" id="L83">    <span class="tok-comment">// Index is not set but it is the first positional argument.</span>
-</span>
-<span class="line" id="L84">    <span class="tok-kw">if</span> (self.positional_args.items.len == <span class="tok-number">0</span>) {</span>
-<span class="line" id="L85">        arg.setIndex(<span class="tok-number">1</span>);</span>
-<span class="line" id="L86">        <span class="tok-kw">return</span> self.positional_args.append(self.allocator, arg);</span>
-<span class="line" id="L87">    }</span>
-<span class="line" id="L88"></span>
-<span class="line" id="L89">    <span class="tok-comment">// Index is not set and it is not the first positional argument.</span>
-</span>
-<span class="line" id="L90">    <span class="tok-kw">var</span> highest_index: <span class="tok-type">usize</span> = <span class="tok-number">1</span>;</span>
-<span class="line" id="L91"></span>
-<span class="line" id="L92">    <span class="tok-kw">for</span> (self.positional_args.items) |pos_arg| {</span>
-<span class="line" id="L93">        std.debug.assert(pos_arg.index != <span class="tok-null">null</span>);</span>
+<span class="line" id="L65"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L66"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L67"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L68"><span class="tok-comment">///</span></span>
+<span class="line" id="L69"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L70"><span class="tok-comment">/// try root.addArg(Arg.booleanOption(&quot;version&quot;, 'v', &quot;Show version number&quot;));</span></span>
+<span class="line" id="L71"><span class="tok-comment">///</span></span>
+<span class="line" id="L72"><span class="tok-comment">/// var test = app.createCommand(&quot;test&quot;, &quot;Run test&quot;);</span></span>
+<span class="line" id="L73"><span class="tok-comment">/// try test.addArg(Arg.positional(&quot;FILE&quot;, null, null));</span></span>
+<span class="line" id="L74"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L75"><span class="tok-comment">///</span></span>
+<span class="line" id="L76"><span class="tok-comment">/// Appending two positional arguments with the same index.</span></span>
+<span class="line" id="L77"><span class="tok-comment">///</span></span>
+<span class="line" id="L78"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L79"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L80"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L81"><span class="tok-comment">///</span></span>
+<span class="line" id="L82"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L83"><span class="tok-comment">/// try root.addArg(Arg.positional(&quot;FIRST&quot;, null, 1));</span></span>
+<span class="line" id="L84"><span class="tok-comment">/// // Returns `error.DuplicatePositionalArgIndex`</span></span>
+<span class="line" id="L85"><span class="tok-comment">/// try root.addArg(Arg.positional(&quot;SECOND&quot;, null, 1));</span></span>
+<span class="line" id="L86"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L87"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">addArg</span>(self: *Command, new_arg: Arg) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L88">    <span class="tok-kw">var</span> arg = new_arg;</span>
+<span class="line" id="L89">    <span class="tok-kw">const</span> is_positional = (arg.short_name == <span class="tok-null">null</span>) <span class="tok-kw">and</span> (arg.long_name == <span class="tok-null">null</span>);</span>
+<span class="line" id="L90"></span>
+<span class="line" id="L91">    <span class="tok-kw">if</span> (!is_positional) {</span>
+<span class="line" id="L92">        <span class="tok-kw">return</span> self.options.append(self.allocator, arg);</span>
+<span class="line" id="L93">    }</span>
 <span class="line" id="L94"></span>
-<span class="line" id="L95">        <span class="tok-kw">if</span> (pos_arg.index.? &gt; highest_index) {</span>
-<span class="line" id="L96">            highest_index = pos_arg.index.?;</span>
-<span class="line" id="L97">        }</span>
-<span class="line" id="L98">    }</span>
-<span class="line" id="L99">    arg.setIndex(highest_index + <span class="tok-number">1</span>);</span>
-<span class="line" id="L100">    <span class="tok-kw">try</span> self.positional_args.append(self.allocator, arg);</span>
-<span class="line" id="L101">}</span>
-<span class="line" id="L102"></span>
-<span class="line" id="L103"><span class="tok-comment">/// Appends multiple arguments to the list of arguments.</span></span>
-<span class="line" id="L104"><span class="tok-comment">///</span></span>
-<span class="line" id="L105"><span class="tok-comment">/// ## Examples</span></span>
-<span class="line" id="L106"><span class="tok-comment">///</span></span>
-<span class="line" id="L107"><span class="tok-comment">/// ```zig</span></span>
-<span class="line" id="L108"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
-<span class="line" id="L109"><span class="tok-comment">/// defer app.deinit();</span></span>
-<span class="line" id="L110"><span class="tok-comment">///</span></span>
-<span class="line" id="L111"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
-<span class="line" id="L112"><span class="tok-comment">/// try root.addArgs(&amp;[_]Arg {</span></span>
-<span class="line" id="L113"><span class="tok-comment">///     Arg.singleValueOption(&quot;firstname&quot;, 'f', &quot;First name&quot;),</span></span>
-<span class="line" id="L114"><span class="tok-comment">///     Arg.singleValueOption(&quot;lastname&quot;, 'l', &quot;Last name&quot;),</span></span>
-<span class="line" id="L115"><span class="tok-comment">/// });</span></span>
-<span class="line" id="L116"><span class="tok-comment">///</span></span>
-<span class="line" id="L117"><span class="tok-comment">/// var address = app.createCommand(&quot;address&quot;, &quot;Address&quot;);</span></span>
-<span class="line" id="L118"><span class="tok-comment">/// try address.addArgs(&amp;[_]Arg {</span></span>
-<span class="line" id="L119"><span class="tok-comment">///     Arg.singleValueOption(&quot;street&quot;, 's', &quot;Street name&quot;),</span></span>
-<span class="line" id="L120"><span class="tok-comment">///     Arg.singleValueOption(&quot;postal&quot;, 'p', &quot;Postal code&quot;),</span></span>
-<span class="line" id="L121"><span class="tok-comment">/// });</span></span>
-<span class="line" id="L122"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L123"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">addArgs</span>(self: *Command, args: []Arg) !<span class="tok-type">void</span> {</span>
-<span class="line" id="L124">    <span class="tok-kw">for</span> (args) |arg| <span class="tok-kw">try</span> self.addArg(arg);</span>
+<span class="line" id="L95">    <span class="tok-kw">if</span> (arg.index != <span class="tok-null">null</span>) {</span>
+<span class="line" id="L96">        <span class="tok-comment">// Check whether any positional argument has the same index as arg.</span>
+</span>
+<span class="line" id="L97">        <span class="tok-kw">for</span> (self.positional_args.items) |positional_arg| {</span>
+<span class="line" id="L98">            std.debug.assert(positional_arg.index != <span class="tok-null">null</span>);</span>
+<span class="line" id="L99"></span>
+<span class="line" id="L100">            <span class="tok-kw">if</span> (positional_arg.index.? == arg.index.?) {</span>
+<span class="line" id="L101">                <span class="tok-kw">return</span> <span class="tok-kw">error</span>.DuplicatePositionalArgIndex;</span>
+<span class="line" id="L102">            }</span>
+<span class="line" id="L103">        }</span>
+<span class="line" id="L104">        <span class="tok-kw">return</span> self.positional_args.append(self.allocator, arg);</span>
+<span class="line" id="L105">    }</span>
+<span class="line" id="L106"></span>
+<span class="line" id="L107">    <span class="tok-comment">// Index is not set but it is the first positional argument.</span>
+</span>
+<span class="line" id="L108">    <span class="tok-kw">if</span> (self.positional_args.items.len == <span class="tok-number">0</span>) {</span>
+<span class="line" id="L109">        arg.setIndex(<span class="tok-number">1</span>);</span>
+<span class="line" id="L110">        <span class="tok-kw">return</span> self.positional_args.append(self.allocator, arg);</span>
+<span class="line" id="L111">    }</span>
+<span class="line" id="L112"></span>
+<span class="line" id="L113">    <span class="tok-comment">// Index is not set and it is not the first positional argument.</span>
+</span>
+<span class="line" id="L114">    <span class="tok-kw">var</span> highest_index: <span class="tok-type">usize</span> = <span class="tok-number">1</span>;</span>
+<span class="line" id="L115"></span>
+<span class="line" id="L116">    <span class="tok-kw">for</span> (self.positional_args.items) |positional_arg| {</span>
+<span class="line" id="L117">        std.debug.assert(positional_arg.index != <span class="tok-null">null</span>);</span>
+<span class="line" id="L118"></span>
+<span class="line" id="L119">        <span class="tok-kw">if</span> (positional_arg.index.? &gt; highest_index) {</span>
+<span class="line" id="L120">            highest_index = positional_arg.index.?;</span>
+<span class="line" id="L121">        }</span>
+<span class="line" id="L122">    }</span>
+<span class="line" id="L123">    arg.setIndex(highest_index + <span class="tok-number">1</span>);</span>
+<span class="line" id="L124">    <span class="tok-kw">try</span> self.positional_args.append(self.allocator, arg);</span>
 <span class="line" id="L125">}</span>
 <span class="line" id="L126"></span>
-<span class="line" id="L127"><span class="tok-comment">/// Appends the new subcommand to the list of subcommands.</span></span>
+<span class="line" id="L127"><span class="tok-comment">/// Appends multiple arguments to the list of arguments.</span></span>
 <span class="line" id="L128"><span class="tok-comment">///</span></span>
 <span class="line" id="L129"><span class="tok-comment">/// ## Examples</span></span>
 <span class="line" id="L130"><span class="tok-comment">///</span></span>
@@ -248,148 +249,172 @@
 <span class="line" id="L133"><span class="tok-comment">/// defer app.deinit();</span></span>
 <span class="line" id="L134"><span class="tok-comment">///</span></span>
 <span class="line" id="L135"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
-<span class="line" id="L136"><span class="tok-comment">///</span></span>
-<span class="line" id="L137"><span class="tok-comment">/// var test = app.createCommand(&quot;test&quot;, &quot;Run test&quot;);</span></span>
-<span class="line" id="L138"><span class="tok-comment">/// try test.addArg(Arg.positional(&quot;FILE&quot;, null, null));</span></span>
-<span class="line" id="L139"><span class="tok-comment">///</span></span>
-<span class="line" id="L140"><span class="tok-comment">/// try root.addSubcommand(test);</span></span>
-<span class="line" id="L141"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L142"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">addSubcommand</span>(self: *Command, new_subcommand: Command) !<span class="tok-type">void</span> {</span>
-<span class="line" id="L143">    <span class="tok-comment">// Add help option for subcommand</span>
-</span>
-<span class="line" id="L144">    <span class="tok-kw">return</span> self.subcommands.append(self.allocator, new_subcommand);</span>
-<span class="line" id="L145">}</span>
-<span class="line" id="L146"></span>
-<span class="line" id="L147"><span class="tok-comment">/// Appends multiple subcommands to the list of subcommands.</span></span>
-<span class="line" id="L148"><span class="tok-comment">///</span></span>
-<span class="line" id="L149"><span class="tok-comment">/// ## Examples</span></span>
-<span class="line" id="L150"><span class="tok-comment">///</span></span>
-<span class="line" id="L151"><span class="tok-comment">/// ```zig</span></span>
-<span class="line" id="L152"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
-<span class="line" id="L153"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L136"><span class="tok-comment">/// try root.addArgs(&amp;[_]Arg {</span></span>
+<span class="line" id="L137"><span class="tok-comment">///     Arg.singleValueOption(&quot;firstname&quot;, 'f', &quot;First name&quot;),</span></span>
+<span class="line" id="L138"><span class="tok-comment">///     Arg.singleValueOption(&quot;lastname&quot;, 'l', &quot;Last name&quot;),</span></span>
+<span class="line" id="L139"><span class="tok-comment">/// });</span></span>
+<span class="line" id="L140"><span class="tok-comment">///</span></span>
+<span class="line" id="L141"><span class="tok-comment">/// var address = app.createCommand(&quot;address&quot;, &quot;Address&quot;);</span></span>
+<span class="line" id="L142"><span class="tok-comment">/// try address.addArgs(&amp;[_]Arg {</span></span>
+<span class="line" id="L143"><span class="tok-comment">///     Arg.singleValueOption(&quot;street&quot;, 's', &quot;Street name&quot;),</span></span>
+<span class="line" id="L144"><span class="tok-comment">///     Arg.singleValueOption(&quot;postal&quot;, 'p', &quot;Postal code&quot;),</span></span>
+<span class="line" id="L145"><span class="tok-comment">/// });</span></span>
+<span class="line" id="L146"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L147"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">addArgs</span>(self: *Command, args: []Arg) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L148">    <span class="tok-kw">for</span> (args) |arg| <span class="tok-kw">try</span> self.addArg(arg);</span>
+<span class="line" id="L149">}</span>
+<span class="line" id="L150"></span>
+<span class="line" id="L151"><span class="tok-comment">/// Appends the new subcommand to the list of subcommands.</span></span>
+<span class="line" id="L152"><span class="tok-comment">///</span></span>
+<span class="line" id="L153"><span class="tok-comment">/// ## Examples</span></span>
 <span class="line" id="L154"><span class="tok-comment">///</span></span>
-<span class="line" id="L155"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
-<span class="line" id="L156"><span class="tok-comment">///</span></span>
-<span class="line" id="L157"><span class="tok-comment">/// try root.addSubcommands(&amp;[_]Command{</span></span>
-<span class="line" id="L158"><span class="tok-comment">///     app.createCommand(&quot;init-exe&quot;, &quot;Initilize the project&quot;),</span></span>
-<span class="line" id="L159"><span class="tok-comment">///     app.createCommand(&quot;build&quot;, &quot;Build the project&quot;),</span></span>
-<span class="line" id="L160"><span class="tok-comment">/// });</span></span>
-<span class="line" id="L161"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L162"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">addSubcommands</span>(self: *Command, subcommands: []Command) !<span class="tok-type">void</span> {</span>
-<span class="line" id="L163">    <span class="tok-kw">for</span> (subcommands) |subcmd| <span class="tok-kw">try</span> self.addSubcommand(subcmd);</span>
-<span class="line" id="L164">}</span>
-<span class="line" id="L165"></span>
-<span class="line" id="L166"><span class="tok-comment">/// Sets a property to the command, specifying how it should be parsed and processed.</span></span>
-<span class="line" id="L167"><span class="tok-comment">///</span></span>
-<span class="line" id="L168"><span class="tok-comment">/// ## Examples</span></span>
-<span class="line" id="L169"><span class="tok-comment">///</span></span>
-<span class="line" id="L170"><span class="tok-comment">/// Setting a property to indicate that the positional argument is required:</span></span>
+<span class="line" id="L155"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L156"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L157"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L158"><span class="tok-comment">///</span></span>
+<span class="line" id="L159"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L160"><span class="tok-comment">///</span></span>
+<span class="line" id="L161"><span class="tok-comment">/// var test = app.createCommand(&quot;test&quot;, &quot;Run test&quot;);</span></span>
+<span class="line" id="L162"><span class="tok-comment">/// try test.addArg(Arg.positional(&quot;FILE&quot;, null, null));</span></span>
+<span class="line" id="L163"><span class="tok-comment">///</span></span>
+<span class="line" id="L164"><span class="tok-comment">/// try root.addSubcommand(test);</span></span>
+<span class="line" id="L165"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L166"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">addSubcommand</span>(self: *Command, new_subcommand: Command) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L167">    <span class="tok-kw">return</span> self.subcommands.append(self.allocator, new_subcommand);</span>
+<span class="line" id="L168">}</span>
+<span class="line" id="L169"></span>
+<span class="line" id="L170"><span class="tok-comment">/// Appends multiple subcommands to the list of subcommands.</span></span>
 <span class="line" id="L171"><span class="tok-comment">///</span></span>
-<span class="line" id="L172"><span class="tok-comment">/// ```zig</span></span>
-<span class="line" id="L173"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
-<span class="line" id="L174"><span class="tok-comment">/// defer app.deinit();</span></span>
-<span class="line" id="L175"><span class="tok-comment">///</span></span>
-<span class="line" id="L176"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L172"><span class="tok-comment">/// ## Examples</span></span>
+<span class="line" id="L173"><span class="tok-comment">///</span></span>
+<span class="line" id="L174"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L175"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L176"><span class="tok-comment">/// defer app.deinit();</span></span>
 <span class="line" id="L177"><span class="tok-comment">///</span></span>
-<span class="line" id="L178"><span class="tok-comment">/// try root.addArg(Arg.positional(&quot;SOURCE&quot;, &quot;Source file to move&quot;, null));</span></span>
-<span class="line" id="L179"><span class="tok-comment">/// try root.addArg(Arg.positional(&quot;DEST&quot;, &quot;Destination path&quot;, null));</span></span>
-<span class="line" id="L180"><span class="tok-comment">/// root.setProperty(.positional_arg_required);</span></span>
-<span class="line" id="L181"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L182"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">setProperty</span>(self: *Command, property: Property) <span class="tok-type">void</span> {</span>
-<span class="line" id="L183">    <span class="tok-kw">return</span> self.properties.insert(property);</span>
-<span class="line" id="L184">}</span>
-<span class="line" id="L185"></span>
-<span class="line" id="L186"><span class="tok-comment">/// Unsets a property from the command, reversing its effect on parsing and processing.</span></span>
-<span class="line" id="L187"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">unsetProperty</span>(self: *Command, property: Property) <span class="tok-type">void</span> {</span>
-<span class="line" id="L188">    <span class="tok-kw">return</span> self.properties.remove(property);</span>
-<span class="line" id="L189">}</span>
-<span class="line" id="L190"></span>
-<span class="line" id="L191"><span class="tok-comment">/// Checks if the command has a specific property set.</span></span>
-<span class="line" id="L192"><span class="tok-comment">///</span></span>
-<span class="line" id="L193"><span class="tok-comment">/// **NOTE:** This function is primarily used by the parser to determine the</span></span>
-<span class="line" id="L194"><span class="tok-comment">/// presence of a specific property for the command.</span></span>
-<span class="line" id="L195"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">hasProperty</span>(self: *<span class="tok-kw">const</span> Command, property: Property) <span class="tok-type">bool</span> {</span>
-<span class="line" id="L196">    <span class="tok-kw">return</span> self.properties.contains(property);</span>
-<span class="line" id="L197">}</span>
-<span class="line" id="L198"></span>
-<span class="line" id="L199"><span class="tok-comment">/// Returns the count of positional arguments in the positional argument list.</span></span>
-<span class="line" id="L200"><span class="tok-comment">///</span></span>
-<span class="line" id="L201"><span class="tok-comment">/// **NOTE:** This function is primarily used by the parser to determine the</span></span>
-<span class="line" id="L202"><span class="tok-comment">/// total number of valid positional arguments.</span></span>
-<span class="line" id="L203"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">countPositionalArgs</span>(self: *<span class="tok-kw">const</span> Command) <span class="tok-type">usize</span> {</span>
-<span class="line" id="L204">    <span class="tok-kw">return</span> (self.positional_args.items.len);</span>
-<span class="line" id="L205">}</span>
-<span class="line" id="L206"></span>
-<span class="line" id="L207"><span class="tok-comment">/// Returns the count of options in the option list.</span></span>
-<span class="line" id="L208"><span class="tok-comment">///</span></span>
-<span class="line" id="L209"><span class="tok-comment">/// **NOTE:** This function is primarily used by the parser to determine the</span></span>
-<span class="line" id="L210"><span class="tok-comment">/// total number of valid options.</span></span>
-<span class="line" id="L211"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">countOptions</span>(self: *<span class="tok-kw">const</span> Command) <span class="tok-type">usize</span> {</span>
-<span class="line" id="L212">    <span class="tok-kw">return</span> (self.options.items.len);</span>
-<span class="line" id="L213">}</span>
-<span class="line" id="L214"></span>
-<span class="line" id="L215"><span class="tok-comment">/// Returns the count of subcommands in the subcommand list.</span></span>
-<span class="line" id="L216"><span class="tok-comment">///</span></span>
-<span class="line" id="L217"><span class="tok-comment">/// **NOTE:** This function is primarily used by the parser to determine the</span></span>
-<span class="line" id="L218"><span class="tok-comment">/// total number of valid subcommands.</span></span>
-<span class="line" id="L219"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">countSubcommands</span>(self: *<span class="tok-kw">const</span> Command) <span class="tok-type">usize</span> {</span>
-<span class="line" id="L220">    <span class="tok-kw">return</span> (self.subcommands.items.len);</span>
-<span class="line" id="L221">}</span>
-<span class="line" id="L222"></span>
-<span class="line" id="L223"><span class="tok-comment">/// Performs a linear search to find a positional argument with the given index.</span></span>
-<span class="line" id="L224"><span class="tok-comment">///</span></span>
-<span class="line" id="L225"><span class="tok-comment">/// **NOTE:** This function is primarily used by the parser to find a positional</span></span>
-<span class="line" id="L226"><span class="tok-comment">/// argument based on its index.</span></span>
-<span class="line" id="L227"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">findPositionalArgByIndex</span>(self: *<span class="tok-kw">const</span> Command, index: <span class="tok-type">usize</span>) ?*<span class="tok-kw">const</span> Arg {</span>
-<span class="line" id="L228">    <span class="tok-kw">for</span> (self.positional_args.items) |*pos_arg| {</span>
-<span class="line" id="L229">        std.debug.assert(pos_arg.index != <span class="tok-null">null</span>);</span>
-<span class="line" id="L230"></span>
-<span class="line" id="L231">        <span class="tok-kw">if</span> (pos_arg.index.? == index) {</span>
-<span class="line" id="L232">            <span class="tok-kw">return</span> pos_arg;</span>
-<span class="line" id="L233">        }</span>
-<span class="line" id="L234">    }</span>
-<span class="line" id="L235">    <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
-<span class="line" id="L236">}</span>
-<span class="line" id="L237"></span>
-<span class="line" id="L238"><span class="tok-comment">/// Performs a linear search to find a short option with the given short name.</span></span>
-<span class="line" id="L239"><span class="tok-comment">///</span></span>
-<span class="line" id="L240"><span class="tok-comment">/// **NOTE:** This function is primarily used by the parser to find a short option</span></span>
-<span class="line" id="L241"><span class="tok-comment">/// based on its short name.</span></span>
-<span class="line" id="L242"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">findShortOption</span>(self: *<span class="tok-kw">const</span> Command, short_name: <span class="tok-type">u8</span>) ?*<span class="tok-kw">const</span> Arg {</span>
-<span class="line" id="L243">    <span class="tok-kw">for</span> (self.options.items) |*arg| {</span>
-<span class="line" id="L244">        <span class="tok-kw">if</span> (arg.short_name) |s| {</span>
-<span class="line" id="L245">            <span class="tok-kw">if</span> (s == short_name) <span class="tok-kw">return</span> arg;</span>
-<span class="line" id="L246">        }</span>
-<span class="line" id="L247">    }</span>
-<span class="line" id="L248">    <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
-<span class="line" id="L249">}</span>
-<span class="line" id="L250"></span>
-<span class="line" id="L251"><span class="tok-comment">/// Performs a linear search to find a long option with the given long name.</span></span>
-<span class="line" id="L252"><span class="tok-comment">///</span></span>
-<span class="line" id="L253"><span class="tok-comment">/// **NOTE:** This function is primarily used by the parser to find a long option</span></span>
-<span class="line" id="L254"><span class="tok-comment">/// based on its long name.</span></span>
-<span class="line" id="L255"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">findLongOption</span>(self: *<span class="tok-kw">const</span> Command, long_name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) ?*<span class="tok-kw">const</span> Arg {</span>
-<span class="line" id="L256">    <span class="tok-kw">for</span> (self.options.items) |*arg| {</span>
-<span class="line" id="L257">        <span class="tok-kw">if</span> (arg.long_name) |l| {</span>
-<span class="line" id="L258">            <span class="tok-kw">if</span> (mem.eql(<span class="tok-type">u8</span>, l, long_name)) <span class="tok-kw">return</span> arg;</span>
-<span class="line" id="L259">        }</span>
-<span class="line" id="L260">    }</span>
-<span class="line" id="L261">    <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
-<span class="line" id="L262">}</span>
-<span class="line" id="L263"></span>
-<span class="line" id="L264"><span class="tok-comment">/// Performs a linear search to find a subcommand with the given subcommand name.</span></span>
-<span class="line" id="L265"><span class="tok-comment">///</span></span>
-<span class="line" id="L266"><span class="tok-comment">/// **NOTE:** This function is primarily used by the parser to find a subcommand</span></span>
-<span class="line" id="L267"><span class="tok-comment">/// based on its name.</span></span>
-<span class="line" id="L268"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">findSubcommand</span>(self: *<span class="tok-kw">const</span> Command, provided_subcmd: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) ?*<span class="tok-kw">const</span> Command {</span>
-<span class="line" id="L269">    <span class="tok-kw">for</span> (self.subcommands.items) |*subcmd| {</span>
-<span class="line" id="L270">        <span class="tok-kw">if</span> (std.mem.eql(<span class="tok-type">u8</span>, subcmd.name, provided_subcmd)) {</span>
-<span class="line" id="L271">            <span class="tok-kw">return</span> subcmd;</span>
-<span class="line" id="L272">        }</span>
-<span class="line" id="L273">    }</span>
-<span class="line" id="L274"></span>
-<span class="line" id="L275">    <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
-<span class="line" id="L276">}</span>
-<span class="line" id="L277"></span>
+<span class="line" id="L178"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L179"><span class="tok-comment">///</span></span>
+<span class="line" id="L180"><span class="tok-comment">/// try root.addSubcommands(&amp;[_]Command{</span></span>
+<span class="line" id="L181"><span class="tok-comment">///     app.createCommand(&quot;init-exe&quot;, &quot;Initilize the project&quot;),</span></span>
+<span class="line" id="L182"><span class="tok-comment">///     app.createCommand(&quot;build&quot;, &quot;Build the project&quot;),</span></span>
+<span class="line" id="L183"><span class="tok-comment">/// });</span></span>
+<span class="line" id="L184"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L185"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">addSubcommands</span>(self: *Command, subcommands: []Command) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L186">    <span class="tok-kw">for</span> (subcommands) |subcmd| <span class="tok-kw">try</span> self.addSubcommand(subcmd);</span>
+<span class="line" id="L187">}</span>
+<span class="line" id="L188"></span>
+<span class="line" id="L189"><span class="tok-comment">/// Sets a property to the command, specifying how it should be parsed and</span></span>
+<span class="line" id="L190"><span class="tok-comment">/// processed.</span></span>
+<span class="line" id="L191"><span class="tok-comment">///</span></span>
+<span class="line" id="L192"><span class="tok-comment">/// ## Examples</span></span>
+<span class="line" id="L193"><span class="tok-comment">///</span></span>
+<span class="line" id="L194"><span class="tok-comment">/// Setting a property to indicate that the positional argument is required:</span></span>
+<span class="line" id="L195"><span class="tok-comment">///</span></span>
+<span class="line" id="L196"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L197"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L198"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L199"><span class="tok-comment">///</span></span>
+<span class="line" id="L200"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L201"><span class="tok-comment">///</span></span>
+<span class="line" id="L202"><span class="tok-comment">/// try root.addArg(Arg.positional(&quot;SOURCE&quot;, &quot;Source file to move&quot;, null));</span></span>
+<span class="line" id="L203"><span class="tok-comment">/// try root.addArg(Arg.positional(&quot;DEST&quot;, &quot;Destination path&quot;, null));</span></span>
+<span class="line" id="L204"><span class="tok-comment">/// root.setProperty(.positional_arg_required);</span></span>
+<span class="line" id="L205"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L206"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">setProperty</span>(self: *Command, property: Property) <span class="tok-type">void</span> {</span>
+<span class="line" id="L207">    <span class="tok-kw">return</span> self.properties.insert(property);</span>
+<span class="line" id="L208">}</span>
+<span class="line" id="L209"></span>
+<span class="line" id="L210"><span class="tok-comment">/// Unsets a property from the command, reversing its effect on parsing and</span></span>
+<span class="line" id="L211"><span class="tok-comment">/// processing.</span></span>
+<span class="line" id="L212"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">unsetProperty</span>(self: *Command, property: Property) <span class="tok-type">void</span> {</span>
+<span class="line" id="L213">    <span class="tok-kw">return</span> self.properties.remove(property);</span>
+<span class="line" id="L214">}</span>
+<span class="line" id="L215"></span>
+<span class="line" id="L216"><span class="tok-comment">/// Checks if the command has a specific property set.</span></span>
+<span class="line" id="L217"><span class="tok-comment">///</span></span>
+<span class="line" id="L218"><span class="tok-comment">/// **NOTE:** This function is primarily used by the parser to determine the</span></span>
+<span class="line" id="L219"><span class="tok-comment">/// presence of a specific property for the command.</span></span>
+<span class="line" id="L220"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">hasProperty</span>(self: *<span class="tok-kw">const</span> Command, property: Property) <span class="tok-type">bool</span> {</span>
+<span class="line" id="L221">    <span class="tok-kw">return</span> self.properties.contains(property);</span>
+<span class="line" id="L222">}</span>
+<span class="line" id="L223"></span>
+<span class="line" id="L224"><span class="tok-comment">/// Returns the count of positional arguments in the positional argument list.</span></span>
+<span class="line" id="L225"><span class="tok-comment">///</span></span>
+<span class="line" id="L226"><span class="tok-comment">/// **NOTE:** This function is primarily used by the parser to determine the</span></span>
+<span class="line" id="L227"><span class="tok-comment">/// total number of valid positional arguments.</span></span>
+<span class="line" id="L228"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">countPositionalArgs</span>(self: *<span class="tok-kw">const</span> Command) <span class="tok-type">usize</span> {</span>
+<span class="line" id="L229">    <span class="tok-kw">return</span> (self.positional_args.items.len);</span>
+<span class="line" id="L230">}</span>
+<span class="line" id="L231"></span>
+<span class="line" id="L232"><span class="tok-comment">/// Returns the count of options in the option list.</span></span>
+<span class="line" id="L233"><span class="tok-comment">///</span></span>
+<span class="line" id="L234"><span class="tok-comment">/// **NOTE:** This function is primarily used by the parser to determine the</span></span>
+<span class="line" id="L235"><span class="tok-comment">/// total number of valid options.</span></span>
+<span class="line" id="L236"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">countOptions</span>(self: *<span class="tok-kw">const</span> Command) <span class="tok-type">usize</span> {</span>
+<span class="line" id="L237">    <span class="tok-kw">return</span> (self.options.items.len);</span>
+<span class="line" id="L238">}</span>
+<span class="line" id="L239"></span>
+<span class="line" id="L240"><span class="tok-comment">/// Returns the count of subcommands in the subcommand list.</span></span>
+<span class="line" id="L241"><span class="tok-comment">///</span></span>
+<span class="line" id="L242"><span class="tok-comment">/// **NOTE:** This function is primarily used by the parser to determine the</span></span>
+<span class="line" id="L243"><span class="tok-comment">/// total number of valid subcommands.</span></span>
+<span class="line" id="L244"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">countSubcommands</span>(self: *<span class="tok-kw">const</span> Command) <span class="tok-type">usize</span> {</span>
+<span class="line" id="L245">    <span class="tok-kw">return</span> (self.subcommands.items.len);</span>
+<span class="line" id="L246">}</span>
+<span class="line" id="L247"></span>
+<span class="line" id="L248"><span class="tok-comment">/// Performs a linear search to find a positional argument with the given index.</span></span>
+<span class="line" id="L249"><span class="tok-comment">///</span></span>
+<span class="line" id="L250"><span class="tok-comment">/// **NOTE:** This function is primarily used by the parser to find a positional</span></span>
+<span class="line" id="L251"><span class="tok-comment">/// argument based on its index.</span></span>
+<span class="line" id="L252"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">findPositionalArgByIndex</span>(self: *<span class="tok-kw">const</span> Command, index: <span class="tok-type">usize</span>) ?*<span class="tok-kw">const</span> Arg {</span>
+<span class="line" id="L253">    <span class="tok-kw">for</span> (self.positional_args.items) |*pos_arg| {</span>
+<span class="line" id="L254">        std.debug.assert(pos_arg.index != <span class="tok-null">null</span>);</span>
+<span class="line" id="L255"></span>
+<span class="line" id="L256">        <span class="tok-kw">if</span> (pos_arg.index.? == index) {</span>
+<span class="line" id="L257">            <span class="tok-kw">return</span> pos_arg;</span>
+<span class="line" id="L258">        }</span>
+<span class="line" id="L259">    }</span>
+<span class="line" id="L260">    <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
+<span class="line" id="L261">}</span>
+<span class="line" id="L262"></span>
+<span class="line" id="L263"><span class="tok-comment">/// Performs a linear search to find a short option with the given short name.</span></span>
+<span class="line" id="L264"><span class="tok-comment">///</span></span>
+<span class="line" id="L265"><span class="tok-comment">/// **NOTE:** This function is primarily used by the parser to find a short option</span></span>
+<span class="line" id="L266"><span class="tok-comment">/// based on its short name.</span></span>
+<span class="line" id="L267"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">findShortOption</span>(self: *<span class="tok-kw">const</span> Command, short_name: <span class="tok-type">u8</span>) ?*<span class="tok-kw">const</span> Arg {</span>
+<span class="line" id="L268">    <span class="tok-kw">for</span> (self.options.items) |*arg| {</span>
+<span class="line" id="L269">        <span class="tok-kw">if</span> (arg.short_name) |s| {</span>
+<span class="line" id="L270">            <span class="tok-kw">if</span> (s == short_name) <span class="tok-kw">return</span> arg;</span>
+<span class="line" id="L271">        }</span>
+<span class="line" id="L272">    }</span>
+<span class="line" id="L273">    <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
+<span class="line" id="L274">}</span>
+<span class="line" id="L275"></span>
+<span class="line" id="L276"><span class="tok-comment">/// Performs a linear search to find a long option with the given long name.</span></span>
+<span class="line" id="L277"><span class="tok-comment">///</span></span>
+<span class="line" id="L278"><span class="tok-comment">/// **NOTE:** This function is primarily used by the parser to find a long option</span></span>
+<span class="line" id="L279"><span class="tok-comment">/// based on its long name.</span></span>
+<span class="line" id="L280"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">findLongOption</span>(self: *<span class="tok-kw">const</span> Command, long_name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) ?*<span class="tok-kw">const</span> Arg {</span>
+<span class="line" id="L281">    <span class="tok-kw">for</span> (self.options.items) |*arg| {</span>
+<span class="line" id="L282">        <span class="tok-kw">if</span> (arg.long_name) |l| {</span>
+<span class="line" id="L283">            <span class="tok-kw">if</span> (mem.eql(<span class="tok-type">u8</span>, l, long_name)) <span class="tok-kw">return</span> arg;</span>
+<span class="line" id="L284">        }</span>
+<span class="line" id="L285">    }</span>
+<span class="line" id="L286">    <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
+<span class="line" id="L287">}</span>
+<span class="line" id="L288"></span>
+<span class="line" id="L289"><span class="tok-comment">/// Performs a linear search to find a subcommand with the given subcommand name.</span></span>
+<span class="line" id="L290"><span class="tok-comment">///</span></span>
+<span class="line" id="L291"><span class="tok-comment">/// **NOTE:** This function is primarily used by the parser to find a subcommand</span></span>
+<span class="line" id="L292"><span class="tok-comment">/// based on its name.</span></span>
+<span class="line" id="L293"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">findSubcommand</span>(self: *<span class="tok-kw">const</span> Command, provided_subcmd: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) ?*<span class="tok-kw">const</span> Command {</span>
+<span class="line" id="L294">    <span class="tok-kw">for</span> (self.subcommands.items) |*subcmd| {</span>
+<span class="line" id="L295">        <span class="tok-kw">if</span> (std.mem.eql(<span class="tok-type">u8</span>, subcmd.name, provided_subcmd)) {</span>
+<span class="line" id="L296">            <span class="tok-kw">return</span> subcmd;</span>
+<span class="line" id="L297">        }</span>
+<span class="line" id="L298">    }</span>
+<span class="line" id="L299"></span>
+<span class="line" id="L300">    <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
+<span class="line" id="L301">}</span>
+<span class="line" id="L302"></span>
 </code></pre></body>
 </html>

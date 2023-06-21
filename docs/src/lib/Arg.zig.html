@@ -302,357 +302,369 @@
 <span class="line" id="L188"><span class="tok-comment">///</span></span>
 <span class="line" id="L189"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
 <span class="line" id="L190"><span class="tok-comment">/// try root.addArg(Arg.multiValuesOptionWithValidValues(</span></span>
-<span class="line" id="L191"><span class="tok-comment">///     &quot;distros&quot;, 'd', &quot;Two Fav Distros&quot;, 2, &amp;[_]const u8 { &quot;debian&quot;, &quot;ubuntu&quot;, &quot;arch&quot; },</span></span>
-<span class="line" id="L192"><span class="tok-comment">/// ));</span></span>
-<span class="line" id="L193"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L194"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">multiValuesOptionWithValidValues</span>(</span>
-<span class="line" id="L195">    name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>,</span>
-<span class="line" id="L196">    short_name: ?<span class="tok-type">u8</span>,</span>
-<span class="line" id="L197">    description: ?[]<span class="tok-kw">const</span> <span class="tok-type">u8</span>,</span>
-<span class="line" id="L198">    max_values: <span class="tok-type">usize</span>,</span>
-<span class="line" id="L199">    values: []<span class="tok-kw">const</span> []<span class="tok-kw">const</span> <span class="tok-type">u8</span>,</span>
-<span class="line" id="L200">) Arg {</span>
-<span class="line" id="L201">    <span class="tok-kw">var</span> arg = Arg.multiValuesOption(name, short_name, description, max_values);</span>
-<span class="line" id="L202">    arg.setValidValues(values);</span>
-<span class="line" id="L203">    <span class="tok-kw">return</span> arg;</span>
-<span class="line" id="L204">}</span>
-<span class="line" id="L205"></span>
-<span class="line" id="L206"><span class="tok-comment">// # Setters</span>
+<span class="line" id="L191"><span class="tok-comment">///     &quot;distros&quot;,</span></span>
+<span class="line" id="L192"><span class="tok-comment">///     'd',</span></span>
+<span class="line" id="L193"><span class="tok-comment">///     &quot;Two Fav Distros&quot;,</span></span>
+<span class="line" id="L194"><span class="tok-comment">///     2,</span></span>
+<span class="line" id="L195"><span class="tok-comment">///     &amp;[_]const u8 { &quot;debian&quot;, &quot;ubuntu&quot;, &quot;arch&quot; },</span></span>
+<span class="line" id="L196"><span class="tok-comment">/// ));</span></span>
+<span class="line" id="L197"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L198"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">multiValuesOptionWithValidValues</span>(</span>
+<span class="line" id="L199">    name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>,</span>
+<span class="line" id="L200">    short_name: ?<span class="tok-type">u8</span>,</span>
+<span class="line" id="L201">    description: ?[]<span class="tok-kw">const</span> <span class="tok-type">u8</span>,</span>
+<span class="line" id="L202">    max_values: <span class="tok-type">usize</span>,</span>
+<span class="line" id="L203">    values: []<span class="tok-kw">const</span> []<span class="tok-kw">const</span> <span class="tok-type">u8</span>,</span>
+<span class="line" id="L204">) Arg {</span>
+<span class="line" id="L205">    <span class="tok-kw">var</span> arg = Arg.multiValuesOption(name, short_name, description, max_values);</span>
+<span class="line" id="L206">    arg.setValidValues(values);</span>
+<span class="line" id="L207">    <span class="tok-kw">return</span> arg;</span>
+<span class="line" id="L208">}</span>
+<span class="line" id="L209"></span>
+<span class="line" id="L210"><span class="tok-comment">// # Setters</span>
 </span>
-<span class="line" id="L207"></span>
-<span class="line" id="L208"><span class="tok-comment">/// Sets the short name of the argument.</span></span>
-<span class="line" id="L209"><span class="tok-comment">///</span></span>
-<span class="line" id="L210"><span class="tok-comment">/// ## Examples</span></span>
-<span class="line" id="L211"><span class="tok-comment">///</span></span>
-<span class="line" id="L212"><span class="tok-comment">/// ```zig</span></span>
-<span class="line" id="L213"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
-<span class="line" id="L214"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L211"></span>
+<span class="line" id="L212"><span class="tok-comment">/// Sets the short name of the argument.</span></span>
+<span class="line" id="L213"><span class="tok-comment">///</span></span>
+<span class="line" id="L214"><span class="tok-comment">/// ## Examples</span></span>
 <span class="line" id="L215"><span class="tok-comment">///</span></span>
-<span class="line" id="L216"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
-<span class="line" id="L217"><span class="tok-comment">///</span></span>
-<span class="line" id="L218"><span class="tok-comment">/// var port = Arg.init(&quot;port&quot;, &quot;Port number to bind&quot;);</span></span>
-<span class="line" id="L219"><span class="tok-comment">/// port.setShortName('p');</span></span>
-<span class="line" id="L220"><span class="tok-comment">/// port.setProperty(.takes_value);</span></span>
+<span class="line" id="L216"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L217"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L218"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L219"><span class="tok-comment">///</span></span>
+<span class="line" id="L220"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
 <span class="line" id="L221"><span class="tok-comment">///</span></span>
-<span class="line" id="L222"><span class="tok-comment">/// // Equivalent, except `singleValueOption` sets the long name as well.</span></span>
-<span class="line" id="L223"><span class="tok-comment">/// var port = Arg.singleValueOption(&quot;port&quot;, 'p', &quot;Port number to bind&quot;);</span></span>
-<span class="line" id="L224"><span class="tok-comment">///</span></span>
-<span class="line" id="L225"><span class="tok-comment">/// try root.addArg(port);</span></span>
-<span class="line" id="L226"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L227"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">setShortName</span>(self: *Arg, short_name: <span class="tok-type">u8</span>) <span class="tok-type">void</span> {</span>
-<span class="line" id="L228">    self.short_name = short_name;</span>
-<span class="line" id="L229">}</span>
-<span class="line" id="L230"></span>
-<span class="line" id="L231"><span class="tok-comment">/// Sets the long name of the argument.</span></span>
-<span class="line" id="L232"><span class="tok-comment">///</span></span>
-<span class="line" id="L233"><span class="tok-comment">/// ## Examples</span></span>
-<span class="line" id="L234"><span class="tok-comment">///</span></span>
-<span class="line" id="L235"><span class="tok-comment">/// ```zig</span></span>
-<span class="line" id="L236"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
-<span class="line" id="L237"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L222"><span class="tok-comment">/// var port = Arg.init(&quot;port&quot;, &quot;Port number to bind&quot;);</span></span>
+<span class="line" id="L223"><span class="tok-comment">/// port.setShortName('p');</span></span>
+<span class="line" id="L224"><span class="tok-comment">/// port.setProperty(.takes_value);</span></span>
+<span class="line" id="L225"><span class="tok-comment">///</span></span>
+<span class="line" id="L226"><span class="tok-comment">/// // Equivalent, except `singleValueOption` sets the long name as well.</span></span>
+<span class="line" id="L227"><span class="tok-comment">/// var port = Arg.singleValueOption(&quot;port&quot;, 'p', &quot;Port number to bind&quot;);</span></span>
+<span class="line" id="L228"><span class="tok-comment">///</span></span>
+<span class="line" id="L229"><span class="tok-comment">/// try root.addArg(port);</span></span>
+<span class="line" id="L230"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L231"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">setShortName</span>(self: *Arg, short_name: <span class="tok-type">u8</span>) <span class="tok-type">void</span> {</span>
+<span class="line" id="L232">    self.short_name = short_name;</span>
+<span class="line" id="L233">}</span>
+<span class="line" id="L234"></span>
+<span class="line" id="L235"><span class="tok-comment">/// Sets the long name of the argument.</span></span>
+<span class="line" id="L236"><span class="tok-comment">///</span></span>
+<span class="line" id="L237"><span class="tok-comment">/// ## Examples</span></span>
 <span class="line" id="L238"><span class="tok-comment">///</span></span>
-<span class="line" id="L239"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
-<span class="line" id="L240"><span class="tok-comment">///</span></span>
-<span class="line" id="L241"><span class="tok-comment">/// var port = Arg.init(&quot;port&quot;, &quot;Port number to bind&quot;);</span></span>
-<span class="line" id="L242"><span class="tok-comment">/// port.setLongName(&quot;port&quot;);</span></span>
-<span class="line" id="L243"><span class="tok-comment">/// port.setProperty(.takes_value);</span></span>
+<span class="line" id="L239"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L240"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L241"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L242"><span class="tok-comment">///</span></span>
+<span class="line" id="L243"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
 <span class="line" id="L244"><span class="tok-comment">///</span></span>
-<span class="line" id="L245"><span class="tok-comment">/// // Equivalent</span></span>
-<span class="line" id="L246"><span class="tok-comment">/// var port = Arg.singleValueOption(&quot;port&quot;, null, &quot;Port number to bind&quot;);</span></span>
-<span class="line" id="L247"><span class="tok-comment">///</span></span>
-<span class="line" id="L248"><span class="tok-comment">/// try root.addArg(port);</span></span>
-<span class="line" id="L249"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L250"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">setLongName</span>(self: *Arg, long_name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) <span class="tok-type">void</span> {</span>
-<span class="line" id="L251">    self.long_name = long_name;</span>
-<span class="line" id="L252">}</span>
-<span class="line" id="L253"></span>
-<span class="line" id="L254"><span class="tok-comment">/// Sets the minimum number of values required for an argument.</span></span>
-<span class="line" id="L255"><span class="tok-comment">///</span></span>
-<span class="line" id="L256"><span class="tok-comment">/// ## Examples</span></span>
-<span class="line" id="L257"><span class="tok-comment">///</span></span>
-<span class="line" id="L258"><span class="tok-comment">/// ```zig</span></span>
-<span class="line" id="L259"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
-<span class="line" id="L260"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L245"><span class="tok-comment">/// var port = Arg.init(&quot;port&quot;, &quot;Port number to bind&quot;);</span></span>
+<span class="line" id="L246"><span class="tok-comment">/// port.setLongName(&quot;port&quot;);</span></span>
+<span class="line" id="L247"><span class="tok-comment">/// port.setProperty(.takes_value);</span></span>
+<span class="line" id="L248"><span class="tok-comment">///</span></span>
+<span class="line" id="L249"><span class="tok-comment">/// // Equivalent</span></span>
+<span class="line" id="L250"><span class="tok-comment">/// var port = Arg.singleValueOption(&quot;port&quot;, null, &quot;Port number to bind&quot;);</span></span>
+<span class="line" id="L251"><span class="tok-comment">///</span></span>
+<span class="line" id="L252"><span class="tok-comment">/// try root.addArg(port);</span></span>
+<span class="line" id="L253"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L254"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">setLongName</span>(self: *Arg, long_name: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) <span class="tok-type">void</span> {</span>
+<span class="line" id="L255">    self.long_name = long_name;</span>
+<span class="line" id="L256">}</span>
+<span class="line" id="L257"></span>
+<span class="line" id="L258"><span class="tok-comment">/// Sets the minimum number of values required for an argument.</span></span>
+<span class="line" id="L259"><span class="tok-comment">///</span></span>
+<span class="line" id="L260"><span class="tok-comment">/// ## Examples</span></span>
 <span class="line" id="L261"><span class="tok-comment">///</span></span>
-<span class="line" id="L262"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
-<span class="line" id="L263"><span class="tok-comment">///</span></span>
-<span class="line" id="L264"><span class="tok-comment">/// var nums = Arg.init(&quot;nums&quot;, &quot;Numbers to add&quot;);</span></span>
-<span class="line" id="L265"><span class="tok-comment">/// nums.setShortName('n');</span></span>
-<span class="line" id="L266"><span class="tok-comment">/// nums.setMinValues(2);</span></span>
-<span class="line" id="L267"><span class="tok-comment">/// nums.setProperty(.takes_value);</span></span>
-<span class="line" id="L268"><span class="tok-comment">///</span></span>
-<span class="line" id="L269"><span class="tok-comment">/// try root.addArg(nums);</span></span>
-<span class="line" id="L270"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L271"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">setMinValues</span>(self: *Arg, num: <span class="tok-type">usize</span>) <span class="tok-type">void</span> {</span>
-<span class="line" id="L272">    self.min_values = <span class="tok-kw">if</span> (num &gt;= <span class="tok-number">1</span>) num <span class="tok-kw">else</span> <span class="tok-null">null</span>;</span>
-<span class="line" id="L273">}</span>
-<span class="line" id="L274"></span>
-<span class="line" id="L275"><span class="tok-comment">/// Sets the maximum number of values an argument can take.</span></span>
-<span class="line" id="L276"><span class="tok-comment">///</span></span>
-<span class="line" id="L277"><span class="tok-comment">/// ## Examples</span></span>
-<span class="line" id="L278"><span class="tok-comment">///</span></span>
-<span class="line" id="L279"><span class="tok-comment">/// ```zig</span></span>
-<span class="line" id="L280"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
-<span class="line" id="L281"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L262"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L263"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L264"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L265"><span class="tok-comment">///</span></span>
+<span class="line" id="L266"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L267"><span class="tok-comment">///</span></span>
+<span class="line" id="L268"><span class="tok-comment">/// var nums = Arg.init(&quot;nums&quot;, &quot;Numbers to add&quot;);</span></span>
+<span class="line" id="L269"><span class="tok-comment">/// nums.setShortName('n');</span></span>
+<span class="line" id="L270"><span class="tok-comment">/// nums.setMinValues(2);</span></span>
+<span class="line" id="L271"><span class="tok-comment">/// nums.setProperty(.takes_value);</span></span>
+<span class="line" id="L272"><span class="tok-comment">///</span></span>
+<span class="line" id="L273"><span class="tok-comment">/// try root.addArg(nums);</span></span>
+<span class="line" id="L274"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L275"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">setMinValues</span>(self: *Arg, num: <span class="tok-type">usize</span>) <span class="tok-type">void</span> {</span>
+<span class="line" id="L276">    self.min_values = <span class="tok-kw">if</span> (num &gt;= <span class="tok-number">1</span>) num <span class="tok-kw">else</span> <span class="tok-null">null</span>;</span>
+<span class="line" id="L277">}</span>
+<span class="line" id="L278"></span>
+<span class="line" id="L279"><span class="tok-comment">/// Sets the maximum number of values an argument can take.</span></span>
+<span class="line" id="L280"><span class="tok-comment">///</span></span>
+<span class="line" id="L281"><span class="tok-comment">/// ## Examples</span></span>
 <span class="line" id="L282"><span class="tok-comment">///</span></span>
-<span class="line" id="L283"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
-<span class="line" id="L284"><span class="tok-comment">///</span></span>
-<span class="line" id="L285"><span class="tok-comment">/// var nums = Arg.init(&quot;nums&quot;, &quot;Numbers to add&quot;);</span></span>
-<span class="line" id="L286"><span class="tok-comment">/// nums.setShortName('n');</span></span>
-<span class="line" id="L287"><span class="tok-comment">/// nums.setLongName(&quot;nums&quot;);</span></span>
-<span class="line" id="L288"><span class="tok-comment">/// nums.setMinValues(2);</span></span>
-<span class="line" id="L289"><span class="tok-comment">/// nums.setMaxValues(5);</span></span>
-<span class="line" id="L290"><span class="tok-comment">/// nums.setProperty(.takes_value);</span></span>
-<span class="line" id="L291"><span class="tok-comment">///</span></span>
-<span class="line" id="L292"><span class="tok-comment">/// try root.addArg(nums);</span></span>
-<span class="line" id="L293"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L294"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">setMaxValues</span>(self: *Arg, num: <span class="tok-type">usize</span>) <span class="tok-type">void</span> {</span>
-<span class="line" id="L295">    self.max_values = <span class="tok-kw">if</span> (num &gt;= <span class="tok-number">1</span>) num <span class="tok-kw">else</span> <span class="tok-null">null</span>;</span>
-<span class="line" id="L296">}</span>
-<span class="line" id="L297"></span>
-<span class="line" id="L298"><span class="tok-comment">/// Sets the valid values for an argument.</span></span>
-<span class="line" id="L299"><span class="tok-comment">///</span></span>
-<span class="line" id="L300"><span class="tok-comment">/// ## Examples</span></span>
-<span class="line" id="L301"><span class="tok-comment">///</span></span>
-<span class="line" id="L302"><span class="tok-comment">/// ```zig</span></span>
-<span class="line" id="L303"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
-<span class="line" id="L304"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L283"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L284"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L285"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L286"><span class="tok-comment">///</span></span>
+<span class="line" id="L287"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L288"><span class="tok-comment">///</span></span>
+<span class="line" id="L289"><span class="tok-comment">/// var nums = Arg.init(&quot;nums&quot;, &quot;Numbers to add&quot;);</span></span>
+<span class="line" id="L290"><span class="tok-comment">/// nums.setShortName('n');</span></span>
+<span class="line" id="L291"><span class="tok-comment">/// nums.setLongName(&quot;nums&quot;);</span></span>
+<span class="line" id="L292"><span class="tok-comment">/// nums.setMinValues(2);</span></span>
+<span class="line" id="L293"><span class="tok-comment">/// nums.setMaxValues(5);</span></span>
+<span class="line" id="L294"><span class="tok-comment">/// nums.setProperty(.takes_value);</span></span>
+<span class="line" id="L295"><span class="tok-comment">///</span></span>
+<span class="line" id="L296"><span class="tok-comment">/// try root.addArg(nums);</span></span>
+<span class="line" id="L297"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L298"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">setMaxValues</span>(self: *Arg, num: <span class="tok-type">usize</span>) <span class="tok-type">void</span> {</span>
+<span class="line" id="L299">    self.max_values = <span class="tok-kw">if</span> (num &gt;= <span class="tok-number">1</span>) num <span class="tok-kw">else</span> <span class="tok-null">null</span>;</span>
+<span class="line" id="L300">}</span>
+<span class="line" id="L301"></span>
+<span class="line" id="L302"><span class="tok-comment">/// Sets the valid values for an argument.</span></span>
+<span class="line" id="L303"><span class="tok-comment">///</span></span>
+<span class="line" id="L304"><span class="tok-comment">/// ## Examples</span></span>
 <span class="line" id="L305"><span class="tok-comment">///</span></span>
-<span class="line" id="L306"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
-<span class="line" id="L307"><span class="tok-comment">///</span></span>
-<span class="line" id="L308"><span class="tok-comment">/// var distros = Arg.init(&quot;distros&quot;, &quot;Two Fav Distros&quot;);</span></span>
-<span class="line" id="L309"><span class="tok-comment">/// distros.setShortName('d');</span></span>
-<span class="line" id="L310"><span class="tok-comment">/// distros.setLongName(&quot;distros&quot;);</span></span>
-<span class="line" id="L311"><span class="tok-comment">/// distros.setMinValues(1);</span></span>
-<span class="line" id="L312"><span class="tok-comment">/// distros.setMaxValues(2);</span></span>
-<span class="line" id="L313"><span class="tok-comment">/// distros.setValidValues(&amp;[_][]const u8{</span></span>
-<span class="line" id="L314"><span class="tok-comment">///     &quot;debian&quot;,</span></span>
-<span class="line" id="L315"><span class="tok-comment">///     &quot;ubuntu&quot;,</span></span>
-<span class="line" id="L316"><span class="tok-comment">///     &quot;arch&quot;,</span></span>
-<span class="line" id="L317"><span class="tok-comment">/// });</span></span>
-<span class="line" id="L318"><span class="tok-comment">/// distros.setProperty(.takes_value);</span></span>
-<span class="line" id="L319"><span class="tok-comment">///</span></span>
-<span class="line" id="L320"><span class="tok-comment">/// // Equivalent</span></span>
-<span class="line" id="L321"><span class="tok-comment">/// var distros = Arg.multiValuesOptionWithValidValues(</span></span>
-<span class="line" id="L322"><span class="tok-comment">///     &quot;distros&quot;, 'd', &quot;Two Fav Distros&quot;, 2, &amp;[_]const u8 { &quot;debian&quot;, &quot;ubuntu&quot;, &quot;arch&quot; },</span></span>
-<span class="line" id="L323"><span class="tok-comment">/// );</span></span>
-<span class="line" id="L324"><span class="tok-comment">///</span></span>
-<span class="line" id="L325"><span class="tok-comment">/// try root.addArg(distros);</span></span>
-<span class="line" id="L326"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L327"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">setValidValues</span>(self: *Arg, values: []<span class="tok-kw">const</span> []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) <span class="tok-type">void</span> {</span>
-<span class="line" id="L328">    self.valid_values = values;</span>
-<span class="line" id="L329">}</span>
-<span class="line" id="L330"></span>
-<span class="line" id="L331"><span class="tok-comment">/// Sets the default separator for values of an argument.</span></span>
-<span class="line" id="L332"><span class="tok-comment">/// This separator is used when multiple values are provided for the argument.</span></span>
-<span class="line" id="L333"><span class="tok-comment">/// Use `Arg.setValuesDelimiter` to set a custom delimiter.</span></span>
-<span class="line" id="L334"><span class="tok-comment">///</span></span>
-<span class="line" id="L335"><span class="tok-comment">/// ## Examples</span></span>
-<span class="line" id="L336"><span class="tok-comment">///</span></span>
-<span class="line" id="L337"><span class="tok-comment">/// ```zig</span></span>
-<span class="line" id="L338"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
-<span class="line" id="L339"><span class="tok-comment">/// defer app.deinit();</span></span>
-<span class="line" id="L340"><span class="tok-comment">///</span></span>
-<span class="line" id="L341"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L306"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L307"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L308"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L309"><span class="tok-comment">///</span></span>
+<span class="line" id="L310"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L311"><span class="tok-comment">///</span></span>
+<span class="line" id="L312"><span class="tok-comment">/// var distros = Arg.init(&quot;distros&quot;, &quot;Two Fav Distros&quot;);</span></span>
+<span class="line" id="L313"><span class="tok-comment">/// distros.setShortName('d');</span></span>
+<span class="line" id="L314"><span class="tok-comment">/// distros.setLongName(&quot;distros&quot;);</span></span>
+<span class="line" id="L315"><span class="tok-comment">/// distros.setMinValues(1);</span></span>
+<span class="line" id="L316"><span class="tok-comment">/// distros.setMaxValues(2);</span></span>
+<span class="line" id="L317"><span class="tok-comment">/// distros.setValidValues(&amp;[_][]const u8{</span></span>
+<span class="line" id="L318"><span class="tok-comment">///     &quot;debian&quot;,</span></span>
+<span class="line" id="L319"><span class="tok-comment">///     &quot;ubuntu&quot;,</span></span>
+<span class="line" id="L320"><span class="tok-comment">///     &quot;arch&quot;,</span></span>
+<span class="line" id="L321"><span class="tok-comment">/// });</span></span>
+<span class="line" id="L322"><span class="tok-comment">/// distros.setProperty(.takes_value);</span></span>
+<span class="line" id="L323"><span class="tok-comment">///</span></span>
+<span class="line" id="L324"><span class="tok-comment">/// // Equivalent</span></span>
+<span class="line" id="L325"><span class="tok-comment">/// var distros = Arg.multiValuesOptionWithValidValues(</span></span>
+<span class="line" id="L326"><span class="tok-comment">///     &quot;distros&quot;,</span></span>
+<span class="line" id="L327"><span class="tok-comment">///     'd',</span></span>
+<span class="line" id="L328"><span class="tok-comment">///     &quot;Two Fav Distros&quot;,</span></span>
+<span class="line" id="L329"><span class="tok-comment">///     2,</span></span>
+<span class="line" id="L330"><span class="tok-comment">///     &amp;[_]const u8 { &quot;debian&quot;, &quot;ubuntu&quot;, &quot;arch&quot; },</span></span>
+<span class="line" id="L331"><span class="tok-comment">/// );</span></span>
+<span class="line" id="L332"><span class="tok-comment">///</span></span>
+<span class="line" id="L333"><span class="tok-comment">/// try root.addArg(distros);</span></span>
+<span class="line" id="L334"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L335"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">setValidValues</span>(self: *Arg, values: []<span class="tok-kw">const</span> []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) <span class="tok-type">void</span> {</span>
+<span class="line" id="L336">    self.valid_values = values;</span>
+<span class="line" id="L337">}</span>
+<span class="line" id="L338"></span>
+<span class="line" id="L339"><span class="tok-comment">/// Sets the default separator for values of an argument.</span></span>
+<span class="line" id="L340"><span class="tok-comment">/// This separator is used when multiple values are provided for the argument.</span></span>
+<span class="line" id="L341"><span class="tok-comment">/// Use `Arg.setValuesDelimiter` to set a custom delimiter.</span></span>
 <span class="line" id="L342"><span class="tok-comment">///</span></span>
-<span class="line" id="L343"><span class="tok-comment">/// var nums = Arg.init(&quot;nums&quot;, &quot;Numbers to add&quot;);</span></span>
-<span class="line" id="L344"><span class="tok-comment">/// nums.setShortName(&quot;n&quot;);</span></span>
-<span class="line" id="L345"><span class="tok-comment">/// nums.setLongName(&quot;nums&quot;);</span></span>
-<span class="line" id="L346"><span class="tok-comment">/// nums.setMinValues(2);</span></span>
-<span class="line" id="L347"><span class="tok-comment">/// nums.setDefaultValuesDelimiter();</span></span>
-<span class="line" id="L348"><span class="tok-comment">/// nums.setProperty(.takes_value);</span></span>
-<span class="line" id="L349"><span class="tok-comment">///</span></span>
-<span class="line" id="L350"><span class="tok-comment">/// try root.addArg(nums);</span></span>
-<span class="line" id="L351"><span class="tok-comment">///</span></span>
-<span class="line" id="L352"><span class="tok-comment">/// // Command line input: myapp --nums 1,2</span></span>
-<span class="line" id="L353"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L354"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">setDefaultValuesDelimiter</span>(self: *Arg) <span class="tok-type">void</span> {</span>
-<span class="line" id="L355">    self.setValuesDelimiter(DEFAULT_VALUES_DELIMITER);</span>
-<span class="line" id="L356">}</span>
-<span class="line" id="L357"></span>
-<span class="line" id="L358"><span class="tok-comment">/// Sets the given separator for values of an argument.</span></span>
-<span class="line" id="L359"><span class="tok-comment">/// This separator is used when multiple values are provided for the argument.</span></span>
-<span class="line" id="L360"><span class="tok-comment">///</span></span>
-<span class="line" id="L361"><span class="tok-comment">/// ## Examples</span></span>
-<span class="line" id="L362"><span class="tok-comment">///</span></span>
-<span class="line" id="L363"><span class="tok-comment">/// ```zig</span></span>
-<span class="line" id="L364"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
-<span class="line" id="L365"><span class="tok-comment">/// defer app.deinit();</span></span>
-<span class="line" id="L366"><span class="tok-comment">///</span></span>
-<span class="line" id="L367"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L343"><span class="tok-comment">/// ## Examples</span></span>
+<span class="line" id="L344"><span class="tok-comment">///</span></span>
+<span class="line" id="L345"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L346"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L347"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L348"><span class="tok-comment">///</span></span>
+<span class="line" id="L349"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L350"><span class="tok-comment">///</span></span>
+<span class="line" id="L351"><span class="tok-comment">/// var nums = Arg.init(&quot;nums&quot;, &quot;Numbers to add&quot;);</span></span>
+<span class="line" id="L352"><span class="tok-comment">/// nums.setShortName(&quot;n&quot;);</span></span>
+<span class="line" id="L353"><span class="tok-comment">/// nums.setLongName(&quot;nums&quot;);</span></span>
+<span class="line" id="L354"><span class="tok-comment">/// nums.setMinValues(2);</span></span>
+<span class="line" id="L355"><span class="tok-comment">/// nums.setDefaultValuesDelimiter();</span></span>
+<span class="line" id="L356"><span class="tok-comment">/// nums.setProperty(.takes_value);</span></span>
+<span class="line" id="L357"><span class="tok-comment">///</span></span>
+<span class="line" id="L358"><span class="tok-comment">/// try root.addArg(nums);</span></span>
+<span class="line" id="L359"><span class="tok-comment">///</span></span>
+<span class="line" id="L360"><span class="tok-comment">/// // Command line input: myapp --nums 1,2</span></span>
+<span class="line" id="L361"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L362"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">setDefaultValuesDelimiter</span>(self: *Arg) <span class="tok-type">void</span> {</span>
+<span class="line" id="L363">    self.setValuesDelimiter(DEFAULT_VALUES_DELIMITER);</span>
+<span class="line" id="L364">}</span>
+<span class="line" id="L365"></span>
+<span class="line" id="L366"><span class="tok-comment">/// Sets the given separator for values of an argument.</span></span>
+<span class="line" id="L367"><span class="tok-comment">/// This separator is used when multiple values are provided for the argument.</span></span>
 <span class="line" id="L368"><span class="tok-comment">///</span></span>
-<span class="line" id="L369"><span class="tok-comment">/// var nums = Arg.init(&quot;nums&quot;, &quot;Numbers to add&quot;);</span></span>
-<span class="line" id="L370"><span class="tok-comment">/// nums.setShortName(&quot;n&quot;);</span></span>
-<span class="line" id="L371"><span class="tok-comment">/// nums.setLongName(&quot;nums&quot;);</span></span>
-<span class="line" id="L372"><span class="tok-comment">/// nums.setMinValues(2);</span></span>
-<span class="line" id="L373"><span class="tok-comment">/// nums.setValuesDelimiter(&quot;:&quot;);</span></span>
-<span class="line" id="L374"><span class="tok-comment">/// nums.setProperty(.takes_value);</span></span>
-<span class="line" id="L375"><span class="tok-comment">///</span></span>
-<span class="line" id="L376"><span class="tok-comment">/// try root.addArg(nums);</span></span>
-<span class="line" id="L377"><span class="tok-comment">///</span></span>
-<span class="line" id="L378"><span class="tok-comment">/// // Command line input: myapp --nums 1:2</span></span>
-<span class="line" id="L379"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L380"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">setValuesDelimiter</span>(self: *Arg, delimiter: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) <span class="tok-type">void</span> {</span>
-<span class="line" id="L381">    self.values_delimiter = delimiter;</span>
-<span class="line" id="L382">}</span>
-<span class="line" id="L383"></span>
-<span class="line" id="L384"><span class="tok-comment">/// Sets the index of a positional argument, starting with **1**.</span></span>
+<span class="line" id="L369"><span class="tok-comment">/// ## Examples</span></span>
+<span class="line" id="L370"><span class="tok-comment">///</span></span>
+<span class="line" id="L371"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L372"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L373"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L374"><span class="tok-comment">///</span></span>
+<span class="line" id="L375"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L376"><span class="tok-comment">///</span></span>
+<span class="line" id="L377"><span class="tok-comment">/// var nums = Arg.init(&quot;nums&quot;, &quot;Numbers to add&quot;);</span></span>
+<span class="line" id="L378"><span class="tok-comment">/// nums.setShortName(&quot;n&quot;);</span></span>
+<span class="line" id="L379"><span class="tok-comment">/// nums.setLongName(&quot;nums&quot;);</span></span>
+<span class="line" id="L380"><span class="tok-comment">/// nums.setMinValues(2);</span></span>
+<span class="line" id="L381"><span class="tok-comment">/// nums.setValuesDelimiter(&quot;:&quot;);</span></span>
+<span class="line" id="L382"><span class="tok-comment">/// nums.setProperty(.takes_value);</span></span>
+<span class="line" id="L383"><span class="tok-comment">///</span></span>
+<span class="line" id="L384"><span class="tok-comment">/// try root.addArg(nums);</span></span>
 <span class="line" id="L385"><span class="tok-comment">///</span></span>
-<span class="line" id="L386"><span class="tok-comment">/// The index determines the position of the positional argument relative to</span></span>
-<span class="line" id="L387"><span class="tok-comment">/// other positional arguments. By default, the index is assigned based on the</span></span>
-<span class="line" id="L388"><span class="tok-comment">/// order in which the arguments are defined.</span></span>
-<span class="line" id="L389"><span class="tok-comment">///</span></span>
-<span class="line" id="L390"><span class="tok-comment">/// **NOTE:** Setting index for options will have no effect and will be sliently</span></span>
-<span class="line" id="L391"><span class="tok-comment">/// ignored.</span></span>
-<span class="line" id="L392"><span class="tok-comment">///</span></span>
-<span class="line" id="L393"><span class="tok-comment">/// ## Examples</span></span>
-<span class="line" id="L394"><span class="tok-comment">///</span></span>
-<span class="line" id="L395"><span class="tok-comment">/// ```zig</span></span>
-<span class="line" id="L396"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
-<span class="line" id="L397"><span class="tok-comment">/// defer app.deinit();</span></span>
-<span class="line" id="L398"><span class="tok-comment">///</span></span>
-<span class="line" id="L399"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L386"><span class="tok-comment">/// // Command line input: myapp --nums 1:2</span></span>
+<span class="line" id="L387"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L388"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">setValuesDelimiter</span>(self: *Arg, delimiter: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) <span class="tok-type">void</span> {</span>
+<span class="line" id="L389">    self.values_delimiter = delimiter;</span>
+<span class="line" id="L390">}</span>
+<span class="line" id="L391"></span>
+<span class="line" id="L392"><span class="tok-comment">/// Sets the index of a positional argument, starting with **1**.</span></span>
+<span class="line" id="L393"><span class="tok-comment">///</span></span>
+<span class="line" id="L394"><span class="tok-comment">/// The index determines the position of the positional argument relative to</span></span>
+<span class="line" id="L395"><span class="tok-comment">/// other positional arguments. By default, the index is assigned based on the</span></span>
+<span class="line" id="L396"><span class="tok-comment">/// order in which the arguments are defined.</span></span>
+<span class="line" id="L397"><span class="tok-comment">///</span></span>
+<span class="line" id="L398"><span class="tok-comment">/// **NOTE:** Setting index for options will have no effect and will be sliently</span></span>
+<span class="line" id="L399"><span class="tok-comment">/// ignored.</span></span>
 <span class="line" id="L400"><span class="tok-comment">///</span></span>
-<span class="line" id="L401"><span class="tok-comment">/// var second = Arg.init(&quot;SECOND&quot;, &quot;Second positional arg&quot;);</span></span>
-<span class="line" id="L402"><span class="tok-comment">/// second.setIndex(2);</span></span>
-<span class="line" id="L403"><span class="tok-comment">/// second.setProperty(.takes_value);</span></span>
-<span class="line" id="L404"><span class="tok-comment">///</span></span>
-<span class="line" id="L405"><span class="tok-comment">/// // Equivalent</span></span>
-<span class="line" id="L406"><span class="tok-comment">/// var second = Arg.positional(&quot;SECOND&quot;, &quot;Second positional arg&quot;, 2);</span></span>
-<span class="line" id="L407"><span class="tok-comment">///</span></span>
-<span class="line" id="L408"><span class="tok-comment">/// var first = Arg.init(&quot;FIRST&quot;, &quot;First positional arg&quot;);</span></span>
-<span class="line" id="L409"><span class="tok-comment">/// first.setIndex(1);</span></span>
-<span class="line" id="L410"><span class="tok-comment">/// first.setProperty(.takes_value);</span></span>
-<span class="line" id="L411"><span class="tok-comment">///</span></span>
-<span class="line" id="L412"><span class="tok-comment">/// // Equivalent</span></span>
-<span class="line" id="L413"><span class="tok-comment">/// var first = Arg.positional(&quot;FIRST&quot;, &quot;First positional arg&quot;, 2);</span></span>
-<span class="line" id="L414"><span class="tok-comment">///</span></span>
-<span class="line" id="L415"><span class="tok-comment">/// // No effect on this</span></span>
-<span class="line" id="L416"><span class="tok-comment">/// var option = Arg.singleValueOption(&quot;option&quot;, 'o', &quot;Some description&quot;);</span></span>
-<span class="line" id="L417"><span class="tok-comment">/// option.setIndex(3);</span></span>
-<span class="line" id="L418"><span class="tok-comment">///</span></span>
-<span class="line" id="L419"><span class="tok-comment">/// try root.addArg(first);</span></span>
-<span class="line" id="L420"><span class="tok-comment">/// try root.addArg(second);</span></span>
-<span class="line" id="L421"><span class="tok-comment">/// try root.addArg(option);</span></span>
+<span class="line" id="L401"><span class="tok-comment">/// ## Examples</span></span>
+<span class="line" id="L402"><span class="tok-comment">///</span></span>
+<span class="line" id="L403"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L404"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L405"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L406"><span class="tok-comment">///</span></span>
+<span class="line" id="L407"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L408"><span class="tok-comment">///</span></span>
+<span class="line" id="L409"><span class="tok-comment">/// var second = Arg.init(&quot;SECOND&quot;, &quot;Second positional arg&quot;);</span></span>
+<span class="line" id="L410"><span class="tok-comment">/// second.setIndex(2);</span></span>
+<span class="line" id="L411"><span class="tok-comment">/// second.setProperty(.takes_value);</span></span>
+<span class="line" id="L412"><span class="tok-comment">///</span></span>
+<span class="line" id="L413"><span class="tok-comment">/// // Equivalent</span></span>
+<span class="line" id="L414"><span class="tok-comment">/// var second = Arg.positional(&quot;SECOND&quot;, &quot;Second positional arg&quot;, 2);</span></span>
+<span class="line" id="L415"><span class="tok-comment">///</span></span>
+<span class="line" id="L416"><span class="tok-comment">/// var first = Arg.init(&quot;FIRST&quot;, &quot;First positional arg&quot;);</span></span>
+<span class="line" id="L417"><span class="tok-comment">/// first.setIndex(1);</span></span>
+<span class="line" id="L418"><span class="tok-comment">/// first.setProperty(.takes_value);</span></span>
+<span class="line" id="L419"><span class="tok-comment">///</span></span>
+<span class="line" id="L420"><span class="tok-comment">/// // Equivalent</span></span>
+<span class="line" id="L421"><span class="tok-comment">/// var first = Arg.positional(&quot;FIRST&quot;, &quot;First positional arg&quot;, 2);</span></span>
 <span class="line" id="L422"><span class="tok-comment">///</span></span>
-<span class="line" id="L423"><span class="tok-comment">/// // Command line examples:</span></span>
-<span class="line" id="L424"><span class="tok-comment">/// //  - myapp firstvalue secondvalue</span></span>
-<span class="line" id="L425"><span class="tok-comment">/// //  - myapp firstvalue secondvalue --option optionvalue</span></span>
-<span class="line" id="L426"><span class="tok-comment">/// //  - myapp --option optionvalue firstvalue secondvalue</span></span>
-<span class="line" id="L427"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L428"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">setIndex</span>(self: *Arg, index: <span class="tok-type">usize</span>) <span class="tok-type">void</span> {</span>
-<span class="line" id="L429">    self.index = index;</span>
-<span class="line" id="L430">}</span>
-<span class="line" id="L431"></span>
-<span class="line" id="L432"><span class="tok-comment">/// Sets a property to the argument, specifying how it should be parsed and processed.</span></span>
-<span class="line" id="L433"><span class="tok-comment">///</span></span>
-<span class="line" id="L434"><span class="tok-comment">/// ## Examples</span></span>
-<span class="line" id="L435"><span class="tok-comment">///</span></span>
-<span class="line" id="L436"><span class="tok-comment">/// Setting a property to indicate that the argument takes a value from the command line:</span></span>
-<span class="line" id="L437"><span class="tok-comment">///</span></span>
-<span class="line" id="L438"><span class="tok-comment">/// ```zig</span></span>
-<span class="line" id="L439"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
-<span class="line" id="L440"><span class="tok-comment">/// defer app.deinit();</span></span>
-<span class="line" id="L441"><span class="tok-comment">///</span></span>
-<span class="line" id="L442"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
-<span class="line" id="L443"><span class="tok-comment">///</span></span>
-<span class="line" id="L444"><span class="tok-comment">/// var name = Arg.init(&quot;name&quot;, &quot;Person to greet&quot;);</span></span>
-<span class="line" id="L445"><span class="tok-comment">/// name.setShortName('n');</span></span>
-<span class="line" id="L446"><span class="tok-comment">/// name.setProperty(.takes_value);</span></span>
+<span class="line" id="L423"><span class="tok-comment">/// // No effect on this</span></span>
+<span class="line" id="L424"><span class="tok-comment">/// var option = Arg.singleValueOption(&quot;option&quot;, 'o', &quot;Some description&quot;);</span></span>
+<span class="line" id="L425"><span class="tok-comment">/// option.setIndex(3);</span></span>
+<span class="line" id="L426"><span class="tok-comment">///</span></span>
+<span class="line" id="L427"><span class="tok-comment">/// try root.addArg(first);</span></span>
+<span class="line" id="L428"><span class="tok-comment">/// try root.addArg(second);</span></span>
+<span class="line" id="L429"><span class="tok-comment">/// try root.addArg(option);</span></span>
+<span class="line" id="L430"><span class="tok-comment">///</span></span>
+<span class="line" id="L431"><span class="tok-comment">/// // Command line examples:</span></span>
+<span class="line" id="L432"><span class="tok-comment">/// //  - myapp firstvalue secondvalue</span></span>
+<span class="line" id="L433"><span class="tok-comment">/// //  - myapp firstvalue secondvalue --option optionvalue</span></span>
+<span class="line" id="L434"><span class="tok-comment">/// //  - myapp --option optionvalue firstvalue secondvalue</span></span>
+<span class="line" id="L435"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L436"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">setIndex</span>(self: *Arg, index: <span class="tok-type">usize</span>) <span class="tok-type">void</span> {</span>
+<span class="line" id="L437">    self.index = index;</span>
+<span class="line" id="L438">}</span>
+<span class="line" id="L439"></span>
+<span class="line" id="L440"><span class="tok-comment">/// Sets a property to the argument, specifying how it should be parsed and</span></span>
+<span class="line" id="L441"><span class="tok-comment">/// processed.</span></span>
+<span class="line" id="L442"><span class="tok-comment">///</span></span>
+<span class="line" id="L443"><span class="tok-comment">/// ## Examples</span></span>
+<span class="line" id="L444"><span class="tok-comment">///</span></span>
+<span class="line" id="L445"><span class="tok-comment">/// Setting a property to indicate that the argument takes a value from the</span></span>
+<span class="line" id="L446"><span class="tok-comment">/// command line:</span></span>
 <span class="line" id="L447"><span class="tok-comment">///</span></span>
-<span class="line" id="L448"><span class="tok-comment">/// try root.addArg(name);</span></span>
-<span class="line" id="L449"><span class="tok-comment">///</span></span>
-<span class="line" id="L450"><span class="tok-comment">/// // Command line input: myapp -n foo</span></span>
-<span class="line" id="L451"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L452"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">setProperty</span>(self: *Arg, property: Property) <span class="tok-type">void</span> {</span>
-<span class="line" id="L453">    <span class="tok-kw">return</span> self.properties.insert(property);</span>
-<span class="line" id="L454">}</span>
-<span class="line" id="L455"></span>
-<span class="line" id="L456"><span class="tok-comment">/// Unsets a property from the argument, reversing its effect on parsing and processing.</span></span>
+<span class="line" id="L448"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L449"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L450"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L451"><span class="tok-comment">///</span></span>
+<span class="line" id="L452"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L453"><span class="tok-comment">///</span></span>
+<span class="line" id="L454"><span class="tok-comment">/// var name = Arg.init(&quot;name&quot;, &quot;Person to greet&quot;);</span></span>
+<span class="line" id="L455"><span class="tok-comment">/// name.setShortName('n');</span></span>
+<span class="line" id="L456"><span class="tok-comment">/// name.setProperty(.takes_value);</span></span>
 <span class="line" id="L457"><span class="tok-comment">///</span></span>
-<span class="line" id="L458"><span class="tok-comment">/// ## Examples</span></span>
+<span class="line" id="L458"><span class="tok-comment">/// try root.addArg(name);</span></span>
 <span class="line" id="L459"><span class="tok-comment">///</span></span>
-<span class="line" id="L460"><span class="tok-comment">/// Removing a property to indicate that the argument no longer takes a value from the command line:</span></span>
-<span class="line" id="L461"><span class="tok-comment">///</span></span>
-<span class="line" id="L462"><span class="tok-comment">/// ```zig</span></span>
-<span class="line" id="L463"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
-<span class="line" id="L464"><span class="tok-comment">/// defer app.deinit();</span></span>
-<span class="line" id="L465"><span class="tok-comment">///</span></span>
-<span class="line" id="L466"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
-<span class="line" id="L467"><span class="tok-comment">///</span></span>
-<span class="line" id="L468"><span class="tok-comment">/// var name = Arg.singleValueOption(&quot;name&quot;, 'n', &quot;Person to greet&quot;);</span></span>
-<span class="line" id="L469"><span class="tok-comment">/// // Convert to boolean option by removing the `takes_value` property</span></span>
-<span class="line" id="L470"><span class="tok-comment">/// name.unsetProperty(.takes_value);</span></span>
-<span class="line" id="L471"><span class="tok-comment">///</span></span>
-<span class="line" id="L472"><span class="tok-comment">/// try root.addArg(name);</span></span>
-<span class="line" id="L473"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L474"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">unsetProperty</span>(self: *Arg, property: Property) <span class="tok-type">void</span> {</span>
-<span class="line" id="L475">    <span class="tok-kw">return</span> self.properties.remove(property);</span>
-<span class="line" id="L476">}</span>
-<span class="line" id="L477"></span>
-<span class="line" id="L478"><span class="tok-comment">// # Getters</span>
+<span class="line" id="L460"><span class="tok-comment">/// // Command line input: myapp -n foo</span></span>
+<span class="line" id="L461"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L462"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">setProperty</span>(self: *Arg, property: Property) <span class="tok-type">void</span> {</span>
+<span class="line" id="L463">    <span class="tok-kw">return</span> self.properties.insert(property);</span>
+<span class="line" id="L464">}</span>
+<span class="line" id="L465"></span>
+<span class="line" id="L466"><span class="tok-comment">/// Unsets a property from the argument, reversing its effect on parsing and</span></span>
+<span class="line" id="L467"><span class="tok-comment">/// processing.</span></span>
+<span class="line" id="L468"><span class="tok-comment">///</span></span>
+<span class="line" id="L469"><span class="tok-comment">/// ## Examples</span></span>
+<span class="line" id="L470"><span class="tok-comment">///</span></span>
+<span class="line" id="L471"><span class="tok-comment">/// Removing a property to indicate that the argument no longer takes a value</span></span>
+<span class="line" id="L472"><span class="tok-comment">/// from the command line:</span></span>
+<span class="line" id="L473"><span class="tok-comment">///</span></span>
+<span class="line" id="L474"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L475"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L476"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L477"><span class="tok-comment">///</span></span>
+<span class="line" id="L478"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L479"><span class="tok-comment">///</span></span>
+<span class="line" id="L480"><span class="tok-comment">/// var name = Arg.singleValueOption(&quot;name&quot;, 'n', &quot;Person to greet&quot;);</span></span>
+<span class="line" id="L481"><span class="tok-comment">/// // Convert to boolean option by removing the `takes_value` property</span></span>
+<span class="line" id="L482"><span class="tok-comment">/// name.unsetProperty(.takes_value);</span></span>
+<span class="line" id="L483"><span class="tok-comment">///</span></span>
+<span class="line" id="L484"><span class="tok-comment">/// try root.addArg(name);</span></span>
+<span class="line" id="L485"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L486"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">unsetProperty</span>(self: *Arg, property: Property) <span class="tok-type">void</span> {</span>
+<span class="line" id="L487">    <span class="tok-kw">return</span> self.properties.remove(property);</span>
+<span class="line" id="L488">}</span>
+<span class="line" id="L489"></span>
+<span class="line" id="L490"><span class="tok-comment">// # Getters</span>
 </span>
-<span class="line" id="L479"></span>
-<span class="line" id="L480"><span class="tok-comment">/// Checks if the argument has a specific property set.</span></span>
-<span class="line" id="L481"><span class="tok-comment">///</span></span>
-<span class="line" id="L482"><span class="tok-comment">/// **NOTE:** This function is primarily used by the parser to determine the</span></span>
-<span class="line" id="L483"><span class="tok-comment">/// presence of a specific property for the argument.</span></span>
-<span class="line" id="L484"><span class="tok-comment">///</span></span>
-<span class="line" id="L485"><span class="tok-comment">/// ## Examples</span></span>
-<span class="line" id="L486"><span class="tok-comment">///</span></span>
-<span class="line" id="L487"><span class="tok-comment">/// Checking if the argument takes a value from the command line:</span></span>
-<span class="line" id="L488"><span class="tok-comment">///</span></span>
-<span class="line" id="L489"><span class="tok-comment">/// ```zig</span></span>
-<span class="line" id="L490"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
-<span class="line" id="L491"><span class="tok-comment">/// defer app.deinit();</span></span>
-<span class="line" id="L492"><span class="tok-comment">///</span></span>
-<span class="line" id="L493"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
-<span class="line" id="L494"><span class="tok-comment">///</span></span>
-<span class="line" id="L495"><span class="tok-comment">/// var name = Arg.singleValueOption(&quot;name&quot;, 'n', &quot;Person to greet&quot;);</span></span>
-<span class="line" id="L496"><span class="tok-comment">/// if (name.hasProperty(.takes_value)) {</span></span>
-<span class="line" id="L497"><span class="tok-comment">///     std.debug.print(&quot;The `name` flag takes a value&quot;, .{});</span></span>
-<span class="line" id="L498"><span class="tok-comment">/// }</span></span>
-<span class="line" id="L499"><span class="tok-comment">///</span></span>
-<span class="line" id="L500"><span class="tok-comment">/// try root.addArg(name);</span></span>
-<span class="line" id="L501"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L502"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">hasProperty</span>(self: *<span class="tok-kw">const</span> Arg, property: Property) <span class="tok-type">bool</span> {</span>
-<span class="line" id="L503">    <span class="tok-kw">return</span> self.properties.contains(property);</span>
-<span class="line" id="L504">}</span>
-<span class="line" id="L505"></span>
-<span class="line" id="L506"><span class="tok-comment">/// Checks whether a given value is valid or not.</span></span>
-<span class="line" id="L507"><span class="tok-comment">///</span></span>
-<span class="line" id="L508"><span class="tok-comment">/// **NOTE:** If `Arg.valid_values` is not set through `Arg.setValidValues`,</span></span>
-<span class="line" id="L509"><span class="tok-comment">/// this function always returns true.</span></span>
-<span class="line" id="L510"><span class="tok-comment">///</span></span>
-<span class="line" id="L511"><span class="tok-comment">/// **NOTE:** This function is primarily used by the parser to determine whether</span></span>
-<span class="line" id="L512"><span class="tok-comment">/// the value present on the command line is valid or not.</span></span>
-<span class="line" id="L513"><span class="tok-comment">///</span></span>
-<span class="line" id="L514"><span class="tok-comment">/// ## Examples</span></span>
-<span class="line" id="L515"><span class="tok-comment">///</span></span>
-<span class="line" id="L516"><span class="tok-comment">/// ```zig</span></span>
-<span class="line" id="L517"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
-<span class="line" id="L518"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L491"></span>
+<span class="line" id="L492"><span class="tok-comment">/// Checks if the argument has a specific property set.</span></span>
+<span class="line" id="L493"><span class="tok-comment">///</span></span>
+<span class="line" id="L494"><span class="tok-comment">/// **NOTE:** This function is primarily used by the parser to determine the</span></span>
+<span class="line" id="L495"><span class="tok-comment">/// presence of a specific property for the argument.</span></span>
+<span class="line" id="L496"><span class="tok-comment">///</span></span>
+<span class="line" id="L497"><span class="tok-comment">/// ## Examples</span></span>
+<span class="line" id="L498"><span class="tok-comment">///</span></span>
+<span class="line" id="L499"><span class="tok-comment">/// Checking if the argument takes a value from the command line:</span></span>
+<span class="line" id="L500"><span class="tok-comment">///</span></span>
+<span class="line" id="L501"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L502"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L503"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L504"><span class="tok-comment">///</span></span>
+<span class="line" id="L505"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L506"><span class="tok-comment">///</span></span>
+<span class="line" id="L507"><span class="tok-comment">/// var name = Arg.singleValueOption(&quot;name&quot;, 'n', &quot;Person to greet&quot;);</span></span>
+<span class="line" id="L508"><span class="tok-comment">/// if (name.hasProperty(.takes_value)) {</span></span>
+<span class="line" id="L509"><span class="tok-comment">///     std.debug.print(&quot;The `name` flag takes a value&quot;, .{});</span></span>
+<span class="line" id="L510"><span class="tok-comment">/// }</span></span>
+<span class="line" id="L511"><span class="tok-comment">///</span></span>
+<span class="line" id="L512"><span class="tok-comment">/// try root.addArg(name);</span></span>
+<span class="line" id="L513"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L514"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">hasProperty</span>(self: *<span class="tok-kw">const</span> Arg, property: Property) <span class="tok-type">bool</span> {</span>
+<span class="line" id="L515">    <span class="tok-kw">return</span> self.properties.contains(property);</span>
+<span class="line" id="L516">}</span>
+<span class="line" id="L517"></span>
+<span class="line" id="L518"><span class="tok-comment">/// Checks whether a given value is valid or not.</span></span>
 <span class="line" id="L519"><span class="tok-comment">///</span></span>
-<span class="line" id="L520"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
-<span class="line" id="L521"><span class="tok-comment">/// var color = Arg.singleValueOptionWithValidValues(</span></span>
-<span class="line" id="L522"><span class="tok-comment">///     &quot;color&quot;, 'c', &quot;Your Favorite Color&quot;, &amp;[_]const u8 { &quot;blue&quot;, &quot;red&quot; },</span></span>
-<span class="line" id="L523"><span class="tok-comment">/// );</span></span>
-<span class="line" id="L524"><span class="tok-comment">///</span></span>
-<span class="line" id="L525"><span class="tok-comment">/// if (color.isValidValue(&quot;foo&quot;)) {</span></span>
-<span class="line" id="L526"><span class="tok-comment">///     std.debug.print(&quot;Foo is not a valid color&quot;);</span></span>
-<span class="line" id="L527"><span class="tok-comment">/// }</span></span>
-<span class="line" id="L528"><span class="tok-comment">///</span></span>
-<span class="line" id="L529"><span class="tok-comment">/// try root.addArg(color);</span></span>
-<span class="line" id="L530"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L531"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">isValidValue</span>(self: *<span class="tok-kw">const</span> Arg, value_to_check: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) <span class="tok-type">bool</span> {</span>
-<span class="line" id="L532">    <span class="tok-kw">if</span> (self.valid_values) |values| {</span>
-<span class="line" id="L533">        <span class="tok-kw">for</span> (values) |value| {</span>
-<span class="line" id="L534">            <span class="tok-kw">if</span> (std.mem.eql(<span class="tok-type">u8</span>, value, value_to_check)) <span class="tok-kw">return</span> <span class="tok-null">true</span>;</span>
-<span class="line" id="L535">        }</span>
-<span class="line" id="L536">        <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
-<span class="line" id="L537">    }</span>
-<span class="line" id="L538">    <span class="tok-kw">return</span> <span class="tok-null">true</span>;</span>
-<span class="line" id="L539">}</span>
-<span class="line" id="L540"></span>
+<span class="line" id="L520"><span class="tok-comment">/// **NOTE:** If `Arg.valid_values` is not set through `Arg.setValidValues`,</span></span>
+<span class="line" id="L521"><span class="tok-comment">/// this function always returns true.</span></span>
+<span class="line" id="L522"><span class="tok-comment">///</span></span>
+<span class="line" id="L523"><span class="tok-comment">/// **NOTE:** This function is primarily used by the parser to determine whether</span></span>
+<span class="line" id="L524"><span class="tok-comment">/// the value present on the command line is valid or not.</span></span>
+<span class="line" id="L525"><span class="tok-comment">///</span></span>
+<span class="line" id="L526"><span class="tok-comment">/// ## Examples</span></span>
+<span class="line" id="L527"><span class="tok-comment">///</span></span>
+<span class="line" id="L528"><span class="tok-comment">/// ```zig</span></span>
+<span class="line" id="L529"><span class="tok-comment">/// var app = App.init(allocator, &quot;myapp&quot;, &quot;My app description&quot;);</span></span>
+<span class="line" id="L530"><span class="tok-comment">/// defer app.deinit();</span></span>
+<span class="line" id="L531"><span class="tok-comment">///</span></span>
+<span class="line" id="L532"><span class="tok-comment">/// var root = app.rootCommand();</span></span>
+<span class="line" id="L533"><span class="tok-comment">/// var color = Arg.singleValueOptionWithValidValues(</span></span>
+<span class="line" id="L534"><span class="tok-comment">///     &quot;color&quot;, 'c', &quot;Your Favorite Color&quot;, &amp;[_]const u8 { &quot;blue&quot;, &quot;red&quot; },</span></span>
+<span class="line" id="L535"><span class="tok-comment">/// );</span></span>
+<span class="line" id="L536"><span class="tok-comment">///</span></span>
+<span class="line" id="L537"><span class="tok-comment">/// if (color.isValidValue(&quot;foo&quot;)) {</span></span>
+<span class="line" id="L538"><span class="tok-comment">///     std.debug.print(&quot;Foo is not a valid color&quot;);</span></span>
+<span class="line" id="L539"><span class="tok-comment">/// }</span></span>
+<span class="line" id="L540"><span class="tok-comment">///</span></span>
+<span class="line" id="L541"><span class="tok-comment">/// try root.addArg(color);</span></span>
+<span class="line" id="L542"><span class="tok-comment">/// ```</span></span>
+<span class="line" id="L543"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">isValidValue</span>(self: *<span class="tok-kw">const</span> Arg, value_to_check: []<span class="tok-kw">const</span> <span class="tok-type">u8</span>) <span class="tok-type">bool</span> {</span>
+<span class="line" id="L544">    <span class="tok-kw">if</span> (self.valid_values) |values| {</span>
+<span class="line" id="L545">        <span class="tok-kw">for</span> (values) |value| {</span>
+<span class="line" id="L546">            <span class="tok-kw">if</span> (std.mem.eql(<span class="tok-type">u8</span>, value, value_to_check)) <span class="tok-kw">return</span> <span class="tok-null">true</span>;</span>
+<span class="line" id="L547">        }</span>
+<span class="line" id="L548">        <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
+<span class="line" id="L549">    }</span>
+<span class="line" id="L550">    <span class="tok-kw">return</span> <span class="tok-null">true</span>;</span>
+<span class="line" id="L551">}</span>
+<span class="line" id="L552"></span>
 </code></pre></body>
 </html>

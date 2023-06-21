@@ -300,43 +300,44 @@
 <span class="line" id="L179">            <span class="tok-kw">try</span> writer.writeAll(<span class="tok-str">&quot;\n&quot;</span>);</span>
 <span class="line" id="L180">        }</span>
 <span class="line" id="L181">        <span class="tok-kw">try</span> writer.writeAll(<span class="tok-str">&quot; -h, --help\n\tPrint help and exit&quot;</span>);</span>
-<span class="line" id="L182">    }</span>
-<span class="line" id="L183"></span>
-<span class="line" id="L184">    <span class="tok-kw">fn</span> <span class="tok-fn">writeFooter</span>(self: *Help, writer: <span class="tok-kw">anytype</span>) !<span class="tok-type">void</span> {</span>
-<span class="line" id="L185">        <span class="tok-kw">if</span> (self.include_subcmds) {</span>
-<span class="line" id="L186">            <span class="tok-kw">try</span> writeNewLine(writer);</span>
-<span class="line" id="L187">            <span class="tok-kw">try</span> writer.print(</span>
-<span class="line" id="L188">                <span class="tok-str">&quot;Run '{s} &lt;command&gt; -h' or '{s} &lt;command&gt; --help' to get help for specific command&quot;</span>,</span>
-<span class="line" id="L189">                .{ self.cmd.name, self.cmd.name },</span>
-<span class="line" id="L190">            );</span>
-<span class="line" id="L191">        }</span>
-<span class="line" id="L192">        <span class="tok-kw">try</span> writeNewLine(writer);</span>
-<span class="line" id="L193">    }</span>
-<span class="line" id="L194"></span>
-<span class="line" id="L195">    <span class="tok-kw">fn</span> <span class="tok-fn">writeNewLine</span>(writer: <span class="tok-kw">anytype</span>) !<span class="tok-type">void</span> {</span>
-<span class="line" id="L196">        <span class="tok-kw">return</span> writer.writeByte(<span class="tok-str">'\n'</span>);</span>
-<span class="line" id="L197">    }</span>
-<span class="line" id="L198">};</span>
-<span class="line" id="L199"></span>
-<span class="line" id="L200"><span class="tok-comment">/// Returns which subcommand is active on command line with `-h` or `--help` option</span></span>
-<span class="line" id="L201"><span class="tok-comment">/// null if none of the subcommands were present</span></span>
-<span class="line" id="L202"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">findSubcommand</span>(root_cmd: *<span class="tok-kw">const</span> Command, matches: *ArgMatches) ?[]<span class="tok-kw">const</span> <span class="tok-type">u8</span> {</span>
-<span class="line" id="L203">    <span class="tok-kw">if</span> ((matches.subcommand != <span class="tok-null">null</span>) <span class="tok-kw">and</span> (matches.subcommand.?.matches != <span class="tok-null">null</span>)) {</span>
-<span class="line" id="L204">        <span class="tok-kw">const</span> subcmd_name = matches.subcommand.?.name;</span>
-<span class="line" id="L205">        <span class="tok-kw">const</span> subcmd_matches = &amp;matches.subcommand.?.matches.?;</span>
-<span class="line" id="L206"></span>
-<span class="line" id="L207">        <span class="tok-kw">if</span> (subcmd_matches.containsArg(<span class="tok-str">&quot;help&quot;</span>)) {</span>
-<span class="line" id="L208">            <span class="tok-kw">return</span> subcmd_name;</span>
-<span class="line" id="L209">        } <span class="tok-kw">else</span> {</span>
-<span class="line" id="L210">            <span class="tok-comment">// If current subcommand's arg doesnot have `help` option</span>
+<span class="line" id="L182">        <span class="tok-kw">try</span> writeNewLine(writer);</span>
+<span class="line" id="L183">    }</span>
+<span class="line" id="L184"></span>
+<span class="line" id="L185">    <span class="tok-kw">fn</span> <span class="tok-fn">writeFooter</span>(self: *Help, writer: <span class="tok-kw">anytype</span>) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L186">        <span class="tok-kw">if</span> (self.include_subcmds) {</span>
+<span class="line" id="L187">            <span class="tok-kw">try</span> writeNewLine(writer);</span>
+<span class="line" id="L188">            <span class="tok-kw">try</span> writer.print(</span>
+<span class="line" id="L189">                <span class="tok-str">&quot;Run '{s} &lt;command&gt; -h' or '{s} &lt;command&gt; --help' to get help for specific command&quot;</span>,</span>
+<span class="line" id="L190">                .{ self.cmd.name, self.cmd.name },</span>
+<span class="line" id="L191">            );</span>
+<span class="line" id="L192">        }</span>
+<span class="line" id="L193">        <span class="tok-kw">try</span> writeNewLine(writer);</span>
+<span class="line" id="L194">    }</span>
+<span class="line" id="L195"></span>
+<span class="line" id="L196">    <span class="tok-kw">fn</span> <span class="tok-fn">writeNewLine</span>(writer: <span class="tok-kw">anytype</span>) !<span class="tok-type">void</span> {</span>
+<span class="line" id="L197">        <span class="tok-kw">return</span> writer.writeByte(<span class="tok-str">'\n'</span>);</span>
+<span class="line" id="L198">    }</span>
+<span class="line" id="L199">};</span>
+<span class="line" id="L200"></span>
+<span class="line" id="L201"><span class="tok-comment">/// Returns which subcommand is active on command line with `-h` or `--help` option</span></span>
+<span class="line" id="L202"><span class="tok-comment">/// null if none of the subcommands were present</span></span>
+<span class="line" id="L203"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">findSubcommand</span>(root_cmd: *<span class="tok-kw">const</span> Command, matches: *ArgMatches) ?[]<span class="tok-kw">const</span> <span class="tok-type">u8</span> {</span>
+<span class="line" id="L204">    <span class="tok-kw">if</span> ((matches.subcommand != <span class="tok-null">null</span>) <span class="tok-kw">and</span> (matches.subcommand.?.matches != <span class="tok-null">null</span>)) {</span>
+<span class="line" id="L205">        <span class="tok-kw">const</span> subcmd_name = matches.subcommand.?.name;</span>
+<span class="line" id="L206">        <span class="tok-kw">const</span> subcmd_matches = &amp;matches.subcommand.?.matches.?;</span>
+<span class="line" id="L207"></span>
+<span class="line" id="L208">        <span class="tok-kw">if</span> (subcmd_matches.containsArg(<span class="tok-str">&quot;help&quot;</span>)) {</span>
+<span class="line" id="L209">            <span class="tok-kw">return</span> subcmd_name;</span>
+<span class="line" id="L210">        } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L211">            <span class="tok-comment">// If current subcommand's arg doesnot have `help` option</span>
 </span>
-<span class="line" id="L211">            <span class="tok-comment">// start to look its child subcommand's arg. (This happens recursively)</span>
+<span class="line" id="L212">            <span class="tok-comment">// start to look its child subcommand's arg. (This happens recursively)</span>
 </span>
-<span class="line" id="L212">            <span class="tok-kw">return</span> findSubcommand(root_cmd, subcmd_matches);</span>
-<span class="line" id="L213">        }</span>
-<span class="line" id="L214">    }</span>
-<span class="line" id="L215">    <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
-<span class="line" id="L216">}</span>
-<span class="line" id="L217"></span>
+<span class="line" id="L213">            <span class="tok-kw">return</span> findSubcommand(root_cmd, subcmd_matches);</span>
+<span class="line" id="L214">        }</span>
+<span class="line" id="L215">    }</span>
+<span class="line" id="L216">    <span class="tok-kw">return</span> <span class="tok-null">null</span>;</span>
+<span class="line" id="L217">}</span>
+<span class="line" id="L218"></span>
 </code></pre></body>
 </html>
