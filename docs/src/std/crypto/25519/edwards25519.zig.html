@@ -151,12 +151,12 @@
 <span class="line" id="L38">        <span class="tok-kw">const</span> vxx = x.sq().mul(v);</span>
 <span class="line" id="L39">        <span class="tok-kw">const</span> has_m_root = vxx.sub(u).isZero();</span>
 <span class="line" id="L40">        <span class="tok-kw">const</span> has_p_root = vxx.add(u).isZero();</span>
-<span class="line" id="L41">        <span class="tok-kw">if</span> ((<span class="tok-builtin">@boolToInt</span>(has_m_root) | <span class="tok-builtin">@boolToInt</span>(has_p_root)) == <span class="tok-number">0</span>) { <span class="tok-comment">// best-effort to avoid two conditional branches</span>
+<span class="line" id="L41">        <span class="tok-kw">if</span> ((<span class="tok-builtin">@intFromBool</span>(has_m_root) | <span class="tok-builtin">@intFromBool</span>(has_p_root)) == <span class="tok-number">0</span>) { <span class="tok-comment">// best-effort to avoid two conditional branches</span>
 </span>
 <span class="line" id="L42">            <span class="tok-kw">return</span> <span class="tok-kw">error</span>.InvalidEncoding;</span>
 <span class="line" id="L43">        }</span>
-<span class="line" id="L44">        x.cMov(x.mul(Fe.sqrtm1), <span class="tok-number">1</span> - <span class="tok-builtin">@boolToInt</span>(has_m_root));</span>
-<span class="line" id="L45">        x.cMov(x.neg(), <span class="tok-builtin">@boolToInt</span>(x.isNegative()) ^ (s[<span class="tok-number">31</span>] &gt;&gt; <span class="tok-number">7</span>));</span>
+<span class="line" id="L44">        x.cMov(x.mul(Fe.sqrtm1), <span class="tok-number">1</span> - <span class="tok-builtin">@intFromBool</span>(has_m_root));</span>
+<span class="line" id="L45">        x.cMov(x.neg(), <span class="tok-builtin">@intFromBool</span>(x.isNegative()) ^ (s[<span class="tok-number">31</span>] &gt;&gt; <span class="tok-number">7</span>));</span>
 <span class="line" id="L46">        <span class="tok-kw">const</span> t = x.mul(y);</span>
 <span class="line" id="L47">        <span class="tok-kw">return</span> Edwards25519{ .x = x, .y = y, .z = z, .t = t };</span>
 <span class="line" id="L48">    }</span>
@@ -165,7 +165,7 @@
 <span class="line" id="L51">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">toBytes</span>(p: Edwards25519) [encoded_length]<span class="tok-type">u8</span> {</span>
 <span class="line" id="L52">        <span class="tok-kw">const</span> zi = p.z.invert();</span>
 <span class="line" id="L53">        <span class="tok-kw">var</span> s = p.y.mul(zi).toBytes();</span>
-<span class="line" id="L54">        s[<span class="tok-number">31</span>] ^= <span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-builtin">@boolToInt</span>(p.x.mul(zi).isNegative())) &lt;&lt; <span class="tok-number">7</span>;</span>
+<span class="line" id="L54">        s[<span class="tok-number">31</span>] ^= <span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-builtin">@intFromBool</span>(p.x.mul(zi).isNegative())) &lt;&lt; <span class="tok-number">7</span>;</span>
 <span class="line" id="L55">        <span class="tok-kw">return</span> s;</span>
 <span class="line" id="L56">    }</span>
 <span class="line" id="L57"></span>
@@ -276,8 +276,8 @@
 <span class="line" id="L162">        <span class="tok-kw">const</span> reduced = <span class="tok-kw">if</span> ((s[s.len - <span class="tok-number">1</span>] &amp; <span class="tok-number">0x80</span>) == <span class="tok-number">0</span>) s <span class="tok-kw">else</span> scalar.reduce(s);</span>
 <span class="line" id="L163">        <span class="tok-kw">var</span> e: [<span class="tok-number">2</span> * <span class="tok-number">32</span>]<span class="tok-type">i8</span> = <span class="tok-null">undefined</span>;</span>
 <span class="line" id="L164">        <span class="tok-kw">for</span> (reduced, <span class="tok-number">0</span>..) |x, i| {</span>
-<span class="line" id="L165">            e[i * <span class="tok-number">2</span> + <span class="tok-number">0</span>] = <span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, <span class="tok-builtin">@truncate</span>(<span class="tok-type">u4</span>, x));</span>
-<span class="line" id="L166">            e[i * <span class="tok-number">2</span> + <span class="tok-number">1</span>] = <span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, <span class="tok-builtin">@truncate</span>(<span class="tok-type">u4</span>, x &gt;&gt; <span class="tok-number">4</span>));</span>
+<span class="line" id="L165">            e[i * <span class="tok-number">2</span> + <span class="tok-number">0</span>] = <span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, <span class="tok-builtin">@as</span>(<span class="tok-type">u4</span>, <span class="tok-builtin">@truncate</span>(x)));</span>
+<span class="line" id="L166">            e[i * <span class="tok-number">2</span> + <span class="tok-number">1</span>] = <span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, <span class="tok-builtin">@as</span>(<span class="tok-type">u4</span>, <span class="tok-builtin">@truncate</span>(x &gt;&gt; <span class="tok-number">4</span>)));</span>
 <span class="line" id="L167">        }</span>
 <span class="line" id="L168">        <span class="tok-comment">// Now, e[0..63] is between 0 and 15, e[63] is between 0 and 7</span>
 </span>
@@ -311,9 +311,9 @@
 <span class="line" id="L190">        <span class="tok-kw">while</span> (<span class="tok-null">true</span>) : (pos -= <span class="tok-number">1</span>) {</span>
 <span class="line" id="L191">            <span class="tok-kw">const</span> slot = e[pos];</span>
 <span class="line" id="L192">            <span class="tok-kw">if</span> (slot &gt; <span class="tok-number">0</span>) {</span>
-<span class="line" id="L193">                q = q.add(pc[<span class="tok-builtin">@intCast</span>(<span class="tok-type">usize</span>, slot)]);</span>
+<span class="line" id="L193">                q = q.add(pc[<span class="tok-builtin">@as</span>(<span class="tok-type">usize</span>, <span class="tok-builtin">@intCast</span>(slot))]);</span>
 <span class="line" id="L194">            } <span class="tok-kw">else</span> <span class="tok-kw">if</span> (slot &lt; <span class="tok-number">0</span>) {</span>
-<span class="line" id="L195">                q = q.sub(pc[<span class="tok-builtin">@intCast</span>(<span class="tok-type">usize</span>, -slot)]);</span>
+<span class="line" id="L195">                q = q.sub(pc[<span class="tok-builtin">@as</span>(<span class="tok-type">usize</span>, <span class="tok-builtin">@intCast</span>(-slot))]);</span>
 <span class="line" id="L196">            }</span>
 <span class="line" id="L197">            <span class="tok-kw">if</span> (pos == <span class="tok-number">0</span>) <span class="tok-kw">break</span>;</span>
 <span class="line" id="L198">            q = q.dbl().dbl().dbl().dbl();</span>
@@ -328,7 +328,7 @@
 <span class="line" id="L206">        <span class="tok-kw">var</span> q = Edwards25519.identityElement;</span>
 <span class="line" id="L207">        <span class="tok-kw">var</span> pos: <span class="tok-type">usize</span> = <span class="tok-number">252</span>;</span>
 <span class="line" id="L208">        <span class="tok-kw">while</span> (<span class="tok-null">true</span>) : (pos -= <span class="tok-number">4</span>) {</span>
-<span class="line" id="L209">            <span class="tok-kw">const</span> slot = <span class="tok-builtin">@truncate</span>(<span class="tok-type">u4</span>, (s[pos &gt;&gt; <span class="tok-number">3</span>] &gt;&gt; <span class="tok-builtin">@truncate</span>(<span class="tok-type">u3</span>, pos)));</span>
+<span class="line" id="L209">            <span class="tok-kw">const</span> slot = <span class="tok-builtin">@as</span>(<span class="tok-type">u4</span>, <span class="tok-builtin">@truncate</span>((s[pos &gt;&gt; <span class="tok-number">3</span>] &gt;&gt; <span class="tok-builtin">@as</span>(<span class="tok-type">u3</span>, <span class="tok-builtin">@truncate</span>(pos)))));</span>
 <span class="line" id="L210">            <span class="tok-kw">if</span> (vartime) {</span>
 <span class="line" id="L211">                <span class="tok-kw">if</span> (slot != <span class="tok-number">0</span>) {</span>
 <span class="line" id="L212">                    q = q.add(pc[slot]);</span>
@@ -405,15 +405,15 @@
 <span class="line" id="L283">        <span class="tok-kw">while</span> (<span class="tok-null">true</span>) : (pos -= <span class="tok-number">1</span>) {</span>
 <span class="line" id="L284">            <span class="tok-kw">const</span> slot1 = e1[pos];</span>
 <span class="line" id="L285">            <span class="tok-kw">if</span> (slot1 &gt; <span class="tok-number">0</span>) {</span>
-<span class="line" id="L286">                q = q.add(pc1[<span class="tok-builtin">@intCast</span>(<span class="tok-type">usize</span>, slot1)]);</span>
+<span class="line" id="L286">                q = q.add(pc1[<span class="tok-builtin">@as</span>(<span class="tok-type">usize</span>, <span class="tok-builtin">@intCast</span>(slot1))]);</span>
 <span class="line" id="L287">            } <span class="tok-kw">else</span> <span class="tok-kw">if</span> (slot1 &lt; <span class="tok-number">0</span>) {</span>
-<span class="line" id="L288">                q = q.sub(pc1[<span class="tok-builtin">@intCast</span>(<span class="tok-type">usize</span>, -slot1)]);</span>
+<span class="line" id="L288">                q = q.sub(pc1[<span class="tok-builtin">@as</span>(<span class="tok-type">usize</span>, <span class="tok-builtin">@intCast</span>(-slot1))]);</span>
 <span class="line" id="L289">            }</span>
 <span class="line" id="L290">            <span class="tok-kw">const</span> slot2 = e2[pos];</span>
 <span class="line" id="L291">            <span class="tok-kw">if</span> (slot2 &gt; <span class="tok-number">0</span>) {</span>
-<span class="line" id="L292">                q = q.add(pc2[<span class="tok-builtin">@intCast</span>(<span class="tok-type">usize</span>, slot2)]);</span>
+<span class="line" id="L292">                q = q.add(pc2[<span class="tok-builtin">@as</span>(<span class="tok-type">usize</span>, <span class="tok-builtin">@intCast</span>(slot2))]);</span>
 <span class="line" id="L293">            } <span class="tok-kw">else</span> <span class="tok-kw">if</span> (slot2 &lt; <span class="tok-number">0</span>) {</span>
-<span class="line" id="L294">                q = q.sub(pc2[<span class="tok-builtin">@intCast</span>(<span class="tok-type">usize</span>, -slot2)]);</span>
+<span class="line" id="L294">                q = q.sub(pc2[<span class="tok-builtin">@as</span>(<span class="tok-type">usize</span>, <span class="tok-builtin">@intCast</span>(-slot2))]);</span>
 <span class="line" id="L295">            }</span>
 <span class="line" id="L296">            <span class="tok-kw">if</span> (pos == <span class="tok-number">0</span>) <span class="tok-kw">break</span>;</span>
 <span class="line" id="L297">            q = q.dbl().dbl().dbl().dbl();</span>
@@ -448,9 +448,9 @@
 <span class="line" id="L326">            <span class="tok-kw">for</span> (es, <span class="tok-number">0</span>..) |e, i| {</span>
 <span class="line" id="L327">                <span class="tok-kw">const</span> slot = e[pos];</span>
 <span class="line" id="L328">                <span class="tok-kw">if</span> (slot &gt; <span class="tok-number">0</span>) {</span>
-<span class="line" id="L329">                    q = q.add(pcs[i][<span class="tok-builtin">@intCast</span>(<span class="tok-type">usize</span>, slot)]);</span>
+<span class="line" id="L329">                    q = q.add(pcs[i][<span class="tok-builtin">@as</span>(<span class="tok-type">usize</span>, <span class="tok-builtin">@intCast</span>(slot))]);</span>
 <span class="line" id="L330">                } <span class="tok-kw">else</span> <span class="tok-kw">if</span> (slot &lt; <span class="tok-number">0</span>) {</span>
-<span class="line" id="L331">                    q = q.sub(pcs[i][<span class="tok-builtin">@intCast</span>(<span class="tok-type">usize</span>, -slot)]);</span>
+<span class="line" id="L331">                    q = q.sub(pcs[i][<span class="tok-builtin">@as</span>(<span class="tok-type">usize</span>, <span class="tok-builtin">@intCast</span>(-slot))]);</span>
 <span class="line" id="L332">                }</span>
 <span class="line" id="L333">            }</span>
 <span class="line" id="L334">            <span class="tok-kw">if</span> (pos == <span class="tok-number">0</span>) <span class="tok-kw">break</span>;</span>
@@ -496,7 +496,7 @@
 <span class="line" id="L370">        <span class="tok-comment">// yed = (x-1)/(x+1) or 1 if the denominator is 0</span>
 </span>
 <span class="line" id="L371">        <span class="tok-kw">var</span> yed = x_plus_one_y_inv.mul(y).mul(x_minus_one);</span>
-<span class="line" id="L372">        yed.cMov(Fe.one, <span class="tok-builtin">@boolToInt</span>(x_plus_one_y_inv.isZero()));</span>
+<span class="line" id="L372">        yed.cMov(Fe.one, <span class="tok-builtin">@intFromBool</span>(x_plus_one_y_inv.isZero()));</span>
 <span class="line" id="L373"></span>
 <span class="line" id="L374">        <span class="tok-kw">return</span> Edwards25519{</span>
 <span class="line" id="L375">            .x = xed,</span>
@@ -521,9 +521,9 @@
 <span class="line" id="L391"></span>
 <span class="line" id="L392">        <span class="tok-comment">// gx1 not a square =&gt; x = -x1-A</span>
 </span>
-<span class="line" id="L393">        x.cMov(x.neg(), <span class="tok-builtin">@boolToInt</span>(not_square));</span>
+<span class="line" id="L393">        x.cMov(x.neg(), <span class="tok-builtin">@intFromBool</span>(not_square));</span>
 <span class="line" id="L394">        x2 = Fe.zero;</span>
-<span class="line" id="L395">        x2.cMov(Fe.edwards25519a, <span class="tok-builtin">@boolToInt</span>(not_square));</span>
+<span class="line" id="L395">        x2.cMov(Fe.edwards25519a, <span class="tok-builtin">@intFromBool</span>(not_square));</span>
 <span class="line" id="L396">        x = x.sub(x2);</span>
 <span class="line" id="L397"></span>
 <span class="line" id="L398">        <span class="tok-comment">// We have y = sqrt(gx1) or sqrt(gx2) with gx2 = gx1*(A+x1)/(-x1)</span>
@@ -541,7 +541,7 @@
 <span class="line" id="L408"></span>
 <span class="line" id="L409">        <span class="tok-kw">const</span> y_sign = !elr.not_square;</span>
 <span class="line" id="L410">        <span class="tok-kw">const</span> y_neg = elr.y.neg();</span>
-<span class="line" id="L411">        elr.y.cMov(y_neg, <span class="tok-builtin">@boolToInt</span>(elr.y.isNegative()) ^ <span class="tok-builtin">@boolToInt</span>(y_sign));</span>
+<span class="line" id="L411">        elr.y.cMov(y_neg, <span class="tok-builtin">@intFromBool</span>(elr.y.isNegative()) ^ <span class="tok-builtin">@intFromBool</span>(y_sign));</span>
 <span class="line" id="L412">        <span class="tok-kw">return</span> montToEd(elr.x, elr.y).clearCofactor();</span>
 <span class="line" id="L413">    }</span>
 <span class="line" id="L414"></span>
@@ -560,7 +560,7 @@
 <span class="line" id="L427">        }</span>
 <span class="line" id="L428">        <span class="tok-kw">const</span> empty_block = [_]<span class="tok-type">u8</span>{<span class="tok-number">0</span>} ** H.block_length;</span>
 <span class="line" id="L429">        <span class="tok-kw">var</span> t = [<span class="tok-number">3</span>]<span class="tok-type">u8</span>{ <span class="tok-number">0</span>, n * h_l, <span class="tok-number">0</span> };</span>
-<span class="line" id="L430">        <span class="tok-kw">var</span> xctx_len_u8 = [<span class="tok-number">1</span>]<span class="tok-type">u8</span>{<span class="tok-builtin">@intCast</span>(<span class="tok-type">u8</span>, xctx.len)};</span>
+<span class="line" id="L430">        <span class="tok-kw">var</span> xctx_len_u8 = [<span class="tok-number">1</span>]<span class="tok-type">u8</span>{<span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-builtin">@intCast</span>(xctx.len))};</span>
 <span class="line" id="L431">        <span class="tok-kw">var</span> st = H.init(.{});</span>
 <span class="line" id="L432">        st.update(empty_block[<span class="tok-number">0</span>..]);</span>
 <span class="line" id="L433">        st.update(s);</span>
@@ -619,7 +619,7 @@
 <span class="line" id="L486">        <span class="tok-kw">const</span> elr = elligator2(Fe.fromBytes(s));</span>
 <span class="line" id="L487">        <span class="tok-kw">var</span> p = montToEd(elr.x, elr.y);</span>
 <span class="line" id="L488">        <span class="tok-kw">const</span> p_neg = p.neg();</span>
-<span class="line" id="L489">        p.cMov(p_neg, <span class="tok-builtin">@boolToInt</span>(p.x.isNegative()) ^ x_sign);</span>
+<span class="line" id="L489">        p.cMov(p_neg, <span class="tok-builtin">@intFromBool</span>(p.x.isNegative()) ^ x_sign);</span>
 <span class="line" id="L490">        <span class="tok-kw">return</span> p.clearCofactor();</span>
 <span class="line" id="L491">    }</span>
 <span class="line" id="L492">};</span>

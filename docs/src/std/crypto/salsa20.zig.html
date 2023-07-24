@@ -450,8 +450,8 @@
 <span class="line" id="L337">            <span class="tok-kw">var</span> d: [<span class="tok-number">4</span>]<span class="tok-type">u32</span> = <span class="tok-null">undefined</span>;</span>
 <span class="line" id="L338">            d[<span class="tok-number">0</span>] = mem.readIntLittle(<span class="tok-type">u32</span>, nonce[<span class="tok-number">0</span>..<span class="tok-number">4</span>]);</span>
 <span class="line" id="L339">            d[<span class="tok-number">1</span>] = mem.readIntLittle(<span class="tok-type">u32</span>, nonce[<span class="tok-number">4</span>..<span class="tok-number">8</span>]);</span>
-<span class="line" id="L340">            d[<span class="tok-number">2</span>] = <span class="tok-builtin">@truncate</span>(<span class="tok-type">u32</span>, counter);</span>
-<span class="line" id="L341">            d[<span class="tok-number">3</span>] = <span class="tok-builtin">@truncate</span>(<span class="tok-type">u32</span>, counter &gt;&gt; <span class="tok-number">32</span>);</span>
+<span class="line" id="L340">            d[<span class="tok-number">2</span>] = <span class="tok-builtin">@as</span>(<span class="tok-type">u32</span>, <span class="tok-builtin">@truncate</span>(counter));</span>
+<span class="line" id="L341">            d[<span class="tok-number">3</span>] = <span class="tok-builtin">@as</span>(<span class="tok-type">u32</span>, <span class="tok-builtin">@truncate</span>(counter &gt;&gt; <span class="tok-number">32</span>));</span>
 <span class="line" id="L342">            SalsaImpl(rounds).salsaXor(out, in, keyToWords(key), d);</span>
 <span class="line" id="L343">        }</span>
 <span class="line" id="L344">    };</span>
@@ -517,7 +517,7 @@
 <span class="line" id="L404">        debug.assert(c.len == m.len);</span>
 <span class="line" id="L405">        <span class="tok-kw">const</span> extended = extend(rounds, k, npub);</span>
 <span class="line" id="L406">        <span class="tok-kw">var</span> block0 = [_]<span class="tok-type">u8</span>{<span class="tok-number">0</span>} ** <span class="tok-number">64</span>;</span>
-<span class="line" id="L407">        <span class="tok-kw">const</span> mlen0 = math.min(<span class="tok-number">32</span>, c.len);</span>
+<span class="line" id="L407">        <span class="tok-kw">const</span> mlen0 = <span class="tok-builtin">@min</span>(<span class="tok-number">32</span>, c.len);</span>
 <span class="line" id="L408">        <span class="tok-builtin">@memcpy</span>(block0[<span class="tok-number">32</span>..][<span class="tok-number">0</span>..mlen0], c[<span class="tok-number">0</span>..mlen0]);</span>
 <span class="line" id="L409">        Salsa20.xor(block0[<span class="tok-number">0</span>..], block0[<span class="tok-number">0</span>..], <span class="tok-number">0</span>, extended.key, extended.nonce);</span>
 <span class="line" id="L410">        <span class="tok-kw">var</span> mac = Poly1305.init(block0[<span class="tok-number">0</span>..<span class="tok-number">32</span>]);</span>
