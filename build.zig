@@ -12,7 +12,7 @@ pub fn build(b: *std.build.Builder) void {
 
     const docs_test = b.addTest(.{ .root_source_file = .{ .path = "src/lib.zig" } });
     const install_docs = b.addInstallDirectory(.{
-        .source_dir = docs_test.getOutputDocs(),
+        .source_dir = docs_test.getEmittedDocs(),
         .install_dir = .prefix,
         .install_subdir = "docs",
     });
