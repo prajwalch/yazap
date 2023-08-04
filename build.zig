@@ -30,7 +30,7 @@ pub fn build(b: *std.build.Builder) void {
             .target = target,
             .optimize = optimize,
         });
-        const install_example = b.addInstallArtifact(example);
+        const install_example = b.addInstallArtifact(example, .{});
         example.addModule("yazap", yazap_mod);
         examples_step.dependOn(&install_example.step);
     }
