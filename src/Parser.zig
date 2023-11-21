@@ -366,7 +366,7 @@ fn putMatchedArg(self: *Parser, arg: *const Arg, value: arg_matches.MatchedArgVa
     try self.verifyValuesLength(arg, value.count());
 
     var matches = &self.arg_matches;
-    var maybe_old_value = matches.args.getPtr(arg.name);
+    const maybe_old_value = matches.args.getPtr(arg.name);
 
     if (maybe_old_value) |old_value| {
         // To fix the const error

@@ -62,7 +62,7 @@ pub const Help = struct {
 
     pub fn writeAll(self: *Help, stream: anytype) !void {
         var buffer = std.io.bufferedWriter(stream);
-        var writer = buffer.writer();
+        const writer = buffer.writer();
 
         try self.writeDescription(writer);
         try self.writeHeader(writer);
