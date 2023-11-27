@@ -207,7 +207,7 @@ test "Option with allowed values" {
     var app = App.init(allocator, "clang", null);
     errdefer app.deinit();
 
-    var stdd = Arg.singleValueOptionWithValidValues(
+    const stdd = Arg.singleValueOptionWithValidValues(
         "std",
         null,
         null,

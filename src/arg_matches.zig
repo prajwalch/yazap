@@ -74,7 +74,7 @@ pub const ArgMatches = struct {
     pub fn setSubcommand(self: *ArgMatches, subcommand: MatchedSubCommand) !void {
         if (self.subcommand != null) return;
 
-        var alloc_subcmd = try self.allocator.create(MatchedSubCommand);
+        const alloc_subcmd = try self.allocator.create(MatchedSubCommand);
         alloc_subcmd.* = subcommand;
         self.subcommand = alloc_subcmd;
     }
