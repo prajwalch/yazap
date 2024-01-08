@@ -23,8 +23,8 @@ pub fn main() anyerror!void {
     try cmd_pull.addArg(Arg.positional("REMOTE", null, null));
 
     var cmd_push = app.createCommand("push", "Update the remote branch");
-    try cmd_pull.addArg(Arg.positional("REMOTE", null, null));
-    try cmd_pull.addArg(Arg.positional("BRANCH_NAME", null, null));
+    try cmd_push.addArg(Arg.positional("REMOTE", null, null));
+    try cmd_push.addArg(Arg.positional("BRANCH_NAME", null, null));
 
     try git.addSubcommand(app.createCommand("init", "Create an empty Git repository or reinitialize an existing one"));
     try git.addSubcommand(cmd_commit);

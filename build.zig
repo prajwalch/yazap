@@ -1,7 +1,7 @@
 const std = @import("std");
 
-pub fn build(b: *std.build.Builder) void {
-    const yazap_mod = b.addModule("yazap", .{ .source_file = .{ .path = "src/lib.zig" } });
+pub fn build(b: *std.Build) void {
+    const yazap_mod = b.addModule("yazap", .{ .root_source_file = .{ .path = "src/lib.zig" } });
 
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
@@ -31,7 +31,7 @@ pub fn build(b: *std.build.Builder) void {
             .optimize = optimize,
         });
         const install_example = b.addInstallArtifact(example, .{});
-        example.addModule("yazap", yazap_mod);
+        example.root_module.addImport("yazap", yazap_mod);
         examples_step.dependOn(&install_example.step);
     }
 }
