@@ -45,7 +45,7 @@ chained options using space (`-abc value, -abc v1,v2,v3`).
 
 ## Installing
 
-Requires [zig v0.11.x](https://ziglang.org).
+Requires [zig v0.12.x](https://ziglang.org).
 
 1. Initialize your project as a repository (if it hasn't been initilized already)
 by running `git init`.
@@ -101,7 +101,7 @@ $ ./zig-out/bin/example_name --help
 
 ### Initializing Yazap
 
-The begin using `yazap`, the first step is to create an instance of 
+To begin using `yazap`, the first step is to create an instance of 
 [App](https://prajwalch.github.io/yazap/#A;lib:App) by calling
 `App.init(allocator, "Your app name", "optional description")`. This function
 internally creates a root command for your application.
