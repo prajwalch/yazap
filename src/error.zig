@@ -7,7 +7,7 @@ pub const YazapError = error{ InvalidCmdLine, Overflow }
     || WriteError;
 // zig fmt: on
 pub const AllocatorError = std.mem.Allocator.Error;
-pub const WriteError = std.os.WriteError;
+pub const WriteError = std.posix.WriteError;
 pub const ParseError = error{
     UnknownFlag,
     UnknownCommand,
