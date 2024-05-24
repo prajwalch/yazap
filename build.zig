@@ -24,9 +24,7 @@ pub fn build(b: *std.Build) void {
     inline for (.{ "git", "touch", "ls" }) |example_name| {
         const example = b.addExecutable(.{
             .name = example_name,
-            .root_source_file = .{
-                .path = b.fmt("examples/{s}.zig", .{example_name}),
-            },
+            .root_source_file = b.path(b.fmt("examples/{s}.zig", .{example_name})),
             .target = target,
             .optimize = optimize,
         });
