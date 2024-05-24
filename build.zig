@@ -6,11 +6,11 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    const main_tests = b.addTest(.{ .root_source_file = .{ .path = "src/test.zig" } });
+    const main_tests = b.addTest(.{ .root_source_file = b.path("src/test.zig") });
     const test_step = b.step("test", "Run library tests");
     test_step.dependOn(&main_tests.step);
 
-    const docs_test = b.addTest(.{ .root_source_file = .{ .path = "src/lib.zig" } });
+    const docs_test = b.addTest(.{ .root_source_file = b.path("src/lib.zig") });
     const install_docs = b.addInstallDirectory(.{
         .source_dir = docs_test.getEmittedDocs(),
         .install_dir = .prefix,
