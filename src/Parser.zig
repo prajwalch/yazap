@@ -234,7 +234,7 @@ fn parseLongOption(self: *Parser, token: *const Token) Error!void {
 // --option=value, -f=value, -fgh=value   => (option, value), (f, value), (fgh, value)
 // --option=, -f=, -fgh=                  => (option, ""), (f, ""), (fgh, "")
 fn optionTokenToOptionTuple(token: *const Token) struct { []const u8, ?[]const u8 } {
-    var kv_iter = mem.tokenize(u8, token.value, "=");
+    var kv_iter = mem.tokenizeSequence(u8, token.value, "=");
 
     return switch (token.tag) {
         .short_option,
@@ -306,7 +306,7 @@ fn splitValue(
         or !mem.containsAtLeast(u8, value, 1, delimiter)) return null;
     // zig fmt: on
 
-    var it = mem.split(u8, value, delimiter);
+    var it = mem.splitSequence(u8, value, delimiter);
     var values = std.ArrayList([]const u8).init(self.allocator);
     errdefer values.deinit();
 
