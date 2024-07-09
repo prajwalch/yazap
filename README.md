@@ -3,15 +3,21 @@
 
 # Yazap
 
-> **Note**
+> **Note:**
 > This branch targets the [master branch of zig](https://github.com/ziglang/zig).
-> Use [v0.9.x-v0.10.x](https://github.com/PrajwalCH/yazap/tree/v0.9.x-v0.10.x) branch
-> if you're using an older versions.
+> See [supported versions table](#supported-versions-table).
 
 The ultimate [zig](https://ziglang.org) library for seamless command-line parsing.
 Effortlessly handles options, subcommands, and custom arguments with ease.
 
 Inspired by [clap-rs](https://github.com/clap-rs/clap) and [andrewrk/ziglang: src-self-hosted/arg.zig](https://git.sr.ht/~andrewrk/ziglang/tree/725b6ee634f01355da4a6badc5675751b85f0bf0/src-self-hosted/arg.zig)
+
+## Supported versions table
+| yazap                                                             | Zig                                      |
+| ----------------------------------------------------------------- | ---------------------------------------- |
+| main                                                              | [master](https://github.com/ziglang/zig) |
+| [`0.5.1`](https://github.com/prajwalch/yazap/releases/tag/v0.5.1) | `0.12.0`, `0.12.1` and  `0.13.0`         |
+| <= `0.5.0`                                                        | Not supported to any                     |
 
 ## Key Features:
 
@@ -45,29 +51,18 @@ chained options using space (`-abc value, -abc v1,v2,v3`).
 
 ## Installing
 
-Requires [zig v0.12.x](https://ziglang.org).
+1. Run the following command:
 
-1. Initialize your project as a repository (if it hasn't been initilized already)
-by running `git init`.
-2. Create a directory named `libs` in the root of your project.
-3. Add the `yazap` library as submodule by running the following command:
+```
+zig fetch --save git+https://github.com/prajwalch/yazap
+```
 
-    ```bash
-    git submodule add https://github.com/PrajwalCH/yazap libs/yazap
-    ```
-4. After the previous step is completed, add the following code snippet to your
-`build.zig` file:
+2. Add the following to `build.zig`:
 
-    ```zig
-    exe.addAnonymousModule("yazap", .{
-        .source_file = .{ .path = "libs/yazap/src/lib.zig" },
-    });
-    ```
-5. You can now import this library in your source file as follows:
-
-    ```zig
-    const yazap = @import("yazap");
-    ```
+```zig
+const yazap = b.dependency("yazap", .{});
+exe.root_module.addImport("yazap", clap.module("yazap"));
+```
 
 ## Documentation
 
