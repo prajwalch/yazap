@@ -61,7 +61,7 @@ zig fetch --save git+https://github.com/prajwalch/yazap
 
 ```zig
 const yazap = b.dependency("yazap", .{});
-exe.root_module.addImport("yazap", clap.module("yazap"));
+exe.root_module.addImport("yazap", yazap.module("yazap"));
 ```
 
 ## Documentation
