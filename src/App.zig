@@ -1,6 +1,7 @@
 const App = @This();
 
 const std = @import("std");
+const builtin = @import("builtin");
 const help = @import("help.zig");
 const Command = @import("Command.zig");
 const Parser = @import("Parser.zig");
@@ -115,7 +116,9 @@ pub fn parseProcess(self: *App) YazapError!(*const ArgMatches) {
 pub fn parseFrom(self: *App, argv: []const [:0]const u8) YazapError!(*const ArgMatches) {
     var parser = Parser.init(self.allocator, Tokenizer.init(argv), self.rootCommand());
     self.arg_matches = parser.parse() catch |e| {
-        try parser.err.log(e);
+        if (!builtin.is_test) {
+            try parser.err.log(e);
+        }
         return e;
     };
     try self.handleHelpOption();
