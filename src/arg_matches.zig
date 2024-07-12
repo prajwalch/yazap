@@ -1,6 +1,6 @@
 const std = @import("std");
 const Arg = @import("Arg.zig");
-const ArgHashMap = std.StringHashMap(MatchedArgValue);
+pub const ArgHashMap = std.StringHashMap(MatchedArgValue);
 
 pub const MatchedArgValue = union(enum) {
     none,
