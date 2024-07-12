@@ -182,7 +182,7 @@ pub fn addSubcommand(self: *Command, new_subcommand: Command) !void {
 ///     app.createCommand("build", "Build the project"),
 /// });
 /// ```
-pub fn addSubcommands(self: *Command, subcommands: []Command) !void {
+pub fn addSubcommands(self: *Command, subcommands: []const Command) !void {
     for (subcommands) |subcmd| try self.addSubcommand(subcmd);
 }
 
