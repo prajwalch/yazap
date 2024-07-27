@@ -442,7 +442,7 @@ fn parseSubCommand(self: *Parser, provided_subcmd: []const u8) Error!MatchedSubC
     // zig fmt: on
 
     if (!takes_value) {
-        return MatchedSubCommand.init(subcmd.name, null);
+        return MatchedSubCommand.init(subcmd.name, ArgMatches.init(self.allocator));
     }
 
     const args = self.tokenizer.restArg() orelse {
