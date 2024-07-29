@@ -79,7 +79,7 @@ pub const Error = struct {
                 try writer.print("The command '{s}' requires a value but none is provided\n", .{self.getStrValue(.valid_cmd)});
             },
             ParseError.CommandSubcommandNotProvided => {
-                try writer.print("The command '{s}' requires a subcommand but none is provided", .{self.getStrValue(.valid_cmd)});
+                try writer.print("The command '{s}' requires a subcommand but none is provided\n", .{self.getStrValue(.valid_cmd)});
             },
             ParseError.ArgValueNotProvided => try writer.print("The arg '{s}' takes a value but none is provided\n", .{self.getStrValue(.valid_arg)}),
             ParseError.UnneededAttachedValue => try writer.print("Arg '{s}' does not takes value but provided\n", .{self.getStrValue(.valid_arg)}),
