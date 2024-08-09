@@ -153,6 +153,58 @@ test "Option that takes single value" {
     app.deinit();
 }
 
+test "multiValuesOption provided with single value short" {
+    var app = App.init(allocator, "clang", null);
+    defer app.deinit();
+
+    const srcs = Arg.multiValuesOption("sources", 's', null, 128);
+
+    // ex: clang sources...
+    try app.rootCommand().addArg(srcs);
+
+    const matches_short = try app.parseFrom(&.{ "-s", "f1" });
+    try testing.expectEqual(@as(usize, 1), matches_short.getMultiValues("sources").?.len);
+}
+
+test "multiValuesOption provided with single value long" {
+    var app = App.init(allocator, "clang", null);
+    defer app.deinit();
+
+    const srcs = Arg.multiValuesOption("sources", 's', null, 128);
+
+    // ex: clang sources...
+    try app.rootCommand().addArg(srcs);
+
+    const matches_short = try app.parseFrom(&.{ "--sources", "f1" });
+    try testing.expectEqual(@as(usize, 1), matches_short.getMultiValues("sources").?.len);
+}
+
+test "multiValuesOption provided with multiple values short" {
+    var app = App.init(allocator, "clang", null);
+    defer app.deinit();
+
+    const srcs = Arg.multiValuesOption("sources", 's', null, 128);
+
+    // ex: clang sources...
+    try app.rootCommand().addArg(srcs);
+    const matches = try app.parseFrom(&.{ "-s", "f1", "f2", "f3", "f4", "f5" });
+
+    try testing.expectEqual(@as(usize, 5), matches.getMultiValues("sources").?.len);
+}
+
+test "multiValuesOption provided with multiple values long" {
+    var app = App.init(allocator, "clang", null);
+    defer app.deinit();
+
+    const srcs = Arg.multiValuesOption("sources", 's', null, 128);
+
+    // ex: clang sources...
+    try app.rootCommand().addArg(srcs);
+    const matches = try app.parseFrom(&.{ "--sources", "f1", "f2", "f3", "f4", "f5" });
+
+    try testing.expectEqual(@as(usize, 5), matches.getMultiValues("sources").?.len);
+}
+
 test "Option that takes many/multiple values" {
     var app = App.init(allocator, "clang", null);
     errdefer app.deinit();

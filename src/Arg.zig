@@ -174,6 +174,7 @@ pub fn multiValuesOption(
     arg.setMaxValues(max_values);
     arg.setDefaultValuesDelimiter();
     arg.setProperty(.takes_value);
+    arg.setProperty(.takes_multiple_values);
     return arg;
 }
 

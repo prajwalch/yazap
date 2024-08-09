@@ -274,7 +274,7 @@ fn parseOptionValue(self: *Parser, arg: *const Arg, attached_value: ?[]const u8)
         self.err.setContext(.{ .valid_arg = arg.name });
         return Error.ArgValueNotProvided;
     }
-    if (values.items.len == 1) {
+    if (values.items.len == 1 and !arg.hasProperty(.takes_multiple_values)) {
         const value = values.pop();
         try self.verifyValue(arg, value);
         try self.putMatchedArg(arg, .{ .single = value });
