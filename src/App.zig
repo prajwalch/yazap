@@ -157,7 +157,7 @@ pub fn displayHelp(self: *App) !void {
     return cmd_help.writeAll(std.io.getStdErr().writer());
 }
 
-/// Displays the usage message of specified subcomand on the command line.
+/// Displays the usage message of specified subcommand on the command line.
 ///
 /// **NOTE:** By default, the handling of the `-h` and `--help` options,
 /// and the automatic display of the usage message are taken care of. Use this
