@@ -1,7 +1,6 @@
 const Command = @This();
 
 const std = @import("std");
-const help = @import("help.zig");
 const Arg = @import("Arg.zig");
 
 const mem = std.mem;
