@@ -89,9 +89,10 @@ pub fn deinit(self: *Command) void {
 /// ```
 pub fn addArg(self: *Command, arg: Arg) !void {
     var new_arg = arg;
+    const is_positional = (arg.short_name == null) and (arg.long_name == null);
 
     // If its not a positional argument, append it and return.
-    if ((new_arg.short_name != null) and (new_arg.long_name != null)) {
+    if (!is_positional) {
         return self.options.append(self.allocator, new_arg);
     }
 
