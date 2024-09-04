@@ -4,12 +4,16 @@ const std = @import("std");
 const Arg = @import("Arg.zig");
 
 const mem = std.mem;
-const ArrayListUnmanaged = std.ArrayListUnmanaged;
 const Allocator = mem.Allocator;
+const ArrayListUnmanaged = std.ArrayListUnmanaged;
 const EnumSet = std.EnumSet;
 
+/// Represents the different parsing behaviors that can be applied to a
+/// command.
 pub const Property = enum {
+    /// Specifies that a positional argument must be provided for the command.
     positional_arg_required,
+    /// Specifies that a subcommand must be provided for the command.
     subcommand_required,
 };
 
@@ -80,47 +84,53 @@ pub fn deinit(self: *Command) void {
 ///
 /// var root = app.rootCommand();
 /// try root.addArg(Arg.positional("FIRST", null, 1));
-/// // Returns `error.DuplicatePositionalArgIndex`
+/// // Returns `error.DuplicatePositionalArgIndex`.
 /// try root.addArg(Arg.positional("SECOND", null, 1));
 /// ```
-pub fn addArg(self: *Command, new_arg: Arg) !void {
-    var arg = new_arg;
-    const is_positional = (arg.short_name == null) and (arg.long_name == null);
+pub fn addArg(self: *Command, arg: Arg) !void {
+    var new_arg = arg;
 
-    if (!is_positional) {
-        return self.options.append(self.allocator, arg);
+    // If its not a positional argument, append it and return.
+    if ((new_arg.short_name != null) and (new_arg.long_name != null)) {
+        return self.options.append(self.allocator, new_arg);
     }
 
-    if (arg.index != null) {
-        // Check whether any positional argument has the same index as arg.
+    // Its a positonal argument.
+    //
+    // If the position is set check for position duplication.
+    if (new_arg.index != null) {
         for (self.positional_args.items) |positional_arg| {
             std.debug.assert(positional_arg.index != null);
 
-            if (positional_arg.index.? == arg.index.?) {
+            if (positional_arg.index.? == new_arg.index.?) {
                 return error.DuplicatePositionalArgIndex;
             }
         }
-        return self.positional_args.append(self.allocator, arg);
+        // No duplication; append it.
+        return self.positional_args.append(self.allocator, new_arg);
     }
 
-    // Index is not set but it is the first positional argument.
+    // If the position is not set and if its the first positional argument
+    // then return immediately by giving it first position.
     if (self.positional_args.items.len == 0) {
-        arg.setIndex(1);
-        return self.positional_args.append(self.allocator, arg);
+        new_arg.setIndex(1);
+        return self.positional_args.append(self.allocator, new_arg);
     }
 
-    // Index is not set and it is not the first positional argument.
-    var highest_index: usize = 1;
+    // If the position is not set and if its not first positional argument
+    // then find the next position for it.
+    var current_position: usize = 1;
 
     for (self.positional_args.items) |positional_arg| {
         std.debug.assert(positional_arg.index != null);
 
-        if (positional_arg.index.? > highest_index) {
-            highest_index = positional_arg.index.?;
+        if (positional_arg.index.? > current_position) {
+            current_position = positional_arg.index.?;
         }
     }
-    arg.setIndex(highest_index + 1);
-    try self.positional_args.append(self.allocator, arg);
+
+    new_arg.setIndex(current_position + 1);
+    try self.positional_args.append(self.allocator, new_arg);
 }
 
 /// Appends multiple arguments to the list of arguments.
@@ -214,40 +224,35 @@ pub fn unsetProperty(self: *Command, property: Property) void {
 
 /// Checks if the command has a specific property set.
 ///
-/// **NOTE:** This function is primarily used by the parser to determine the
-/// presence of a specific property for the command.
+/// **NOTE:** This function is primarily used by the parser.
 pub fn hasProperty(self: *const Command, property: Property) bool {
     return self.properties.contains(property);
 }
 
 /// Returns the count of positional arguments in the positional argument list.
 ///
-/// **NOTE:** This function is primarily used by the parser to determine the
-/// total number of valid positional arguments.
+/// **NOTE:** This function is primarily used by the parser.
 pub fn countPositionalArgs(self: *const Command) usize {
     return (self.positional_args.items.len);
 }
 
 /// Returns the count of options in the option list.
 ///
-/// **NOTE:** This function is primarily used by the parser to determine the
-/// total number of valid options.
+/// **NOTE:** This function is primarily used by the parser.
 pub fn countOptions(self: *const Command) usize {
     return (self.options.items.len);
 }
 
 /// Returns the count of subcommands in the subcommand list.
 ///
-/// **NOTE:** This function is primarily used by the parser to determine the
-/// total number of valid subcommands.
+/// **NOTE:** This function is primarily used by the parser.
 pub fn countSubcommands(self: *const Command) usize {
     return (self.subcommands.items.len);
 }
 
 /// Performs a linear search to find a positional argument with the given index.
 ///
-/// **NOTE:** This function is primarily used by the parser to find a positional
-/// argument based on its index.
+/// **NOTE:** This function is primarily used by the parser.
 pub fn findPositionalArgByIndex(self: *const Command, index: usize) ?*const Arg {
     for (self.positional_args.items) |*pos_arg| {
         std.debug.assert(pos_arg.index != null);
@@ -261,8 +266,7 @@ pub fn findPositionalArgByIndex(self: *const Command, index: usize) ?*const Arg 
 
 /// Performs a linear search to find a short option with the given short name.
 ///
-/// **NOTE:** This function is primarily used by the parser to find a short option
-/// based on its short name.
+/// **NOTE:** This function is primarily used by the parser.
 pub fn findShortOption(self: *const Command, short_name: u8) ?*const Arg {
     for (self.options.items) |*arg| {
         if (arg.short_name) |s| {
@@ -274,8 +278,7 @@ pub fn findShortOption(self: *const Command, short_name: u8) ?*const Arg {
 
 /// Performs a linear search to find a long option with the given long name.
 ///
-/// **NOTE:** This function is primarily used by the parser to find a long option
-/// based on its long name.
+/// **NOTE:** This function is primarily used by the parser.
 pub fn findLongOption(self: *const Command, long_name: []const u8) ?*const Arg {
     for (self.options.items) |*arg| {
         if (arg.long_name) |l| {
@@ -287,11 +290,10 @@ pub fn findLongOption(self: *const Command, long_name: []const u8) ?*const Arg {
 
 /// Performs a linear search to find a subcommand with the given subcommand name.
 ///
-/// **NOTE:** This function is primarily used by the parser to find a subcommand
-/// based on its name.
-pub fn findSubcommand(self: *const Command, provided_subcmd: []const u8) ?*const Command {
+/// **NOTE:** This function is primarily used by the parser.
+pub fn findSubcommand(self: *const Command, subcommand: []const u8) ?*const Command {
     for (self.subcommands.items) |*subcmd| {
-        if (std.mem.eql(u8, subcmd.name, provided_subcmd)) {
+        if (std.mem.eql(u8, subcmd.name, subcommand)) {
             return subcmd;
         }
     }
