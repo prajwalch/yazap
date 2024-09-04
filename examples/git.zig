@@ -5,31 +5,34 @@ const allocator = std.heap.page_allocator;
 const App = yazap.App;
 const Arg = yazap.Arg;
 
-// git init
-// git commit -m "message"
-// git pull <remote>
-// git push <remote> <branch_name>
-
 pub fn main() anyerror!void {
     var app = App.init(allocator, "mygit", null);
     defer app.deinit();
 
     var git = app.rootCommand();
 
+    // git init
+    try git.addSubcommand(app.createCommand(
+        "init",
+        "Create an empty Git repository or reinitialize an existing one",
+    ));
+
+    // git commit -m "message"
     var cmd_commit = app.createCommand("commit", "Record changes to the repository");
     try cmd_commit.addArg(Arg.singleValueOption("message", 'm', "commit message"));
 
-    var cmd_pull = app.createCommand("pull", "Fetch from remote branch and merge it to local");
-    try cmd_pull.addArg(Arg.positional("REMOTE", null, null));
-
+    // git push <remote> <branch_name>
     var cmd_push = app.createCommand("push", "Update the remote branch");
     try cmd_push.addArg(Arg.positional("REMOTE", null, null));
     try cmd_push.addArg(Arg.positional("BRANCH_NAME", null, null));
 
-    try git.addSubcommand(app.createCommand("init", "Create an empty Git repository or reinitialize an existing one"));
+    // git pull <remote>
+    var cmd_pull = app.createCommand("pull", "Fetch from remote branch and merge it to local");
+    try cmd_pull.addArg(Arg.positional("REMOTE", null, null));
+
     try git.addSubcommand(cmd_commit);
-    try git.addSubcommand(cmd_pull);
     try git.addSubcommand(cmd_push);
+    try git.addSubcommand(cmd_pull);
 
     const matches = try app.parseProcess();
 
