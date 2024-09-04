@@ -138,7 +138,7 @@ test "Option that does not takes value" {
     errdefer app.deinit();
 
     try app.rootCommand().addArg(Arg.booleanOption("version", 'v', null));
-    try testing.expectError(error.UnneededAttachedValue, app.parseFrom(&.{"-v=13"}));
+    try testing.expectError(error.UnexpectedArgumentValue, app.parseFrom(&.{"-v=13"}));
 
     app.deinit();
 }
@@ -148,7 +148,7 @@ test "Option that takes single value" {
     errdefer app.deinit();
 
     try app.rootCommand().addArg(Arg.singleValueOption("output", 'o', null));
-    try testing.expectError(error.ArgValueNotProvided, app.parseFrom(&.{"-o"}));
+    try testing.expectError(error.ArgumentValueNotProvided, app.parseFrom(&.{"-o"}));
 
     app.deinit();
 }
@@ -235,7 +235,7 @@ test "Option with min values" {
     srcs.setProperty(.takes_value);
 
     try app.rootCommand().addArg(srcs);
-    try testing.expectError(error.TooFewArgValue, app.parseFrom(&.{"-s=f1"}));
+    try testing.expectError(error.TooFewArgumentValue, app.parseFrom(&.{"-s=f1"}));
 
     app.deinit();
 }
@@ -248,7 +248,7 @@ test "Option with max values" {
     srcs.setValuesDelimiter(":");
 
     try app.rootCommand().addArg(srcs);
-    try testing.expectError(error.TooManyArgValue, app.parseFrom(
+    try testing.expectError(error.TooManyArgumentValue, app.parseFrom(
         &.{"-s=f1:f2:f3:f4:f5:f6"},
     ));
 
@@ -267,7 +267,7 @@ test "Option with allowed values" {
     );
 
     try app.rootCommand().addArg(stdd);
-    try testing.expectError(error.ProvidedValueIsNotValidOption, app.parseFrom(&.{"--std=c100"}));
+    try testing.expectError(error.InvalidArgumentValue, app.parseFrom(&.{"--std=c100"}));
 
     app.deinit();
 }

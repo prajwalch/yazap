@@ -2,19 +2,29 @@ const App = @This();
 
 const std = @import("std");
 const builtin = @import("builtin");
-const help = @import("help.zig");
+const Allocator = std.mem.Allocator;
+const ArgMatches = @import("ArgMatches.zig");
 const Command = @import("Command.zig");
-const Parser = @import("Parser.zig");
-const ArgMatches = @import("arg_matches.zig").ArgMatches;
-const Tokenizer = @import("tokenizer.zig").Tokenizer;
+const HelpMessageWriter = @import("HelpMessageWriter.zig");
+const Parser = @import("parser/Parser.zig");
+const ParseResult = @import("./parser/ParseResult.zig");
+const parse_error = @import("./parser/parse_error.zig");
 const YazapError = @import("error.zig").YazapError;
 
-const Allocator = std.mem.Allocator;
-
+/// Top level allocator for the entire library.
 allocator: Allocator,
+/// Root command of the app.
 command: Command,
-subcommand_help: ?help.Help = null,
+/// Core structure containing parse result.
+///
+/// It is not intended for direct access, use `ArgMatches` instead.
+parse_result: ?ParseResult = null,
+/// Public container to query parse result.
+///
+/// It cab be access directly but for the most part `parseFrom` or `parseProcess`
+/// returns it.
 arg_matches: ?ArgMatches = null,
+/// Raw buffer containing command line arguments.
 process_args: ?[]const [:0]u8 = null,
 
 /// Creates a new instance of `App`.
@@ -41,13 +51,15 @@ pub fn init(allocator: Allocator, name: []const u8, description: ?[]const u8) Ap
 /// defer app.deinit();
 /// ```
 pub fn deinit(self: *App) void {
-    if (self.arg_matches) |*matches| matches.deinit();
-    if (self.process_args) |pargs| std.process.argsFree(self.allocator, pargs);
-    self.command.deinit();
-
-    if (self.subcommand_help) |subcmd_help| {
-        subcmd_help.parents.?.deinit();
+    if (self.parse_result) |*parse_result| {
+        parse_result.deinit();
     }
+    if (self.process_args) |args| {
+        std.process.argsFree(self.allocator, args);
+    }
+    self.command.deinit();
+    self.parse_result = null;
+    self.arg_matches = null;
 }
 
 /// Creates a new `Command` with given name and optional description.
@@ -114,14 +126,23 @@ pub fn parseProcess(self: *App) YazapError!(*const ArgMatches) {
 /// const matches = try app.parseFrom(&.{ "arg1", "--some-option" "subcmd" });
 /// ```
 pub fn parseFrom(self: *App, argv: []const [:0]const u8) YazapError!(*const ArgMatches) {
-    var parser = Parser.init(self.allocator, Tokenizer.init(argv), self.rootCommand());
-    self.arg_matches = parser.parse() catch |e| {
+    var parser = Parser.init(self.allocator, argv, self.rootCommand());
+
+    const parse_result = parser.parse() catch |err| {
+        // Don't clutter the test result with error messages.
         if (!builtin.is_test) {
-            try parser.err.log(e);
+            try parse_error.print(parser.error_context);
         }
-        return e;
+        return err;
     };
-    try self.handleHelpOption();
+    if (parse_result.getCommandContainingHelpFlag()) |command| {
+        var help_writer = HelpMessageWriter.init(command);
+        try help_writer.write();
+        self.deinit();
+        std.process.exit(0);
+    }
+    self.parse_result = parse_result;
+    self.arg_matches = ArgMatches{ .parse_result = &self.parse_result.? };
     return &self.arg_matches.?;
 }
 
@@ -148,13 +169,11 @@ pub fn parseFrom(self: *App, argv: []const [:0]const u8) YazapError!(*const ArgM
 ///     return;
 /// }
 /// ```
-pub fn displayHelp(self: *App) !void {
-    var cmd_help = help.Help.init(
-        self.allocator,
-        self.rootCommand(),
-        self.rootCommand().name,
-    ) catch unreachable;
-    return cmd_help.writeAll(std.io.getStdErr().writer());
+pub fn displayHelp(self: *App) YazapError!void {
+    if (self.parse_result) |parse_result| {
+        var help_writer = HelpMessageWriter.init(parse_result.getCommand());
+        try help_writer.write();
+    }
 }
 
 /// Displays the usage message of specified subcommand on the command line.
@@ -181,39 +200,13 @@ pub fn displayHelp(self: *App) !void {
 /// if (matches.subcommandMatches("subcmd")) |subcmd_matches| {
 ///     if (!subcmd_matches.containsArgs()) {
 ///         try app.displaySubcommandHelp();
-///         return;
-///     }
 /// }
 /// ```
-pub fn displaySubcommandHelp(self: *App) !void {
-    if (self.subcommand_help) |*h| return h.writeAll(std.io.getStdErr().writer());
-}
+pub fn displaySubcommandHelp(self: *App) YazapError!void {
+    const parse_result = self.parse_result orelse return;
 
-fn handleHelpOption(self: *App) !void {
-    if (help.findSubcommand(self.rootCommand(), &self.arg_matches.?)) |subcmd| {
-        self.subcommand_help = try help.Help.init(
-            self.allocator,
-            self.rootCommand(),
-            subcmd,
-        );
-    }
-    try self.displayHelpAndExitIfFound();
-}
-
-fn displayHelpAndExitIfFound(self: *App) !void {
-    var arg_matches = self.arg_matches.?;
-    var help_displayed = false;
-
-    if (arg_matches.containsArg("help")) {
-        try self.displayHelp();
-        help_displayed = true;
-    } else {
-        try self.displaySubcommandHelp();
-        help_displayed = (self.subcommand_help != null);
-    }
-
-    if (help_displayed) {
-        self.deinit();
-        std.process.exit(0);
+    if (parse_result.getActiveSubcommand()) |subcmd| {
+        var help_writer = HelpMessageWriter.init(subcmd);
+        try help_writer.write();
     }
 }

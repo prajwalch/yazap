@@ -1,46 +1,109 @@
+const Tokenizer = @This();
+
 const std = @import("std");
 const mem = std.mem;
 
-pub const Token = struct {
-    pub const Tag = enum {
-        // -f
-        short_option,
-        // -f=value
-        short_option_with_value,
-        // -f=
-        short_option_with_empty_value,
-        // -fvalue or -fgh
-        short_option_with_tail,
-        // -fgh=value
-        short_options_with_value,
-        // -fgh=
-        short_options_with_empty_value,
-        // --option
-        long_option,
-        // --option=value
-        long_option_with_value,
-        // --option=
-        long_option_with_empty_value,
-        // arg
-        some_argument,
+/// Buffer containing command line arguments.
+argv: []const [:0]const u8,
+/// Current buffer index.
+cursor: usize = 0,
+
+/// Initilizes the tokenizer with the given arguments buffer.
+pub fn init(argv: []const [:0]const u8) Tokenizer {
+    return Tokenizer{ .argv = argv };
+}
+
+/// Returns the next token from the `argv` or returns `null` if tokenizer is ended.
+pub fn nextToken(self: *Tokenizer) ?Token {
+    // Get the next non-empty argument.
+    const arg = while (self.nextRawArg()) |arg| {
+        if (arg.len >= 1) {
+            break arg;
+        }
+    } else {
+        // Tokenizer ended.
+        return null;
     };
 
-    value: []const u8,
-    tag: Tag,
+    if (mem.startsWith(u8, arg, "--")) {
+        return tokenizeLongOption(arg);
+    } else if (mem.startsWith(u8, arg, "-")) {
+        return tokenizeShortOption(arg);
+    }
+    return Token.init(arg, .some_argument);
+}
 
-    pub fn init(value: []const u8, tag: Tag) Token {
-        return Token{ .value = value, .tag = tag };
+/// Returns the next argument as-is.
+pub fn nextRawArg(self: *Tokenizer) ?[]const u8 {
+    if (self.cursor >= self.argv.len) return null;
+    defer self.cursor += 1;
+
+    return @as([]const u8, self.argv[self.cursor]);
+}
+
+/// Returns the next argument if it's not an option (i.e. doesn't start with
+/// `-` or `--`); otherwise returns `null`.
+pub fn nextNonOptionArg(self: *Tokenizer) ?[]const u8 {
+    var next_token = self.nextToken() orelse return null;
+
+    if (next_token.isShortOption() or next_token.isLongOption()) {
+        self.cursor -= 1;
+        return null;
+    }
+    return next_token.value;
+}
+
+/// Returns the remaining args left to tokenize.
+pub fn remainingArgs(self: *Tokenizer) ?[]const [:0]const u8 {
+    if (self.cursor >= self.argv.len) return null;
+    defer self.cursor = self.argv.len;
+
+    return self.argv[self.cursor..];
+}
+
+/// Represents an argument token.
+pub const Token = struct {
+    /// Represents what kind of token is.
+    pub const Kind = enum {
+        /// `-f`
+        short_option,
+        /// `-f=value`
+        short_option_with_value,
+        /// `-f=`
+        short_option_with_empty_value,
+        /// `-fvalue` or `-fgh`
+        short_option_with_tail,
+        /// `-fgh=value`
+        short_options_with_value,
+        /// `-fgh=`
+        short_options_with_empty_value,
+        /// `--option`
+        long_option,
+        /// `--option=value`
+        long_option_with_value,
+        /// `--option=`
+        long_option_with_empty_value,
+        /// `arg`
+        some_argument,
+    };
+    /// Value of token from the `argv`.
+    value: []const u8,
+    /// Type of token.
+    kind: Kind,
+
+    pub fn init(value: []const u8, kind: Kind) Token {
+        return Token{ .value = value, .kind = kind };
     }
 
     pub fn isShortOption(self: *const Token) bool {
         // zig fmt: off
         return (
-            self.tag == .short_option
-            or self.tag == .short_option_with_value
-            or self.tag == .short_option_with_empty_value
-            or self.tag == .short_option_with_tail
-            or self.tag == .short_options_with_value
-            or self.tag == .short_options_with_empty_value
+            self.kind == .short_option
+            or self.kind == .short_option_with_value
+            or self.kind == .short_option_with_empty_value
+            or self.kind == .short_option_with_tail
+            or self.kind == .short_options_with_value
+            or self.kind == .short_options_with_empty_value
         );
         // zig fmt: on
     }
@@ -48,126 +111,67 @@ pub const Token = struct {
     pub fn isLongOption(self: *const Token) bool {
         // zig fmt: off
         return (
-            self.tag == .long_option
-            or self.tag == .long_option_with_value
-            or self.tag == .long_option_with_empty_value
+            self.kind == .long_option
+            or self.kind == .long_option_with_value
+            or self.kind == .long_option_with_empty_value
         );
         // zig fmt: on
     }
 };
 
-pub const Tokenizer = struct {
-    args: []const [:0]const u8,
-    cursor: usize,
+fn tokenizeLongOption(arg: []const u8) Token {
+    const option = mem.trimLeft(u8, arg, "--");
+    const kind: Token.Kind = blk: {
+        if (mem.indexOfScalar(u8, option, '=')) |eql_pos| {
+            const has_value = option[eql_pos + 1 ..].len >= 1;
 
-    pub fn init(args: []const [:0]const u8) Tokenizer {
-        return Tokenizer{ .args = args, .cursor = 0 };
-    }
-
-    pub fn nextToken(self: *Tokenizer) ?Token {
-        var arg = self.nextRawArg() orelse return null;
-
-        if (arg.len == 0) {
-            while (self.nextRawArg()) |a| {
-                if (a.len >= 1) {
-                    arg = a;
-                    break;
-                }
+            if (has_value) {
+                break :blk .long_option_with_value;
             } else {
-                return null;
+                break :blk .long_option_with_empty_value;
             }
         }
+        break :blk .long_option;
+    };
 
-        if (mem.startsWith(u8, arg, "--")) {
-            return processLongOption(arg);
-        } else if (mem.startsWith(u8, arg, "-")) {
-            return processShortOption(arg);
-        }
+    return Token.init(option, kind);
+}
 
-        return Token.init(arg, .some_argument);
-    }
+fn tokenizeShortOption(arg: []const u8) Token {
+    const option = mem.trimLeft(u8, arg, "-");
+    const kind: Token.Kind = kind: {
+        if (mem.indexOfScalar(u8, option, '=')) |eql_pos| {
+            const has_options_combined = option[0..eql_pos].len > 1;
+            const has_value = option[eql_pos + 1 ..].len >= 1;
 
-    /// Returns the next raw argument without converting it to token
-    pub fn nextRawArg(self: *Tokenizer) ?[]const u8 {
-        if (self.cursor >= self.args.len) return null;
-        defer self.cursor += 1;
-
-        return @as([]const u8, self.args[self.cursor]);
-    }
-
-    /// Returns the next non option argument
-    pub fn nextNonOptionArg(self: *Tokenizer) ?[]const u8 {
-        var next_token = self.nextToken() orelse return null;
-
-        if (next_token.isShortOption() or next_token.isLongOption()) {
-            self.cursor -= 1;
-            return null;
-        }
-
-        return next_token.value;
-    }
-
-    pub fn restArg(self: *Tokenizer) ?[]const [:0]const u8 {
-        if (self.cursor >= self.args.len) return null;
-        defer self.cursor = self.args.len;
-
-        return self.args[self.cursor..];
-    }
-
-    fn processLongOption(arg: []const u8) Token {
-        const option = mem.trimLeft(u8, arg, "--");
-        const tag: Token.Tag = blk: {
-            if (mem.indexOfScalar(u8, option, '=')) |eql_pos| {
-                const has_value = (eql_pos + 1) < option.len;
-
+            if (has_options_combined) {
                 if (has_value) {
-                    break :blk .long_option_with_value;
+                    break :kind .short_options_with_value;
                 } else {
-                    break :blk .long_option_with_empty_value;
-                }
-            }
-            break :blk .long_option;
-        };
-
-        return Token.init(option, tag);
-    }
-
-    fn processShortOption(arg: []const u8) Token {
-        const option = mem.trimLeft(u8, arg, "-");
-        const tag: Token.Tag = blk: {
-            if (mem.indexOfScalar(u8, option, '=')) |eql_pos| {
-                const is_options = (option[0..eql_pos]).len > 1;
-                const has_value = (eql_pos + 1) < option.len;
-
-                if (is_options) {
-                    if (has_value) {
-                        break :blk .short_options_with_value;
-                    } else {
-                        break :blk .short_options_with_empty_value;
-                    }
-                } else {
-                    if (has_value) {
-                        break :blk .short_option_with_value;
-                    } else {
-                        break :blk .short_option_with_empty_value;
-                    }
+                    break :kind .short_options_with_empty_value;
                 }
             } else {
-                // has tail?
-                // for ex: -fgh or -fvalue
-                if (option.len > 1) break :blk .short_option_with_tail;
+                if (has_value) {
+                    break :kind .short_option_with_value;
+                } else {
+                    break :kind .short_option_with_empty_value;
+                }
             }
-            break :blk .short_option;
-        };
+        } else {
+            // has tail?
+            // for e.x.: -fgh or -fvalue
+            if (option.len > 1) break :kind .short_option_with_tail;
+        }
+        break :kind .short_option;
+    };
 
-        return Token.init(option, tag);
-    }
-};
+    return Token.init(option, kind);
+}
 
-fn expectToken(actual_token: Token, expected_tag: Token.Tag) !void {
-    std.testing.expect(actual_token.tag == expected_tag) catch |e| {
+fn expectToken(actual_token: Token, expected_tag: Token.Kind) !void {
+    std.testing.expect(actual_token.kind == expected_tag) catch |e| {
         std.debug.print("\nexpected '{s}', found '{s}'\n", .{
-            @tagName(expected_tag), @tagName(actual_token.tag),
+            @tagName(expected_tag), @tagName(actual_token.kind),
         });
         return e;
     };
