@@ -488,6 +488,10 @@ fn parseSubcommand(self: *Parser, subcommand_name: []const u8) Error!ParseResult
         return Error.UnrecognizedCommand;
     };
 
+    // Get the subcommand argv from tokenizer or initilize an empty argv so
+    // that we could still invoke the parser and let it handle remaining.
+    const argv = self.tokenizer.remainingArgs() orelse &[_][:0]const u8{};
+
     // Create the full name of the current subcommand.
     var abs_name = ParseResult.ParsedCommand.AbsoluteName.init(self.allocator);
     // First append the parent command name.
@@ -496,24 +500,6 @@ fn parseSubcommand(self: *Parser, subcommand_name: []const u8) Error!ParseResult
     try abs_name.append(' ');
     // Then append the current subcommand name.
     try abs_name.appendSlice(subcmd.name);
-
-    const argv = self.tokenizer.remainingArgs() orelse {
-        // Argv is empty.
-        //
-        // Return an error if positional argument is required.
-        if (subcmd.hasProperty(.positional_arg_required)) {
-            self.error_context = ParseErrorContext{
-                .command_argument_not_provided = subcommand_name,
-            };
-            return Error.CommandArgumentNotProvided;
-        }
-
-        // Otherwise return an empty result.
-        var parse_result = ParseResult.init(self.allocator, subcmd);
-        // But before, set the subcommand full name.
-        parse_result.command.absolute_name = abs_name;
-        return parse_result;
-    };
 
     var parser = Parser.init(self.allocator, argv, subcmd);
     // Set the subcommand full name in its parser.
