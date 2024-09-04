@@ -175,17 +175,17 @@ pub const MatchedArgValue = union(enum) {
     many: std.ArrayList([]const u8),
 
     /// Creates an empty type of value.
-    pub fn none() MatchedArgValue {
+    pub fn initNone() MatchedArgValue {
         return .none;
     }
 
     /// Creates a single type of value.
-    pub fn single(value: []const u8) MatchedArgValue {
+    pub fn initSingle(value: []const u8) MatchedArgValue {
         return .{ .single = value };
     }
 
     /// Creates a multiple type of value.
-    pub fn many(values: std.ArrayList([]const u8)) MatchedArgValue {
+    pub fn initMany(values: std.ArrayList([]const u8)) MatchedArgValue {
         return .{ .many = values };
     }
 

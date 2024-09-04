@@ -168,7 +168,7 @@ fn parsePositionalArg(self: *Parser, token: *const Token, current_position: usiz
             // And then consume rest from the tokenizer.
             try self.consumeValuesTillNextOption(arg, &values);
             // Set the argument value and return.
-            return self.insertMatchedArg(arg, MatchedArgValue.many(values));
+            return self.insertMatchedArg(arg, MatchedArgValue.initMany(values));
         }
 
         // Fallback to single value and let the rest code handle it.
@@ -184,7 +184,7 @@ fn parsePositionalArg(self: *Parser, token: *const Token, current_position: usiz
         // Either we have set it as fallback or user set it intentionally.
         if (num_values == 1) {
             try self.validateValue(arg, given_value);
-            try self.insertMatchedArg(arg, MatchedArgValue.single(given_value));
+            try self.insertMatchedArg(arg, MatchedArgValue.initSingle(given_value));
             // Redundant. Destory it and return.
             values.deinit();
             return;
@@ -200,7 +200,7 @@ fn parsePositionalArg(self: *Parser, token: *const Token, current_position: usiz
         try self.consumeNValues(arg, new_num_values, &values);
     }
 
-    return self.insertMatchedArg(arg, MatchedArgValue.many(values));
+    return self.insertMatchedArg(arg, MatchedArgValue.initMany(values));
 }
 
 /// Parses the given token as a short argument.
@@ -224,7 +224,7 @@ fn parseShortOption(self: *Parser, token: AbstractOptionToken) Error!void {
 
         if (!arg.hasProperty(.takes_value)) {
             if (!option_iter.optionContainsValue()) {
-                try self.insertMatchedArg(arg, MatchedArgValue.none());
+                try self.insertMatchedArg(arg, MatchedArgValue.initNone());
                 continue;
             }
 
@@ -276,7 +276,7 @@ fn parseLongOption(self: *Parser, token: AbstractOptionToken) Error!void {
         return Error.UnexpectedArgumentValue;
     } else {
         // Doesn't take value; not provided.
-        return self.insertMatchedArg(arg, MatchedArgValue.none());
+        return self.insertMatchedArg(arg, MatchedArgValue.initNone());
     }
 }
 
@@ -315,7 +315,7 @@ fn parseOptionValue(
         // If an arg can contain as much as values we can consume, proceed it.
         if (arg.hasProperty(.takes_multiple_values)) {
             try self.consumeValuesTillNextOption(arg, &values);
-            return MatchedArgValue.many(values);
+            return MatchedArgValue.initMany(values);
         }
         // Arg is expecting finite number of values but neither the min/max nor
         // the `.takes_multiple_values` property is set therefore use the sensible
@@ -339,28 +339,28 @@ fn parseOptionValue(
         const value = values.pop();
         values.deinit();
         // No verification required here as it is already verfied while consuming.
-        return MatchedArgValue.single(value);
+        return MatchedArgValue.initSingle(value);
     }
 
     // Doesn't allows, return as-is.
-    return MatchedArgValue.many(values);
+    return MatchedArgValue.initMany(values);
 }
 
-/// Converts the given value to `MatchedArgValue.many` type, if the given arg
-/// has set `values_delimeter`; otherwise returns it as a `MatchedArgValue.single`.
+/// Converts the given value to `MatchedArgValue.initMany` type, if the given arg
+/// has set `values_delimeter`; otherwise returns it as a `MatchedArgValue.initSingle`.
 fn splitValueIfPossible(
     self: *Parser,
     arg: *const Arg,
     value: []const u8,
 ) Error!MatchedArgValue {
     const values_separator = arg.values_delimiter orelse {
-        return MatchedArgValue.single(value);
+        return MatchedArgValue.initSingle(value);
     };
 
     // If the given value doesn't contains separator return it immediately so
     // that we don't perform any unnecessary operation.
     if (!mem.containsAtLeast(u8, value, 1, values_separator)) {
-        return MatchedArgValue.single(value);
+        return MatchedArgValue.initSingle(value);
     }
 
     // Proceed to split.
@@ -372,7 +372,7 @@ fn splitValueIfPossible(
         try self.validateAndAppendValue(arg, subvalue, &values);
     }
 
-    return MatchedArgValue.many(values);
+    return MatchedArgValue.initMany(values);
 }
 
 /// Consumes `n` values from the `argv` into the given `list`.
