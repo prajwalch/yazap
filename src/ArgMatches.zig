@@ -30,10 +30,7 @@ parse_result: *const ParseResult,
 /// }
 /// ```
 pub fn containsArgs(self: *const ArgMatches) bool {
-    // zig fmt: off
-        return (self.parse_result.getArgs().count() >= 1
-                or self.parse_result.getSubcommandParseResult() != null);
-        // zig fmt: on
+    return !self.parse_result.isEmpty();
 }
 
 /// Checks whether an option, positional argument or subcommand with the

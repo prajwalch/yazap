@@ -98,6 +98,11 @@ pub fn getSubcommandParseResult(self: *const ParseResult) ?*const ParseResult {
     return @as(?*const ParseResult, self.subcmd_parse_result);
 }
 
+/// Returns `true` if the result is completely empty.
+pub fn isEmpty(self: *const ParseResult) bool {
+    return (self.getArgs().count() == 0) and (self.getSubcommandParseResult() == null);
+}
+
 /// Inserts a given name-value pair into the map.
 ///
 /// If the map already contains the name, value will be updated and if it didn't
