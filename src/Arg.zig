@@ -1,13 +1,26 @@
-//! Represents the argument for your command.
-
+//! Represents the argument of the command.
 const Arg = @This();
 const std = @import("std");
 
+/// A default character used to separate multiple values when passed in a single
+/// string.
+///
+/// For e.x.: `myapp arg val1,val2,val3`.
 const DEFAULT_VALUES_DELIMITER = ",";
 
+/// Represents the different parsing behaviors that can be applied to an
+/// argument.
 pub const Property = enum {
+    /// Specifies that a value must be provided for the argument.
     takes_value,
+    /// Allows any number of values to be passed for the argument.
+    ///
+    /// **NOTE:** `.takes_value` must be set for this to be work.
     takes_multiple_values,
+    /// Allows an empty value to passed for the argument.
+    ///
+    /// **NOTE:** Empty value are only captured when passed with an attached
+    /// syntax (`-f=`).
     allow_empty_value,
 };
 
@@ -21,8 +34,6 @@ valid_values: ?[]const []const u8 = null,
 values_delimiter: ?[]const u8 = null,
 index: ?usize = null,
 properties: std.EnumSet(Property) = .{},
-
-// # Constructors
 
 /// Creates a new instance of `Arg`.
 ///
@@ -47,7 +58,7 @@ pub fn init(name: []const u8, description: ?[]const u8) Arg {
 ///
 /// The index starts with **1** and determines the position of the positional
 /// argument relative to other positional arguments. By default, the index is
-/// assigned based on the order in which the arguments are defined.
+/// assigned based on the order in which the arguments are given to `Command.addArg`.
 ///
 /// ## Examples
 ///
@@ -57,15 +68,24 @@ pub fn init(name: []const u8, description: ?[]const u8) Arg {
 ///
 /// var root = app.rootCommand();
 ///
-/// // Order dependent
+/// // Order dependent.
 /// try root.addArg(Arg.positional("FIRST", null, null));
 /// try root.addArg(Arg.positional("SECOND", null, null));
 /// try root.addArg(Arg.positional("THIRD", null, null));
 ///
-/// // Equivalent but order independent
+/// // Equivalent but order independent.
 /// try root.addArg(Arg.positional("THIRD", null, 3));
 /// try root.addArg(Arg.positional("SECOND", null, 2));
 /// try root.addArg(Arg.positional("FIRST", null, 1));
+///
+/// // Hybrid approach.
+/// const third = Arg.positional("THIRD", null, null);
+/// const second = Arg.positional("SECOND", null, null);
+/// const first = Arg.positional("FIRST", null, null);
+///
+/// try root.addArg(first);
+/// try root.addArg(second);
+/// try root.addArg(third);
 /// ```
 pub fn positional(name: []const u8, description: ?[]const u8, index: ?usize) Arg {
     var arg = Arg.init(name, description);
@@ -133,7 +153,10 @@ pub fn singleValueOption(name: []const u8, short_name: ?u8, description: ?[]cons
 ///
 /// var root = app.rootCommand();
 /// try root.addArg(Arg.singleValueOptionWithValidValues(
-///     "output", 'o', "Output format", &[_][]const u8 { "json", "xml", "csv" },
+///     "output",
+///     'o',
+///     "Output format",
+///     &[_][]const u8 { "json", "xml", "csv" },
 /// ));
 /// ```
 pub fn singleValueOptionWithValidValues(
@@ -207,8 +230,6 @@ pub fn multiValuesOptionWithValidValues(
     arg.setValidValues(values);
     return arg;
 }
-
-// # Setters
 
 /// Sets the short name of the argument.
 ///
@@ -338,8 +359,9 @@ pub fn setValidValues(self: *Arg, values: []const []const u8) void {
 }
 
 /// Sets the default separator for values of an argument.
-/// This separator is used when multiple values are provided for the argument.
-/// Use `Arg.setValuesDelimiter` to set a custom delimiter.
+///
+/// This separator is used when multiple values are provided for the argument
+/// in a single string. Use `Arg.setValuesDelimiter` to set a custom delimiter.
 ///
 /// ## Examples
 ///
@@ -365,7 +387,9 @@ pub fn setDefaultValuesDelimiter(self: *Arg) void {
 }
 
 /// Sets the given separator for values of an argument.
-/// This separator is used when multiple values are provided for the argument.
+///
+/// This separator is used when multiple values are provided for the argument
+/// in a single string.
 ///
 /// ## Examples
 ///
@@ -394,7 +418,7 @@ pub fn setValuesDelimiter(self: *Arg, delimiter: []const u8) void {
 ///
 /// The index determines the position of the positional argument relative to
 /// other positional arguments. By default, the index is assigned based on the
-/// order in which the arguments are defined.
+/// order in which the arguments are given to `Command.addArg`.
 ///
 /// **NOTE:** Setting index for options will have no effect and will be sliently
 /// ignored.
@@ -479,7 +503,7 @@ pub fn setProperty(self: *Arg, property: Property) void {
 /// var root = app.rootCommand();
 ///
 /// var name = Arg.singleValueOption("name", 'n', "Person to greet");
-/// // Convert to boolean option by removing the `takes_value` property
+/// // Convert to boolean option by removing the `takes_value` property.
 /// name.unsetProperty(.takes_value);
 ///
 /// try root.addArg(name);
@@ -488,12 +512,9 @@ pub fn unsetProperty(self: *Arg, property: Property) void {
     return self.properties.remove(property);
 }
 
-// # Getters
-
 /// Checks if the argument has a specific property set.
 ///
-/// **NOTE:** This function is primarily used by the parser to determine the
-/// presence of a specific property for the argument.
+/// **NOTE:** This function is primarily used by the parser.
 ///
 /// ## Examples
 ///
@@ -506,6 +527,7 @@ pub fn unsetProperty(self: *Arg, property: Property) void {
 /// var root = app.rootCommand();
 ///
 /// var name = Arg.singleValueOption("name", 'n', "Person to greet");
+///
 /// if (name.hasProperty(.takes_value)) {
 ///     std.debug.print("The `name` flag takes a value", .{});
 /// }
@@ -521,8 +543,7 @@ pub fn hasProperty(self: *const Arg, property: Property) bool {
 /// **NOTE:** If `Arg.valid_values` is not set through `Arg.setValidValues`,
 /// this function always returns true.
 ///
-/// **NOTE:** This function is primarily used by the parser to determine whether
-/// the value present on the command line is valid or not.
+/// **NOTE:** This function is primarily used by the parser.
 ///
 /// ## Examples
 ///
@@ -532,10 +553,13 @@ pub fn hasProperty(self: *const Arg, property: Property) bool {
 ///
 /// var root = app.rootCommand();
 /// var color = Arg.singleValueOptionWithValidValues(
-///     "color", 'c', "Your Favorite Color", &[_]const u8 { "blue", "red" },
+///     "color",
+///     'c',
+///     "Your Favorite Color",
+///     &[_]const u8 { "blue", "red" },
 /// );
 ///
-/// if (color.isValidValue("foo")) {
+/// if (!color.isValidValue("foo")) {
 ///     std.debug.print("Foo is not a valid color");
 /// }
 ///
