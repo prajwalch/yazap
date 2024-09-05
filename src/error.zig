@@ -1,9 +1,8 @@
 /// An error type returned by the standard allocator.
 pub const AllocatorError = @import("std").mem.Allocator.Error;
 
-const parse_error = @import("./parser/parse_error.zig");
-pub const ParseError = parse_error.ParseError;
-pub const PrintError = parse_error.PrintError;
+pub const ParseError = @import("./parser/ParseError.zig").Error;
+pub const PrintError = @import("./parser/ParseError.zig").PrintError;
 /// An Error returned by the `std.process.argsAlloc`.
 ///
 /// `std.process.argsAlloc` is used to obtain the command line arguments from

@@ -8,7 +8,6 @@ const Command = @import("Command.zig");
 const HelpMessageWriter = @import("HelpMessageWriter.zig");
 const Parser = @import("parser/Parser.zig");
 const ParseResult = @import("./parser/ParseResult.zig");
-const parse_error = @import("./parser/parse_error.zig");
 const YazapError = @import("error.zig").YazapError;
 
 /// Top level allocator for the entire library.
@@ -131,7 +130,7 @@ pub fn parseFrom(self: *App, argv: []const [:0]const u8) YazapError!(*const ArgM
     const parse_result = parser.parse() catch |err| {
         // Don't clutter the test result with error messages.
         if (!builtin.is_test) {
-            try parse_error.print(parser.error_context);
+            try parser.perror.print();
         }
         return err;
     };

@@ -9,16 +9,14 @@ const Command = @import("../Command.zig");
 const Tokenizer = @import("../Tokenizer.zig");
 const Token = Tokenizer.Token;
 
+const ParseError = @import("ParseError.zig");
 const ParseResult = @import("ParseResult.zig");
 const MatchedArgValue = ParseResult.MatchedArgValue;
-const parse_error = @import("parse_error.zig");
-const ParseError = parse_error.ParseError;
-const ParseErrorContext = parse_error.ParseErrorContext;
 const AbstractOptionToken = @import("AbstractOptionToken.zig");
 const ShortOptionIterator = @import("ShortOptionIterator.zig");
 
 /// A complete error type returned by the parser.
-pub const Error = ParseError || Allocator.Error;
+pub const Error = ParseError.Error || Allocator.Error;
 
 allocator: Allocator,
 /// A tokenizer to tokenize the `argv`.
@@ -27,8 +25,8 @@ tokenizer: Tokenizer,
 command: *const Command,
 /// Core structure to store parse result.
 result: ParseResult,
-/// Custom error payload or context tracer.
-error_context: ParseErrorContext,
+/// Core structure to store parsing error.
+perror: ParseError,
 
 /// Initilizes the parser with a given source of arguments for a given command.
 pub fn init(allocator: Allocator, argv: []const [:0]const u8, command: *const Command) Parser {
@@ -37,7 +35,7 @@ pub fn init(allocator: Allocator, argv: []const [:0]const u8, command: *const Co
         .tokenizer = Tokenizer.init(argv),
         .command = command,
         .result = ParseResult.init(allocator, command),
-        .error_context = .none,
+        .perror = ParseError.init(),
     };
 }
 
@@ -91,10 +89,10 @@ pub fn parse(self: *Parser) Error!ParseResult {
     const is_pos_arg_required = self.command.hasProperty(.positional_arg_required);
 
     if (takes_pos_args and is_pos_arg_required and !parsed_all_pos_args) {
-        self.error_context = ParseErrorContext{
-            .command_argument_not_provided = self.command.name,
-        };
-        return Error.CommandArgumentNotProvided;
+        self.perror.setContext(ParseError.Context{
+            .positional_argument_not_provided = self.command.name,
+        });
+        return Error.PositionalArgumentNotProvided;
     }
 
     // 2. Validate the requirement of subcommand.
@@ -102,10 +100,10 @@ pub fn parse(self: *Parser) Error!ParseResult {
     const parsed_any_subcommand = self.result.getSubcommandParseResult() != null;
 
     if (is_subcommand_required and !parsed_any_subcommand) {
-        self.error_context = ParseErrorContext{
-            .command_subcommand_not_provided = self.command.name,
-        };
-        return Error.CommandSubcommandNotProvided;
+        self.perror.setContext(ParseError.Context{
+            .subcommand_not_provided = self.command.name,
+        });
+        return Error.SubcommandNotProvided;
     }
 
     // 3. Options are not required to validate here as they are validate during
@@ -216,10 +214,10 @@ fn parseShortOption(self: *Parser, token: AbstractOptionToken) Error!void {
 
     while (option_iter.next()) |option| {
         const arg = self.command.findShortOption(option) orelse {
-            self.error_context = ParseErrorContext{
-                .unrecognized_argument = option_iter.getCurrentOptionAsStr(),
-            };
-            return Error.UnrecognizedArgument;
+            self.perror.setContext(ParseError.Context{
+                .unrecognized_option = option_iter.getCurrentOptionAsStr(),
+            });
+            return Error.UnrecognizedOption;
         };
 
         if (!arg.hasProperty(.takes_value)) {
@@ -228,11 +226,11 @@ fn parseShortOption(self: *Parser, token: AbstractOptionToken) Error!void {
                 continue;
             }
 
-            self.error_context = ParseErrorContext{ .unexpected_argument_value = .{
-                .argument = arg.name,
+            self.perror.setContext(ParseError.Context{ .unexpected_option_value = .{
+                .option = ParseError.Option.init(arg.short_name, arg.long_name),
                 .value = option_iter.getOptionValue().?,
-            } };
-            return Error.UnexpectedArgumentValue;
+            } });
+            return Error.UnexpectedOptionValue;
         }
 
         const attached_value = option_iter.getOptionValue() orelse blk: {
@@ -257,8 +255,10 @@ fn parseShortOption(self: *Parser, token: AbstractOptionToken) Error!void {
 /// Returns an error if validation fails or requirements doesn't meet.
 fn parseLongOption(self: *Parser, token: AbstractOptionToken) Error!void {
     const arg = self.command.findLongOption(token.optionName()) orelse {
-        self.error_context = ParseErrorContext{ .unrecognized_argument = token.optionName() };
-        return Error.UnrecognizedArgument;
+        self.perror.setContext(ParseError.Context{
+            .unrecognized_option = token.optionName(),
+        });
+        return Error.UnrecognizedOption;
     };
 
     if (arg.hasProperty(.takes_value)) {
@@ -267,13 +267,11 @@ fn parseLongOption(self: *Parser, token: AbstractOptionToken) Error!void {
         return self.insertMatchedArg(arg, value);
     } else if (token.optionAttachedValue()) |attached_value| {
         // Doesn't take value; but provided.
-        self.error_context = ParseErrorContext{
-            .unexpected_argument_value = .{
-                .argument = token.optionName(),
-                .value = attached_value,
-            },
-        };
-        return Error.UnexpectedArgumentValue;
+        self.perror.setContext(ParseError.Context{ .unexpected_option_value = .{
+            .option = ParseError.Option.init(arg.short_name, arg.long_name),
+            .value = attached_value,
+        } });
+        return Error.UnexpectedOptionValue;
     } else {
         // Doesn't take value; not provided.
         return self.insertMatchedArg(arg, MatchedArgValue.initNone());
@@ -328,8 +326,11 @@ fn parseOptionValue(
         try self.consumeNValues(arg, num_values, &values);
 
         if (num_values != 0 and values.items.len == 0) {
-            self.error_context = ParseErrorContext{ .argument_value_not_provided = arg.name };
-            return Error.ArgumentValueNotProvided;
+            self.perror.setContext(ParseError.Context{ .option_value_not_provided = .{
+                .option = ParseError.Option.init(arg.short_name, arg.long_name),
+                .valid_values = arg.valid_values,
+            } });
+            return Error.OptionValueNotProvided;
         }
     }
 
@@ -442,17 +443,20 @@ fn insertMatchedArg(self: *Parser, arg: *const Arg, value: MatchedArgValue) Erro
 /// Returns an error if validation fails.
 fn validateValue(self: *Parser, arg: *const Arg, value: []const u8) Error!void {
     if (value.len == 0 and !arg.hasProperty(.allow_empty_value)) {
-        self.error_context = ParseErrorContext{ .empty_argument_value = arg.name };
-        return Error.EmptyArgumentValue;
+        self.perror.setContext(ParseError.Context{ .empty_option_value = .{
+            .option = ParseError.Option.init(arg.short_name, arg.long_name),
+            .valid_values = arg.valid_values,
+        } });
+        return Error.EmptyOptionValue;
     }
 
     if (!arg.isValidValue(value)) {
-        self.error_context = ParseErrorContext{ .invalid_argument_value = .{
-            .argument = arg.name,
+        self.perror.setContext(ParseError.Context{ .invalid_option_value = .{
+            .option = ParseError.Option.init(arg.short_name, arg.long_name),
             .invalid_value = value,
             .valid_values = arg.valid_values.?,
-        } };
-        return Error.InvalidArgumentValue;
+        } });
+        return Error.InvalidOptionValue;
     }
 }
 
@@ -463,28 +467,30 @@ fn validateValue(self: *Parser, arg: *const Arg, value: []const u8) Error!void {
 /// Returns an error if validation fails.
 fn validateValuesCount(self: *Parser, arg: *const Arg, count: usize) Error!void {
     if ((arg.min_values != null) and (count < arg.min_values.?)) {
-        self.error_context = ParseErrorContext{ .too_few_argument_value = .{
-            .argument = arg.name,
+        self.perror.setContext(ParseError.Context{ .too_few_option_value = .{
+            .option = ParseError.Option.init(arg.short_name, arg.long_name),
             .num_values = count,
             .min_values = arg.min_values.?,
-        } };
-        return Error.TooFewArgumentValue;
+        } });
+        return Error.TooFewOptionValue;
     }
 
     if ((arg.max_values != null) and (count > arg.max_values.?)) {
-        self.error_context = ParseErrorContext{ .too_many_argument_value = .{
-            .argument = arg.name,
+        self.perror.setContext(ParseError.Context{ .too_many_option_value = .{
+            .option = ParseError.Option.init(arg.short_name, arg.long_name),
             .num_values = count,
             .max_values = arg.max_values.?,
-        } };
-        return Error.TooManyArgumentValue;
+        } });
+        return Error.TooManyOptionValue;
     }
 }
 
 /// Parses the specified named subcommand.
 fn parseSubcommand(self: *Parser, subcommand_name: []const u8) Error!ParseResult {
     const subcmd = self.command.findSubcommand(subcommand_name) orelse {
-        self.error_context = ParseErrorContext{ .unrecognized_command = subcommand_name };
+        self.perror.setContext(ParseError.Context{
+            .unrecognized_command = subcommand_name,
+        });
         return Error.UnrecognizedCommand;
     };
 
@@ -509,7 +515,7 @@ fn parseSubcommand(self: *Parser, subcommand_name: []const u8) Error!ParseResult
         return parse_result;
     } else |err| {
         // Bubble up the error context.
-        self.error_context = parser.error_context;
+        self.perror.setContext(parser.perror.context);
         return err;
     }
 }

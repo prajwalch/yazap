@@ -117,7 +117,7 @@ test "command that takes required positional arg" {
 
     try app.rootCommand().addArg(Arg.positional("PATH", null, null));
     app.rootCommand().setProperty(.positional_arg_required);
-    try testing.expectError(error.CommandArgumentNotProvided, app.parseFrom(&.{}));
+    try testing.expectError(error.PositionalArgumentNotProvided, app.parseFrom(&.{}));
 
     app.deinit();
 }
@@ -128,7 +128,7 @@ test "command requires subcommand" {
 
     try app.rootCommand().addSubcommand(app.createCommand("init", null));
     app.rootCommand().setProperty(.subcommand_required);
-    try testing.expectError(error.CommandSubcommandNotProvided, app.parseFrom(&.{}));
+    try testing.expectError(error.SubcommandNotProvided, app.parseFrom(&.{}));
 
     app.deinit();
 }
@@ -138,7 +138,7 @@ test "Option that does not takes value" {
     errdefer app.deinit();
 
     try app.rootCommand().addArg(Arg.booleanOption("version", 'v', null));
-    try testing.expectError(error.UnexpectedArgumentValue, app.parseFrom(&.{"-v=13"}));
+    try testing.expectError(error.UnexpectedOptionValue, app.parseFrom(&.{"-v=13"}));
 
     app.deinit();
 }
@@ -148,7 +148,7 @@ test "Option that takes single value" {
     errdefer app.deinit();
 
     try app.rootCommand().addArg(Arg.singleValueOption("output", 'o', null));
-    try testing.expectError(error.ArgumentValueNotProvided, app.parseFrom(&.{"-o"}));
+    try testing.expectError(error.OptionValueNotProvided, app.parseFrom(&.{"-o"}));
 
     app.deinit();
 }
@@ -235,7 +235,7 @@ test "Option with min values" {
     srcs.setProperty(.takes_value);
 
     try app.rootCommand().addArg(srcs);
-    try testing.expectError(error.TooFewArgumentValue, app.parseFrom(&.{"-s=f1"}));
+    try testing.expectError(error.TooFewOptionValue, app.parseFrom(&.{"-s=f1"}));
 
     app.deinit();
 }
@@ -248,7 +248,7 @@ test "Option with max values" {
     srcs.setValuesDelimiter(":");
 
     try app.rootCommand().addArg(srcs);
-    try testing.expectError(error.TooManyArgumentValue, app.parseFrom(
+    try testing.expectError(error.TooManyOptionValue, app.parseFrom(
         &.{"-s=f1:f2:f3:f4:f5:f6"},
     ));
 
@@ -267,7 +267,7 @@ test "Option with allowed values" {
     );
 
     try app.rootCommand().addArg(stdd);
-    try testing.expectError(error.InvalidArgumentValue, app.parseFrom(&.{"--std=c100"}));
+    try testing.expectError(error.InvalidOptionValue, app.parseFrom(&.{"--std=c100"}));
 
     app.deinit();
 }
