@@ -5,7 +5,7 @@ const Arg = @import("Arg.zig");
 
 const mem = std.mem;
 const Allocator = mem.Allocator;
-const ArrayListUnmanaged = std.ArrayListUnmanaged;
+const ArrayList = std.ArrayList;
 const EnumSet = std.EnumSet;
 
 /// Represents the different parsing behaviors that can be applied to a
@@ -20,9 +20,9 @@ pub const Property = enum {
 allocator: Allocator,
 name: []const u8,
 description: ?[]const u8,
-positional_args: ArrayListUnmanaged(Arg) = .{},
-options: ArrayListUnmanaged(Arg) = .{},
-subcommands: ArrayListUnmanaged(Command) = .{},
+positional_args: ArrayList(Arg),
+options: ArrayList(Arg),
+subcommands: ArrayList(Command),
 properties: EnumSet(Property) = .{},
 
 /// Creates a new instance of `Command`.
@@ -44,18 +44,21 @@ pub fn init(allocator: Allocator, name: []const u8, description: ?[]const u8) Co
         .allocator = allocator,
         .name = name,
         .description = description,
+        .positional_args = ArrayList(Arg).init(allocator),
+        .options = ArrayList(Arg).init(allocator),
+        .subcommands = ArrayList(Command).init(allocator),
     };
 }
 
 /// Deallocates all allocated memory.
 pub fn deinit(self: *Command) void {
-    self.positional_args.deinit(self.allocator);
-    self.options.deinit(self.allocator);
+    self.positional_args.deinit();
+    self.options.deinit();
 
     for (self.subcommands.items) |*subcommand| {
         subcommand.deinit();
     }
-    self.subcommands.deinit(self.allocator);
+    self.subcommands.deinit();
 }
 
 /// Appends the new argument to the list of arguments.
@@ -93,7 +96,7 @@ pub fn addArg(self: *Command, arg: Arg) !void {
 
     // If its not a positional argument, append it and return.
     if (!is_positional) {
-        return self.options.append(self.allocator, new_arg);
+        return self.options.append(new_arg);
     }
 
     // Its a positonal argument.
@@ -108,14 +111,14 @@ pub fn addArg(self: *Command, arg: Arg) !void {
             }
         }
         // No duplication; append it.
-        return self.positional_args.append(self.allocator, new_arg);
+        return self.positional_args.append(new_arg);
     }
 
     // If the position is not set and if its the first positional argument
     // then return immediately by giving it first position.
     if (self.positional_args.items.len == 0) {
         new_arg.setIndex(1);
-        return self.positional_args.append(self.allocator, new_arg);
+        return self.positional_args.append(new_arg);
     }
 
     // If the position is not set and if its not first positional argument
@@ -131,7 +134,7 @@ pub fn addArg(self: *Command, arg: Arg) !void {
     }
 
     new_arg.setIndex(current_position + 1);
-    try self.positional_args.append(self.allocator, new_arg);
+    try self.positional_args.append(new_arg);
 }
 
 /// Appends multiple arguments to the list of arguments.
@@ -174,7 +177,7 @@ pub fn addArgs(self: *Command, args: []const Arg) !void {
 /// try root.addSubcommand(test);
 /// ```
 pub fn addSubcommand(self: *Command, new_subcommand: Command) !void {
-    return self.subcommands.append(self.allocator, new_subcommand);
+    return self.subcommands.append(new_subcommand);
 }
 
 /// Appends multiple subcommands to the list of subcommands.
