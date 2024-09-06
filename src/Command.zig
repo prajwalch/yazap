@@ -11,6 +11,8 @@ const EnumSet = std.EnumSet;
 /// Represents the different parsing behaviors that can be applied to a
 /// command.
 pub const Property = enum {
+    /// Configures to display help when arguments are not provided.
+    help_on_empty_args,
     /// Specifies that a positional argument must be provided for the command.
     positional_arg_required,
     /// Specifies that a subcommand must be provided for the command.

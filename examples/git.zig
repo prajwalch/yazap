@@ -10,6 +10,7 @@ pub fn main() anyerror!void {
     defer app.deinit();
 
     var git = app.rootCommand();
+    git.setProperty(.help_on_empty_args);
 
     // git init
     try git.addSubcommand(app.createCommand(

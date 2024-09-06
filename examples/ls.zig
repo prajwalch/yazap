@@ -11,8 +11,11 @@ pub fn main() anyerror!void {
     defer app.deinit();
 
     var myls = app.rootCommand();
+    myls.setProperty(.help_on_empty_args);
 
     var update_cmd = app.createCommand("update", "Update the app or check for new updates");
+    update_cmd.setProperty(.help_on_empty_args);
+
     try update_cmd.addArg(Arg.booleanOption("check-only", null, "Only check for new update"));
     try update_cmd.addArg(Arg.singleValueOptionWithValidValues(
         "branch",
@@ -20,7 +23,6 @@ pub fn main() anyerror!void {
         "Branch to update",
         &[_][]const u8{ "stable", "nightly", "beta" },
     ));
-
     try myls.addSubcommand(update_cmd);
 
     try myls.addArg(Arg.booleanOption("all", 'a', "Don't ignore the hidden directories"));
@@ -39,10 +41,12 @@ pub fn main() anyerror!void {
 
     const matches = try app.parseProcess();
 
-    if (!(matches.containsArgs())) {
-        try app.displayHelp();
-        return;
-    }
+    // Use `.help_on_empty_args` property.
+    //
+    // if (!(matches.containsArgs())) {
+    //     try app.displayHelp();
+    //     return;
+    // }
 
     if (matches.containsArg("version")) {
         log.info("v0.1.0", .{});
@@ -50,10 +54,12 @@ pub fn main() anyerror!void {
     }
 
     if (matches.subcommandMatches("update")) |update_cmd_matches| {
-        if (!(update_cmd_matches.containsArgs())) {
-            try app.displaySubcommandHelp();
-            return;
-        }
+        // Use `.help_on_empty_args` property.
+        //
+        // if (!(update_cmd_matches.containsArgs())) {
+        //     try app.displaySubcommandHelp();
+        //     return;
+        // }
 
         if (update_cmd_matches.containsArg("check-only")) {
             std.log.info("Check and report new update", .{});

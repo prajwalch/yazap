@@ -83,6 +83,11 @@ pub fn parse(self: *Parser) Error!ParseResult {
         try self.result.setSubcommandParseResult(try self.parseSubcommand(token.value));
     }
 
+    if (self.result.isEmpty() and self.command.hasProperty(.help_on_empty_args)) {
+        self.result.setContainsHelpFlag(true);
+        return self.result;
+    }
+
     // Validate requirements of command.
     //
     // 1. Validate the requirement of positional arguments.

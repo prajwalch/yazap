@@ -10,6 +10,7 @@ pub fn main() anyerror!void {
     defer app.deinit();
 
     var touch = app.rootCommand();
+    touch.setProperty(.help_on_empty_args);
 
     try touch.addArg(Arg.positional("FILE_NAME", null, null));
     touch.setProperty(.positional_arg_required);
