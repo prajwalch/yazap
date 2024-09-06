@@ -25,15 +25,15 @@ pub fn main() anyerror!void {
 
     try myls.addArg(Arg.booleanOption("all", 'a', "Don't ignore the hidden directories"));
     try myls.addArg(Arg.booleanOption("recursive", 'R', "List subdirectories recursively"));
-    try myls.addArg(Arg.booleanOption("one-line", '1', null));
-    try myls.addArg(Arg.booleanOption("size", 's', null));
-    try myls.addArg(Arg.booleanOption("version", null, null));
-    try myls.addArg(Arg.singleValueOption("ignore", 'I', null));
-    try myls.addArg(Arg.singleValueOption("hide", null, null));
+    try myls.addArg(Arg.booleanOption("one-line", '1', "List each entries in new line"));
+    try myls.addArg(Arg.booleanOption("size", 's', "Display file size"));
+    try myls.addArg(Arg.booleanOption("version", null, "Display program version number"));
+    try myls.addArg(Arg.singleValueOption("ignore", 'I', "Ignore the given pattern"));
+    try myls.addArg(Arg.singleValueOption("hide", null, "Don't display hidden entries"));
     try myls.addArg(Arg.singleValueOptionWithValidValues(
         "color",
         'C',
-        null,
+        "Enable or disable output color",
         &[_][]const u8{ "always", "auto", "never" },
     ));
 
