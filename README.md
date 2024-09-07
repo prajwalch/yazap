@@ -21,24 +21,24 @@ Inspired by [clap-rs](https://github.com/clap-rs/clap) and [andrewrk/ziglang: sr
 
 ## Key Features:
 
-- **Options (short and long)**:
+- [**Options (short and long)**](#adding-arguments):
   - Providing values with `=`, space, or no space (`-f=value`, `-f value`, `-fvalue`).
   - Supports delimiter-separated values with `=` or without space (`-f=v1,v2,v3`, `-fv1:v2:v3`).
   - Chaining multiple short boolean options (`-abc`).
   - Providing values and delimiter-separated values for multiple chained options using `=` (`-abc=val`, `-abc=v1,v2,v3`).
   - Specifying an option multiple times (`-a 1 -a 2 -a 3`).
 
-- **Positional arguments**:
+- [**Positional arguments**](#adding-arguments):
   - Supports positional arguments alongside options for more flexible command-line inputs. For example:
     - `command <positional_arg>`
     - `command <arg1> <arg2> <arg3>`
 
-- **Nested subcommands**:
+- [**Nested subcommands**](#adding-subcommands):
   - Organize commands with nested subcommands for a structured command-line interface. For example:
     - `command subcommand`
     - `command subcommand subsubcommand`
 
-- **Automatic help handling and generation**
+- [**Automatic help handling and generation**](#handling-help)
 
 - **Custom Argument definition**:
   - Define custom [Argument](https://prajwalch.github.io/yazap/#A;lib:Arg) types for specific application requirements.
@@ -110,11 +110,11 @@ defer app.deinit();
 
 The [App](https://prajwalch.github.io/yazap/#A;lib:App) itself does not provide
 any methods for adding arguments to your command. Its main purpose is to
-initialize the library, invoke the parser, and free associated structures. To
-add arguments and subcommands, you'll need to use the root command.
+initialize the library, to invoke the parser with necessary arguments, and to
+deinitilize the library. 
 
-To obtain the root command, simply call `App.rootCommand()`, which returns a
-pointer to it. This gives you access to the core command of your application.
+To add arguments and subcommands, acquire the root command by calling `App.rootCommand()`.
+This gives you access to the core command of your application by returning a pointer to it.
 
 ```zig
 var myls = app.rootCommand();
@@ -122,9 +122,9 @@ var myls = app.rootCommand();
 
 ### Adding Arguments
 
-Once you have obtained the root command, you can proceed to arguments using the
-provided methods in the `Command`. For a complete list of available methods,
-refer to the [Command API](https://prajwalch.github.io/yazap/#A;lib:Command)
+Once you have obtained the root command, you can proceed to add arguments and
+[subcommands](#adding-subcommands) using the methods available in the `Command`. For a complete list
+of available methods, refer to the [Command API](https://prajwalch.github.io/yazap/#A;lib:Command)
 documentation.
 
 ```zig
@@ -138,11 +138,12 @@ try myls.addArg(Arg.booleanOption("version", null, null));
 try myls.addArg(Arg.singleValueOption("ignore", 'I', null));
 try myls.addArg(Arg.singleValueOption("hide", null, null));
 
-try myls.addArg(Arg.singleValueOptionWithValidValues("color", 'C', null, &[_][]const u8{
-    "always",
-    "auto",
-    "never",
-}));
+try myls.addArg(Arg.singleValueOptionWithValidValues(
+    "color",
+    'C',
+    "Colorize the output",
+    &[_][]const u8{ "always", "auto", "never" }
+));
 ```
 
 Alternatively, you can add multiple arguments in a single function call using
@@ -160,40 +161,42 @@ try myls.addArgs(&[_]Arg {
     Arg.singleValueOption("ignore", 'I', null),
     Arg.singleValueOption("hide", null, null),
 
-    Arg.singleValueOptionWithValidValues("color", 'C', null, &[_][]const u8{
-        "always",
-        "auto",
-        "never",
-    }),
+    Arg.singleValueOptionWithValidValues(
+        "color",
+        'C',
+        "Colorize the output",
+        &[_][]const u8{ "always", "auto", "never" }
+    ),
 });
 ```
 
 ### Adding Subcommands
 
-To create a subcommand, you can use `App.createCommand("name", "optional description")`.
-Once you have created a subcommand, you can add its own arguments and subcommands
-just like the root command then add it to the root command using `Command.addSubcommand()`.
+To create a subcommand, use `App.createCommand("name", "optional description")` then
+you can add its own arguments and subcommands just like the root command. After you
+finish adding arguments, add it as a root subcommand by calling `Command.addSubcommand()`.
 
 ```zig
 var update_cmd = app.createCommand("update", "Update the app or check for new updates");
 try update_cmd.addArg(Arg.booleanOption("check-only", null, "Only check for new update"));
-try update_cmd.addArg(Arg.singleValueOptionWithValidValues("branch", 'b', "Branch to update", &[_][]const u8{ 
-    "stable",
-    "nightly",
-    "beta"
-}));
+try update_cmd.addArg(Arg.singleValueOptionWithValidValues(
+    "branch",
+    'b',
+    "Branch to update",
+    &[_][]const u8{ "stable", "nightly", "beta" }
+));
 
 try myls.addSubcommand(update_cmd);
 ```
 
 ### Parsing Arguments
 
-Once you have finished adding arguments and subcommands, call `App.parseProcess()`
-to start the parsing process. This function internally utilizes
+Once you have finished adding all the arguments and subcommands, call `App.parseProcess()`
+to start parsing the arguments given to the current process. This function internally utilizes
 [`std.process.argsAlloc`](https://ziglang.org/documentation/master/std/#A;std:process.argsAlloc)
-to obtain the raw arguments. Alternatively, you can use `App.parseFrom()` and
-pass your own raw arguments, which can be useful during testing. Both functions
-return a constant pointer to [`ArgMatches`](https://prajwalch.github.io/yazap/#A;lib:ArgMatches).
+to obtain the raw arguments. Alternatively, you can use `App.parseFrom()` and pass your own raw 
+arguments, which can be useful during testing. Both functions return a constant pointer to
+[`ArgMatches`](https://prajwalch.github.io/yazap/#A;lib:ArgMatches).
 
 ```zig
 const matches = try app.parseProcess();
@@ -246,17 +249,20 @@ if (matches.containsArg("color")) {
 
 ### Handling Help
 
-The handling of `-h` or `--help` option and the automatic display of usage
-information are taken care by the library. However, if you need to manually
-display the help information, there are two functions available: `App.displayHelp()`
-and `App.displaySubcommandHelp()`.
+`-h` and `--h` flag is globally available to all the commands and subcommands and 
+handled automatically when they are passed to command line. However, if you need to
+manually display the help message there are currently two ways to do it.
 
-- `App.displayHelp()` prints the help information for the root command,
-providing a simple way to display the overall usage and description of the
-application.
+#### 1. By invoking `App.displayHelp()` and `App.displaySubcommandHelp()`.
 
-- On the other hand, `App.displaySubcommandHelp()` queries the sepecifed
-subcommand on the command line and displays its specific usage information.
+`App.displayHelp()` displays the help message for the root command and
+other hand `App.displaySubcommandHelp()` displays the help message for the
+active subcommand.
+
+For e.x.: if `gh auth login` were passed then `App.displayHelp()` would display the
+help for `gh` and `App.displaySubcommandHelp()` display the help for `login`.
+
+Example:
 
 ```zig
 if (!matches.containsArgs()) {
@@ -270,6 +276,31 @@ if (matches.subcommandMatches("update")) |update_cmd_matches| {
         return;
     }
 }
+```
+
+#### 2. By setting `.help_on_empty_args` property to the command.
+
+The `.help_on_empty_args` property which when set to a command, it instructs
+the handler to display the help message for that particular command when arguments
+are not provided. It behaves exactly like the code shown at the example above.
+
+Example:
+
+```zig
+var app = App.init(allocator, "myls", "My custom ls");
+defer app.deinit();
+
+var myls = app.rootCommand();
+myls.setProperty(.help_on_empty_args);
+
+var update_cmd = app.createCommand("update", "Update the app or check for new updates");
+update_cmd.setProperty(.help_on_empty_args);
+
+try myls.addSubcommand(update_cmd);
+
+const matches = try myls.parseProcess();
+
+// --snip--
 ```
 
 ### Putting it All Together
@@ -288,14 +319,18 @@ pub fn main() anyerror!void {
     defer app.deinit();
 
     var myls = app.rootCommand();
+    myls.setProperty(.help_on_empty_args);
 
     var update_cmd = app.createCommand("update", "Update the app or check for new updates");
+    update_cmd.setProperty(.help_on_empty_args);
+
     try update_cmd.addArg(Arg.booleanOption("check-only", null, "Only check for new update"));
-    try update_cmd.addArg(Arg.singleValueOptionWithValidValues("branch", 'b', "Branch to update", &[_][]const u8{
-        "stable",
-        "nightly",
-        "beta"
-    }));
+    try update_cmd.addArg(Arg.singleValueOptionWithValidValues(
+        "branch",
+        'b',
+        "Branch to update",
+        &[_][]const u8{ "stable", "nightly", "beta" }
+    ));
 
     try myls.addSubcommand(update_cmd);
 
@@ -308,18 +343,14 @@ pub fn main() anyerror!void {
     try myls.addArg(Arg.singleValueOption("ignore", 'I', null));
     try myls.addArg(Arg.singleValueOption("hide", null, null));
 
-    try myls.addArg(Arg.singleValueOptionWithValidValues("color", 'C', null, &[_][]const u8{
-        "always",
-        "auto",
-        "never",
-    }));
+    try myls.addArg(Arg.singleValueOptionWithValidValues(
+        "color",
+        'C',
+        "Colorize the output",
+        &[_][]const u8{ "always", "auto", "never" }
+    ));
 
     const matches = try app.parseProcess();
-    
-    if (!matches.containsArgs()) {
-        try app.displayHelp();
-        return;
-    }
 
     if (matches.containsArg("version")) {
         log.info("v0.1.0", .{});
@@ -332,15 +363,11 @@ pub fn main() anyerror!void {
     }
 
     if (matches.subcommandMatches("update")) |update_cmd_matches| {
-        if (!update_cmd_matches.containsArgs()) {
-            try app.displaySubcommandHelp();
-            return;
-        }
-
         if (update_cmd_matches.containsArg("check-only")) {
             std.log.info("Check and report new update", .{});
             return;
         }
+
         if (update_cmd_matches.getSingleValue("branch")) |branch| {
             std.log.info("Branch to update: {s}", .{branch});
             return;
