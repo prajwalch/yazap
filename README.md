@@ -249,7 +249,7 @@ if (matches.containsArg("color")) {
 
 ### Handling Help
 
-`-h` and `--h` flag are globally available to all the commands and subcommands and 
+`-h` and `--h` flag is globally available to all the commands and subcommands and 
 handled automatically when they are passed to command line. However, if you need to
 manually display the help message there are currently two ways to do it.
 
