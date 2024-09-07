@@ -30,8 +30,15 @@ pub fn main() anyerror!void {
     try myls.addArg(Arg.booleanOption("one-line", '1', "List each entries in new line"));
     try myls.addArg(Arg.booleanOption("size", 's', "Display file size"));
     try myls.addArg(Arg.booleanOption("version", null, "Display program version number"));
-    try myls.addArg(Arg.singleValueOption("ignore", 'I', "Ignore the given pattern"));
-    try myls.addArg(Arg.singleValueOption("hide", null, "Don't display hidden entries"));
+
+    var ignore_opt = Arg.singleValueOption("ignore", 'I', "Ignore the given pattern");
+    ignore_opt.setValuePlaceholder("PATTERN");
+
+    var hide_opt = Arg.singleValueOption("hide", null, "Don't display hidden entries");
+    hide_opt.setValuePlaceholder("PATTERN");
+
+    try myls.addArg(ignore_opt);
+    try myls.addArg(hide_opt);
     try myls.addArg(Arg.singleValueOptionWithValidValues(
         "color",
         'C',

@@ -30,6 +30,7 @@ short_name: ?u8 = null,
 long_name: ?[]const u8 = null,
 min_values: ?usize = null,
 max_values: ?usize = null,
+value_placeholder: ?[]const u8 = null,
 valid_values: ?[]const []const u8 = null,
 values_delimiter: ?[]const u8 = null,
 index: ?usize = null,
@@ -319,6 +320,42 @@ pub fn setMinValues(self: *Arg, num: usize) void {
 /// ```
 pub fn setMaxValues(self: *Arg, num: usize) void {
     self.max_values = if (num >= 1) num else null;
+}
+
+/// Sets the placeholder for the argument value in the help message.
+///
+/// The placeholder is only used to display on help message and by default,
+/// if the placeholder is not set, argument name is displayed.
+///
+/// **NOTE:** If the argument doesn't take value, placeholder is ignored.
+///
+/// ## Examples
+///
+/// ```zig
+/// var app = App.init(allocator, "myapp", "My app description");
+/// defer app.deinit();
+///
+/// var root = app.rootCommand();
+///
+/// var arg = Arg.singleValueOption("exp-time", 't', "Set max expire time")
+/// arg.setValuePlaceholder("SECS");
+///
+/// root.addArg(arg);
+/// ```
+///
+/// On command line:
+///
+/// ```sh
+/// $ myapp -h
+/// My app description
+///
+/// Usage: myapp [OPTIONS]
+///
+/// Options:
+///     -t, --exp-time=<SECS>       Set max expire time
+/// ```
+pub fn setValuePlaceholder(self: *Arg, placeholder: []const u8) void {
+    self.value_placeholder = placeholder;
 }
 
 /// Sets the valid values for an argument.

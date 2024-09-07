@@ -141,34 +141,12 @@ fn writeOption(self: *HelpMessageWriter, option: *const Arg) !void {
 
     // Value name.
     if (option.hasProperty(.takes_value)) {
-        try signature_writer.writeByte('=');
+        // Otherwise print the option actual value name or option name itself.
+        const value_name = option.value_placeholder orelse option.name;
+        try signature_writer.print("=<{s}>", .{value_name});
 
-        // If the option has set acceptable values, print that.
-        if (option.valid_values) |valid_values| {
-            try signature_writer.writeByte('<');
-
-            for (valid_values, 0..) |value, idx| {
-                try signature_writer.print("{s}", .{value});
-
-                // Don't print `|` at first and last.
-                //
-                // For e.x.: --format=<json|toml|yaml>
-                if (idx < (valid_values.len - 1)) {
-                    try signature_writer.writeByte('|');
-                }
-            }
-
-            try signature_writer.writeByte('>');
-        } else {
-            // Otherwise print the option name.
-            //
-            // TODO: Add new `Arg.placeholderName()` to display correct value
-            //       or placeholder name. For e.x.: --time=SECS.
-            try signature_writer.print("<{s}>", .{option.name});
-
-            if (option.hasProperty(.takes_multiple_values)) {
-                try signature_writer.writeAll("...");
-            }
+        if (option.hasProperty(.takes_multiple_values)) {
+            try signature_writer.writeAll("...");
         }
     }
 
@@ -178,6 +156,11 @@ fn writeOption(self: *HelpMessageWriter, option: *const Arg) !void {
     // Then write the description.
     if (option.description) |description| {
         try writer.print("\t\t{s}", .{description});
+
+        if (option.valid_values) |valid_values| {
+            // FIXME: Remove this hacky implmentation
+            try writer.print("\n\t\t\t\t\t\t values: {s}", .{valid_values});
+        }
     }
 
     // End of line.
