@@ -7,7 +7,7 @@ const ArgMatches = @import("ArgMatches.zig");
 const Command = @import("Command.zig");
 const HelpMessageWriter = @import("HelpMessageWriter.zig");
 const Parser = @import("parser/Parser.zig");
-const ParseResult = @import("./parser/ParseResult.zig");
+const ParseResult = @import("parser/ParseResult.zig");
 const YazapError = @import("error.zig").YazapError;
 
 /// Top level allocator for the entire library.

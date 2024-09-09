@@ -2,7 +2,7 @@
 const ArgMatches = @This();
 
 const std = @import("std");
-const ParseResult = @import("./parser/ParseResult.zig");
+const ParseResult = @import("parser/ParseResult.zig");
 
 /// Core structure containing parse result.
 ///

@@ -4,7 +4,7 @@ const std = @import("std");
 const Arg = @import("Arg.zig");
 const BufferedWriter = std.io.BufferedWriter(4096, std.fs.File.Writer);
 const Command = @import("Command.zig");
-const ParsedCommand = @import("./parser/ParseResult.zig").ParsedCommand;
+const ParsedCommand = @import("parser/ParseResult.zig").ParsedCommand;
 
 /// Used to store the help content before writing into the `stderr`.
 buffer: BufferedWriter,
