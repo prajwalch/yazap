@@ -3,7 +3,7 @@
 
 # Yazap
 
-> **Note:**
+> [!NOTE]
 > This branch targets the [master branch of zig](https://github.com/ziglang/zig).
 > See [supported versions table](#supported-versions-table).
 
@@ -41,7 +41,7 @@ Inspired by [clap-rs](https://github.com/clap-rs/clap) and [andrewrk/ziglang: sr
 - [**Automatic help handling and generation**](#handling-help)
 
 - **Custom Argument definition**:
-  - Define custom [Argument](https://prajwalch.github.io/yazap/#A;lib:Arg) types for specific application requirements.
+  - Define custom [Argument](/src/Arg.zig) types for specific application requirements.
 
 ## Limitations:
 
@@ -68,6 +68,9 @@ exe.root_module.addImport("yazap", yazap.module("yazap"));
 
 For detailed and comprehensive documentation, please visit
 [this link](https://prajwalch.github.io/yazap/).
+
+> [!WARNING]
+> The documentation site is currently broken, in the meantime check out the source code.
 
 ## Building and Running Examples
 
@@ -97,7 +100,7 @@ $ ./zig-out/bin/example_name --help
 ### Initializing Yazap
 
 To begin using `yazap`, the first step is to create an instance of 
-[App](https://prajwalch.github.io/yazap/#A;lib:App) by calling
+[App](/src/App.zig) by calling
 `App.init(allocator, "Your app name", "optional description")`. This function
 internally creates a root command for your application.
 
@@ -108,7 +111,7 @@ defer app.deinit();
 
 ### Obtaining the Root Command
 
-The [App](https://prajwalch.github.io/yazap/#A;lib:App) itself does not provide
+The [App](/src/App.zig) itself does not provide
 any methods for adding arguments to your command. Its main purpose is to
 initialize the library, to invoke the parser with necessary arguments, and to
 deinitilize the library. 
@@ -124,7 +127,7 @@ var myls = app.rootCommand();
 
 Once you have obtained the root command, you can proceed to add arguments and
 [subcommands](#adding-subcommands) using the methods available in the `Command`. For a complete list
-of available methods, refer to the [Command API](https://prajwalch.github.io/yazap/#A;lib:Command)
+of available methods, refer to the [Command API](/src/Command.zig)
 documentation.
 
 ```zig
@@ -217,7 +220,7 @@ to start parsing the arguments given to the current process. This function inter
 [`std.process.argsAlloc`](https://ziglang.org/documentation/master/std/#A;std:process.argsAlloc)
 to obtain the raw arguments. Alternatively, you can use `App.parseFrom()` and pass your own raw 
 arguments, which can be useful during testing. Both functions returns
-[`ArgMatches`](https://prajwalch.github.io/yazap/#A;lib:ArgMatches).
+[`ArgMatches`](/src/ArgMatches.zig).
 
 ```zig
 const matches = try app.parseProcess();
