@@ -78,6 +78,7 @@ pub fn createCommand(self: *App, name: []const u8, description: ?[]const u8) Com
 /// defer app.deinit();
 ///
 /// var root = app.rootCommand();
+/// root.addProperty(.help_on_empty_args);
 ///
 /// // Add arguments and subcommands using `root`.
 /// ```
