@@ -126,21 +126,23 @@ pub fn parseProcess(self: *App) YazapError!(*const ArgMatches) {
 /// ```
 pub fn parseFrom(self: *App, argv: []const [:0]const u8) YazapError!(*const ArgMatches) {
     var parser = Parser.init(self.allocator, argv, self.rootCommand());
-
-    const parse_result = parser.parse() catch |err| {
+    var result = parser.parse() catch |err| {
         // Don't clutter the test result with error messages.
         if (!builtin.is_test) {
             try parser.perror.print();
         }
         return err;
     };
-    if (parse_result.getCommandContainingHelpFlag()) |command| {
+
+    if (result.getCommandContainingHelpFlag()) |command| {
         var help_writer = HelpMessageWriter.init(command);
         try help_writer.write();
+        result.deinit();
         self.deinit();
         std.process.exit(0);
     }
-    self.parse_result = parse_result;
+
+    self.parse_result = result;
     self.arg_matches = ArgMatches{ .parse_result = &self.parse_result.? };
     return &self.arg_matches.?;
 }
