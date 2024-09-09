@@ -85,7 +85,7 @@ pub fn rootCommand(self: *App) *Command {
     return &self.command;
 }
 
-/// Parses the command line arguments.
+/// Parses the arguments passed to the current process.
 ///
 /// ## Examples
 ///
