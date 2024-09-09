@@ -170,6 +170,27 @@ try myls.addArgs(&[_]Arg {
 });
 ```
 
+Note that for any option that accepts value, you can set its value placeholder to display in the
+help message. If you don't set the placeholder, the option name will be displayed by default.
+
+```zig
+var ignore_opt = Arg.singleValueOption("ignore", 'I', null);
+ignore_opt.setValuePlaceholder("PATTERN");
+
+var hide_opt = Arg.singleValueOption("hide", null, null);
+hide_opt.setValuesPlaceholder("PATTERN");
+
+var color_opt = Arg.singleValueOptionWithValidValues(
+    "color",
+    'C',
+    "Colorize the output",
+    &[_][]const u8{ "always", "auto", "never" }
+);
+color_opt.setValuePlaceholder("WHEN");
+
+try myls.addArgs(&[_]Arg{ ignore_opt, hide_opt, color_opt });
+```
+
 ### Adding Subcommands
 
 To create a subcommand, use `App.createCommand("name", "optional description")` then
@@ -320,7 +341,33 @@ pub fn main() anyerror!void {
 
     var myls = app.rootCommand();
     myls.setProperty(.help_on_empty_args);
+    
+    try myls.addArgs(&[_]Arg {
+        Arg.positional("FILE", null, null),
+        Arg.booleanOption("all", 'a', "Don't ignore the hidden directories"),
+        Arg.booleanOption("recursive", 'R', "List subdirectories recursively"),
+        Arg.booleanOption("one-line", '1', null),
+        Arg.booleanOption("size", 's', null),
+        Arg.booleanOption("version", null, null),
+    });
+    
+    var ignore_opt = Arg.singleValueOption("ignore", 'I', null);
+    ignore_opt.setValuePlaceholder("PATTERN");
 
+    var hide_opt = Arg.singleValueOption("hide", null, null);
+    hide_opt.setValuesPlaceholder("PATTERN");
+
+    var color_opt = Arg.singleValueOptionWithValidValues(
+        "color",
+        'C',
+        "Colorize the output",
+        &[_][]const u8{ "always", "auto", "never" }
+    );
+    color_opt.setValuePlaceholder("WHEN");
+
+    try myls.addArgs(&[_]Arg{ ignore_opt, hide_opt, color_opt });
+
+    // Update subcommand.
     var update_cmd = app.createCommand("update", "Update the app or check for new updates");
     update_cmd.setProperty(.help_on_empty_args);
 
@@ -334,22 +381,7 @@ pub fn main() anyerror!void {
 
     try myls.addSubcommand(update_cmd);
 
-    try myls.addArg(Arg.positional("FILE", null, null));
-    try myls.addArg(Arg.booleanOption("all", 'a', "Don't ignore the hidden directories"));
-    try myls.addArg(Arg.booleanOption("recursive", 'R', "List subdirectories recursively"));
-    try myls.addArg(Arg.booleanOption("one-line", '1', null));
-    try myls.addArg(Arg.booleanOption("size", 's', null));
-    try myls.addArg(Arg.booleanOption("version", null, null));
-    try myls.addArg(Arg.singleValueOption("ignore", 'I', null));
-    try myls.addArg(Arg.singleValueOption("hide", null, null));
-
-    try myls.addArg(Arg.singleValueOptionWithValidValues(
-        "color",
-        'C',
-        "Colorize the output",
-        &[_][]const u8{ "always", "auto", "never" }
-    ));
-
+    // Get the parse result.
     const matches = try app.parseProcess();
 
     if (matches.containsArg("version")) {
