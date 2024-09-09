@@ -18,11 +18,6 @@ command: Command,
 ///
 /// It is not intended for direct access, use `ArgMatches` instead.
 parse_result: ?ParseResult = null,
-/// Public container to query parse result.
-///
-/// It cab be access directly but for the most part `parseFrom` or `parseProcess`
-/// returns it.
-arg_matches: ?ArgMatches = null,
 /// Raw buffer containing command line arguments.
 process_args: ?[]const [:0]u8 = null,
 
@@ -58,7 +53,6 @@ pub fn deinit(self: *App) void {
     }
     self.command.deinit();
     self.parse_result = null;
-    self.arg_matches = null;
 }
 
 /// Creates a new `Command` with given name and optional description.
@@ -105,7 +99,7 @@ pub fn rootCommand(self: *App) *Command {
 ///
 /// const matches = try app.parseProcess();
 /// ```
-pub fn parseProcess(self: *App) YazapError!(*const ArgMatches) {
+pub fn parseProcess(self: *App) YazapError!ArgMatches {
     self.process_args = try std.process.argsAlloc(self.allocator);
     return self.parseFrom(self.process_args.?[1..]);
 }
@@ -124,7 +118,7 @@ pub fn parseProcess(self: *App) YazapError!(*const ArgMatches) {
 ///
 /// const matches = try app.parseFrom(&.{ "arg1", "--some-option" "subcmd" });
 /// ```
-pub fn parseFrom(self: *App, argv: []const [:0]const u8) YazapError!(*const ArgMatches) {
+pub fn parseFrom(self: *App, argv: []const [:0]const u8) YazapError!ArgMatches {
     var parser = Parser.init(self.allocator, argv, self.rootCommand());
     var result = parser.parse() catch |err| {
         // Don't clutter the test result with error messages.
@@ -143,8 +137,7 @@ pub fn parseFrom(self: *App, argv: []const [:0]const u8) YazapError!(*const ArgM
     }
 
     self.parse_result = result;
-    self.arg_matches = ArgMatches{ .parse_result = &self.parse_result.? };
-    return &self.arg_matches.?;
+    return ArgMatches{ .parse_result = &self.parse_result.? };
 }
 
 /// Displays the overall usage and description of the application.

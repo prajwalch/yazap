@@ -195,7 +195,7 @@ Once you have finished adding all the arguments and subcommands, call `App.parse
 to start parsing the arguments given to the current process. This function internally utilizes
 [`std.process.argsAlloc`](https://ziglang.org/documentation/master/std/#A;std:process.argsAlloc)
 to obtain the raw arguments. Alternatively, you can use `App.parseFrom()` and pass your own raw 
-arguments, which can be useful during testing. Both functions return a constant pointer to
+arguments, which can be useful during testing. Both functions returns
 [`ArgMatches`](https://prajwalch.github.io/yazap/#A;lib:ArgMatches).
 
 ```zig
