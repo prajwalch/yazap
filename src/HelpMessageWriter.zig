@@ -6,6 +6,11 @@ const BufferedWriter = std.io.BufferedWriter(4096, std.fs.File.Writer);
 const Command = @import("Command.zig");
 const ParsedCommand = @import("parser/ParseResult.zig").ParsedCommand;
 
+/// The total number of space to use before any argument name.
+///
+/// **NOTE**: The argument refers to any argument not just the `Arg`.
+const SIGNATURE_LEFT_PADDING = 4;
+
 /// Used to store the help content before writing into the `stderr`.
 buffer: BufferedWriter,
 /// Command whose help to write.
@@ -68,50 +73,27 @@ fn writeHeader(self: *HelpMessageWriter) !void {
 }
 
 fn writePositionalArgs(self: *HelpMessageWriter) !void {
-    const command = self.command.deref();
-
-    if (command.countPositionalArgs() == 0) {
+    if (self.command.deref().countPositionalArgs() == 0) {
         return;
     }
 
     const writer = self.buffer.writer();
     try writer.writeAll("\nArgs:\n");
 
-    for (command.positional_args.items) |arg| {
+    for (self.command.deref().positional_args.items) |arg| {
         var line = Line.init();
-        try line.signature.addPadding(4);
-
-        _ = try line.signature.writeAll(arg.name);
+        try line.signature.addPadding(SIGNATURE_LEFT_PADDING);
+        try line.signature.writeAll(arg.name);
 
         if (arg.hasProperty(.takes_multiple_values)) {
-            _ = try line.signature.writeAll("...");
+            try line.signature.writeAll("...");
         }
 
-        const description = arg.description orelse {
-            // Description is not set for the current arg.
-            //
-            // Print current line and move to the next iteration.
-            try writer.print("{}", .{line});
-            continue;
-        };
-
-        if (try line.description.writeAll(description)) |remaining_description| {
-            // Description is too long to fit into the current line.
-            //
-            // First print the current line and then print the remaining
-            // description at the new line but just below the first half description.
-            try writer.print("{}", .{line});
-
-            var new_line = Line.init();
-            _ = try new_line.description.writeAll(remaining_description);
-
-            try writer.print("{}", .{new_line});
-        } else {
-            // Description fits into the current line.
-            //
-            // Print the current line.
-            try writer.print("{}", .{line});
+        if (arg.description) |description| {
+            try line.description.writeAll(description);
         }
+
+        try writer.print("{}", .{line});
     }
 }
 
@@ -124,41 +106,14 @@ fn writeSubcommands(self: *HelpMessageWriter) !void {
     try writer.writeAll("\nCommands:\n");
 
     for (self.command.deref().subcommands.items) |*subcommand| {
-        try self.writeSubcommand(subcommand);
-    }
-}
+        var line = Line.init();
+        try line.signature.addPadding(SIGNATURE_LEFT_PADDING);
+        try line.signature.writeAll(subcommand.name);
 
-fn writeSubcommand(self: *HelpMessageWriter, subcommand: *const Command) !void {
-    const writer = self.buffer.writer();
+        if (subcommand.description) |description| {
+            try line.description.writeAll(description);
+        }
 
-    var line = Line.init();
-    try line.signature.addPadding(4);
-
-    _ = try line.signature.writeAll(subcommand.name);
-
-    const description = subcommand.description orelse {
-        // Description is not set for the current subcommand.
-        //
-        // Print the current line and return.
-        try writer.print("{}", .{line});
-        return;
-    };
-
-    if (try line.description.writeAll(description)) |remaining_description| {
-        // Description is too long to fit into the current line.
-        //
-        // First print the current line and then use the new line to print
-        // the remaining description.
-        try writer.print("{}", .{line});
-
-        var new_line = Line.init();
-        _ = try new_line.description.writeAll(remaining_description);
-
-        try writer.print("{}", .{new_line});
-    } else {
-        // Description fits into the current line.
-        //
-        // Print the current line and move to the next iteration.
         try writer.print("{}", .{line});
     }
 }
@@ -183,7 +138,7 @@ fn writeOption(self: *HelpMessageWriter, option: *const Arg) !void {
     const writer = self.buffer.writer();
 
     var line = Line.init();
-    try line.signature.addPadding(4);
+    try line.signature.addPadding(SIGNATURE_LEFT_PADDING);
 
     // Option name.
     if (option.short_name != null and option.long_name != null) {
@@ -194,46 +149,37 @@ fn writeOption(self: *HelpMessageWriter, option: *const Arg) !void {
     } else if (option.short_name) |short_name| {
         try line.signature.print("-{c}", .{short_name});
     } else if (option.long_name) |long_name| {
-        try line.signature.addPadding(4);
+        // When short name are not present extra padding is required to align
+        // all the long name in the same line.
+        //
+        //     -t, --time
+        //         --max-time
+        //
+        // If not set then it will look like:
+        //
+        //     -t, --time
+        //     --max-time
+        try line.signature.addPadding(SIGNATURE_LEFT_PADDING);
         try line.signature.print("--{s}", .{long_name});
     }
 
     // Value name.
     if (option.hasProperty(.takes_value)) {
-        // Otherwise print the option actual value name or option name itself.
+        // Print the option actual value name or option name itself.
         const value_name = option.value_placeholder orelse option.name;
         try line.signature.print("=<{s}>", .{value_name});
 
         if (option.hasProperty(.takes_multiple_values)) {
-            _ = try line.signature.writeAll("...");
+            try line.signature.writeAll("...");
         }
     }
 
-    const description = option.description orelse {
-        // Description is not set for the option.
-        //
-        // Print the current line and return.
-        try writer.print("{}", .{line});
-        return;
-    };
-
-    if (try line.description.writeAll(description)) |remaining_description| {
-        // Description is too long to fit into the current line.
-        //
-        // First print the current line and then print the remaining
-        // description at the new line but just below the first half description.
-        try writer.print("{}", .{line});
-
-        var new_line = Line.init();
-        _ = try new_line.description.writeAll(remaining_description);
-
-        try writer.print("{}", .{new_line});
-    } else {
-        // Description fits into the current line.
-        //
-        // Print the current line.
-        try writer.print("{}", .{line});
+    // Description.
+    if (option.description) |description| {
+        try line.description.writeAll(description);
     }
+
+    try writer.print("{}", .{line});
 
     // If the acceptable values are set for the option, print them at the new
     // line but just below the description.
@@ -264,21 +210,26 @@ fn getBraces(required: bool) struct { u8, u8 } {
 /// As compere to regular line composed of single row and multiple columns,
 /// this line is composed of two blocks named `signature` and `description`.
 const Line = struct {
-    /// A name of either subcommand or option including its value placeholder
-    /// (`-t, --time=<SECS>`).
+    /// Represents the name of an argument.
+    ///
+    /// **NOTE**: The argument refers to any argument not just the `Arg`.
     const Signature = LineBlock(30);
-    /// A description of either subcommand or option.
-    const Description = LineBlock(70);
+    /// Represents the description of an argument.
+    ///
+    /// **NOTE**: The argument refers to any argument not just the `Arg`.
+    const Description = LineBlock(80);
 
+    /// Argument name or any other text which can be part of name.
+    ///
+    /// For e.x.: Option name and its value placeholder makes up single
+    /// signature (`-t, --time=<SECS>`).
     signature: Signature,
+    /// Argument description.
     description: Description,
 
     /// Creates an empty line.
     pub fn init() Line {
-        return Line{
-            .signature = Signature.init(),
-            .description = Description.init(),
-        };
+        return Line{ .signature = Signature.init(), .description = Description.init() };
     }
 
     pub fn format(
@@ -291,10 +242,31 @@ const Line = struct {
         _ = options;
 
         try writer.print("{}{}\n", .{ self.signature, self.description });
+
+        const overflow_signature = self.signature.overflowContent();
+        const overflow_description = self.description.overflowContent();
+
+        if (overflow_signature == null and overflow_description == null) {
+            return;
+        }
+
+        var new_line = Line.init();
+
+        if (overflow_signature) |signature| {
+            // FIXME: Inherit padding from the previous line (i.e. this line).
+            try new_line.signature.addPadding(SIGNATURE_LEFT_PADDING);
+            try new_line.signature.writeAll(signature);
+        }
+
+        if (overflow_description) |description| {
+            try new_line.description.writeAll(description);
+        }
+
+        try writer.print("{}", .{new_line});
     }
 };
 
-/// Represents a certain space within a `Line` where signature or description
+/// Represents a discrete area within a `Line` where signature or description
 /// can be write.
 fn LineBlock(comptime width: usize) type {
     return struct {
@@ -303,52 +275,57 @@ fn LineBlock(comptime width: usize) type {
         /// A character used for padding.
         const WHITE_SPACE = ' ';
         /// Used for storing content.
-        const Buffer = std.BoundedArray(u8, width);
+        const Array = std.BoundedArray(u8, width);
 
-        buffer: Buffer,
+        /// Content that fits into this block.
+        visible_content: Array = Array{},
+        /// Content that cannot fit into this block.
+        overflow_content: Array = Array{},
 
-        /// Creates an empty block having given width.
-        pub fn init() Self {
-            return Self{
-                .buffer = Self.Buffer.init(0) catch unreachable,
-            };
+        /// Creates an empty block.
+        fn init() Self {
+            return Self{};
         }
 
-        /// Adds the `n` number of padding.
-        pub fn addPadding(self: *Self, n: usize) !void {
-            if (n > self.buffer.capacity()) {
-                return self.addPadding(self.remainingSpaceLength());
-            }
-            try self.buffer.appendNTimes(Self.WHITE_SPACE, n);
+        /// Returns the length of remaining space.
+        fn remainingSpaceLength(self: *const Self) usize {
+            return width - self.visible_content.len;
         }
 
-        /// Appends the content based on the given format.
-        fn print(self: *Self, comptime fmt: []const u8, args: anytype) !void {
-            try self.buffer.writer().print(fmt, args);
-        }
-
-        /// Appends the given content as-is.
-        ///
-        /// If the content is too long to fit into the buffer it writes upto to
-        /// the writable portion and returns the remaining.
-        pub fn writeAll(self: *Self, content: []const u8) !(?[]const u8) {
-            const remaining_space_length = self.remainingSpaceLength();
-
-            if (content.len <= remaining_space_length) {
-                try self.buffer.appendSlice(content);
+        /// Returns the content that cannot fit into this block, if any.
+        fn overflowContent(self: *const Self) ?[]const u8 {
+            if (self.overflow_content.len == 0) {
                 return null;
             }
-
-            const writeable_portion = content[0..remaining_space_length];
-            const remaining_portion = content[remaining_space_length..];
-            _ = try self.writeAll(writeable_portion);
-
-            return remaining_portion;
+            return self.overflow_content.constSlice();
         }
 
-        /// Returns the total length of remaining space into the buffer.
-        fn remainingSpaceLength(self: *const Self) usize {
-            return self.buffer.capacity() - self.buffer.len;
+        /// Adds the `n` number of space.
+        fn addPadding(self: *Self, n: usize) !void {
+            if (n > width) {
+                return self.addPadding(self.remainingSpaceLength());
+            }
+            try self.visible_content.appendNTimes(Self.WHITE_SPACE, n);
+        }
+
+        /// Appends the string based on the given format.
+        fn print(self: *Self, comptime fmt: []const u8, args: anytype) !void {
+            try self.visible_content.writer().print(fmt, args);
+        }
+
+        /// Appends the given string as-is.
+        fn writeAll(self: *Self, string: []const u8) !void {
+            const remaining_space_length = self.remainingSpaceLength();
+
+            if (string.len <= remaining_space_length) {
+                return self.visible_content.appendSlice(string);
+            }
+
+            const writeable_portion = string[0..remaining_space_length];
+            try self.writeAll(writeable_portion);
+
+            const remaining_portion = string[remaining_space_length..];
+            try self.overflow_content.appendSlice(remaining_portion);
         }
 
         pub fn format(
@@ -366,7 +343,7 @@ fn LineBlock(comptime width: usize) type {
                 mut_self.addPadding(mut_self.remainingSpaceLength()) catch {};
             }
 
-            try writer.writeAll(mut_self.buffer.constSlice());
+            try writer.writeAll(mut_self.visible_content.constSlice());
         }
     };
 }
