@@ -177,13 +177,18 @@ fn writeOption(self: *HelpMessageWriter, option: *const Arg) !void {
     // Description.
     if (option.description) |description| {
         try line.description.writeAll(description);
+        try writer.print("{}", .{line});
     }
 
-    try writer.print("{}", .{line});
-
-    // If the acceptable values are set for the option, print them at the new
-    // line but just below the description.
     if (option.valid_values) |valid_values| {
+        // If the description is not set then print the values at the same line.
+        if (option.description == null) {
+            try line.description.print("values: {s}", .{valid_values});
+            return writer.print("{}", .{line});
+        }
+
+        // If the description is set then print the values at the new line
+        // but just below the description.
         var new_line = Line.init();
         try new_line.description.addPadding(2);
         try new_line.description.print("values: {s}", .{valid_values});
