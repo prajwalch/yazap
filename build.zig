@@ -18,14 +18,12 @@ fn testStep(b: *std.Build) void {
 }
 
 fn examplesStep(b: *std.Build, yazap: *std.Build.Module) void {
-    const step = b.step("examples", "Build all the examples");
-
-    var dir = std.fs.cwd().openDir("./examples/", .{ .iterate = true }) catch @panic(
-        "failed to open examples dir",
-    );
+    var dir = std.fs.cwd().openDir("./examples/", .{ .iterate = true }) catch return;
     defer dir.close();
 
+    const step = b.step("examples", "Build all the examples");
     var examples = dir.iterate();
+
     while (examples.next() catch @panic("failed to get example file")) |example_file| {
         std.debug.assert(example_file.kind == .file);
 
