@@ -1,6 +1,6 @@
 .{
     .name = "yazap",
-    .version = "0.6.0",
+    .version = "0.6.1",
     .dependencies = .{
         // See `zig fetch --save <url>` for a command-line interface for adding dependencies.
     },
