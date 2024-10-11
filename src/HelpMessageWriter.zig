@@ -218,7 +218,7 @@ const Line = struct {
     /// Represents the name of an argument.
     ///
     /// **NOTE**: The argument refers to any argument not just the `Arg`.
-    const Signature = LineBlock(30);
+    const Signature = LineBlock(50);
     /// Represents the description of an argument.
     ///
     /// **NOTE**: The argument refers to any argument not just the `Arg`.
