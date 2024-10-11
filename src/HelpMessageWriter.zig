@@ -281,6 +281,15 @@ fn LineBlock(comptime width: usize) type {
         const WHITE_SPACE = ' ';
         /// Used for storing content.
         const Array = std.BoundedArray(u8, width);
+        /// A custom writer over the `std.BoundedArray.Writer` for better error
+        /// and word wrap handling.
+        const ContentWriter = std.io.GenericWriter(
+            *Self,
+            ContentWriteError,
+            writeContent,
+        );
+        /// Required error type for the required method.
+        const ContentWriteError = error{Overflow};
 
         /// Content that fits into this block.
         visible_content: Array = Array{},
@@ -315,22 +324,35 @@ fn LineBlock(comptime width: usize) type {
 
         /// Appends the string based on the given format.
         fn print(self: *Self, comptime fmt: []const u8, args: anytype) !void {
-            try self.visible_content.writer().print(fmt, args);
+            try self.contentWriter().print(fmt, args);
         }
 
         /// Appends the given string as-is.
         fn writeAll(self: *Self, string: []const u8) !void {
+            try self.contentWriter().writeAll(string);
+        }
+
+        /// Returns the content writer.
+        fn contentWriter(self: *Self) ContentWriter {
+            return ContentWriter{ .context = self };
+        }
+
+        /// Writes the given bytes and returns the number of bytes written.
+        fn writeContent(self: *Self, bytes: []const u8) ContentWriteError!usize {
             const remaining_space_length = self.remainingSpaceLength();
 
-            if (string.len <= remaining_space_length) {
-                return self.visible_content.appendSlice(string);
+            if (bytes.len <= remaining_space_length) {
+                try self.visible_content.appendSlice(bytes);
+                return bytes.len;
             }
 
-            const writeable_portion = string[0..remaining_space_length];
+            const writeable_portion = bytes[0..remaining_space_length];
             try self.writeAll(writeable_portion);
 
-            const remaining_portion = string[remaining_space_length..];
+            const remaining_portion = bytes[remaining_space_length..];
             try self.overflow_content.appendSlice(remaining_portion);
+
+            return writeable_portion.len;
         }
 
         pub fn format(
