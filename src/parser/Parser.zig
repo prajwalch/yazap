@@ -342,7 +342,7 @@ fn parseOptionValue(
     // If we have consumed a single value only, check if the policy of an arg
     // allows to return it as a single value.
     if (values.items.len == 1 and !arg.hasProperty(.takes_multiple_values)) {
-        const value = values.pop();
+        const value = values.pop().?;
         values.deinit();
         // No verification required here as it is already verfied while consuming.
         return MatchedArgValue.initSingle(value);
