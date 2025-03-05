@@ -16,6 +16,7 @@ Inspired by [clap-rs](https://github.com/clap-rs/clap) and [andrewrk/ziglang: sr
 | yazap                                                             | Zig                                      |
 | ----------------------------------------------------------------- | ---------------------------------------- |
 | main                                                              | [master](https://github.com/ziglang/zig) |
+| [`0.6.3`](https://github.com/prajwalch/yazap/releases/tag/v0.6.3) | `0.14.0`         |
 | [`0.5.1`](https://github.com/prajwalch/yazap/releases/tag/v0.5.1) | `0.12.0`, `0.12.1` and  `0.13.0`         |
 | <= `0.5.0`                                                        | Not supported to any                     |
 
