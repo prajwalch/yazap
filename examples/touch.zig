@@ -21,7 +21,7 @@ pub fn main() anyerror!void {
     const matches = try app.parseProcess();
 
     if (matches.containsArg("version")) {
-        std.debug.print("v0.1.0", .{});
+        std.debug.print("v0.1.0\n", .{});
         return;
     }
 
