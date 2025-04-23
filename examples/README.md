@@ -5,7 +5,7 @@ To build them please run:
 zig build examples
 ```
 
-When the compilation finishes you cn run any example
+When the compilation finishes you can run any example
 as an usual executable file, for example:
 ```sh
 ./zig-out/bin/touch --no-create it-works
