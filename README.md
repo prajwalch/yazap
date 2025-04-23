@@ -73,29 +73,6 @@ For detailed and comprehensive documentation, please visit
 > [!WARNING]
 > The documentation site is currently broken, in the meantime check out the source code.
 
-## Building and Running Examples
-
-The examples can be found [here](/examples). To build all of them, run the
-following command on your terminal:
-
-```bash
-$ zig build examples
-```
-
-After the compilation finishes, you can run each example by executing the
-corresponding binary:
-
-```bash
-$ ./zig-out/bin/example_name
-```
-
-To view the usage and available options for each example, you can use `-h` or
-`--help` flag:
-
-```bash
-$ ./zig-out/bin/example_name --help
-```
-
 ## Usage
 
 ### Initializing Yazap
