@@ -98,6 +98,17 @@ pub fn positional(name: []const u8, description: ?[]const u8, index: ?usize) Arg
     return arg;
 }
 
+/// Creates a positional argument that takes multiple values.
+///
+/// It is a simple wrapper for positional() that allows for a declarative approach.
+/// To see the example use please see `examples/touch.zig`
+pub fn positionalMultiValues(name: []const u8, description: ?[]const u8, index: ?usize) Arg {
+    var arg = Arg.positional(name, description, index);
+    arg.setProperty(.takes_multiple_values);
+
+    return arg;
+}
+
 /// Creates a boolean option to enable or disable a specific feature or behavior.
 ///
 /// This option represents a simple on/off switch that can be used to control a
