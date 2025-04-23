@@ -28,7 +28,7 @@ pub fn main() anyerror!void {
     if (matches.getMultiValues("FILE...")) |file_names| {
         for (file_names) |file_name| {
             if (matches.containsArg("no-create")) {
-                std.debug.print("I'am not creating it", .{});
+                std.debug.print("File {s} does not exist and it will not be created\n", .{file_name});
             } else {
                 var file = try std.fs.cwd().createFile(file_name, .{});
                 defer file.close();
