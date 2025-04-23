@@ -11,7 +11,7 @@ as an usual executable file, for example:
 ./zig-out/bin/touch --no-create it-works
 ```
 
-All if the examples come with a `--help` page which
+All the examples come with a `--help` page which
 can also be displayed with `-h`, as follows:
 ```sh
 ./zig-out/bin/touch -h
