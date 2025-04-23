@@ -54,7 +54,7 @@ chained options using space (`-abc value, -abc v1,v2,v3`).
 
 1. Run the following command:
 
-```
+```sh
 zig fetch --save git+https://github.com/prajwalch/yazap
 ```
 
