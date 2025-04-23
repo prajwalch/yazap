@@ -12,7 +12,7 @@ pub fn main() anyerror!void {
     var touch = app.rootCommand();
     touch.setProperty(.help_on_empty_args);
 
-    try touch.addArg(Arg.positional("FILE_NAME", null, null));
+    try touch.addArg(Arg.positionalMultiValues("FILE...", null, null));
     touch.setProperty(.positional_arg_required);
 
     try touch.addArg(Arg.booleanOption("no-create", 'c', "Do not create any files"));
@@ -25,12 +25,14 @@ pub fn main() anyerror!void {
         return;
     }
 
-    if (matches.getSingleValue("FILE_NAME")) |file_name| {
-        if (matches.containsArg("no-create")) {
-            std.debug.print("I'am not creating it", .{});
-        } else {
-            var file = try std.fs.cwd().createFile(file_name, .{});
-            defer file.close();
+    if (matches.getMultiValues("FILE...")) |file_names| {
+        for (file_names) |file_name| {
+            if (matches.containsArg("no-create")) {
+                std.debug.print("I'am not creating it", .{});
+            } else {
+                var file = try std.fs.cwd().createFile(file_name, .{});
+                defer file.close();
+            }
         }
     }
 }
