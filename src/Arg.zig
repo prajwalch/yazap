@@ -102,7 +102,7 @@ pub fn positional(name: []const u8, description: ?[]const u8, index: ?usize) Arg
 ///
 /// It is a simple wrapper for positional() that allows for a declarative approach.
 /// To see the example use please see `examples/touch.zig`
-pub fn positionalMultiValues(name: []const u8, description: ?[]const u8, index: ?usize) Arg {
+pub fn multiValuesPositional(name: []const u8, description: ?[]const u8, index: ?usize) Arg {
     var arg = Arg.positional(name, description, index);
     arg.setProperty(.takes_multiple_values);
 
