@@ -12,7 +12,7 @@ pub fn main() anyerror!void {
     var touch = app.rootCommand();
     touch.setProperty(.help_on_empty_args);
 
-    try touch.addArg(Arg.positionalMultiValues("FILE...", null, null));
+    try touch.addArg(Arg.multiValuesPositional("FILE...", null, null));
     touch.setProperty(.positional_arg_required);
 
     try touch.addArg(Arg.booleanOption("no-create", 'c', "Do not create any files"));
