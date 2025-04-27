@@ -27,7 +27,7 @@ fn examplesStep(b: *std.Build, yazap: *std.Build.Module) void {
     while (examples.next() catch @panic("failed to get example file")) |example_file| {
         std.debug.assert(example_file.kind == .file);
         // If not a .zig file, skip it
-        if (!std.mem.endsWith(u8, example_file.name, ".zig")) break;
+        if (!std.mem.endsWith(u8, example_file.name, ".zig")) continue;
 
         // Example file path.
         const example_file_path = b.path(b.fmt("examples/{s}", .{example_file.name}));
