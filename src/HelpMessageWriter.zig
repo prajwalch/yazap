@@ -218,11 +218,11 @@ const Line = struct {
     /// Represents the name of an argument.
     ///
     /// **NOTE**: The argument refers to any argument not just the `Arg`.
-    const Signature = LineBlock(50);
+    const Signature = LineBlock(50, true);
     /// Represents the description of an argument.
     ///
     /// **NOTE**: The argument refers to any argument not just the `Arg`.
-    const Description = LineBlock(80);
+    const Description = LineBlock(500, false);
 
     /// Argument name or any other text which can be part of name.
     ///
@@ -273,7 +273,7 @@ const Line = struct {
 
 /// Represents a discrete area within a `Line` where signature or description
 /// can be write.
-fn LineBlock(comptime width: usize) type {
+fn LineBlock(comptime width: usize, comptime fill_max_width: bool) type {
     return struct {
         const Self = @This();
 
@@ -366,7 +366,7 @@ fn LineBlock(comptime width: usize) type {
 
             var mut_self = self;
 
-            if (mut_self.remainingSpaceLength() != 0) {
+            if (mut_self.remainingSpaceLength() != 0 and fill_max_width) {
                 mut_self.addPadding(mut_self.remainingSpaceLength()) catch {};
             }
 
