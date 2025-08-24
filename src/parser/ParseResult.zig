@@ -37,7 +37,7 @@ pub fn deinit(self: *ParseResult) void {
 
     var args_value_iter = self.args.valueIterator();
     while (args_value_iter.next()) |value| {
-        if (value.isMany()) value.many.deinit();
+        if (value.isMany()) value.many.deinit(self.allocator);
     }
     self.args.deinit();
 
@@ -112,7 +112,7 @@ pub fn insertMatchedArg(
     name: []const u8,
     value: MatchedArgValue,
 ) AllocatorError!void {
-    errdefer if (value.isMany()) value.many.deinit();
+    errdefer if (value.isMany()) @constCast(&value.many).deinit(self.allocator);
 
     const old_value = self.args.getPtr(name) orelse {
         // Map don't have an entry; create a new pair.
@@ -129,15 +129,15 @@ pub fn insertMatchedArg(
             if (new_value.isSingle()) {
                 // If both old and new value are single then convert them into
                 // multiple values by combining them.
-                var many = std.ArrayList([]const u8).init(self.allocator);
-                try many.append(old_single_value);
-                try many.append(new_value.single);
+                var many = try std.ArrayList([]const u8).initCapacity(self.allocator, 2);
+                try many.append(self.allocator, old_single_value);
+                try many.append(self.allocator, new_value.single);
 
                 return self.args.put(name, .{ .many = many });
             } else if (new_value.isMany()) {
                 // If old value is single but the new value is many then append
                 // the old one into the new one.
-                try new_value.many.append(old_single_value);
+                try new_value.many.append(self.allocator, old_single_value);
                 return self.args.put(name, new_value);
             }
         },
@@ -145,11 +145,11 @@ pub fn insertMatchedArg(
             if (new_value.isSingle()) {
                 // If old value is many and the new value is single then append
                 // the new single value into the old one.
-                try old_many_values.append(new_value.single);
+                try old_many_values.append(self.allocator, new_value.single);
             } else if (new_value.isMany()) {
                 // If both old and new value are multiple types then append all
                 // new values into the old value.
-                try old_many_values.appendSlice(try new_value.many.toOwnedSlice());
+                try old_many_values.appendSlice(self.allocator, try new_value.many.toOwnedSlice(self.allocator));
             }
         },
     }
@@ -239,8 +239,8 @@ pub const ParsedCommand = struct {
 
     /// Deinitilizes the structure by freeing all the allocated memory.
     pub fn deinit(self: *ParsedCommand) void {
-        if (self.absolute_name) |abs_name| {
-            abs_name.deinit();
+        if (self.absolute_name) |*abs_name| {
+            abs_name.deinit(self.command.allocator);
         }
     }
 

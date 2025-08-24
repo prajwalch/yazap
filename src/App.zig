@@ -9,6 +9,7 @@ const HelpMessageWriter = @import("HelpMessageWriter.zig");
 const Parser = @import("parser/Parser.zig");
 const ParseResult = @import("parser/ParseResult.zig");
 const YazapError = @import("error.zig").YazapError;
+const help_message_buffer_size = 4096;
 
 /// Top level allocator for the entire library.
 allocator: Allocator,
@@ -31,7 +32,7 @@ process_args: ?[]const [:0]u8 = null,
 pub fn init(allocator: Allocator, name: []const u8, description: ?[]const u8) App {
     return App{
         .allocator = allocator,
-        .command = Command.init(allocator, name, description),
+        .command = Command.init(allocator, name, description) catch { @panic("failed to create Command"); }
     };
 }
 
@@ -66,7 +67,7 @@ pub fn deinit(self: *App) void {
 /// var subcmd1 = app.createCommand("subcmd1", "First Subcommand");
 /// ```
 pub fn createCommand(self: *App, name: []const u8, description: ?[]const u8) Command {
-    return Command.init(self.allocator, name, description);
+    return Command.init(self.allocator, name, description) catch { @panic("failed to create Command"); };
 }
 
 /// Returns a pointer to the root `Command` of the application.
@@ -130,7 +131,8 @@ pub fn parseFrom(self: *App, argv: []const [:0]const u8) YazapError!ArgMatches {
     };
 
     if (result.getCommandContainingHelpFlag()) |command| {
-        var help_writer = HelpMessageWriter.init(command);
+        var buffer: [help_message_buffer_size]u8 = undefined;
+        var help_writer = HelpMessageWriter.init(command, &buffer);
         try help_writer.write();
         result.deinit();
         self.deinit();
@@ -166,7 +168,8 @@ pub fn parseFrom(self: *App, argv: []const [:0]const u8) YazapError!ArgMatches {
 /// ```
 pub fn displayHelp(self: *App) YazapError!void {
     if (self.parse_result) |parse_result| {
-        var help_writer = HelpMessageWriter.init(parse_result.getCommand());
+        var buffer: [help_message_buffer_size]u8 = undefined;
+        var help_writer = HelpMessageWriter.init(parse_result.getCommand(), &buffer);
         try help_writer.write();
     }
 }
@@ -201,7 +204,8 @@ pub fn displaySubcommandHelp(self: *App) YazapError!void {
     const parse_result = self.parse_result orelse return;
 
     if (parse_result.getActiveSubcommand()) |subcmd| {
-        var help_writer = HelpMessageWriter.init(subcmd);
+        var buffer: [help_message_buffer_size]u8 = undefined;
+        var help_writer = HelpMessageWriter.init(subcmd, &buffer);
         try help_writer.write();
     }
 }

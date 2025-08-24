@@ -18,8 +18,9 @@ pub fn setContext(self: *ParseError, ctx: Context) void {
 
 /// Prints the error context in a nice error message.
 pub fn print(self: *const ParseError) PrintError!void {
-    var buffer = std.io.bufferedWriter(std.io.getStdErr().writer());
-    const writer = buffer.writer();
+    var buffer: [1024]u8 = undefined;
+    var _writer = std.fs.File.stderr().writer(&buffer);
+    const writer = &_writer.interface;
 
     // Print the error prefix for nicer output.
     try writer.writeAll("error: ");
@@ -44,7 +45,7 @@ pub fn print(self: *const ParseError) PrintError!void {
             try writer.print("unrecognized option '{s}'\n", .{option});
         },
         .option_value_not_provided => |ctx| {
-            try writer.print("a value is missing for option '{}'\n", .{ctx.option});
+            try writer.print("a value is missing for option '{f}'\n", .{ctx.option});
 
             if (ctx.valid_values) |valid_values| {
                 try writer.writeByte('\n');
@@ -57,12 +58,12 @@ pub fn print(self: *const ParseError) PrintError!void {
         },
         .unexpected_option_value => |ctx| {
             try writer.print(
-                "a value '{s}' was not expected for option '{}'\n",
+                "a value '{s}' was not expected for option '{f}'\n",
                 .{ ctx.value, ctx.option },
             );
         },
         .empty_option_value => |ctx| {
-            try writer.print("empty value was not expected for option '{}'\n", .{ctx.option});
+            try writer.print("empty value was not expected for option '{f}'\n", .{ctx.option});
 
             if (ctx.valid_values) |valid_values| {
                 try writer.writeByte('\n');
@@ -75,7 +76,7 @@ pub fn print(self: *const ParseError) PrintError!void {
         },
         .invalid_option_value => |ctx| {
             try writer.print(
-                "'{s}' is invalid value for option '{}'\n\n",
+                "'{s}' is invalid value for option '{f}'\n\n",
                 .{ ctx.invalid_value, ctx.option },
             );
             try writer.writeAll("help: valid values are:\n");
@@ -86,7 +87,7 @@ pub fn print(self: *const ParseError) PrintError!void {
         },
         .too_few_option_value => |ctx| {
             try writer.print(
-                "minimum of '{d}' values were expected for option '{}'\n\n",
+                "minimum of '{d}' values were expected for option '{f}'\n\n",
                 .{ ctx.min_values, ctx.option },
             );
             try writer.print(
@@ -96,7 +97,7 @@ pub fn print(self: *const ParseError) PrintError!void {
         },
         .too_many_option_value => |ctx| {
             try writer.print(
-                "only upto '{d}' values were expected for option '{}'\n\n",
+                "only upto '{d}' values were expected for option '{f}'\n\n",
                 .{ ctx.max_values, ctx.option },
             );
             try writer.print(
@@ -106,11 +107,11 @@ pub fn print(self: *const ParseError) PrintError!void {
         },
     }
     try writer.writeAll("\nhelp: invoke the command with '-h/--h' flag to learn more.\n");
-    try buffer.flush();
+    try writer.flush();
 }
 
 /// An error type returned by the `print`.
-pub const PrintError = std.fs.File.WriteFileError;
+pub const PrintError = std.fs.File.WriteError || std.Io.Writer.Error;
 /// An error type returned by the parser.
 pub const Error = error{
     UnrecognizedCommand,
@@ -194,15 +195,7 @@ pub const Option = struct {
         return Option{ .short_name = short_name, .long_name = long_name };
     }
 
-    pub fn format(
-        self: Option,
-        comptime fmt: []const u8,
-        options: std.fmt.FormatOptions,
-        writer: anytype,
-    ) !void {
-        _ = fmt;
-        _ = options;
-
+    pub fn format(self: Option, writer: *std.Io.Writer) !void {
         if (self.short_name != null and self.long_name != null) {
             try writer.print("-{c}/--{s}", .{ self.short_name.?, self.long_name.? });
         } else if (self.short_name) |short_name| {
@@ -210,5 +203,6 @@ pub const Option = struct {
         } else if (self.long_name) |long_name| {
             try writer.print("--{s}", .{long_name});
         }
+        try writer.flush();
     }
 };
