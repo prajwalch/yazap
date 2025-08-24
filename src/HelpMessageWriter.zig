@@ -2,7 +2,7 @@ const HelpMessageWriter = @This();
 
 const std = @import("std");
 const Arg = @import("Arg.zig");
-const BufferedWriter = std.io.BufferedWriter(4096, std.fs.File.Writer);
+const BufferedWriter = std.fs.File.Writer;
 const Command = @import("Command.zig");
 const ParsedCommand = @import("parser/ParseResult.zig").ParsedCommand;
 
@@ -12,15 +12,13 @@ const ParsedCommand = @import("parser/ParseResult.zig").ParsedCommand;
 const SIGNATURE_LEFT_PADDING = 4;
 
 /// Used to store the help content before writing into the `stderr`.
-buffer: BufferedWriter,
+writer: BufferedWriter = undefined,
 /// Command whose help to write.
-command: *const ParsedCommand,
+command: *const ParsedCommand = undefined,
 
-pub fn init(command: *const ParsedCommand) HelpMessageWriter {
+pub fn init(command: *const ParsedCommand, buffer: []u8) HelpMessageWriter {
     return HelpMessageWriter{
-        .buffer = std.io.bufferedWriter(
-            std.io.getStdErr().writer(),
-        ),
+        .writer = .init(std.fs.File.stderr(), buffer),
         .command = command,
     };
 }
@@ -33,19 +31,19 @@ pub fn write(self: *HelpMessageWriter) !void {
     try self.writeOptions();
     try self.writeFooter();
 
-    try self.buffer.flush();
+    try self.writer.interface.flush();
 }
 
 fn writeDescription(self: *HelpMessageWriter) !void {
-    const writer = self.buffer.writer();
-
     if (self.command.deref().description) |d| {
+        const writer = &self.writer.interface;
         try writer.print("{s}\n\n", .{d});
+        try writer.flush();
     }
 }
 
 fn writeHeader(self: *HelpMessageWriter) !void {
-    const writer = self.buffer.writer();
+    const writer = &self.writer.interface;
     try writer.print("Usage: {s}", .{self.command.name()});
 
     const command = self.command.deref();
@@ -70,6 +68,8 @@ fn writeHeader(self: *HelpMessageWriter) !void {
 
     // End of line.
     try writer.writeByte('\n');
+
+    try writer.flush();
 }
 
 fn writePositionalArgs(self: *HelpMessageWriter) !void {
@@ -77,12 +77,15 @@ fn writePositionalArgs(self: *HelpMessageWriter) !void {
         return;
     }
 
-    const writer = self.buffer.writer();
+    const writer = &self.writer.interface;
     try writer.writeAll("\nArgs:\n");
 
     for (self.command.deref().positional_args.items) |arg| {
-        var line = Line.init();
-        try line.signature.addPadding(SIGNATURE_LEFT_PADDING);
+        var line = Line{};
+        line.init();
+        line.signature.addPadding(SIGNATURE_LEFT_PADDING) catch {
+            return error.WriteFailed;
+        };
         try line.signature.writeAll(arg.name);
 
         if (arg.hasProperty(.takes_multiple_values)) {
@@ -93,8 +96,10 @@ fn writePositionalArgs(self: *HelpMessageWriter) !void {
             try line.description.writeAll(description);
         }
 
-        try writer.print("{}", .{line});
+        try writer.print("{f}", .{&line});
     }
+
+    try writer.flush();
 }
 
 fn writeSubcommands(self: *HelpMessageWriter) !void {
@@ -102,11 +107,12 @@ fn writeSubcommands(self: *HelpMessageWriter) !void {
         return;
     }
 
-    const writer = self.buffer.writer();
+    const writer = &self.writer.interface;
     try writer.writeAll("\nCommands:\n");
 
     for (self.command.deref().subcommands.items) |*subcommand| {
-        var line = Line.init();
+        var line = Line{};
+        line.init();
         try line.signature.addPadding(SIGNATURE_LEFT_PADDING);
         try line.signature.writeAll(subcommand.name);
 
@@ -114,8 +120,10 @@ fn writeSubcommands(self: *HelpMessageWriter) !void {
             try line.description.writeAll(description);
         }
 
-        try writer.print("{}", .{line});
+        try writer.print("{f}", .{&line});
     }
+
+    try writer.flush();
 }
 
 fn writeOptions(self: *HelpMessageWriter) !void {
@@ -123,7 +131,7 @@ fn writeOptions(self: *HelpMessageWriter) !void {
         return;
     }
 
-    const writer = self.buffer.writer();
+    const writer = &self.writer.interface;
     try writer.writeAll("\nOptions:\n");
 
     for (self.command.deref().options.items) |*option| {
@@ -132,12 +140,15 @@ fn writeOptions(self: *HelpMessageWriter) !void {
 
     const help = Arg.booleanOption("help", 'h', "Print this help and exit");
     try self.writeOption(&help);
+
+    try writer.flush();
 }
 
 fn writeOption(self: *HelpMessageWriter, option: *const Arg) !void {
-    const writer = self.buffer.writer();
+    const writer = &self.writer.interface;
 
-    var line = Line.init();
+    var line = Line{};
+    line.init();
     try line.signature.addPadding(SIGNATURE_LEFT_PADDING);
 
     // Option name.
@@ -177,33 +188,47 @@ fn writeOption(self: *HelpMessageWriter, option: *const Arg) !void {
     // Description.
     if (option.description) |description| {
         try line.description.writeAll(description);
-        try writer.print("{}", .{line});
+        try writer.print("{f}", .{&line});
     }
 
     if (option.valid_values) |valid_values| {
         // If the description is not set then print the values at the same line.
         if (option.description == null) {
-            try line.description.print("values: {s}", .{valid_values});
-            return writer.print("{}", .{line});
+            // Strangely this line was compiled on zig 0.14.1
+            //try line.description.print("values: {s}", .{valid_values});
+            try line.description.print("values: ", .{});
+            for (valid_values) |v| {
+                try line.description.print("{s}", .{v});
+            }
+            return writer.print("{f}", .{&line});
         }
 
         // If the description is set then print the values at the new line
         // but just below the description.
-        var new_line = Line.init();
+        var new_line = Line{};
+        new_line.init();
         try new_line.description.addPadding(2);
-        try new_line.description.print("values: {s}", .{valid_values});
-
-        try writer.print("{}", .{new_line});
+        // Strangely this line was compiled on zig 0.14.1
+        //try new_line.description.print("values: {s}", .{valid_values});
+        try new_line.description.print("values: ", .{});
+        for (valid_values) |v| {
+            try new_line.description.print("{s}", .{v});
+        }
+        try writer.print("{f}", .{&new_line});
     }
+
+    try writer.flush();
 }
 
 fn writeFooter(self: *HelpMessageWriter) !void {
+    const writer = &self.writer.interface;
     if (self.command.deref().countSubcommands() >= 1) {
-        try self.buffer.writer().print(
+        try writer.print(
             "\nRun '{s} <command>` with `-h/--h' flag to get help of any command.\n",
             .{self.command.name()},
         );
     }
+    try writer.flush();
 }
 
 fn getBraces(required: bool) struct { u8, u8 } {
@@ -228,25 +253,18 @@ const Line = struct {
     ///
     /// For e.x.: Option name and its value placeholder makes up single
     /// signature (`-t, --time=<SECS>`).
-    signature: Signature,
+    signature: Signature = undefined,
     /// Argument description.
-    description: Description,
+    description: Description = undefined,
 
     /// Creates an empty line.
-    pub fn init() Line {
-        return Line{ .signature = Signature.init(), .description = Description.init() };
+    pub fn init(self: *Line) void {
+        self.signature.init();
+        self.description.init();
     }
 
-    pub fn format(
-        self: Line,
-        comptime fmt: []const u8,
-        options: std.fmt.FormatOptions,
-        writer: anytype,
-    ) !void {
-        _ = fmt;
-        _ = options;
-
-        try writer.print("{}{}\n", .{ self.signature, self.description });
+    pub fn format(self: *Line, writer: *std.Io.Writer) error{WriteFailed}!void {
+        try writer.print("{f}{f}\n", .{ &self.signature, &self.description });
 
         const overflow_signature = self.signature.overflowContent();
         const overflow_description = self.description.overflowContent();
@@ -255,11 +273,14 @@ const Line = struct {
             return;
         }
 
-        var new_line = Line.init();
+        var new_line = Line{};
+        new_line.init();
 
         if (overflow_signature) |signature| {
             // FIXME: Inherit padding from the previous line (i.e. this line).
-            try new_line.signature.addPadding(SIGNATURE_LEFT_PADDING);
+            new_line.signature.addPadding(SIGNATURE_LEFT_PADDING) catch {
+                return error.WriteFailed;
+            };
             try new_line.signature.writeAll(signature);
         }
 
@@ -267,7 +288,9 @@ const Line = struct {
             try new_line.description.writeAll(description);
         }
 
-        try writer.print("{}", .{new_line});
+        try writer.print("{f}", .{&new_line});
+
+        try writer.flush();
     }
 };
 
@@ -280,38 +303,71 @@ fn LineBlock(comptime width: usize, comptime fill_max_width: bool) type {
         /// A character used for padding.
         const WHITE_SPACE = ' ';
         /// Used for storing content.
-        const Array = std.BoundedArray(u8, width);
+        const Array = std.ArrayList(u8);
         /// A custom writer over the `std.BoundedArray.Writer` for better error
         /// and word wrap handling.
-        const ContentWriter = std.io.GenericWriter(
-            *Self,
-            ContentWriteError,
-            writeContent,
-        );
+        const ContentWriter = struct {
+            context: *Self,
+            interface: std.Io.Writer,
+
+            pub fn init(context: *Self) ContentWriter {
+                return .{
+                    .context = context,
+                    .interface = .{
+                        .vtable = &.{
+                            .drain = drain,
+                            .sendFile = std.Io.Writer.unimplementedSendFile,
+                        },
+                        .buffer = &.{},
+                    },
+                };
+            }
+
+            pub fn drain(io_w: *std.Io.Writer, data: []const []const u8, splat: usize) std.Io.Writer.Error!usize {
+                const w: *ContentWriter = @alignCast(@fieldParentPtr("interface", io_w));
+                for (data[0 .. data.len - 1]) |buf| {
+                    if (buf.len == 0) continue;
+                    const n = try w.context.writeContent(buf);
+                    return io_w.consume(n);
+                }
+                const pattern = data[data.len - 1];
+                if (pattern.len == 0 or splat == 0) return 0;
+                const n = try w.context.writeContent(pattern);
+                return io_w.consume(n);
+            }
+        };
+
         /// Required error type for the required method.
-        const ContentWriteError = error{Overflow};
+        const ContentWriteError = std.Io.Writer.Error;
+
+        /// Content writer
+        content_writer: ContentWriter = undefined,
 
         /// Content that fits into this block.
-        visible_content: Array = Array{},
+        visible_content_buffer: [width]u8 = undefined,
+        visible_content: Array = undefined,
         /// Content that cannot fit into this block.
-        overflow_content: Array = Array{},
+        overflow_content_buffer: [width]u8 = undefined,
+        overflow_content: Array = undefined,
 
         /// Creates an empty block.
-        fn init() Self {
-            return Self{};
+        fn init(self: *Self) void {
+            self.content_writer = ContentWriter.init(self);
+            self.visible_content = Array.initBuffer(&self.visible_content_buffer);
+            self.overflow_content = Array.initBuffer(&self.overflow_content_buffer);
         }
 
         /// Returns the length of remaining space.
         fn remainingSpaceLength(self: *const Self) usize {
-            return width - self.visible_content.len;
+            return width - self.visible_content.items.len;
         }
 
         /// Returns the content that cannot fit into this block, if any.
         fn overflowContent(self: *const Self) ?[]const u8 {
-            if (self.overflow_content.len == 0) {
+            if (self.overflow_content.items.len == 0) {
                 return null;
             }
-            return self.overflow_content.constSlice();
+            return self.overflow_content.items;
         }
 
         /// Adds the `n` number of space.
@@ -319,22 +375,24 @@ fn LineBlock(comptime width: usize, comptime fill_max_width: bool) type {
             if (n > width) {
                 return self.addPadding(self.remainingSpaceLength());
             }
-            try self.visible_content.appendNTimes(Self.WHITE_SPACE, n);
+            self.visible_content.appendNTimesAssumeCapacity(Self.WHITE_SPACE, n);
         }
 
         /// Appends the string based on the given format.
         fn print(self: *Self, comptime fmt: []const u8, args: anytype) !void {
             try self.contentWriter().print(fmt, args);
+            try self.contentWriter().flush();
         }
 
         /// Appends the given string as-is.
         fn writeAll(self: *Self, string: []const u8) !void {
             try self.contentWriter().writeAll(string);
+            try self.contentWriter().flush();
         }
 
         /// Returns the content writer.
-        fn contentWriter(self: *Self) ContentWriter {
-            return ContentWriter{ .context = self };
+        fn contentWriter(self: *Self) *std.Io.Writer {
+            return &self.content_writer.interface;
         }
 
         /// Writes the given bytes and returns the number of bytes written.
@@ -342,7 +400,7 @@ fn LineBlock(comptime width: usize, comptime fill_max_width: bool) type {
             const remaining_space_length = self.remainingSpaceLength();
 
             if (bytes.len <= remaining_space_length) {
-                try self.visible_content.appendSlice(bytes);
+                self.visible_content.appendSliceAssumeCapacity(bytes);
                 return bytes.len;
             }
 
@@ -350,27 +408,21 @@ fn LineBlock(comptime width: usize, comptime fill_max_width: bool) type {
             try self.writeAll(writeable_portion);
 
             const remaining_portion = bytes[remaining_space_length..];
-            try self.overflow_content.appendSlice(remaining_portion);
+            self.overflow_content.appendSliceAssumeCapacity(remaining_portion);
 
             return writeable_portion.len;
         }
 
-        pub fn format(
-            self: Self,
-            comptime fmt: []const u8,
-            options: std.fmt.FormatOptions,
-            writer: anytype,
-        ) !void {
-            _ = fmt;
-            _ = options;
-
-            var mut_self = self;
-
-            if (mut_self.remainingSpaceLength() != 0 and fill_max_width) {
-                mut_self.addPadding(mut_self.remainingSpaceLength()) catch {};
+        pub fn format(self: *Self, writer: *std.Io.Writer) !void {
+            if (self.remainingSpaceLength() != 0 and fill_max_width) {
+                self.addPadding(self.remainingSpaceLength()) catch {
+                    return error.WriteFailed;
+                };
             }
 
-            try writer.writeAll(mut_self.visible_content.constSlice());
+            try writer.writeAll(self.visible_content.items);
+
+            try writer.flush();
         }
     };
 }

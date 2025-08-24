@@ -18,6 +18,8 @@ const ShortOptionIterator = @import("ShortOptionIterator.zig");
 /// A complete error type returned by the parser.
 pub const Error = ParseError.Error || Allocator.Error;
 
+const default_init_array_capacity = 10;
+
 allocator: Allocator,
 /// A tokenizer to tokenize the `argv`.
 tokenizer: Tokenizer,
@@ -156,8 +158,8 @@ fn parsePositionalArg(self: *Parser, token: *const Token, current_position: usiz
     }
 
     // Proceed to consume more.
-    var values = std.ArrayList([]const u8).init(self.allocator);
-    errdefer values.deinit();
+    var values = try std.ArrayList([]const u8).initCapacity(self.allocator, default_init_array_capacity);
+    errdefer values.deinit(self.allocator);
 
     // Try to find upper limitation on how many values we can consume.
     var num_values_to_consume = arg.max_values orelse arg.min_values;
@@ -189,7 +191,7 @@ fn parsePositionalArg(self: *Parser, token: *const Token, current_position: usiz
             try self.validateValue(arg, given_value);
             try self.insertMatchedArg(arg, MatchedArgValue.initSingle(given_value));
             // Redundant. Destory it and return.
-            values.deinit();
+            values.deinit(self.allocator);
             return;
         }
 
@@ -307,8 +309,8 @@ fn parseOptionValue(
     }
 
     // Value is not attached; prepare to consume.
-    var values = std.ArrayList([]const u8).init(self.allocator);
-    errdefer values.deinit();
+    var values = try std.ArrayList([]const u8).initCapacity(self.allocator, default_init_array_capacity);
+    errdefer values.deinit(self.allocator);
 
     // Try to find upper limitation on how many values we can consume.
     var num_values_to_consume = arg.max_values orelse arg.min_values;
@@ -343,7 +345,7 @@ fn parseOptionValue(
     // allows to return it as a single value.
     if (values.items.len == 1 and !arg.hasProperty(.takes_multiple_values)) {
         const value = values.pop().?;
-        values.deinit();
+        values.deinit(self.allocator);
         // No verification required here as it is already verfied while consuming.
         return MatchedArgValue.initSingle(value);
     }
@@ -370,8 +372,8 @@ fn splitValueIfPossible(
     }
 
     // Proceed to split.
-    var values = std.ArrayList([]const u8).init(self.allocator);
-    errdefer values.deinit();
+    var values = try std.ArrayList([]const u8).initCapacity(self.allocator, default_init_array_capacity);
+    errdefer values.deinit(self.allocator);
 
     var values_iter = mem.splitSequence(u8, value, values_separator);
     while (values_iter.next()) |subvalue| {
@@ -426,7 +428,7 @@ fn validateAndAppendValue(
     list: *std.ArrayList([]const u8),
 ) Error!void {
     try self.validateValue(arg, value);
-    try list.append(value);
+    try list.append(self.allocator, value);
 }
 
 /// Inserts the given argument as a matched argument with the given value.
@@ -435,7 +437,7 @@ fn validateAndAppendValue(
 ///
 /// Returns an error if value cannot be insert due to invalidation.
 fn insertMatchedArg(self: *Parser, arg: *const Arg, value: MatchedArgValue) Error!void {
-    errdefer if (value.isMany()) value.many.deinit();
+    errdefer if (value.isMany()) @constCast(&value.many).deinit(self.allocator);
 
     try self.validateValuesCount(arg, value.count());
     try self.result.insertMatchedArg(arg.name, value);
@@ -504,13 +506,13 @@ fn parseSubcommand(self: *Parser, subcommand_name: []const u8) Error!ParseResult
     const argv = self.tokenizer.remainingArgs() orelse &[_][:0]const u8{};
 
     // Create the full name of the current subcommand.
-    var abs_name = ParseResult.ParsedCommand.AbsoluteName.init(self.allocator);
+    var abs_name = try ParseResult.ParsedCommand.AbsoluteName.initCapacity(self.allocator, 256);
     // First append the parent command name.
-    try abs_name.appendSlice(self.result.getCommand().name());
+    try abs_name.appendSlice(self.allocator, self.result.getCommand().name());
     // Followed by a whitespace.
-    try abs_name.append(' ');
+    try abs_name.append(self.allocator, ' ');
     // Then append the current subcommand name.
-    try abs_name.appendSlice(subcmd.name);
+    try abs_name.appendSlice(self.allocator, subcmd.name);
 
     var parser = Parser.init(self.allocator, argv, subcmd);
     // Set the subcommand full name in its parser.
