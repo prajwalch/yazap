@@ -197,8 +197,11 @@ fn writeOption(self: *HelpMessageWriter, option: *const Arg) !void {
             // Strangely this line was compiled on zig 0.14.1
             //try line.description.print("values: {s}", .{valid_values});
             try line.description.print("values: ", .{});
-            for (valid_values) |v| {
+            for (valid_values, 0..) |v, i| {
                 try line.description.print("{s}", .{v});
+                if (i < valid_values.len-1) {
+                    try line.description.print(" ", .{});
+                }
             }
             return writer.print("{f}", .{&line});
         }
@@ -211,8 +214,11 @@ fn writeOption(self: *HelpMessageWriter, option: *const Arg) !void {
         // Strangely this line was compiled on zig 0.14.1
         //try new_line.description.print("values: {s}", .{valid_values});
         try new_line.description.print("values: ", .{});
-        for (valid_values) |v| {
+        for (valid_values, 0..) |v, i| {
             try new_line.description.print("{s}", .{v});
+            if (i < valid_values.len-1) {
+                try new_line.description.print(" ", .{});
+            }
         }
         try writer.print("{f}", .{&new_line});
     }
