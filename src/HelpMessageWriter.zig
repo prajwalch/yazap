@@ -48,15 +48,15 @@ fn writeHeader(self: *HelpMessageWriter) !void {
 
     const command = self.command.deref();
 
+    if (command.countOptions() >= 1) {
+        try writer.writeAll(" [OPTIONS]");
+    }
+
     if (command.countPositionalArgs() >= 1) {
         try writer.print(
             " {c}ARGS{c}",
             getBraces(command.hasProperty(.positional_arg_required)),
         );
-    }
-
-    if (command.countOptions() >= 1) {
-        try writer.writeAll(" [OPTIONS]");
     }
 
     if (command.countSubcommands() >= 1) {
