@@ -8,6 +8,7 @@ pub fn build(b: *std.Build) void {
 
     testStep(b);
     examplesStep(b, yazap);
+    docsStep(b, yazap);
 }
 
 fn testStep(b: *std.Build) void {
@@ -60,4 +61,21 @@ fn examplesStep(b: *std.Build, yazap: *std.Build.Module) void {
         const installer = b.addInstallArtifact(executable, .{});
         step.dependOn(&installer.step);
     }
+}
+
+fn docsStep(b: *std.Build, yazap: *std.Build.Module) void {
+    const lib = b.addLibrary(.{
+        .name = "yazap",
+        .root_module = yazap,
+    });
+    const docs_step = b.step("doc", "Emit documentation");
+
+    const docs_install = b.addInstallDirectory(.{
+        .install_dir = .prefix,
+        .install_subdir = "docs",
+        .source_dir = lib.getEmittedDocs(),
+    });
+
+    docs_step.dependOn(&docs_install.step);
+    b.getInstallStep().dependOn(docs_step);
 }
