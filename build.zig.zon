@@ -2,6 +2,7 @@
     .name = .yazap,
     .version = "0.7.0",
     .fingerprint = 0xc4ff2399127e5b67,
+    .minimum_zig_version = "0.16.0",
     .paths = .{
         "build.zig",
         "build.zig.zon",
